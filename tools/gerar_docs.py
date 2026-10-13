@@ -9,6 +9,7 @@ import sys
 
 import mundo as M
 import skins as S
+import versoes as V
 import receitas as R
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -28,6 +29,8 @@ BALANC = RAIZ / "docs/BALANCEAMENTO.md"
 SKINS = RAIZ / "docs/dados/skins.json"
 SKINS_MD = RAIZ / "docs/SKINS.md"
 GUIA = RAIZ / "docs/GUIA.md"
+VERSOES = RAIZ / "docs/dados/versoes.json"
+ROTEIRO = RAIZ / "docs/ROTEIRO.md"
 MODELO = RAIZ / "tools/modelo_site.html"
 SITE = RAIZ / "docs/site/index.html"
 
@@ -296,6 +299,7 @@ def gerar_site(dados, armas, info, mundo, skins):
     html = html.replace("/*__ITENS__*/{}", js(info))
     html = html.replace("/*__MUNDO__*/{}", js(mundo))
     html = html.replace("/*__SKINS__*/{}", js(skins))
+    html = html.replace("/*__ROTEIRO__*/\"\"", js(ROTEIRO.read_text(encoding="utf-8")))
     html = html.replace("/*__GUIA__*/\"\"", js(GUIA.read_text(encoding="utf-8")))
     SITE.parent.mkdir(parents=True, exist_ok=True)
     cabeca = '<!doctype html>\n<html lang="pt-BR">\n<meta charset="utf-8">\n' \
@@ -314,8 +318,9 @@ def main():
     erros_r, receitas, nomes = R.verificar(cat_itens["itens"], dados, vanilla)
     mundo = M.carregar(MUNDO_DIR)
     skins = json.loads(SKINS.read_text(encoding="utf-8"))
+    versoes = json.loads(VERSOES.read_text(encoding="utf-8"))
     erros = validar(dados) + validar_armas(armas, dados) + erros_r + M.verificar(mundo, dados, nomes, vanilla) \
-        + S.verificar(skins, dados, mundo, nomes)
+        + S.verificar(skins, dados, mundo, nomes) + V.verificar(versoes, dados, mundo, nomes)
     if erros:
         print("\n".join(erros))
         sys.exit(1)
@@ -327,11 +332,12 @@ def main():
     M.gerar_md(info_mundo, MUNDO_MD)
     info_skins = S.preparar(skins, dados, mundo, nomes)
     S.gerar_md(info_skins, SKINS_MD)
+    V.gerar_md(V.preparar(versoes, dados, mundo, cat_itens["itens"], nomes), ROTEIRO)
     gerar_site(dados, armas, info, info_mundo, info_skins)
     print(f"OK: {len(dados)} personagens, {len(armas['armas'])} armas, {len(receitas)} receitas verificadas "
           f"e mundo ({len(info_mundo['locais'])} locais, {len(info_mundo['missoes'])} missões) "
           f"e {sum(len(x['alt']) for x in info_skins['skins'])} skins alternativas "
-          "-> PERSONAGENS.md, FICHAS.md, ITENS.md, MUNDO.md, SKINS.md, site/index.html")
+          "-> PERSONAGENS.md, FICHAS.md, ITENS.md, MUNDO.md, SKINS.md, ROTEIRO.md, site/index.html")
 
 
 if __name__ == "__main__":

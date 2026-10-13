@@ -1,6 +1,6 @@
 # DC Universe Mod: Planejamento
 
-> Documento vivo. Etapa atual: **planejamento inicial** (sem código). Itens marcados com **[DECIDIR]** dependem do autor do mod.
+> Documento vivo. Etapa atual: **planejamento concluído** (sem código). Próxima etapa: v0.1 do [ROTEIRO.md](ROTEIRO.md). As decisões que estavam em aberto estão na seção 8.
 
 ## 1. Visão geral
 
@@ -8,8 +8,8 @@
 |---|---|
 | Minecraft | Java Edition 26.2 |
 | Loader | Forge `forge-26.2-65.1.0-mdk` |
-| Mod ID (proposto) | `dcuniverse` |
-| Pacote Java (proposto) | `com.danrod.dcuniverse` |
+| Mod ID | `dcuniverse` |
+| Pacote Java | `com.danrod.dcuniverse` |
 | Entregas | `dcuniverse-<versão>.jar` e perfil `.zip` importável no CurseForge |
 
 Conceito: o jogador usa um **item de transformação** (craftável) e vira o personagem: recebe a **skin**, o **traje travado** nos slots de armadura (com bônus), um **medidor de energia** próprio e acesso às **habilidades** (ativas pelo menu radial, passivas pela própria ação).
@@ -89,7 +89,7 @@ O servidor é a autoridade (funciona em multiplayer); o cliente só pede ações
 1. Jogador usa o item de transformação (clique direito, com animação/partículas curtas).
 2. Servidor guarda a armadura atual no estado do jogador e a substitui pelas peças do traje.
 3. Aplica skin, atributos, passivas e inicia o medidor de energia.
-4. **Destransformar**: usar o mesmo item de novo (ou tecla dedicada **[DECIDIR]**). Remove traje, devolve a armadura original, remove bônus.
+4. **Destransformar**: usar o mesmo item de novo ou a tecla **H**. Remove traje, devolve a armadura original, remove bônus.
 
 Eventos de borda já previstos: morte (proposta: destransforma e devolve a armadura antes do drop), logout/login (estado persiste), troca de dimensão, `/kill`, comandos de admin `/dcu transform <jogador> <personagem>` para testes.
 
@@ -141,12 +141,12 @@ Medidor por personagem (`max` no JSON), exibido no HUD. Fontes de recarga são *
 | `weather` / `lightning` | durante tempestade ou atingido por raio | Shazam, Adão Negro |
 | `darkness` | recarrega no escuro | personagens sombrios |
 
-Drenos também são tipos (`near_item` para kriptonita, `in_fire` para Caçador de Marte etc.). Energia zerada: habilidades ativas bloqueadas e passivas que gastam energia (ex.: voo prolongado) se desligam com segurança (sem morrer de queda ao acabar a energia em voo: transição para planar/queda amortecida **[DECIDIR]**).
+Drenos também são tipos (`near_item` para kriptonita, `in_fire` para Caçador de Marte etc.). Energia zerada: habilidades ativas bloqueadas e passivas que gastam energia (ex.: voo prolongado) se desligam com segurança (sem morrer de queda ao acabar a energia em voo: queda amortecida, ver seção 8).
 
 ### 2.8 Menu radial e habilidades ativas
 
-- Tecla configurável (proposta: `R`) segura para abrir o menu radial com as habilidades ativas do personagem; soltar sobre uma fatia seleciona.
-- Tecla de uso (proposta: `V`) dispara a habilidade selecionada. Modos: `instant`, `hold` (canalizada, ex.: visão de calor), `charge` (segura e solta).
+- Tecla configurável (padrão `R`) segura para abrir o menu radial com as habilidades ativas do personagem; soltar sobre uma fatia seleciona.
+- Tecla de uso (padrão `V`) dispara a habilidade selecionada. Modos: `instant`, `hold` (canalizada, ex.: visão de calor), `charge` (segura e solta).
 - O menu lê a lista do JSON; ícones em `textures/gui/ability/<id>.png`.
 - Habilidades ativas são **tipos genéricos parametrizados**. Lista inicial de tipos que cobre a maioria dos personagens:
   - `projectile_beam` (raio contínuo), `projectile` (disparo único: batarangue, flecha, rajada)
@@ -259,70 +259,53 @@ Os verificadores leem os arquivos gerados pelo datagen, então rodam em segundos
 - Um documento curto por sistema em `docs/sistemas/` (contrato do tipo + parâmetros), para que cada tarefa futura leia só o necessário em vez do código todo.
 - Template de personagem (`docs/TEMPLATE_PERSONAGEM.md`) como checklist de criação.
 
-## 6. Personagens sugeridos (para validar)
+## 6. Personagens e ordem de implementação
 
-> A lista completa dos 100 personagens, com a experiência e as habilidades de cada um, está em [PERSONAGENS.md](PERSONAGENS.md) (gerada de `docs/dados/personagens.json` por `tools/gerar_docs.py`, que também gera a página `docs/site/index.html`). As fases abaixo definem a ordem de implementação.
+A lista completa dos 100 personagens, com a experiência e as habilidades de cada um, está em [PERSONAGENS.md](PERSONAGENS.md). A ordem em que entram no mod está no roteiro de versões (seção 7): cada versão traz primeiro quem introduz sistemas novos e depois quem só reaproveita (a coluna "Reaproveita" de cada personagem diz de quem).
 
-A ordem prioriza quem testa mais sistemas novos primeiro; os seguintes reaproveitam.
+## 7. Roteiro de versões
 
-### Fase 1: núcleo (cada um introduz sistemas)
+O roteiro completo, com personagens, locais, missões, bosses, NPCs, mobs e itens de cada versão, está em [ROTEIRO.md](ROTEIRO.md), gerado de `docs/dados/versoes.json`. O gerador recusa uma missão que dependa de algo de uma versão posterior (missão exigida, local, NPC ou boss) e calcula sozinho os bosses, NPCs, mobs e itens de cada versão.
 
-| Personagem | Item de transformação | Energia / recarga | Passivas | Ativas (menu) | Introduz |
-|---|---|---|---|---|---|
-| Superman | Cristal Kryptoniano | passiva + sol; dreno por kriptonita | voo, imunidade a queda | visão de calor, sopro congelante, soco sônico | voo, `sunlight`, `projectile_beam`, `area_cone`, fraqueza |
-| Batman | Cinto de Utilidades | baterias de equipamento (`item_consume`) + passiva lenta | planar (capa), visão noturna | batarangue, gancho, bomba de fumaça | `glide`, `grapple`, `projectile`, camada de capa |
-| Lanterna Verde (Hal Jordan) | Anel de Poder | só recarrega na Bateria de Energia (bloco craftável) | voo (rastro verde) | escudo, martelo, ponte construto, rajada | `construct`, `block_interact`, bloco de recarga |
-| Flash (Barry Allen) | Anel do Flash | recarrega correndo | supervelocidade, corrida em parede/água | intangibilidade, soco relâmpago, tornado | `super_speed`, `while_moving`, `buff_self` |
-| Mulher-Maravilha | Tiara de Themyscira | passiva | voo, força | laço da verdade, bloqueio com braceletes, escudo | `grapple` (reuso), bloqueio de projéteis |
-
-### Fase 2: reaproveitando a fase 1
-
-| Personagem | Reaproveita | Novo |
-|---|---|---|
-| Supergirl | tudo do Superman | só skin/ajustes |
-| Aquaman | — | `fast_swim`, recarga `water`, `summon` (animais marinhos), tridente |
-| Shazam | voo, `area_blast` | recarga `lightning`, item = "palavra" (pergaminho) |
-| Mulher-Gavião | voo/planar com camada de asas | maça de Nth (melee especial) |
-| Ciborgue | `projectile_beam` | canhão sônico, scanner |
-| Caçador de Marte | voo, intangibilidade do Flash | dreno `in_fire`, metamorfose (skin alternativa) |
-| Arqueiro Verde | `projectile` | flechas especiais (seleção no radial) |
-
-### Fase 3: vilões (quase só reuso)
-
-| Personagem | Reaproveita |
+| Versão | O que entrega |
 |---|---|
-| Flash Reverso | Flash (cor do rastro vermelha) |
-| Sinestro | Lanterna Verde (amarelo, bateria amarela) |
-| Adão Negro | Shazam |
-| Lex Luthor (traje de guerra) | voo + `projectile_beam`; energia por baterias |
-| Bane | `super_jump`, recarga `item_consume` (Veneno) |
-| Coringa / Arlequina | `projectile` (bombas, gás), sem voo |
-| Exterminador | `projectile`, `dash` |
-| Capitão Frio | `area_cone` do Superman (congelante) |
-| Darkseid | voo, `projectile_beam` (Visão Ômega), boss-tier |
+| v0.1 Núcleo | Superman e Batman completos, Smallville e o Prólogo. Prova o .jar, o perfil .zip e o servidor dedicado. |
+| v0.2 Liga Fundadora | **Primeira versão jogável de verdade**: Mulher-Maravilha, Flash e Lanterna Verde, mais Supergirl e Superboy (só reuso), Gotham, Batcaverna, Torre de Vigilância e o começo do Ato 1. |
+| v0.3 Ato 1: as Cidades | Metrópolis, Central City, Arkham e LexCorp, primeiros bosses, família Batman e vilões de Gotham e Central City, skins alternativas e Guarda-Roupa. |
+| v0.4 Ato 2: os Reinos | Themyscira, Atlântida e Oa, Lanternas de todas as cores, heróis do mar e Gaviões. |
+| v0.5 Ato 3: Krypton | Apocalypse, Brainiac, Zona Fantasma e Mundo Bizarro. |
+| v0.6 O Lado Místico | Shazam, magia, Trigon, Monstro do Pântano, Nanda Parbat e Cidade dos Gorilas. |
+| v0.7 Ato 4: Apokolips | Final da campanha contra Darkseid e modo Lenda. |
+| v1.0 Lançamento | Os 16 heróis restantes, balanceamento com dados reais, tradução completa e compatibilidade JEI e EMI. |
 
-Mais tarde (sistemas mais complexos): Mutano (transformação em animais), Zatanna (magias por texto), Ravena, Estelar, Lanterna Azul/Vermelha e demais tropas (reuso do Lanterna).
+Cada versão gera o `.jar` e o perfil `.zip` e é testada num servidor dedicado com 2 jogadores antes da release.
 
-## 7. Roteiro de implementação (próximas etapas)
+**Passos da v0.1:**
 
-0. Baixar o MDK `forge-26.2-65.1.0`, confirmar versão do Java exigida e APIs atuais (capabilities/attachments, rede, GameTest, renderização do jogador) e registrar no `docs/sistemas/`. **Os nomes de API citados aqui são de referência e serão conferidos nesse passo.**
-1. Esqueleto do projeto + CI + `dcuVerify` (vazio) + tarefa do perfil `.zip`. Primeira release "vazia" para validar a importação no CurseForge.
-2. Núcleo: estado do jogador, transformação, traje travado, skin, energia + HUD.
-3. Menu radial + primeiro tipo ativo; voo como primeira passiva.
-4. Superman completo (valida tudo). Depois Batman, Lanterna, Flash, Mulher-Maravilha.
-5. Fase 2 e 3.
+0. Baixar o MDK `forge-26.2-65.1.0`, confirmar a versão do Java e as APIs atuais (attachments, rede, GameTest, renderização do jogador, atributo de escala) e registrar em `docs/sistemas/`. **Os nomes de API citados neste plano são de referência e serão conferidos nesse passo.**
+1. Esqueleto do projeto, CI, `dcuVerify` lendo os mesmos JSON de `docs/dados` e a tarefa do perfil `.zip`. Primeira release vazia para validar a importação no CurseForge.
+2. Núcleo: estado do jogador, transformação, traje travado, skin, energia e HUD.
+3. Menu radial e os primeiros tipos de habilidade; voo e planar.
+4. Superman completo, depois Batman (com o Batwing como primeiro veículo).
+5. Smallville, Martha, Prólogo e o Guia do Herói com Primeiros Passos.
 
-## 8. Decisões pendentes [DECIDIR]
+## 8. Decisões
 
-1. Lista e ordem dos personagens (seção 6).
-2. Item de transformação: só craft, ou também achado em estruturas/loot? Craft caro (fim de jogo) ou acessível?
-3. Morte do transformado: destransforma (proposta) ou continua transformado ao renascer?
-4. Um jogador pode ter vários itens e trocar de personagem livremente, ou há cooldown?
-5. Destransformar: usar o item de novo (proposta) ou tecla própria?
-6. Energia zerada em pleno voo: cair amortecido (proposta) ou cair normal?
-7. Texturas/skins: quem produz? (o plano assume arte própria, sem copiar assets oficiais).
-8. Dependências externas (ex.: GeckoLib para animações): proposta é **nenhuma** no início.
-9. Multiplayer: proposta é suportar desde o início (servidor autoritativo).
-10. Mod ID `dcuniverse` e nomes em português no jogo com tradução em inglês: confirmar.
+Propostas do planejamento, todas configuráveis no servidor onde fizer sentido. Qualquer uma pode ser revista depois.
+
+| # | Tema | Decisão |
+|---|---|---|
+| 1 | Ordem dos personagens | Pelo roteiro de versões (seção 7): primeiro quem traz sistemas novos, depois quem reaproveita. |
+| 2 | Como obter o item de transformação | Só por receita, com o nível do personagem decidindo o Núcleo Meta-Humano (I a IV), o que liga o poder ao avanço no survival. Bosses que são personagens jogáveis têm 10% de chance de dropar o próprio item. Sem itens de transformação em baús. |
+| 3 | Morte transformado | Destransforma antes do drop e devolve a armadura original (o traje nunca cai no chão). O item de transformação segue a regra normal de drop do mundo. Ao renascer, o jogador volta sem transformação. |
+| 4 | Vários personagens | O jogador pode ter vários itens e trocar à vontade, com 30 s de espera entre transformações (configurável). O novo personagem começa com 50% de energia, para ninguém trocar só para encher a barra. |
+| 5 | Destransformar | Usar o item de novo ou a tecla **H**, que funciona sem o item na mão. Leva 1 s e não pode ser feito durante uma habilidade canalizada. |
+| 6 | Energia zerada no voo | Queda amortecida: o personagem passa a planar devagar até o chão, sem dano de queda, e as habilidades ativas ficam bloqueadas até recuperar 10%. |
+| 7 | Quem produz a arte | Arte própria em Blockbench seguindo `docs/dados/skins.json`. Enquanto a arte de um personagem não fica pronta, o build gera uma textura provisória com as cores principais dele, para o código nunca esperar pela arte. Créditos de quem desenhou ficam em `CREDITS.md`. |
+| 8 | Dependências externas | Nenhuma até a v0.2. Na v0.3 (bosses e formas grandes) avaliamos GeckoLib para animações, se houver versão para 26.2; sem ela, usamos animação de modelo do próprio jogo. JEI e EMI são integrações opcionais, nunca obrigatórias. |
+| 9 | Multiplayer | Suportado desde a v0.1 com servidor autoritativo. O CI roda os testes também num servidor dedicado. |
+| 10 | Mod ID e idiomas | Mod ID `dcuniverse`, pacote `com.danrod.dcuniverse`. Português (`pt_br`) é a língua de origem e o inglês (`en_us`) entra desde a v0.1. O verificador acusa chave faltando em qualquer um dos dois. |
+
+**Teclas padrão** (todas configuráveis, e o verificador de teclas confere conflitos): **R** segura para o menu radial, **V** usa a habilidade selecionada, **H** destransforma, **G** abre o Guia, **J** abre o Diário de Missões e **K** abre o Guarda-Roupa.
 
 > Observação: DC Comics e seus personagens são marcas de terceiros. O mod deve ser distribuído como projeto de fã, não comercial, com arte original.

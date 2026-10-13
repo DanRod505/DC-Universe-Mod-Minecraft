@@ -124,6 +124,7 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
     <button role="tab" id="tab-mundo" aria-selected="false" data-aba="mundo">Mundo</button>
     <button role="tab" id="tab-skins" aria-selected="false" data-aba="skins">Skins</button>
     <button role="tab" id="tab-guia" aria-selected="false" data-aba="guia">Guia</button>
+    <button role="tab" id="tab-roteiro" aria-selected="false" data-aba="roteiro">Roteiro</button>
     <button role="tab" id="tab-planejamento" aria-selected="false" data-aba="planejamento">Planejamento</button>
   </nav>
 
@@ -174,6 +175,10 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
     <article class="md" id="texto-guia"></article>
   </section>
 
+  <section id="aba-roteiro" hidden>
+    <article class="md" id="texto-roteiro"></article>
+  </section>
+
   <section id="aba-planejamento" hidden>
     <article class="md" id="plano"></article>
   </section>
@@ -189,6 +194,7 @@ const ITENS = /*__ITENS__*/{};
 const MUNDO = /*__MUNDO__*/{};
 const SKINS = /*__SKINS__*/{};
 const GUIA = /*__GUIA__*/"";
+const ROTEIRO = /*__ROTEIRO__*/"";
 const FICHA_COLS = [["nivel", "Nível"], ["vida", "Vida ♥"], ["armadura", "Armadura"], ["dano", "Dano ♥"], ["energia", "Energia"],
   ["regen", "Regen/s"], ["terra", "Corrida"], ["vmax", "Supervel."], ["voo", "Voo"], ["nado", "Nado"], ["planar", "Planar"]];
 const num = v => v == null ? "–" : String(v).replace(".", ",");
@@ -412,13 +418,14 @@ function skins() {
 }
 document.getElementById("busca-skins").addEventListener("input", skins);
 
-const ABAS = ["personagens", "fichas", "armas", "itens", "mundo", "skins", "guia", "planejamento"];
+const ABAS = ["personagens", "fichas", "armas", "itens", "mundo", "skins", "guia", "roteiro", "planejamento"];
 function aba(nome) {
   document.querySelectorAll("[role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
   ABAS.forEach(a => document.getElementById("aba-" + a).hidden = a !== nome);
   if (nome === "planejamento") md("plano", PLANO);
   if (nome === "fichas") md("balanc", BALANC);
   if (nome === "guia") md("texto-guia", GUIA);
+  if (nome === "roteiro") md("texto-roteiro", ROTEIRO);
 }
 document.querySelector("nav").addEventListener("click", e => {
   const b = e.target.closest("[data-aba]"); if (b) { aba(b.dataset.aba); history.replaceState(null, "", "#" + b.dataset.aba); }
