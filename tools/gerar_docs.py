@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Gera docs/PERSONAGENS.md, docs/FICHAS.md e docs/site/index.html a partir de docs/dados/*.json.
+"""Gera docs/PERSONAGENS.md, docs/FICHAS.md, docs/ITENS.md e docs/site/index.html a partir de docs/dados/*.json.
 
 Fonte única: edite só os JSON (e docs/PLANEJAMENTO.md, docs/BALANCEAMENTO.md) e rode este script.
 Também valida os dados (contagem, nomes únicos, referências, faixas de balanceamento).
 """
 import json
 import sys
+
+import receitas as R
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -15,6 +17,9 @@ MD = RAIZ / "docs/PERSONAGENS.md"
 PLANO = RAIZ / "docs/PLANEJAMENTO.md"
 ARMAS = RAIZ / "docs/dados/armas.json"
 FICHAS = RAIZ / "docs/FICHAS.md"
+ITENS = RAIZ / "docs/dados/itens.json"
+VANILLA = RAIZ / "docs/dados/vanilla.json"
+ITENS_MD = RAIZ / "docs/ITENS.md"
 BALANC = RAIZ / "docs/BALANCEAMENTO.md"
 MODELO = RAIZ / "tools/modelo_site.html"
 SITE = RAIZ / "docs/site/index.html"
@@ -145,6 +150,7 @@ def gerar_md(dados):
                 out.append(f"- **Reaproveita:** sistemas de {por_n[p['reusa_n']]['nome']}")
             for campo, rotulo in CAMPOS:
                 out.append(f"- **{rotulo}:** " + "; ".join(p[campo]))
+            out.append(f"- **Item de transformação:** {p['transformacao']['nome']} ({p['transformacao']['desc']}) Receita em [ITENS.md](ITENS.md#itens-de-transformação).")
             out.append(f"- **Energia:** {p['energia']}")
             f = p["ficha"]
             out.append("- **Ficha:** " + " · ".join(f"{r} {fmt(f[c])}" for c, r in FICHA_COLS if f[c] is not None))
@@ -174,7 +180,105 @@ def gerar_md(dados):
     MD.write_text("\n".join(out), encoding="utf-8")
 
 
-def gerar_site(dados, armas):
+def montar_itens(cat_itens, dados, receitas, nomes, vanilla):
+    """Dados prontos para o .md e a página: grades com nomes e índice reverso de uso."""
+    nm = lambda i: R.nome_de(i, nomes, vanilla)
+    def visual(r):
+        if r["tipo"] == "shaped":
+            return {"tipo": "shaped", "qtd": r.get("qtd", 1),
+                    "grade": [[nm(c) for c in l] for l in R.grade_de(r["padrao"], r["chaves"])]}
+        if r["tipo"] == "shapeless":
+            return {"tipo": "shapeless", "qtd": r.get("qtd", 1), "ingredientes": [nm(i) for i in r["ingredientes"]]}
+        return {"tipo": "fundicao", "qtd": 1, "entrada": nm(r["entrada"])}
+    usado_em = defaultdict(set)
+    for r in receitas:
+        for ing in R.ingredientes(r):
+            usado_em[ing].add(nomes[r["saida"]])
+    por_saida = defaultdict(list)
+    for r in receitas:
+        por_saida[r["origem"] if r["origem"] in nomes else r["saida"]].append(r)
+    itens = []
+    for it in cat_itens["itens"]:
+        rs = por_saida.get(it["id"], [])
+        pecas = [{"nome": nomes[r["saida"]], **visual(r)} for r in rs]
+        usados = set(usado_em.get(it["id"], set()))
+        if it.get("familia"):
+            usados = set()
+        itens.append({"id": it["id"], "nome": it["nome"], "cat": it["cat"], "uso": it["uso"],
+                      "obtencao": it.get("obtencao"), "receitas": pecas, "usado_em": sorted(usados)})
+    for p in dados:
+        r = next(x for x in receitas if x["saida"] == p["transformacao"]["id"])
+        p["transformacao"]["receita"] = visual(r)
+        p["transformacao"]["nucleo"] = nm(R.nucleo(p["ficha"]["nivel"]))
+    return {"categorias": cat_itens["categorias"], "estruturas": cat_itens["estruturas"], "itens": itens}
+
+
+def grade_md(v):
+    if v["tipo"] == "shaped":
+        letras, leg, linhas = {}, [], []
+        for l in v["grade"]:
+            cel = []
+            for c in l:
+                if not c:
+                    cel.append("·")
+                    continue
+                if c not in letras:
+                    letras[c] = chr(65 + len(letras))
+                    leg.append(f"{letras[c]} = {c}")
+                cel.append(letras[c])
+            linhas.append(" ".join(cel))
+        qtd = f" → {v['qtd']} unidades" if v["qtd"] > 1 else ""
+        return ["```", *linhas, "```", "", "; ".join(leg) + qtd, ""]
+    if v["tipo"] == "shapeless":
+        qtd = f" → {v['qtd']} unidades" if v["qtd"] > 1 else ""
+        return [f"Sem forma: {', '.join(v['ingredientes'])}{qtd}", ""]
+    return [f"Fornalha: {v['entrada']}", ""]
+
+
+def gerar_itens_md(info, dados):
+    out = ["# Itens do mod", "",
+           "> Gerado por `tools/gerar_docs.py` a partir de `docs/dados/itens.json` e `personagens.json`. "
+           "Todas as receitas passam pelo verificador `tools/receitas.py` (ingredientes existentes, sem duplicadas).", "",
+           "## Como funciona a progressão", "",
+           "Todo item de transformação usa o mesmo formato de receita e leva no centro um **Núcleo Meta-Humano** "
+           "do nível de poder do personagem. Assim, personagens mais fortes só ficam disponíveis mais tarde no jogo:", "",
+           "| Núcleo | Etapa do jogo | Qtde de personagens |", "|---|---|---|"]
+    etapas = {1: "início (ferro e ouro)", 2: "diamante", 3: "Nether (blaze, pérola do ender)", 4: "fim de jogo (eco e netherita)"}
+    for nv in range(1, 5):
+        ps = [p["nome"] for p in dados if p["ficha"]["nivel"] == nv]
+        out.append(f"| Núcleo Meta-Humano {'I' * nv if nv < 4 else 'IV'} | {etapas[nv]} | {len(ps)} |")
+    out += ["", "Formato padrão do item de transformação (A = material principal, B = secundário, C = item temático, N = núcleo):",
+            "", "```", "B C B", "A N A", "B A B", "```", "",
+            "## Itens de transformação", "",
+            "| # | Personagem | Item | Núcleo | A (×3) | B (×4) | C |", "|---|---|---|---|---|---|---|"]
+    for p in dados:
+        t = p["transformacao"]
+        g = t["receita"]["grade"]
+        out.append(f"| {p['n']} | {p['nome']} | **{t['nome']}** | {t['nucleo']} | {g[1][0]} | {g[0][0]} | {g[0][1]} |")
+    out += ["", "Detalhes de cada item de transformação estão na página (aba Itens) e no JSON.", "",
+            "## Estruturas do mundo", "", "| Estrutura | Onde | O que tem |", "|---|---|---|"]
+    out += [f"| {e['nome']} | {e['onde']} | {e['conteudo']} |" for e in info["estruturas"]]
+    out.append("")
+    for cat, titulo in info["categorias"].items():
+        lista = [i for i in info["itens"] if i["cat"] == cat]
+        if not lista:
+            continue
+        out += [f"## {titulo}", ""]
+        for i in lista:
+            out += [f"### {i['nome']}", "", i["uso"], ""]
+            if i["obtencao"]:
+                out += [f"**Obtenção:** {i['obtencao']}", ""]
+            for r in i["receitas"]:
+                if len(i["receitas"]) > 1:
+                    out.append(f"**{r['nome']}**")
+                    out.append("")
+                out += grade_md(r)
+            if i["usado_em"]:
+                out += [f"**Usado em:** {', '.join(i['usado_em'])}", ""]
+    ITENS_MD.write_text("\n".join(out), encoding="utf-8")
+
+
+def gerar_site(dados, armas, info):
     def js(obj):
         return json.dumps(obj, ensure_ascii=False).replace("</", "<\\/")
     html = MODELO.read_text(encoding="utf-8")
@@ -182,6 +286,7 @@ def gerar_site(dados, armas):
     html = html.replace("/*__PLANO__*/\"\"", js(PLANO.read_text(encoding="utf-8")))
     html = html.replace("/*__BALANC__*/\"\"", js(BALANC.read_text(encoding="utf-8")))
     html = html.replace("/*__ARMAS__*/{}", js(armas))
+    html = html.replace("/*__ITENS__*/{}", js(info))
     SITE.parent.mkdir(parents=True, exist_ok=True)
     cabeca = '<!doctype html>\n<html lang="pt-BR">\n<meta charset="utf-8">\n' \
              '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' \
@@ -194,14 +299,20 @@ def gerar_site(dados, armas):
 def main():
     dados = json.loads(DADOS.read_text(encoding="utf-8"))
     armas = json.loads(ARMAS.read_text(encoding="utf-8"))
-    erros = validar(dados) + validar_armas(armas, dados)
+    cat_itens = json.loads(ITENS.read_text(encoding="utf-8"))
+    vanilla = json.loads(VANILLA.read_text(encoding="utf-8"))
+    erros_r, receitas, nomes = R.verificar(cat_itens["itens"], dados, vanilla)
+    erros = validar(dados) + validar_armas(armas, dados) + erros_r
     if erros:
         print("\n".join(erros))
         sys.exit(1)
+    info = montar_itens(cat_itens, dados, receitas, nomes, vanilla)
     gerar_md(dados)
     gerar_fichas(dados, armas)
-    gerar_site(dados, armas)
-    print(f"OK: {len(dados)} personagens, {len(armas['armas'])} armas -> PERSONAGENS.md, FICHAS.md, site/index.html")
+    gerar_itens_md(info, dados)
+    gerar_site(dados, armas, info)
+    print(f"OK: {len(dados)} personagens, {len(armas['armas'])} armas, {len(receitas)} receitas verificadas "
+          "-> PERSONAGENS.md, FICHAS.md, ITENS.md, site/index.html")
 
 
 if __name__ == "__main__":

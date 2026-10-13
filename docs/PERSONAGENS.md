@@ -139,6 +139,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Visão de calor (raio contínuo, acende fornalhas e derrete gelo/areia em vidro); Sopro congelante (cone: congela água, apaga fogo, deixa mobs lentos); Soco sônico (empurra uma área inteira); Pisão sísmico (onda de choque no chão); Visão de raio X (destaca minérios, baús e mobs através de blocos)
 - **Armas, ferramentas e invocações:** Nenhuma arma: o próprio corpo é a ferramenta
 - **Utilidade no survival:** Mineração manual rápida e captura de blocos pesados; Fundição instantânea com visão de calor; Raio X para achar diamantes e estruturas; Carregar mobs/animais voando até a base
+- **Item de transformação:** Cristal da Casa de El (Cristal com o brasão da Casa de El; ao usar, o traje se forma em luz solar.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Energia Solar: regenera sempre, rápido sob o sol, lento à noite/subterrâneo; kriptonita drena e anula poderes
 - **Ficha:** Nível 4 · Vida ♥ 40 · Armadura 22 · Dano ♥ 12 · Energia 300 · Regen/s 1,5 · Corrida 6,5 · Supervel. 12 · Voo 32 · Nado 6
 - ⭐ **Habilidade suprema (Estrutura/terreno): Fortaleza da Solidão.** Ergue do chão uma Fortaleza da Solidão de cristal kryptoniano no local escolhido: base temporária com câmara solar que acelera a recarga de energia, cura quem está dentro e protege contra mobs. Aliados podem entrar e usar.
@@ -150,6 +151,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Modo Detetive (destaca mobs, rastros de jogadores, pontos fracos e blocos interativos); Batarangue (ricocheteia, corta cordas/teias, atordoa); Gancho de escalada (puxa até o bloco mirado); Bomba de fumaça (cegueira em área + fuga); Gel explosivo (marca uma parede e detona depois)
 - **Armas, ferramentas e invocações:** Cinto de utilidades com slots configuráveis (escolhe quais gadgets levar); Batcomputador (bloco) para fabricar gadgets e analisar amostras; Invocar o Batmóvel/Batwing (veículos craftados)
 - **Utilidade no survival:** Gadgets craftáveis com materiais do jogo (o preparo é o loop de progressão); Gancho para escalar e explorar cavernas; Gel explosivo para mineração controlada; Batcaverna: base com bancada de pesquisa
+- **Item de transformação:** Cinto de Utilidades (O cinto também guarda os gadgets escolhidos no Batcomputador.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Recursos do Cinto: cada gadget tem cargas; recarrega no Batcomputador ou craftando munição
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 14 · Dano ♥ 3 · Energia 200 · Regen/s 0,5 · Corrida 6 · Nado 4 · Planar 11
 - ⭐ **Habilidade suprema (Veículo): Batwing.** Invoca o Batwing: jato pilotável com assento para um passageiro, metralhadoras, mísseis teleguiados e modo furtivo. Pode descer e embarcar o Batman de volta com gancho.
@@ -161,6 +163,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Laço da Verdade (puxa, prende mobs; mob laçado obedece/segue); Investida com escudo; Golpe de braceletes cruzados (onda de choque); Grito de guerra (buff de força para aliados próximos)
 - **Armas, ferramentas e invocações:** Espada de Themyscira; Escudo; Laço da Verdade; Tiara arremessável
 - **Utilidade no survival:** Laço para domar e transportar animais/mobs; Reflexão de flechas contra esqueletos; Buff de aliados em multiplayer
+- **Item de transformação:** Tiara de Themyscira (Presente das amazonas; ao usar, a armadura dourada se forma.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Bênção dos Deuses: regenera com o tempo; altares (blocos) aceleram
 - **Ficha:** Nível 4 · Vida ♥ 36 · Armadura 22 · Dano ♥ 10 · Energia 250 · Regen/s 1,5 · Corrida 6,2 · Voo 24 · Nado 5
 - ⭐ **Habilidade suprema (Veículo): Jato Invisível.** Invoca o Jato Invisível amazônico: aeronave pilotável e invisível para mobs, com espaço para três aliados e uma rampa que lança Diana em mergulho.
@@ -172,6 +175,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Tempo de bala (desacelera o mundo ao seu redor por alguns segundos); Soco de massa infinita (carga longa, dano enorme); Tornado giratório (puxa e lança mobs); Vibrar intangível (atravessa paredes finas); Arremesso de relâmpago
 - **Armas, ferramentas e invocações:** Anel do traje (guarda o uniforme)
 - **Utilidade no survival:** Viagem rápida entre biomas; Colheita e plantio em alta velocidade; Construção acelerada (colocar blocos mais rápido); Fugir de qualquer ameaça
+- **Item de transformação:** Anel do Flash (Barry Allen) (O uniforme salta comprimido de dentro do anel.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Aceleração: recarrega enquanto corre; consome rápido em tempo de bala; fome aumenta muito (comer mais)
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 12 · Dano ♥ 5 · Energia 250 · Regen/s 2 · Corrida 7 · Supervel. 45 · Nado 6
 - ⭐ **Habilidade suprema (Transformação): Avatar da Força de Aceleração.** Barry se funde com a Força de Aceleração: vira um corpo de relâmpago dourado que corre por cima de tudo, atravessa blocos e deixa um rastro elétrico que fere mobs. Outros jogadores não são afetados pelo tempo.
@@ -184,6 +188,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Roubar velocidade (deixa mobs lentos e ganha energia); Emprestar velocidade (buff de velocidade em aliados); Tempo de bala; Tornado giratório
 - **Armas, ferramentas e invocações:** Anel do traje
 - **Utilidade no survival:** Transporte de aliados; Escolta rápida de comerciantes/animais
+- **Item de transformação:** Anel do Flash (Wally West) (Versão do anel feita para o velocista mais rápido.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Aceleração (mesmo sistema do Barry, recarga maior por velocidade)
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 12 · Dano ♥ 5 · Energia 260 · Regen/s 2,2 · Corrida 7 · Supervel. 50 · Nado 6
 - ⭐ **Habilidade suprema (Invocação): Esteira de Velocistas.** Abre uma pista de relâmpagos à frente; aliados que correm nela ganham supervelocidade e mobs que tocam nela ficam presos em lentidão.
@@ -195,6 +200,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Rajada de energia; Construtos rápidos: martelo, punho gigante, jaula, escudo; Construto livre: aponta e cria plataforma/ponte temporária; Avião de construto (veículo rápido)
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia (bloco)
 - **Utilidade no survival:** Pontes e plataformas temporárias para atravessar abismos; Construtos de ferramenta (picareta/machado de energia); Jaula para capturar mobs
+- **Item de transformação:** Anel de Poder (Hal Jordan) (Precisa ser carregado na Bateria Verde antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Vontade: só recarrega na Bateria de Energia (juramento); pequena regeneração ao vencer lutas
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 16 · Dano ♥ 5 · Energia 300 · Regen/s 0 · Corrida 5,6 · Voo 26 · Nado 5
 - ⭐ **Habilidade suprema (Veículo): Caça de Construto.** Cria um caça a jato verde pilotável (homenagem ao piloto Hal), com rajadas, escudo e assento para um aliado.
@@ -207,6 +213,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Planta de construto: grava uma estrutura (área de blocos) e a projeta depois como construto; Muralha/fortaleza de energia; Torre de artilharia de construto (atira sozinha); Rajada de precisão (atirador)
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Projetar andaimes, pontes e escadas grandes; Defesa de base com torres temporárias; Converter construto em blocos reais pagando materiais
+- **Item de transformação:** Anel de Poder (John Stewart) (Precisa ser carregado na Bateria Verde antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Vontade (Bateria); construtos maiores custam mais, mas duram mais
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 16 · Dano ♥ 5 · Energia 320 · Regen/s 0 · Corrida 5,6 · Voo 22 · Nado 5
 - ⭐ **Habilidade suprema (Construto): Fortaleza do Arquiteto.** Projeta uma fortaleza de energia com muralhas, portões e torres de artilharia que atiram sozinhas. Usa plantas salvas pelo jogador; pagando materiais, vira construção permanente.
@@ -219,6 +226,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Construtos vivos (invoca criaturas de energia: dragão, robô, lobo) que lutam sozinhas; Mecha de construto (monta e pilota); Arte em tela: desenhar construtos de formas personalizadas; Rajada multicolorida
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Criaturas de construto ajudam a minerar/defender; Formas personalizadas para decoração temporária
+- **Item de transformação:** Anel de Poder (Kyle Rayner) (Precisa ser carregado na Bateria Verde antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Vontade (Bateria)
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 16 · Dano ♥ 5 · Energia 300 · Regen/s 0 · Corrida 5,6 · Voo 24 · Nado 5
 - ⭐ **Habilidade suprema (Armadura/mecha): Mecha de Construto.** Kyle cria e entra num mecha verde gigante, detalhado, com punhos, canhão e propulsores. Um aliado pode subir no ombro como atirador.
@@ -231,6 +239,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Punhos gigantes em sequência; Taco/bola de demolição de construto; Investida de ombro; Provocação (atrai mobs)
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Demolição rápida de blocos; Tanque em combate de grupo
+- **Item de transformação:** Anel de Poder (Guy Gardner) (Precisa ser carregado na Bateria Verde antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Vontade (Bateria); ganha energia ao receber dano
 - **Ficha:** Nível 3 · Vida ♥ 28 · Armadura 18 · Dano ♥ 6 · Energia 280 · Regen/s 0 · Corrida 5,6 · Voo 22 · Nado 5
 - ⭐ **Habilidade suprema (Construto): Bola de Demolição Gigante.** Um guindaste de construto com bola de demolição colossal que Guy controla, destruindo estruturas e hordas.
@@ -243,6 +252,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Escudo grande que protege aliados; Correntes de construto (prende vários alvos); Superar o medo: com pouca vida, construtos ficam mais fortes
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Proteger aldeões e animais durante ataques; Resgate em cavernas
+- **Item de transformação:** Anel de Poder (Jessica Cruz) (Precisa ser carregado na Bateria Verde antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Vontade (Bateria); recarga extra ao proteger aliados
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 16 · Dano ♥ 5 · Energia 300 · Regen/s 0 · Corrida 5,6 · Voo 24 · Nado 5
 - ⭐ **Habilidade suprema (Construto): Cúpula de Proteção.** Uma cúpula verde gigante e translúcida que bloqueia mobs e projéteis e cura aliados dentro; perfeita para defender uma vila.
@@ -255,6 +265,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Luz da Vida: cura aliados e remove efeitos negativos; Visão do futuro curta (mostra trajetória de projéteis); Construtos táticos (barricadas); Rajada
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia; Pistola reserva
 - **Utilidade no survival:** Curar aldeões zumbis (acelera a cura); Suporte em multiplayer
+- **Item de transformação:** Anel de Poder (Simon Baz) (Precisa ser carregado na Bateria Verde antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Vontade (Bateria)
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 16 · Dano ♥ 5 · Energia 300 · Regen/s 0 · Corrida 5,6 · Voo 24 · Nado 5
 - ⭐ **Habilidade suprema (Construto): Ambulância Esmeralda.** Um veículo de construto que cura passageiros continuamente e cura aldeões zumbis ao tocá-los.
@@ -266,6 +277,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Telepatia marinha: invoca/comanda peixes, golfinhos, tartarugas e lulas; Chamar tubarões/baleia para atacar ou transportar; Tridente de Atlan: controle de água (ondas, empurrar, criar bolha de ar); Maremoto
 - **Armas, ferramentas e invocações:** Tridente de Netuno; Concha de comando (item)
 - **Utilidade no survival:** Explorar monumentos oceânicos e naufrágios com facilidade; Golfinhos guiam até tesouros; Montar uma baleia/cavalo-marinho; Bolha de ar para amigos
+- **Item de transformação:** Insígnia Real de Atlântida (Selo do rei dos mares; ao usar, o traje de escamas se forma.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Hidratação: recarrega na água, drena lentamente em terra seca e muito em desertos/Nether
 - **Ficha:** Nível 4 · Vida ♥ 34 · Armadura 18 · Dano ♥ 9 · Energia 250 · Regen/s 2 · Corrida 6 · Nado 18
 - ⭐ **Habilidade suprema (Invocação): Montaria de Topo.** Invoca Topo, o polvo gigante guardião de Atlântida, como montaria aquática: arrasta navios, agarra mobs com tentáculos e leva aliados nas costas.
@@ -278,6 +290,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Construtos de água endurecida (paredes, plataformas, armas); Jato de água pressurizado; Desidratar (dano em mobs de terra); Mover volumes de água (encher/esvaziar áreas)
 - **Armas, ferramentas e invocações:** Coroa de Xebel
 - **Utilidade no survival:** Drenar áreas inundadas para minerar; Irrigar plantações; Apagar lava/incêndios
+- **Item de transformação:** Coroa de Xebel (Coroa da rainha guerreira de Xebel.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Hidratação (mesmo sistema do Aquaman)
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 14 · Dano ♥ 5 · Energia 260 · Regen/s 2 · Corrida 5,8 · Nado 16
 - ⭐ **Habilidade suprema (Construto): Leviatã de Água.** Molda um dragão-marinho de água sólida que luta por ela e transporta aliados pelo mar.
@@ -289,6 +302,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Canhão sônico; Hackear (desativa/ativa mecanismos, torna golems aliados); Tubo de Boom (teletransporte para pontos marcados); Braço-ferramenta (broca, serra, garra); Propulsores (voo curto)
 - **Armas, ferramentas e invocações:** Upgrades instaláveis no corpo (módulos craftáveis)
 - **Utilidade no survival:** Teletransporte entre bases; Controle remoto de redstone; Broca para túneis; Analisar blocos e minérios
+- **Item de transformação:** Núcleo Cibernético (Implante que expande as placas do corpo cibernético.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Bateria interna: recarrega em blocos de energia/redstone ou dormindo
 - **Ficha:** Nível 3 · Vida ♥ 28 · Armadura 20 · Dano ♥ 6 · Energia 250 · Regen/s 1 · Corrida 5,4 · Voo 14 · Nado 4
 - ⭐ **Habilidade suprema (Armadura/mecha): Armadura de Guerra de Ciborgue.** Expande o corpo numa armadura blindada gigante com canhões sônicos duplos e voo, que um aliado pode usar como torre.
@@ -300,6 +314,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Metamorfose (assume a aparência de um mob; mobs daquele tipo ficam neutros); Telepatia (vê o que um mob vê, acalma mobs); Visão marciana (raio); Aumentar densidade (fica pesado e forte)
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Infiltração em estruturas hostis disfarçado; Explorar atravessando paredes; Acalmar mobs para passar
+- **Item de transformação:** Medalhão Marciano (Foco telepático de J'onn.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Mente Marciana: regenera com o tempo; fogo drena e bloqueia poderes
 - **Ficha:** Nível 4 · Vida ♥ 34 · Armadura 18 · Dano ♥ 9 · Energia 280 · Regen/s 1,2 · Corrida 6 · Voo 24 · Nado 6
 - ⭐ **Habilidade suprema (Transformação): Forma Marciana de Guerra.** J'onn assume sua forma marciana gigante e blindada, com força enorme e intangibilidade seletiva.
@@ -311,6 +326,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Invocar relâmpago (cai no alvo); Sabedoria de Salomão (revela informações de mobs/itens); Soco trovejante; Grito SHAZAM (destransforma com raio que causa dano em área)
 - **Armas, ferramentas e invocações:** Nenhum; a transformação é um raio
 - **Utilidade no survival:** Raio para carregar creepers, transformar porcos/aldeões; Força para mineração
+- **Item de transformação:** Pergaminho de Shazam (Ler o pergaminho chama o raio mágico (transformação com trovão).) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Magia de Shazam: recarrega durante tempestades e ao ser atingido por raios; regeneração lenta normal
 - **Ficha:** Nível 4 · Vida ♥ 36 · Armadura 20 · Dano ♥ 10 · Energia 250 · Regen/s 0,8 · Corrida 6,5 · Voo 28 · Nado 5
 - ⭐ **Habilidade suprema (Invocação): Pedra da Eternidade.** Invoca um portal para a Pedra da Eternidade: aliados que atravessam são curados e recebem força divina por um tempo.
@@ -323,6 +339,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Visão de calor; Sopro congelante; Investida aérea; Raio X
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Mesmo que Superman, com foco em transporte rápido
+- **Item de transformação:** Cristal da Casa de Zor-El (Cristal da família de Kara.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Energia Solar (mesmo sistema)
 - **Ficha:** Nível 4 · Vida ♥ 34 · Armadura 20 · Dano ♥ 10 · Energia 280 · Regen/s 1,6 · Corrida 6,6 · Supervel. 12 · Voo 34 · Nado 6
 - ⭐ **Habilidade suprema (Veículo): Nave Kryptoniana.** Invoca a cápsula/nave de Kara, pilotável, com escudo e canhão solar.
@@ -334,6 +351,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Seletor de flechas especiais: explosiva, rede, gancho, gelo, ácido, boxe, sinalizadora; Tiro triplo; Tiro carregado perfurante
 - **Armas, ferramentas e invocações:** Arco Composto; Aljava de flechas especiais (craftáveis)
 - **Utilidade no survival:** Flecha gancho para tirolesa; Caça eficiente; Flecha sinalizadora ilumina cavernas
+- **Item de transformação:** Aljava Esmeralda (A aljava também guarda as flechas especiais.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Aljava: munição especial craftada; flechas comuns infinitas
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 12 · Dano ♥ 3 · Energia 150 · Regen/s 0,5 · Corrida 6 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Arqueiro-Móvel.** Invoca o carro do Arqueiro Verde com lançador de flechas especiais no capô (rede, explosiva, gancho) e lugar para um passageiro atirar.
@@ -345,6 +363,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Grito Canário (cone que empurra, quebra vidro e atordoa); Grito ressonante (quebra blocos frágeis); Chute giratório
 - **Armas, ferramentas e invocações:** Bastão retrátil
 - **Utilidade no survival:** Quebrar blocos frágeis em área; Afastar hordas
+- **Item de transformação:** Gargantilha Sônica (Amplifica o Grito Canário.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Fôlego: regenera rápido; não recarrega debaixo d'água
 - **Ficha:** Nível 2 · Vida ♥ 16 · Armadura 12 · Dano ♥ 4 · Energia 180 · Regen/s 1,5 · Corrida 6 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Moto Sônica.** Invoca uma moto veloz; o Grito Canário em movimento abre caminho por blocos frágeis e derruba mobs à frente.
@@ -356,6 +375,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Mergulho de impacto com maça; Rajada de penas; Grito de guerra; Lembrança de vidas passadas (bônus temporário de combate)
 - **Armas, ferramentas e invocações:** Maça de Metal Nth; Asas de Metal Nth (anti-gravidade)
 - **Utilidade no survival:** Explorar montanhas; Caçar do alto
+- **Item de transformação:** Cinto de Metal Nth (O cinto ativa as asas antigravidade.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Metal Nth: regenera com o tempo; mais rápido em altitude
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 16 · Dano ♥ 7 · Energia 200 · Regen/s 1 · Corrida 5,8 · Voo 20 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Esquadrão Alado.** Invoca guerreiros thanagarianos que voam em formação e atacam o alvo marcado; aliados podem ser carregados por eles.
@@ -368,6 +388,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Maça elétrica; Golpe giratório aéreo; Agarrar e soltar do alto
 - **Armas, ferramentas e invocações:** Maça de Metal Nth; Asas
 - **Utilidade no survival:** Transporte aéreo; Exploração vertical
+- **Item de transformação:** Capacete de Thanagar (Capacete da polícia thanagariana.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Metal Nth
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 16 · Dano ♥ 7 · Energia 200 · Regen/s 1 · Corrida 5,8 · Voo 22 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Nave Thanagariana.** Invoca uma nave thanagariana pilotável com canhão de Metal Nth e gancho para carregar cargas pesadas.
@@ -379,6 +400,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Grimório de feitiços falados (radial de feitiços: Rednef! Ralov! etc.); Transformar mob em coelho/galinha; Teleporte curto; Prender com correntes mágicas; Ilusão (cria cópia que atrai mobs)
 - **Armas, ferramentas e invocações:** Cartola (guarda itens); Varinha
 - **Utilidade no survival:** Feitiço de crescer plantações; Feitiço de luz; Feitiço de conserto de itens
+- **Item de transformação:** Cartola Mágica (Tirar a cartola revela a maga (com coelho).) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Mana: regenera; poções e livros mágicos aceleram; à noite regenera mais
 - **Ficha:** Nível 3 · Vida ♥ 18 · Armadura 10 · Dano ♥ 3 · Energia 300 · Regen/s 1,5 · Corrida 5,6 · Voo 10 · Nado 4
 - ⭐ **Habilidade suprema (Estrutura/terreno): Palco da Ilusão.** Ergue um palco mágico gigante: mobs dentro ficam hipnotizados e parados, e aliados ganham velocidade e força enquanto estiverem no palco.
@@ -390,6 +412,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Ankh de luz (rajada dourada); Escudo místico; Portal místico (teleporte entre pontos); Banir (bane mob mágico/do End)
 - **Armas, ferramentas e invocações:** Elmo de Nabu; Capa e Amuleto de Anúbis
 - **Utilidade no survival:** Portais entre bases; Proteção contra magia de bruxas e evocadores
+- **Item de transformação:** Elmo de Nabu (O elmo fala com quem o usa.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Magia de Nabu: regenera; torre de Destino (bloco) acelera
 - **Ficha:** Nível 3 · Vida ♥ 22 · Armadura 14 · Dano ♥ 4 · Energia 320 · Regen/s 1,2 · Corrida 5,6 · Voo 20 · Nado 4
 - ⭐ **Habilidade suprema (Estrutura/terreno): Torre do Destino.** Ergue a Torre do Destino: estrutura mágica com biblioteca de encantamentos e portais que ligam a pontos marcados por qualquer aliado.
@@ -401,6 +424,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Controle de tamanho (escala de mini a gigante); Soco subatômico (encolhe e reaparece com impulso); Viajar por cabos de redstone; Encolher objetos/mobs
 - **Armas, ferramentas e invocações:** Cinto de Massa Anã
 - **Utilidade no survival:** Explorar através de grades e frestas; Ficar gigante para colher/derrubar árvores; Encolher mobs perigosos
+- **Item de transformação:** Cinto de Massa Anã (Controla o tamanho com matéria de estrela anã.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Estrela anã: regenera; mudar de tamanho custa
 - **Ficha:** Nível 2 · Vida ♥ 16 · Armadura 12 · Dano ♥ 3 · Energia 200 · Regen/s 1 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Transformação): Átomo Gigante.** Cresce até tamanho colossal: derruba árvores inteiras, carrega mobs na mão e passa por cima de muralhas.
@@ -412,6 +436,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Canhão de plasma; Lâminas de braço; Escudo; Escaneamento (analisa mobs e revela fraquezas); Camuflagem
 - **Armas, ferramentas e invocações:** Escaravelho (Khaji Da)
 - **Utilidade no survival:** Armadura se adapta a lava/frio; Ferramentas geradas pela armadura
+- **Item de transformação:** Escaravelho Khaji Da (O escaravelho se prende às costas e forma a armadura.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Escaravelho: regenera lentamente; absorver energia de explosões recarrega
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 18 · Dano ♥ 5 · Energia 250 · Regen/s 0,8 · Corrida 5,8 · Voo 22 · Nado 5
 - ⭐ **Habilidade suprema (Armadura/mecha): Besouro Titã.** A armadura se expande num mecha de escaravelho gigante com canhões de plasma, asas e garras de mineração.
@@ -423,6 +448,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Rajada das luvas; Campo de força em área; Skeets (robô ajudante que coleta itens e informa); Viagem no tempo curta (volta posição 5s atrás)
 - **Armas, ferramentas e invocações:** Anel da Legião; Robô Skeets
 - **Utilidade no survival:** Skeets coleta itens; Voltar no tempo para desfazer queda
+- **Item de transformação:** Anel da Legião (Tecnologia do século 25 trazida por Skeets.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Bateria do futuro: recarrega em carregador (bloco)
 - **Ficha:** Nível 2 · Vida ♥ 20 · Armadura 16 · Dano ♥ 4 · Energia 220 · Regen/s 0 · Corrida 5,8 · Voo 20 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Nave do Século 25.** Invoca uma nave do futuro com teletransporte para pontos marcados, Skeets como copiloto e lugar para aliados.
@@ -434,6 +460,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Esticar braço (soco à distância, pegar itens longe); Virar objeto (bola, paraquedas, trampolim, mola); Envolver mob (prende); Disfarce de bloco
 - **Armas, ferramentas e invocações:** Óculos
 - **Utilidade no survival:** Pegar itens longe; Virar ponte/escada; Trampolim para outros jogadores
+- **Item de transformação:** Óculos do Homem-Elástico (Os óculos são a única parte que não estica.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Elasticidade: regenera rápido; fogo e frio reduzem
 - **Ficha:** Nível 2 · Vida ♥ 22 · Armadura 8 · Dano ♥ 4 · Energia 200 · Regen/s 2 · Corrida 5,8 · Nado 5 · Planar 8
 - ⭐ **Habilidade suprema (Transformação): Forma Colossal.** Vira objetos gigantes à escolha: trampolim enorme, paraquedas para o grupo, ponte viva ou bola de demolição.
@@ -445,6 +472,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Totem de Tantu: escolhe um animal de Minecraft para canalizar (lobo: força; cavalo: velocidade; golfinho: nado; galinha: queda lenta; aranha: escalar; urso polar: resistência ao frio); Canalizar o último animal tocado; Rugido
 - **Armas, ferramentas e invocações:** Totem de Tantu
 - **Utilidade no survival:** Adaptação a qualquer bioma; Domesticação facilitada
+- **Item de transformação:** Totem de Tantu (Canaliza o espírito dos animais.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Espírito Animal: recarrega estando perto de animais
 - **Ficha:** Nível 2 · Vida ♥ 18 · Armadura 12 · Dano ♥ 4 · Energia 200 · Regen/s 1 · Corrida 6,2 · Nado 5
 - ⭐ **Habilidade suprema (Transformação): Fera Mítica.** Funde-se num leão espiritual gigante que soma as habilidades de vários animais e pode levar aliados nas costas.
@@ -456,6 +484,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Raios estelares das mãos; Rajada dos olhos; Explosão estelar (área); Aprender idioma pelo toque (negociação melhor com aldeões)
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Desconto com aldeões; Iluminar cavernas
+- **Item de transformação:** Pedra Estelar de Tamaran (Absorve luz solar.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Energia Solar (mesmo sistema do Superman, sem kriptonita)
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 14 · Dano ♥ 7 · Energia 260 · Regen/s 1,5 · Corrida 6 · Voo 26 · Nado 5
 - ⭐ **Habilidade suprema (Invocação): Nave de Tamaran.** Invoca uma nave tamaraniana que dispara raios estelares no alvo marcado e transporta aliados.
@@ -467,6 +496,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Tendrões de sombra (agarra e arremessa); Corvo de alma (projeção astral para explorar); Teleporte por sombras; Escudo de sombras; Cura por empatia
 - **Armas, ferramentas e invocações:** Capa
 - **Utilidade no survival:** Projeção astral para explorar cavernas sem risco; Teleporte; Curar aliados
+- **Item de transformação:** Gema de Azarath (Contém a calma necessária para segurar o poder.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Controle Emocional: recarrega meditando; tomar muito dano rápido descontrola (efeito aleatório)
 - **Ficha:** Nível 3 · Vida ♥ 20 · Armadura 12 · Dano ♥ 4 · Energia 300 · Regen/s 1 · Corrida 5,6 · Voo 12 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Corvo de Alma Gigante.** Libera um corvo de sombra gigante que transporta o grupo voando e engole mobs no caminho.
@@ -478,6 +508,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Metamorfose animal: escolhe uma forma (lobo, cavalo, golfinho, morcego, aranha, urso, papagaio, cabra, tartaruga) com as habilidades e o modelo dela
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Cada forma resolve um problema: morcego explora cavernas, cabra escala, golfinho nada, cavalo viaja
+- **Item de transformação:** Amuleto Animal (Desbloqueia formas novas ao tocar animais diferentes.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Energia de Transformação: regenera; formas maiores custam mais por segundo
 - **Ficha:** Nível 2 · Vida ♥ 20 · Armadura 12 · Dano ♥ 4 · Energia 260 · Regen/s 1,2 · Corrida 6 · Nado 5
 - ⭐ **Habilidade suprema (Transformação): Tiranossauro Rex.** Mutano vira um T-Rex gigante: rugido que espanta mobs, mordidas devastadoras e pode carregar aliados nas costas.
@@ -489,6 +520,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Bastões de Escrima elétricos (combo); Gancho; Disco atordoante; Investida acrobática
 - **Armas, ferramentas e invocações:** Bastões de Escrima; Gancho de pulso
 - **Utilidade no survival:** Mobilidade vertical em montanhas e cidades; Exploração ágil
+- **Item de transformação:** Insígnia de Asa Noturna (O pássaro azul de Blüdhaven.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Fôlego: regenera rápido; acrobacias consomem
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 12 · Dano ♥ 3 · Energia 160 · Regen/s 2 · Corrida 6,6 · Nado 4,5
 - ⭐ **Habilidade suprema (Veículo): Moto de Asa Noturna.** Invoca uma moto que corre pelas paredes, com gancho integrado e bastões elétricos nas laterais.
@@ -501,6 +533,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Batarangue; Gancho; Granada de choque; Mira tática (marca alvos para aliados)
 - **Armas, ferramentas e invocações:** Cinto de utilidades
 - **Utilidade no survival:** Mesmo kit do Batman, com marcação de alvos
+- **Item de transformação:** Cinto da Batwoman (Variante militar do cinto de utilidades.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Recursos do Cinto
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 14 · Dano ♥ 3 · Energia 200 · Regen/s 0,5 · Corrida 6 · Nado 4 · Planar 11
 - ⭐ **Habilidade suprema (Veículo): Bat-Moto Tática.** Invoca uma moto blindada com mísseis e marcador de alvos que mostra os inimigos para todos os aliados.
@@ -512,6 +545,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Transmutação: transforma um bloco em outro do mesmo tipo (pedra em ferro, areia em vidro; tabela balanceada); Rajada nuclear; Absorver radiação/explosões
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Transmutação é uma ferramenta de economia (com custo alto); Fundição instantânea
+- **Item de transformação:** Matriz Nuclear (Funde os dois lados do Nuclear.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Matriz Nuclear: regenera; instável se zerar (explosão pequena)
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 16 · Dano ♥ 6 · Energia 280 · Regen/s 1 · Corrida 5,8 · Voo 26 · Nado 4
 - ⭐ **Habilidade suprema (Transformação): Forma Nuclear Total.** Vira uma tocha nuclear gigante que voa e transmuta os blocos por onde passa (com custo alto).
@@ -523,6 +557,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Raio em cadeia (pula entre mobs); Campo elétrico (área); Ativar redstone à distância; Carregar creeper
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Energizar circuitos de redstone; Iluminação
+- **Item de transformação:** Insígnia Elétrica (Canaliza a bioeletricidade de Jefferson.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Bioeletricidade: recarrega perto de redstone/para-raios ou em tempestade
 - **Ficha:** Nível 3 · Vida ♥ 22 · Armadura 14 · Dano ♥ 5 · Energia 260 · Regen/s 1 · Corrida 5,8 · Voo 12 · Nado 4
 - ⭐ **Habilidade suprema (Transformação): Tempestade Viva.** Vira um corpo de relâmpago que voa e eletrifica tudo ao redor, ativando redstone e carregando creepers.
@@ -534,6 +569,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Rajada cósmica; Escudo de energia; Puxar itens/mobs; S.T.R.I.P.E. (invoca robô aliado)
 - **Armas, ferramentas e invocações:** Bastão Cósmico; Cinturão Cósmico
 - **Utilidade no survival:** Voo acessível cedo; Robô carregador
+- **Item de transformação:** Cinturão Cósmico (Também invoca o Bastão Cósmico.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Energia Cósmica: regenera à noite com céu aberto
 - **Ficha:** Nível 2 · Vida ♥ 18 · Armadura 12 · Dano ♥ 3 · Energia 220 · Regen/s 1 · Corrida 5,6 · Voo 20 · Nado 4
 - ⭐ **Habilidade suprema (Armadura/mecha): S.T.R.I.P.E. Pilotável.** Invoca o robô S.T.R.I.P.E. em versão gigante e entra nele: armadura com canhões e voo.
@@ -545,6 +581,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** T-Esferas (drones: atacam, iluminam, escaneiam, protegem); Holograma; Hackear
 - **Armas, ferramentas e invocações:** T-Esferas; Jaqueta
 - **Utilidade no survival:** Drones que mineram/iluminam; Mapear área
+- **Item de transformação:** Jaqueta T (Libera as T-Esferas.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Bateria das T-Esferas: recarrega no laboratório (bloco)
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 12 · Dano ♥ 3 · Energia 220 · Regen/s 0 · Corrida 5,8 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Enxame de T-Esferas.** Libera uma nuvem de T-Esferas que formam muralhas, pontes, iluminação e lutam sozinhas.
@@ -556,6 +593,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Caixa-Mãe: tubo de explosão (teleporte); Discos aéreos (voo); Armadilha (prende mob)
 - **Armas, ferramentas e invocações:** Caixa-Mãe; Discos Aéreos
 - **Utilidade no survival:** Teleporte; Escapar de quedas e armadilhas
+- **Item de transformação:** Caixa-Mãe do Senhor Milagre (Inclui os Discos Aéreos.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Caixa-Mãe: recarrega com o tempo
 - **Ficha:** Nível 2 · Vida ♥ 18 · Armadura 14 · Dano ♥ 3 · Energia 220 · Regen/s 1 · Corrida 6 · Voo 18 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Discos Aéreos do Grupo.** Invoca um disco aéreo para cada aliado próximo, para todo o grupo voar junto.
@@ -567,6 +605,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Megabastão: rajada, golpe sísmico; Tubo de explosão; Investida
 - **Armas, ferramentas e invocações:** Megabastão; Armadura das Fúrias
 - **Utilidade no survival:** Demolição; Teleporte
+- **Item de transformação:** Elmo das Fúrias (Armadura das Fúrias Femininas.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Disciplina Fúria: regenera; aumenta ao lutar
 - **Ficha:** Nível 3 · Vida ♥ 28 · Armadura 20 · Dano ♥ 8 · Energia 220 · Regen/s 1 · Corrida 5,8 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Fúrias Femininas.** Invoca guerreiras de Apokolips aliadas armadas com bastões e lanças.
@@ -578,6 +617,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Crescimento: farinha de osso em área, árvores instantâneas; Vinhas que prendem; Viajar pelo Verde (teleporte entre árvores); Corpo de plantas (gera clones de folhagem)
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Agricultura acelerada; Reflorestamento; Teleporte por árvores
+- **Item de transformação:** Semente do Verde (Plantar a semente faz o corpo de plantas brotar no jogador.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** O Verde: recarrega perto de plantas; drena em desertos, Nether e fogo
 - **Ficha:** Nível 4 · Vida ♥ 36 · Armadura 18 · Dano ♥ 8 · Energia 300 · Regen/s 1,5 · Corrida 5 · Nado 6
 - ⭐ **Habilidade suprema (Estrutura/terreno): Floresta Viva.** Faz surgir uma floresta inteira ao redor, com árvores, vinhas que prendem inimigos e plantações maduras. Fica permanente.
@@ -589,6 +629,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Investigar (revela histórico de um local: quem passou, o que quebrou); Gás de pseudopele (disfarce); Golpe nos pontos fracos
 - **Armas, ferramentas e invocações:** Máscara; Gás binário
 - **Utilidade no survival:** Rastrear jogadores/mobs; Descobrir estruturas próximas
+- **Item de transformação:** Máscara sem Rosto (O gás binário cola a máscara ao rosto.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Pistas: recarrega ao investigar blocos/mobs novos
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 10 · Dano ♥ 3 · Energia 150 · Regen/s 0 · Corrida 5,8 · Nado 4
 - ⭐ **Habilidade suprema (Estrutura/terreno): Mural da Investigação.** Cria um quadro de investigação que revela por um tempo tudo da área: baús, minérios, estruturas e quem passou ali.
@@ -600,6 +641,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Rajada do Astro-Arnês; Caixa-Mãe (teleporte); Fúria de Apokolips
 - **Armas, ferramentas e invocações:** Astro-Arnês; Caixa-Mãe
 - **Utilidade no survival:** Combate pesado; Teleporte
+- **Item de transformação:** Astro-Arnês (Propulsão cósmica de Orion.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Astro-Força: regenera
 - **Ficha:** Nível 4 · Vida ♥ 34 · Armadura 20 · Dano ♥ 10 · Energia 260 · Regen/s 1 · Corrida 6 · Voo 26 · Nado 5
 - ⭐ **Habilidade suprema (Veículo): Moto Cósmica.** O Astro-Arnês vira uma moto cósmica de alta velocidade com canhões e lugar para um passageiro.
@@ -612,6 +654,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Construtos pesados (bigorna, martelo de guerra); Ordem do Sargento (buff de aliados); Rajada
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Apoio em grupo
+- **Item de transformação:** Anel de Poder (Kilowog) (Precisa ser carregado na Bateria Verde antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Vontade (Bateria)
 - **Ficha:** Nível 3 · Vida ♥ 30 · Armadura 18 · Dano ♥ 7 · Energia 300 · Regen/s 0 · Corrida 5,4 · Voo 20 · Nado 5
 - ⭐ **Habilidade suprema (Construto): Quartel da Tropa.** Projeta um campo de treino de construto com recrutas Lanternas aliados que defendem a área.
@@ -624,6 +667,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Rede da Vida: combina 2 habilidades de animais próximos; Chamar animais aliados
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Adaptação a biomas; Aliados animais
+- **Item de transformação:** Jaqueta da Rede da Vida (Conecta Buddy a todos os animais.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Espírito Animal
 - **Ficha:** Nível 2 · Vida ♥ 18 · Armadura 12 · Dano ♥ 4 · Energia 220 · Regen/s 1 · Corrida 6 · Nado 5
 - ⭐ **Habilidade suprema (Invocação): Manada Mítica.** Chama pela Rede da Vida uma manada de animais gigantes que atropela os inimigos e depois some.
@@ -635,6 +679,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Tornado (puxa mobs e itens); Rajada de vento (empurra); Chamar tempestade/limpar o clima; Escudo de vento (desvia projéteis)
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Mudar o clima; Juntar itens com tornado; Desviar flechas
+- **Item de transformação:** Núcleo Androide (Gerador de ventos do Tornado Vermelho.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Núcleo Androide: recarrega em altitude e em tempestades
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 18 · Dano ♥ 6 · Energia 260 · Regen/s 1 · Corrida 5,6 · Voo 28 · Nado 4
 - ⭐ **Habilidade suprema (Transformação): Ciclone Vivo.** Tornado Vermelho vira um ciclone colossal que voa pilotado pelo jogador: suga mobs e itens soltos (que vão direto para o inventário), apaga incêndios e pode carregar um aliado no olho do furacão.
@@ -649,6 +694,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Espada ninja; Batarangue; Gancho; Bomba de fumaça
 - **Armas, ferramentas e invocações:** Katana; Cinto de utilidades
 - **Utilidade no survival:** Kit do Batman simplificado; Combate rápido
+- **Item de transformação:** Cinto do Robin (Damian) (Inclui a espada da Liga dos Assassinos.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Recursos do Cinto
 - **Ficha:** Nível 1 · Vida ♥ 12 · Armadura 12 · Dano ♥ 3 · Energia 160 · Regen/s 0,5 · Corrida 6,2 · Nado 4 · Planar 10
 - ⭐ **Habilidade suprema (Veículo): Moto Ninja do Robin.** Invoca uma moto compacta com lâminas laterais e lançador de bombas de fumaça; dá para empinar e saltar entre telhados com o gancho integrado.
@@ -661,6 +707,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Hackear (como Ciborgue, alcance menor); Batarangue; Gancho; Câmera remota
 - **Armas, ferramentas e invocações:** Cinto de utilidades; Tablet
 - **Utilidade no survival:** Hackear redstone; Exploração
+- **Item de transformação:** Capuz da Batgirl (Com o computador do Oráculo embutido.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Recursos do Cinto
 - **Ficha:** Nível 1 · Vida ♥ 12 · Armadura 12 · Dano ♥ 2,5 · Energia 180 · Regen/s 0,5 · Corrida 6 · Nado 4 · Planar 10
 - ⭐ **Habilidade suprema (Veículo): Batgirl-Ciclo.** Invoca uma moto com computador de bordo: enquanto pilota, mostra mobs e jogadores no mapa e hackeia portas, portões e redstone num raio grande.
@@ -673,6 +720,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Telecinese tátil: levanta áreas de blocos e arremessa; Pisão sísmico; Escudo telecinético
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Mover blocos em massa (construção); Mineração em área
+- **Item de transformação:** Jaqueta de Couro de Conner (Herança kryptoniana em estilo de rua.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Energia Solar
 - **Ficha:** Nível 3 · Vida ♥ 30 · Armadura 18 · Dano ♥ 8 · Energia 250 · Regen/s 1,4 · Corrida 6,2 · Voo 26 · Nado 5
 - ⭐ **Habilidade suprema (Estrutura/terreno): Ilha Telecinética.** Arranca um disco de terreno do chão e o faz flutuar como plataforma pilotável; aliados podem subir e ser levados junto, e dá para pousá-lo como base aérea permanente.
@@ -685,6 +733,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Socos rápidos; Ler livros/itens instantaneamente (revela receitas); Tempo de bala curto
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Coleta rápida; Aprender receitas
+- **Item de transformação:** Óculos do Impulso (Velocidade do futuro.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Aceleração
 - **Ficha:** Nível 2 · Vida ♥ 18 · Armadura 10 · Dano ♥ 3,5 · Energia 200 · Regen/s 2 · Corrida 7 · Supervel. 35 · Nado 5
 - ⭐ **Habilidade suprema (Veículo): Esteira Cósmica.** Invoca a Esteira Cósmica: correr nela abre um túnel de velocidade para qualquer ponto marcado por ele ou por aliados, levando quem estiver na esteira.
@@ -697,6 +746,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Espadas de água endurecida; Choque na água (dano em área enquanto molhado); Jato de água
 - **Armas, ferramentas e invocações:** Portadores de Água
 - **Utilidade no survival:** Pesca/defesa no oceano
+- **Item de transformação:** Portadores de Água (Os cabos das espadas de água.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Hidratação
 - **Ficha:** Nível 2 · Vida ♥ 20 · Armadura 12 · Dano ♥ 4 · Energia 220 · Regen/s 2 · Corrida 5,8 · Nado 15
 - ⭐ **Habilidade suprema (Construto): Tubarão de Água Viva.** Molda um tubarão de água endurecida que serve de montaria rápida no mar e ataca mobs aquáticos; em terra vira uma onda que derruba inimigos.
@@ -709,6 +759,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Laço de Zeus (elétrico); Golpe de raio; Investida
 - **Armas, ferramentas e invocações:** Laço de Zeus
 - **Utilidade no survival:** Mesmo que Mulher-Maravilha, laço elétrico
+- **Item de transformação:** Braceletes de Cassie (Acompanham o Laço de Zeus.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Bênção dos Deuses
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 18 · Dano ♥ 7 · Energia 240 · Regen/s 1,5 · Corrida 6 · Voo 22 · Nado 5
 - ⭐ **Habilidade suprema (Invocação): Águia de Zeus.** Invoca uma águia gigante feita de raios como montaria voadora para dois jogadores; o mergulho dela cai como um relâmpago no alvo.
@@ -721,6 +772,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Flechas especiais; Troca rápida para arma de fogo/granada; Tiro em ricochete
 - **Armas, ferramentas e invocações:** Arco; Arsenal portátil
 - **Utilidade no survival:** Caça e defesa
+- **Item de transformação:** Aljava do Arsenal (Inclui o arsenal portátil.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Aljava
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 12 · Dano ♥ 3 · Energia 160 · Regen/s 0,5 · Corrida 6 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Blindado do Arsenal.** Invoca um veículo blindado com torre giratória de flechas especiais que um aliado pode operar enquanto Arsenal dirige.
@@ -733,6 +785,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Modo Detetive aprimorado; Armadilhas (prende/atordoa); Bastão; Drone
 - **Armas, ferramentas e invocações:** Bastão retrátil; Cinto
 - **Utilidade no survival:** Armadilhas para fazendas de mobs
+- **Item de transformação:** Cinto do Robin Vermelho (Cheio de armadilhas.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Recursos do Cinto
 - **Ficha:** Nível 1 · Vida ♥ 12 · Armadura 12 · Dano ♥ 2,5 · Energia 180 · Regen/s 0,5 · Corrida 6 · Nado 4 · Planar 11
 - ⭐ **Habilidade suprema (Veículo): Robin-Copter.** Invoca um helicóptero tático pilotável com holofote, gancho de carga (transporta mobs, animais ou baús) e lugar para um passageiro.
@@ -745,6 +798,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Ferrões elétricos; Enxame (invoca abelhas aliadas)
 - **Armas, ferramentas e invocações:** Traje Bumblebee
 - **Utilidade no survival:** Abelhas polinizam plantações e produzem mel
+- **Item de transformação:** Traje Bumblebee (núcleo) (Asas e ferrões elétricos.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Bateria do traje
 - **Ficha:** Nível 2 · Vida ♥ 14 · Armadura 10 · Dano ♥ 3 · Energia 180 · Regen/s 0,8 · Corrida 5,6 · Voo 14 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Colmeia Rainha.** Planta uma colmeia gigante que libera um enxame de abelhas aliadas: atacam inimigos, polinizam e fazem crescer plantações próximas e produzem mel.
@@ -757,6 +811,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Combo marcial; Contra-ataque perfeito; Batarangue
 - **Armas, ferramentas e invocações:** Cinto de utilidades
 - **Utilidade no survival:** Combate sem dano
+- **Item de transformação:** Máscara de Cassandra Cain (Máscara silenciosa da Órfã.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Foco: aumenta acertando golpes
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 12 · Dano ♥ 4 · Energia 150 · Regen/s 0 · Corrida 6,6 · Nado 4,5 · Planar 10
 - ⭐ **Habilidade suprema (Transformação): Sombra Perfeita.** Cassandra vira uma silhueta impossível de acertar: por alguns segundos desvia de tudo automaticamente e cada desvio vira um contra-ataque crítico.
@@ -771,6 +826,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Pistolas duplas; Granadas; Faca de combate; Capacete (visão tática)
 - **Armas, ferramentas e invocações:** Pistolas; Munição craftável
 - **Utilidade no survival:** Caça e defesa à distância
+- **Item de transformação:** Capacete Vermelho (Capacete com visão tática do Capuz Vermelho.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Munição
 - **Ficha:** Nível 1 · Vida ♥ 16 · Armadura 14 · Dano ♥ 3,5 · Energia 180 · Regen/s 0 · Corrida 6 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Moto do Capuz.** Invoca uma moto pesada com metralhadoras frontais e lançador de granadas; o garupa pode atirar com as próprias armas.
@@ -782,6 +838,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Chicote (puxa itens da mão de mobs/jogadores); Garras; Roubo (rouba itens de mobs, baús trancados); Gatos aliados
 - **Armas, ferramentas e invocações:** Chicote; Garras
 - **Utilidade no survival:** Afastar creepers; Saquear estruturas; Domar gatos
+- **Item de transformação:** Óculos da Mulher-Gato (Os gatos reconhecem quem os usa.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Agilidade: regenera
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 10 · Dano ♥ 3 · Energia 160 · Regen/s 1,5 · Corrida 6,6 · Nado 4,5
 - ⭐ **Habilidade suprema (Invocação): Exército de Gatos.** Invoca dezenas de gatos de rua que roubam itens dos mobs, espantam creepers e phantoms e trazem o saque para Selina.
@@ -793,6 +850,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Gancho com corrente; Invocar a Moto Espacial; Fúria (berserker)
 - **Armas, ferramentas e invocações:** Gancho; Moto Espacial
 - **Utilidade no survival:** Explorar sem medo de morrer; Veículo
+- **Item de transformação:** Gancho de Czarnia (Também invoca a Moto Espacial (suprema).) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Fúria: aumenta lutando, cai fora de combate
 - **Ficha:** Nível 4 · Vida ♥ 38 · Armadura 20 · Dano ♥ 10 · Energia 200 · Regen/s 0 · Corrida 6 · Nado 5
 - ⭐ **Habilidade suprema (Veículo): Moto Espacial Suprema.** Invoca a moto espacial de Lobo, que voa, atravessa o vácuo do End sem cair e tem canhões e um arpão com corrente para arrastar mobs.
@@ -805,6 +863,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Relâmpago destrutivo; Soco trovejante; Pisão divino; Domínio (mobs fracos fogem)
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Como Shazam, mais agressivo
+- **Item de transformação:** Amuleto de Kahndaq (Dizer a palavra chama o raio.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Magia de Shazam
 - **Ficha:** Nível 4 · Vida ♥ 36 · Armadura 20 · Dano ♥ 11 · Energia 250 · Regen/s 0,8 · Corrida 6,5 · Voo 28 · Nado 5
 - ⭐ **Habilidade suprema (Transformação): Deus de Kahndaq.** Adão Negro cresce e vira um colosso de relâmpagos: voa, cada pisão vira trovão e mobs fracos fogem só de vê-lo.
@@ -816,6 +875,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Rituais em círculo (prepara no chão e ativa); Exorcismo (dano enorme em mortos-vivos); Invocação de demônio aliado (com custo de vida); Ilusão
 - **Armas, ferramentas e invocações:** Isqueiro; Grimório
 - **Utilidade no survival:** Rituais de utilidade: clima, dia/noite, proteção da base
+- **Item de transformação:** Isqueiro de Constantine (O sobretudo vem junto.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Sorte: rituais custam materiais e às vezes vida
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 8 · Dano ♥ 2 · Energia 300 · Regen/s 0 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Demônio do Pacto.** Desenha um círculo e invoca um demônio gigante aliado por um tempo; custa parte da vida máxima de Constantine até ele descansar.
@@ -827,6 +887,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Sopro infernal; Garras; Rimas de poder
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Explorar o Nether livremente
+- **Item de transformação:** Grimório de Rimas (Ler a rima invoca Etrigan.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Fogo infernal: recarrega no Nether ou perto de fogo/lava
 - **Ficha:** Nível 3 · Vida ♥ 30 · Armadura 16 · Dano ♥ 8 · Energia 260 · Regen/s 1 · Corrida 5,6 · Nado 3
 - ⭐ **Habilidade suprema (Transformação): Etrigan Colossal.** Vira uma fera infernal gigante que anda sobre lava, cospe fogo infernal e deixa um rastro de chamas que não queima aliados.
@@ -838,6 +899,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Julgamento (transforma mob hostil em algo inofensivo); Crescer até tamanho gigante; Punição
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Fim de jogo: limpar áreas hostis
+- **Item de transformação:** Capuz do Espectro (A ira divina procura um hospedeiro.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Ira divina: só recarrega derrotando mobs hostis
 - **Ficha:** Nível 4 · Vida ♥ 40 · Armadura 24 · Dano ♥ 10 · Energia 300 · Regen/s 0 · Corrida 5,6 · Voo 26 · Nado 5
 - ⭐ **Habilidade suprema (Transformação): Espectro Colossal.** Cresce até tamanho gigantesco, fica intangível e pode pegar mobs hostis com a mão e julgá-los (viram cinzas ou criaturas inofensivas).
@@ -849,6 +911,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Marreta gigante (golpe que lança); Pistola de rolha; Bomba de confete; Hienas aliadas
 - **Armas, ferramentas e invocações:** Marreta; Taco
 - **Utilidade no survival:** Hienas como pets; Diversão
+- **Item de transformação:** Fantasia da Arlequina (Vem com a marreta.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Caos: aleatório, enche ao acertar
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 10 · Dano ♥ 3,5 · Energia 180 · Regen/s 1 · Corrida 6,4 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Carro da Arlequina.** Invoca um carro de palhaço armado com canhão de confete, buzina que atordoa e porta-malas de onde saem as hienas.
@@ -860,6 +923,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Tiro de precisão; Pulso de armas do punho; Tiro em ricochete
 - **Armas, ferramentas e invocações:** Rifle; Pistolas de pulso; Monóculo
 - **Utilidade no survival:** Caça a longa distância
+- **Item de transformação:** Monóculo de Mira (Mira assistida do Pistoleiro.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Munição
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 14 · Dano ♥ 3 · Energia 200 · Regen/s 0 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Armadura/mecha): Traje de Atirador Supremo.** Veste um traje com braço-canhão e monóculo avançado que trava a mira em todos os alvos à vista; cada disparo acerta o próximo da fila.
@@ -871,6 +935,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Capacete com raio; Granadas; Bomba de fumaça; Águia aliada
 - **Armas, ferramentas e invocações:** Capacete; Armas
 - **Utilidade no survival:** Águia como pet de reconhecimento
+- **Item de transformação:** Capacete do Pacificador (Cheio de funções escondidas.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Munição
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 14 · Dano ♥ 3 · Energia 200 · Regen/s 0 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Jato do Pacificador.** Invoca um jato bombardeiro pilotável com espaço para um artilheiro; o capacete do Pacificador controla o bombardeio.
@@ -883,6 +948,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Mordida (cura ao causar dano); Frenesi; Investida aquática
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Caça no oceano
+- **Item de transformação:** Dente do Tubarão-Rei (Desperta o predador.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Hidratação
 - **Ficha:** Nível 3 · Vida ♥ 30 · Armadura 16 · Dano ♥ 8 · Energia 220 · Regen/s 2 · Corrida 5,6 · Nado 17
 - ⭐ **Habilidade suprema (Transformação): Megalodonte.** Nanaue vira um tubarão pré-histórico gigante: engole mobs aquáticos, arrasta barcos e pode levar aliados agarrados nas barbatanas.
@@ -894,6 +960,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Soultaker: golpes que prendem a alma (mob morto vira espírito aliado temporário); Corte rápido; Investida
 - **Armas, ferramentas e invocações:** Espada Soultaker
 - **Utilidade no survival:** Espíritos aliados ajudam a lutar
+- **Item de transformação:** Bainha da Soultaker (A espada vem na bainha.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Almas: recarrega abatendo mobs
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 12 · Dano ♥ 4 · Energia 200 · Regen/s 0 · Corrida 6,2 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Exército de Almas.** A Soultaker libera todas as almas guardadas como uma tropa de samurais espectrais que luta enquanto houver almas armazenadas.
@@ -905,6 +972,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Espada flamejante; Investida sagrada; Escudo de fé
 - **Armas, ferramentas e invocações:** Espada da Misericórdia; Armadura de São Dumas
 - **Utilidade no survival:** Combate pesado
+- **Item de transformação:** Insígnia de São Dumas (A Ordem de São Dumas convoca seu cavaleiro.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Fé: regenera
 - **Ficha:** Nível 2 · Vida ♥ 20 · Armadura 18 · Dano ♥ 5 · Energia 200 · Regen/s 1 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Armadura/mecha): Armadura de São Dumas.** Veste a armadura sagrada completa com asas de fogo para planar e a Espada da Misericórdia flamejante gigante.
@@ -917,6 +985,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Vômito de plasma (área); Construtos de fúria; Dex-Starr (gato aliado)
 - **Armas, ferramentas e invocações:** Anel Vermelho; Bateria Vermelha
 - **Utilidade no survival:** Dano em área
+- **Item de transformação:** Anel Vermelho (Precisa ser carregado na Bateria Vermelha antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Fúria: só recarrega em combate e na Bateria Vermelha
 - **Ficha:** Nível 3 · Vida ♥ 28 · Armadura 18 · Dano ♥ 7 · Energia 300 · Regen/s 0 · Corrida 5,6 · Voo 22 · Nado 5
 - ⭐ **Habilidade suprema (Invocação): Dragão de Fúria.** Vomita plasma que forma um dragão vermelho vivo que voa pela área queimando inimigos; Atrocitus pode montá-lo.
@@ -928,6 +997,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Revólveres duplos; Dinamite; Rastreamento de recompensa
 - **Armas, ferramentas e invocações:** Revólveres; Cavalo
 - **Utilidade no survival:** Cavalos melhores; Caçar alvos
+- **Item de transformação:** Chapéu de Caçador de Recompensas (O cavalo vem junto.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Munição
 - **Ficha:** Nível 1 · Vida ♥ 16 · Armadura 12 · Dano ♥ 3 · Energia 180 · Regen/s 0 · Corrida 5,8 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Cavalo Fantasma.** Invoca um cavalo negro espectral imune a dano, muito rápido e capaz de correr sobre a água, com alforjes extras de inventário.
@@ -941,6 +1011,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Gás do riso (efeito aleatório negativo nos inimigos); Flor de ácido; Bomba de brinquedo (armadilha); Campainha de choque; Pistola BANG
 - **Armas, ferramentas e invocações:** Cartas afiadas; Bengala
 - **Utilidade no survival:** Armadilhas; Fazendas de mobs
+- **Item de transformação:** Carta Coringa (Rir ao usar é obrigatório.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Caos: aleatório; enche quando efeitos aleatórios disparam
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 8 · Dano ♥ 2,5 · Energia 250 · Regen/s 1 · Corrida 5,8 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Carro do Coringa.** Invoca o carro roxo do Coringa com canhão de gás do riso e armadilhas que caem do porta-malas; o garupa joga as bombas.
@@ -952,6 +1023,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Raio laser; Raio de kriptonita; Mísseis; Escaneamento
 - **Armas, ferramentas e invocações:** Armadura de Guerra; LexCorp (bloco de pesquisa)
 - **Utilidade no survival:** Pesquisa tecnológica e economia (vende itens)
+- **Item de transformação:** Núcleo da Armadura de Guerra (Tecnologia LexCorp com kryptonita.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Bateria da armadura: recarga em estação LexCorp
 - **Ficha:** Nível 2 · Vida ♥ 20 · Armadura 20 · Dano ♥ 5 · Energia 280 · Regen/s 0 · Corrida 5,4 · Voo 22 · Nado 4
 - ⭐ **Habilidade suprema (Armadura/mecha): Armadura de Guerra Suprema.** Lex veste a armadura de guerra gigante: mísseis teleguiados, raio de kriptonita, voo pesado e escudo que um aliado pode compartilhar.
@@ -963,6 +1035,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Raios Ômega (perseguem o alvo); Tubo de explosão; Parademônios aliados; Equação Anti-Vida (controla mobs)
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Exército de Parademônios
+- **Item de transformação:** Pedra de Apokolips (O trono de Darkseid em miniatura.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Poder de Apokolips: regenera lentamente
 - **Ficha:** Nível 4 · Vida ♥ 40 · Armadura 24 · Dano ♥ 12 · Energia 300 · Regen/s 0,6 · Corrida 5 · Nado 4
 - ⭐ **Habilidade suprema (Transformação): Darkseid Ascendente.** Darkseid cresce em tamanho e poder, os Raios Ômega viram contínuos e perseguidores, e Parademônios surgem ao seu redor.
@@ -975,6 +1048,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Construtos de medo (mobs fogem); Rajada; Construtos cruéis
 - **Armas, ferramentas e invocações:** Anel Amarelo; Bateria Amarela
 - **Utilidade no survival:** Afastar mobs
+- **Item de transformação:** Anel Amarelo (Precisa ser carregado na Bateria Amarela antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Medo: recarrega na Bateria Amarela e assustando mobs
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 16 · Dano ♥ 6 · Energia 300 · Regen/s 0 · Corrida 5,6 · Voo 24 · Nado 5
 - ⭐ **Habilidade suprema (Construto): Monstro do Medo.** Cria um construto amarelo gigante e aterrorizante (uma fera de garras) que luta por ele e faz mobs fugirem em pânico.
@@ -987,6 +1061,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Mão vibrante (atravessa defesa); Tempo de bala; Tornado
 - **Armas, ferramentas e invocações:** Anel
 - **Utilidade no survival:** Velocidade
+- **Item de transformação:** Anel do Flash Reverso (Força de Aceleração Negativa.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Aceleração Negativa
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 12 · Dano ♥ 5 · Energia 260 · Regen/s 2 · Corrida 7 · Supervel. 45 · Nado 6
 - ⭐ **Habilidade suprema (Transformação): Avatar da Força Negativa.** Thawne vira relâmpago vermelho puro: corre através de blocos e deixa um rastro que desacelera mobs. Outros jogadores não são afetados pelo tempo.
@@ -999,6 +1074,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Distorção temporal (desacelera tudo menos ele); Estrondo sônico
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Velocidade
+- **Item de transformação:** Núcleo de Zoom (Distorce o tempo pessoal.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Força de Aceleração
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 12 · Dano ♥ 5 · Energia 240 · Regen/s 2 · Corrida 7 · Supervel. 42 · Nado 6
 - ⭐ **Habilidade suprema (Transformação): Sombra Veloz.** Zoom vira uma silhueta azul distorcida que se move num tempo próprio; ataques dele chegam em vários impactos ao mesmo tempo.
@@ -1010,6 +1086,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Espada; Rifle; Granadas; Previsão tática (destaca o próximo ataque inimigo)
 - **Armas, ferramentas e invocações:** Espada; Bastão; Rifle
 - **Utilidade no survival:** Combate versátil
+- **Item de transformação:** Máscara do Exterminador (Armadura de prométio sob medida.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Munição + regeneração
 - **Ficha:** Nível 2 · Vida ♥ 20 · Armadura 16 · Dano ♥ 5 · Energia 200 · Regen/s 1 · Corrida 6,2 · Nado 4,5
 - ⭐ **Habilidade suprema (Armadura/mecha): Armadura de Exterminador.** Veste a armadura tática completa com espada, rifle e mochila a jato para saltos longos e mira tática em todos os alvos.
@@ -1021,6 +1098,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Injeção de Veneno (cresce e ganha força); Quebrar costas (agarrão); Investida
 - **Armas, ferramentas e invocações:** Tanques de Veneno
 - **Utilidade no survival:** Força para mineração
+- **Item de transformação:** Tanque de Veneno (Bombeia Veneno direto no corpo.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Veneno: recarrega com frascos craftados
 - **Ficha:** Nível 2 · Vida ♥ 24 · Armadura 14 · Dano ♥ 6 · Energia 200 · Regen/s 0 · Corrida 5,8 · Nado 4
 - ⭐ **Habilidade suprema (Transformação): Bane Titã.** Overdose de Veneno: vira um gigante de músculos que esmaga blocos, arremessa mobs e carrega rochas como armas.
@@ -1032,6 +1110,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Bengala elétrica; Armadilha de enigma (prende até resolver); Troféus de charada (marcadores); Hackear
 - **Armas, ferramentas e invocações:** Bengala
 - **Utilidade no survival:** Redstone e puzzles
+- **Item de transformação:** Bengala Interrogação (Cada uso começa com um enigma.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Intelecto: regenera
 - **Ficha:** Nível 1 · Vida ♥ 12 · Armadura 10 · Dano ♥ 2 · Energia 200 · Regen/s 1 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Estrutura/terreno): Labirinto do Charada.** Ergue um labirinto verde com interrogações ao redor dos inimigos; mobs lá dentro ficam presos até achar a saída. Pode virar estrutura permanente.
@@ -1043,6 +1122,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Guarda-chuva-arma (tiro, gás, paraquedas); Pinguins aliados; Capangas
 - **Armas, ferramentas e invocações:** Guarda-chuvas
 - **Utilidade no survival:** Comércio; Paraquedas
+- **Item de transformação:** Monóculo do Pinguim (Acompanha o primeiro guarda-chuva.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Riqueza: esmeraldas recarregam
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 10 · Dano ♥ 2 · Energia 200 · Regen/s 0 · Corrida 5 · Nado 6 · Planar 8
 - ⭐ **Habilidade suprema (Veículo): Pato de Guerra.** Invoca o pato gigante do Pinguim, anfíbio, armado com canhões de guarda-chuva e espaço para passageiros.
@@ -1054,6 +1134,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Jogar a moeda: buff forte ou efeito ruim; Pistolas duplas; Capangas
 - **Armas, ferramentas e invocações:** Moeda; Pistolas
 - **Utilidade no survival:** Aposta
+- **Item de transformação:** Moeda de Duas Caras (Joga a moeda ao transformar: o lado decide um bônus inicial.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Moeda: recarga aleatória
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 12 · Dano ♥ 3 · Energia 200 · Regen/s 0 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Gangue das Duas Faces.** Invoca capangas aliados; a moeda decide se vêm armados (cara) ou se chegam em dobro (coroa).
@@ -1065,6 +1146,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Toxina do medo (alucinação: mobs fogem ou atacam uns aos outros); Foice; Corvos aliados
 - **Armas, ferramentas e invocações:** Foice; Máscara
 - **Utilidade no survival:** Fazendas: assustar mobs para onde quiser
+- **Item de transformação:** Máscara de Estopa (O medo como disfarce.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Toxina: frascos craftados
 - **Ficha:** Nível 1 · Vida ♥ 12 · Armadura 10 · Dano ♥ 2,5 · Energia 200 · Regen/s 0 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Campo de Espantalhos.** Planta espantalhos ao redor que espalham toxina do medo e mantêm mobs longe da área (ótimo para proteger plantações).
@@ -1077,6 +1159,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Vinhas; Planta carnívora (invoca); Feromônios (mobs ficam aliados); Crescimento
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Agricultura acelerada
+- **Item de transformação:** Flor da Hera (Toxinas e feromônios em uma flor.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** O Verde
 - **Ficha:** Nível 3 · Vida ♥ 22 · Armadura 12 · Dano ♥ 4 · Energia 280 · Regen/s 1,5 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Estrutura/terreno): Jardim Carnívoro.** Faz brotar um jardim de plantas carnívoras gigantes que devoram inimigos, protegem a área e fazem a plantação crescer.
@@ -1088,6 +1171,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Raio congelante (cria gelo); Granada de gelo; Prisão de gelo
 - **Armas, ferramentas e invocações:** Arma criogênica; Traje
 - **Utilidade no survival:** Criar gelo/estradas de gelo
+- **Item de transformação:** Núcleo Criogênico (Mantém o traje em temperatura abaixo de zero.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Refrigeração: drena no calor (deserto/Nether)
 - **Ficha:** Nível 2 · Vida ♥ 22 · Armadura 20 · Dano ♥ 4 · Energia 220 · Regen/s 1 · Corrida 4,8 · Nado 3
 - ⭐ **Habilidade suprema (Armadura/mecha): Traje Criogênico Titã.** Veste um traje criogênico gigante: anda devagar mas congela o chão, cria pontes de gelo e prende mobs em blocos de gelo.
@@ -1099,6 +1183,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Mordida; Arremesso; Emboscada na água
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Pântanos e água
+- **Item de transformação:** Dente de Crocodilo (A pele vira escama.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Hidratação
 - **Ficha:** Nível 3 · Vida ♥ 30 · Armadura 18 · Dano ♥ 7 · Energia 200 · Regen/s 1,5 · Corrida 5,6 · Nado 14
 - ⭐ **Habilidade suprema (Transformação): Crocodilo Ancestral.** Vira um crocodilo gigante anfíbio: arrasta mobs para a água e pode carregar aliados nas costas pelo pântano.
@@ -1110,6 +1195,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Disfarce (copia jogador/mob); Braço martelo; Engolir mob
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Disfarce
+- **Item de transformação:** Argila Viva (Massa que obedece à vontade.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Massa: argila e lama recarregam
 - **Ficha:** Nível 3 · Vida ♥ 30 · Armadura 10 · Dano ♥ 6 · Energia 240 · Regen/s 1 · Corrida 5,4 · Nado 4
 - ⭐ **Habilidade suprema (Transformação): Colosso de Barro.** Vira um monstro de barro gigante que absorve blocos de terra/argila para crescer e engole mobs.
@@ -1121,6 +1207,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Espada; Ninjas da Liga aliados; Poço de Lázaro (bloco que revive/cura)
 - **Armas, ferramentas e invocações:** Espada; Poço de Lázaro
 - **Utilidade no survival:** Cura total no poço
+- **Item de transformação:** Frasco de Lázaro (O líder da Liga dos Assassinos renasce.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Lázaro: recarrega no Poço
 - **Ficha:** Nível 1 · Vida ♥ 16 · Armadura 14 · Dano ♥ 4 · Energia 200 · Regen/s 0 · Corrida 6 · Nado 4
 - ⭐ **Habilidade suprema (Estrutura/terreno): Poço de Lázaro.** Ergue um Poço de Lázaro permanente: quem entra é curado por completo e um aliado morto pode ser revivido ali uma vez por dia.
@@ -1133,6 +1220,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Visão de calor; Pisão; Combate militar
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Igual Superman
+- **Item de transformação:** Cristal do General Zod (Insígnia militar kryptoniana.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Energia Solar
 - **Ficha:** Nível 4 · Vida ♥ 36 · Armadura 20 · Dano ♥ 11 · Energia 280 · Regen/s 1,5 · Corrida 6,5 · Voo 30 · Nado 6
 - ⭐ **Habilidade suprema (Armadura/mecha): Armadura de Batalha Kryptoniana.** Veste a armadura de guerra de Krypton com canhão de energia e escudo; protege contra kriptonita enquanto durar.
@@ -1144,6 +1232,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Encolher e engarrafar estrutura; Drones; Raio
 - **Armas, ferramentas e invocações:** Nave
 - **Utilidade no survival:** Coletar estruturas (miniaturas)
+- **Item de transformação:** Crânio de Coluan (Interface com a nave de Brainiac.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Conhecimento: recarrega escaneando
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 20 · Dano ♥ 5 · Energia 300 · Regen/s 1 · Corrida 5,4 · Voo 18 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Nave Crânio.** Invoca a nave-crânio de Brainiac: pilotável, com raio trator que encolhe estruturas e garrafas onde guardá-las.
@@ -1155,6 +1244,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Investida; Pisão; Ossos espinhos
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Fim de jogo
+- **Item de transformação:** Osso de Apocalypse (Evolução que nasce da morte.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Fúria
 - **Ficha:** Nível 4 · Vida ♥ 40 · Armadura 24 · Dano ♥ 12 · Energia 200 · Regen/s 0 · Corrida 6 · Nado 4
 - ⭐ **Habilidade suprema (Transformação): Apocalypse Evoluído.** Vira uma forma ainda maior coberta de ossos-espinhos: fica imune ao último tipo de dano sofrido e cada golpe abre crateras.
@@ -1167,6 +1257,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Visão congelante; Sopro de fogo
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Igual Superman, invertido
+- **Item de transformação:** Cristal Bizarro (Cristal imperfeito de um mundo quadrado.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Energia Solar Azul
 - **Ficha:** Nível 4 · Vida ♥ 36 · Armadura 20 · Dano ♥ 11 · Energia 250 · Regen/s 1,5 · Corrida 6,3 · Voo 28 · Nado 5
 - ⭐ **Habilidade suprema (Estrutura/terreno): Mundo Bizarro.** Ergue um mini mundo bizarro quadrado ao redor: gravidade invertida para mobs (caem para cima) e blocos trocados de lugar.
@@ -1179,6 +1270,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Raios do capacete; Lâminas; Torpedos
 - **Armas, ferramentas e invocações:** Capacete
 - **Utilidade no survival:** Oceano
+- **Item de transformação:** Capacete da Arraia Negra (Os olhos disparam raios.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Bateria do traje
 - **Ficha:** Nível 2 · Vida ♥ 20 · Armadura 16 · Dano ♥ 4 · Energia 220 · Regen/s 0 · Corrida 5,6 · Nado 14
 - ⭐ **Habilidade suprema (Veículo): Submarino Manta.** Invoca o submarino em forma de arraia pilotável, com torpedos, raio do capacete e espaço para aliados.
@@ -1190,6 +1282,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Garras; Investida; Caça (marca presa)
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Caça
+- **Item de transformação:** Amuleto de Urzkartaga (A maldição da deusa felina.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Fome de caça
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 12 · Dano ♥ 6 · Energia 220 · Regen/s 1,5 · Corrida 7,5 · Supervel. 14 · Nado 5
 - ⭐ **Habilidade suprema (Transformação): Grande Felina.** Vira uma leoparda gigante: velocidade extrema, saltos longos e um rugido que marca todos os mobs da área como presa.
@@ -1201,6 +1294,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Controle mental de mobs; Gorilas aliados; Rajada psíquica
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Mobs como trabalhadores
+- **Item de transformação:** Coroa Psíquica (Amplifica a telepatia de Grodd.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Psiquismo
 - **Ficha:** Nível 3 · Vida ♥ 30 · Armadura 16 · Dano ♥ 8 · Energia 280 · Regen/s 1 · Corrida 6,2 · Nado 4
 - ⭐ **Habilidade suprema (Invocação): Exército de Gorila City.** Invoca gorilas guerreiros aliados com armaduras e controla mentalmente mobs fracos para lutarem junto.
@@ -1213,6 +1307,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Pistola de frio; Parede de gelo
 - **Armas, ferramentas e invocações:** Pistola de frio
 - **Utilidade no survival:** Gelo
+- **Item de transformação:** Núcleo da Pistola de Frio (A pistola vem junto.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Refrigeração
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 12 · Dano ♥ 2,5 · Energia 200 · Regen/s 0 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Estrutura/terreno): Rinque de Gelo.** Congela uma grande área: água vira gelo, chão vira pista escorregadia onde Snart patina rápido e mobs escorregam.
@@ -1225,6 +1320,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Tridente; Magia aquática; Monstros marinhos aliados
 - **Armas, ferramentas e invocações:** Tridente
 - **Utilidade no survival:** Oceano
+- **Item de transformação:** Insígnia de Orm (O rival ao trono de Atlântida.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Hidratação
 - **Ficha:** Nível 3 · Vida ♥ 28 · Armadura 16 · Dano ♥ 6 · Energia 240 · Regen/s 2 · Corrida 5,8 · Nado 17
 - ⭐ **Habilidade suprema (Invocação): Tropa Atlante.** Invoca guerreiros atlantes montados em cavalos-marinhos que lutam na água e em terra.
@@ -1237,6 +1333,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Rajada de gelo; Construtos de gelo; Roubar calor (drena vida)
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Gelo
+- **Item de transformação:** Coração de Gelo (Rouba o calor de quem toca.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Calor roubado
 - **Ficha:** Nível 3 · Vida ♥ 22 · Armadura 12 · Dano ♥ 5 · Energia 260 · Regen/s 1 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Estrutura/terreno): Palácio de Gelo.** Ergue um palácio de gelo permanente que drena calor dos inimigos e cura Nevasca e aliados dentro dele.
@@ -1249,6 +1346,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Reanimar (mob morto vira zumbi aliado); Drenar vida; Construtos negros
 - **Armas, ferramentas e invocações:** Anel Negro
 - **Utilidade no survival:** Exército de mortos-vivos
+- **Item de transformação:** Anel Negro (Precisa ser carregado na Bateria Negra antes do primeiro uso.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Morte: recarrega quando mobs morrem perto
 - **Ficha:** Nível 3 · Vida ♥ 24 · Armadura 16 · Dano ♥ 5 · Energia 300 · Regen/s 0 · Corrida 5,6 · Voo 22 · Nado 5
 - ⭐ **Habilidade suprema (Invocação): Tropa dos Lanternas Negros.** Reanima os mobs mortos na área como Lanternas Negros aliados, que lutam até a energia acabar.
@@ -1260,6 +1358,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Machado de energia; Parademônios aliados; Tubo de explosão
 - **Armas, ferramentas e invocações:** Machado
 - **Utilidade no survival:** Derrubar árvores e mineração
+- **Item de transformação:** Elmo do Lobo da Estepe (O machado vem junto.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Apokolips
 - **Ficha:** Nível 4 · Vida ♥ 34 · Armadura 22 · Dano ♥ 10 · Energia 240 · Regen/s 1 · Corrida 5,8 · Nado 4
 - ⭐ **Habilidade suprema (Veículo): Nave de Guerra de Apokolips.** Invoca uma nave de guerra pilotável que solta Parademônios e dispara raios no chão.
@@ -1271,6 +1370,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Poderes e combate (menu radial):** Drenar energia (rouba energia de outros transformados); Copiar habilidade passiva por tempo
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** PvP
+- **Item de transformação:** Frasco de Absorção (Absorve energia de outros transformados.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Absorção: só recarrega drenando
 - **Ficha:** Nível 3 · Vida ♥ 26 · Armadura 12 · Dano ♥ 5 · Energia 200 · Regen/s 0 · Corrida 5,6 · Nado 4
 - ⭐ **Habilidade suprema (Transformação): Forma Absorvida.** Parasita cresce e copia a habilidade suprema de outro transformado próximo (que só perde energia, nunca a habilidade).

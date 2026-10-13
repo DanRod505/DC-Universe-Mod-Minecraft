@@ -73,6 +73,15 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
 .sistema > p { margin: 0 0 12px; max-width: 78ch; color: var(--muted); }
 .arma h3 { font: 700 21px/1.1 var(--display); margin: 0; }
 .arma ul { margin: 0; padding-left: 18px; }
+.receita { display: grid; grid-template-columns: repeat(3, minmax(0, 76px)); gap: 3px; margin-block: 6px; }
+.receita span { aspect-ratio: 1; max-width: 100%; display: grid; place-items: center; text-align: center; font-size: 10.5px; line-height: 1.15; padding: 3px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); overflow-wrap: anywhere; }
+.receita span.n { border-color: var(--gold); font-weight: 600; }
+.receita span:empty { opacity: .45; }
+.receita-legenda { font-size: 13px; color: var(--muted); margin: 0; }
+.transf { display: grid; gap: 2px; font-size: 15px; }
+.transf b { font-weight: 600; }
+.cat-itens h2 { font: 700 28px/1.15 var(--display); margin: 28px 0 12px; }
+.chips-usado { font-size: 13px; color: var(--muted); margin: 0; }
 .donos { font-size: 14px; color: var(--muted); margin: 0; }
 .md h1 { font-size: 40px; margin-block: 8px 12px; }
 .md h2 { font: 700 28px/1.15 var(--display); margin-block: 32px 8px; padding-top: 8px; border-top: 1px solid var(--line); }
@@ -98,6 +107,7 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
     <button role="tab" id="tab-personagens" aria-selected="true" data-aba="personagens">Personagens</button>
     <button role="tab" id="tab-fichas" aria-selected="false" data-aba="fichas">Fichas</button>
     <button role="tab" id="tab-armas" aria-selected="false" data-aba="armas">Armas</button>
+    <button role="tab" id="tab-itens" aria-selected="false" data-aba="itens">Itens</button>
     <button role="tab" id="tab-planejamento" aria-selected="false" data-aba="planejamento">Planejamento</button>
   </nav>
 
@@ -122,6 +132,13 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
     <div id="armas"></div>
   </section>
 
+  <section id="aba-itens" hidden>
+    <div class="tools">
+      <input id="busca-itens" type="search" placeholder="Buscar item, ingrediente ou uso" aria-label="Buscar itens">
+    </div>
+    <div id="itens"></div>
+  </section>
+
   <section id="aba-planejamento" hidden>
     <article class="md" id="plano"></article>
   </section>
@@ -133,6 +150,7 @@ const PERSONAGENS = /*__PERSONAGENS__*/[];
 const PLANO = /*__PLANO__*/"";
 const BALANC = /*__BALANC__*/"";
 const ARMAS = /*__ARMAS__*/{};
+const ITENS = /*__ITENS__*/{};
 const FICHA_COLS = [["nivel", "Nível"], ["vida", "Vida ♥"], ["armadura", "Armadura"], ["dano", "Dano ♥"], ["energia", "Energia"],
   ["regen", "Regen/s"], ["terra", "Corrida"], ["vmax", "Supervel."], ["voo", "Voo"], ["nado", "Nado"], ["planar", "Planar"]];
 const num = v => v == null ? "–" : String(v).replace(".", ",");
@@ -168,6 +186,17 @@ function stats(f) {
   return itens.filter(([, v]) => v != null).map(([r, v]) => `<span>${r} <b>${num(v)}</b></span>`).join("");
 }
 
+function receitaHtml(r) {
+  if (r.tipo === "shaped") {
+    const g = r.grade.map(l => [...l, ...Array(3 - l.length).fill(null)]);
+    while (g.length < 3) g.push([null, null, null]);
+    const qtd = r.qtd > 1 ? `<p class="receita-legenda">Rende ${r.qtd}</p>` : "";
+    return `<div class="receita">${g.flat().map(c => `<span class="${c && c.startsWith("Núcleo Meta") ? "n" : ""}">${c ? esc(c) : ""}</span>`).join("")}</div>${qtd}`;
+  }
+  if (r.tipo === "shapeless") return `<p class="receita-legenda">Sem forma: ${r.ingredientes.map(esc).join(", ")}${r.qtd > 1 ? ` (rende ${r.qtd})` : ""}</p>`;
+  return `<p class="receita-legenda">Fornalha: ${esc(r.entrada)}</p>`;
+}
+
 function ficha(p) {
   const reusa = p.reusa_n ? `<p class="reusa">Reaproveita sistemas de <b>${esc(porN[p.reusa_n].nome)}</b></p>` : "";
   const dl = CAMPOS.map(([k, r]) => `<div><dt>${r}</dt><dd><ul>${p[k].map(i => `<li>${esc(i)}</li>`).join("")}</ul></dd></div>`).join("");
@@ -177,7 +206,8 @@ function ficha(p) {
     <p class="exp">${esc(p.exp)}</p>${reusa}
     <div class="stats">${stats(p.ficha)}</div>
     <div class="supremo"><span class="sup-rot">Habilidade suprema · ${TIPOS_SUP[p.supremo.tipo]}</span><strong>${esc(p.supremo.nome)}</strong><span>${esc(p.supremo.desc)}</span></div>
-    <details${abertas ? " open" : ""}><summary>Habilidades</summary><dl>${dl}
+    <details${abertas ? " open" : ""}><summary>Habilidades e transformação</summary><dl>
+      <div><dt>Item de transformação</dt><dd class="transf"><b>${esc(p.transformacao.nome)}</b><span>${esc(p.transformacao.desc)}</span>${receitaHtml(p.transformacao.receita)}</dd></div>${dl}
       <div class="energia"><dt>Energia</dt><dd>${esc(p.energia)}</dd></div></dl></details>
   </article>`;
 }
@@ -243,7 +273,27 @@ function armas() {
   }).join("");
 }
 
-const ABAS = ["personagens", "fichas", "armas", "planejamento"];
+function itens() {
+  const q = document.getElementById("busca-itens").value.trim().toLowerCase();
+  const est = `<section class="cat-itens"><h2>Estruturas do mundo</h2><div class="grid">${ITENS.estruturas.map(e =>
+    `<article class="card" style="--c:var(--gold)"><h3>${esc(e.nome)}</h3><p class="donos">${esc(e.onde)}</p><p class="reusa">${esc(e.conteudo)}</p></article>`).join("")}</div></section>`;
+  const cats = Object.entries(ITENS.categorias).map(([k, titulo]) => {
+    const lista = ITENS.itens.filter(i => i.cat === k && (!q || JSON.stringify(i).toLowerCase().includes(q)));
+    if (!lista.length) return "";
+    return `<section class="cat-itens"><h2>${esc(titulo)}</h2><div class="grid">${lista.map(i => `
+      <article class="card" style="--c:var(--accent)">
+        <h3>${esc(i.nome)}</h3>
+        <p class="exp" style="font-style:normal">${esc(i.uso)}</p>
+        ${i.obtencao ? `<p class="reusa"><b>Obtenção:</b> ${esc(i.obtencao)}</p>` : ""}
+        ${i.receitas.map(r => (i.receitas.length > 1 ? `<p class="reusa"><b>${esc(r.nome)}</b></p>` : "") + receitaHtml(r)).join("")}
+        ${i.usado_em.length ? `<details><summary>Usado em ${i.usado_em.length} receita${i.usado_em.length > 1 ? "s" : ""}</summary><p class="chips-usado">${i.usado_em.map(esc).join(", ")}</p></details>` : ""}
+      </article>`).join("")}</div></section>`;
+  }).join("");
+  document.getElementById("itens").innerHTML = (q ? "" : est) + (cats || `<p class="empty">Nenhum item encontrado.</p>`);
+}
+document.getElementById("busca-itens").addEventListener("input", itens);
+
+const ABAS = ["personagens", "fichas", "armas", "itens", "planejamento"];
 function aba(nome) {
   document.querySelectorAll("[role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
   ABAS.forEach(a => document.getElementById("aba-" + a).hidden = a !== nome);
@@ -257,6 +307,7 @@ document.querySelector("nav").addEventListener("click", e => {
 render();
 tabelaFichas();
 armas();
+itens();
 const inicial = location.hash.slice(1);
 if (ABAS.includes(inicial)) aba(inicial);
 </script>
