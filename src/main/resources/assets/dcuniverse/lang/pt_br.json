@@ -1,3 +1,27 @@
 {
-  "mod.dcuniverse.nome": "DC Universe"
+  "mod.dcuniverse.nome": "DC Universe",
+  "itemGroup.dcuniverse": "DC Universe",
+  "item.dcuniverse.cristal_superman": "Cristal da Casa de El",
+  "item.dcuniverse.cinto_batman": "Cinto de Utilidades",
+  "item.dcuniverse.batarangue_simples": "Batarangue",
+  "item.dcuniverse.traje_cabeca": "Traje (cabeça)",
+  "item.dcuniverse.traje_peito": "Traje (peito)",
+  "item.dcuniverse.traje_pernas": "Traje (pernas)",
+  "item.dcuniverse.traje_pes": "Traje (pés)",
+  "entity.dcuniverse.projetil": "Projétil",
+  "personagem.dcuniverse.superman": "Superman",
+  "personagem.dcuniverse.batman": "Batman",
+  "habilidade.dcuniverse.heat_vision": "Visão de Calor",
+  "habilidade.dcuniverse.freeze_breath": "Sopro Congelante",
+  "habilidade.dcuniverse.batarangue": "Batarangue",
+  "habilidade.dcuniverse.gancho": "Gancho de Escalada",
+  "key.category.dcuniverse.main": "DC Universe",
+  "key.dcuniverse.radial": "Menu de habilidades (segurar)",
+  "key.dcuniverse.usar": "Usar habilidade",
+  "key.dcuniverse.destransformar": "Destransformar",
+  "dcuniverse.radial": "Habilidades",
+  "dcuniverse.msg.personagem_desconhecido": "Personagem desconhecido: %s",
+  "dcuniverse.msg.espera_transformacao": "Aguarde %s s para transformar de novo",
+  "dcuniverse.msg.canalizando": "Termine a habilidade antes de destransformar",
+  "dcuniverse.msg.sem_energia": "Energia insuficiente"
 }

@@ -16,7 +16,10 @@ base.archivesName = modId
 // O Minecraft 26.1+ roda em Java 25.
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    srcDir layout.buildDirectory.dir('generated/provisorio')
+}
 
 minecraft {
     runs {
@@ -83,6 +86,16 @@ def dcuVerify = tasks.register('dcuVerify', Exec) {
     commandLine 'python3', '-I', 'tools/verificar_mod.py', '--raiz', '.'
 }
 tasks.named('check') { dependsOn dcuVerify }
+
+// Modelos de item e texturas provisórias enquanto a arte não fica pronta (decisão 7).
+def recursosProvisorios = tasks.register('recursosProvisorios', Exec) {
+    group = 'build'
+    inputs.dir('src/main/resources/assets')
+    inputs.file('tools/recursos_provisorios.py')
+    outputs.dir(layout.buildDirectory.dir('generated/provisorio'))
+    commandLine 'python3', '-I', 'tools/recursos_provisorios.py', '--raiz', '.', '--saida', 'build/generated/provisorio'
+}
+tasks.named('processResources') { dependsOn recursosProvisorios }
 
 // Perfil importável no CurseForge: manifest.json + overrides/mods/<jar>.
 def manifestoDir = layout.buildDirectory.dir('perfil')

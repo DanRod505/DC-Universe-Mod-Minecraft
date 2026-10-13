@@ -1,0 +1,22 @@
+{
+  "n": 1,
+  "level": 4,
+  "stats": { "vida": 40, "armadura": 22, "dano": 12, "terra": 6.5 },
+  "energy": {
+    "max": 300,
+    "regen": 1.5,
+    "recharge": [ { "type": "sunlight", "per_second": 3.0 } ]
+  },
+  "suit": [ "chest", "legs", "feet" ],
+  "passives": [
+    { "type": "flight", "speed": 32, "drain": 0.5 },
+    { "type": "fall_immunity" },
+    { "type": "fire_immunity" }
+  ],
+  "abilities": [
+    { "id": "heat_vision", "type": "projectile_beam", "mode": "hold", "cost": 5, "cooldown": 1,
+      "range": 24, "damage_mult": 0.4, "color": "#FF2200", "sets_fire": true, "melts": true },
+    { "id": "freeze_breath", "type": "area_cone", "mode": "hold", "cost": 4, "cooldown": 1,
+      "range": 8, "angle": 30, "damage_mult": 0.2, "effect": "freeze" }
+  ]
+}

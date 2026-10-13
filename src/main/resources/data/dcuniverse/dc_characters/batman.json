@@ -1,0 +1,20 @@
+{
+  "n": 2,
+  "level": 1,
+  "stats": { "vida": 14, "armadura": 14, "dano": 3, "terra": 6 },
+  "energy": {
+    "max": 200,
+    "regen": 0.5,
+    "recharge": []
+  },
+  "suit": [ "head", "chest", "legs", "feet" ],
+  "passives": [
+    { "type": "glide", "speed": 11 },
+    { "type": "night_vision" }
+  ],
+  "abilities": [
+    { "id": "batarangue", "type": "projectile", "cost": 8, "cooldown": 0.75,
+      "item": "dcuniverse:batarangue_simples", "speed": 1.8, "damage_mult": 0.5, "stun": 1 },
+    { "id": "gancho", "type": "grapple", "cost": 15, "cooldown": 3, "range": 32, "speed": 2.2 }
+  ]
+}
