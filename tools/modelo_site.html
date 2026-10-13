@@ -55,17 +55,35 @@ dd { margin: 0; }
 dd ul { margin: 2px 0 0; padding-left: 18px; }
 .energia { border-left: 3px solid var(--gold); padding-left: 8px; }
 .empty { color: var(--muted); padding: 24px 0; }
-#plano { max-width: 78ch; }
-#plano h1 { font-size: 40px; margin-block: 8px 12px; }
-#plano h2 { font: 700 28px/1.15 var(--display); margin-block: 32px 8px; padding-top: 8px; border-top: 1px solid var(--line); }
-#plano h3 { font: 700 21px var(--display); margin-block: 20px 6px; }
-#plano .tbl { overflow-x: auto; }
-#plano table { border-collapse: collapse; font-size: 15px; width: 100%; }
-#plano th, #plano td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
-#plano th { background: var(--surface); }
-#plano pre { background: var(--surface); border: 1px solid var(--line); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
-#plano code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
-#plano blockquote { margin: 0; padding: 8px 12px; border-left: 3px solid var(--gold); background: var(--surface); }
+.md { max-width: 78ch; }
+nav { flex-wrap: wrap; }
+.stats { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--fg); font-weight: 600; }
+.sec { font: 700 28px/1.15 var(--display); margin-block: 32px 4px; }
+.tbl { overflow-x: auto; }
+table.fichas { border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.fichas th, table.fichas td { border-bottom: 1px solid var(--line); padding: 5px 8px; text-align: right; }
+table.fichas th { position: sticky; top: 0; background: var(--bg); cursor: pointer; user-select: none; font-weight: 600; }
+table.fichas th[aria-sort] { color: var(--accent); }
+table.fichas td:nth-child(2), table.fichas th:nth-child(2), table.fichas td:last-child { text-align: left; }
+table.fichas td:nth-child(2) { font-weight: 600; border-left: 3px solid var(--c); }
+table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(--muted); }
+.sistema { margin-block: 28px 12px; }
+.sistema h2 { font: 700 28px/1.15 var(--display); margin: 0 0 4px; }
+.sistema > p { margin: 0 0 12px; max-width: 78ch; color: var(--muted); }
+.arma h3 { font: 700 21px/1.1 var(--display); margin: 0; }
+.arma ul { margin: 0; padding-left: 18px; }
+.donos { font-size: 14px; color: var(--muted); margin: 0; }
+.md h1 { font-size: 40px; margin-block: 8px 12px; }
+.md h2 { font: 700 28px/1.15 var(--display); margin-block: 32px 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.md h3 { font: 700 21px var(--display); margin-block: 20px 6px; }
+.md .tbl { overflow-x: auto; }
+.md table { border-collapse: collapse; font-size: 15px; width: 100%; }
+.md th, .md td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+.md th { background: var(--surface); }
+.md pre { background: var(--surface); border: 1px solid var(--line); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+.md code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
+.md blockquote { margin: 0; padding: 8px 12px; border-left: 3px solid var(--gold); background: var(--surface); }
 </style>
 
 <div class="wrap">
@@ -78,6 +96,8 @@ dd ul { margin: 2px 0 0; padding-left: 18px; }
 
   <nav role="tablist">
     <button role="tab" id="tab-personagens" aria-selected="true" data-aba="personagens">Personagens</button>
+    <button role="tab" id="tab-fichas" aria-selected="false" data-aba="fichas">Fichas</button>
+    <button role="tab" id="tab-armas" aria-selected="false" data-aba="armas">Armas</button>
     <button role="tab" id="tab-planejamento" aria-selected="false" data-aba="planejamento">Planejamento</button>
   </nav>
 
@@ -91,8 +111,19 @@ dd ul { margin: 2px 0 0; padding-left: 18px; }
     <p class="empty" id="vazio" hidden>Nenhum personagem encontrado.</p>
   </section>
 
+  <section id="aba-fichas" hidden>
+    <article class="md" id="balanc"></article>
+    <h2 class="sec">Fichas comparativas</h2>
+    <p class="meta">Clique no cabeçalho de uma coluna para ordenar.</p>
+    <div class="tbl"><table class="fichas" id="tabela-fichas"></table></div>
+  </section>
+
+  <section id="aba-armas" hidden>
+    <div id="armas"></div>
+  </section>
+
   <section id="aba-planejamento" hidden>
-    <article id="plano"></article>
+    <article class="md" id="plano"></article>
   </section>
 </div>
 
@@ -100,6 +131,11 @@ dd ul { margin: 2px 0 0; padding-left: 18px; }
 <script>
 const PERSONAGENS = /*__PERSONAGENS__*/[];
 const PLANO = /*__PLANO__*/"";
+const BALANC = /*__BALANC__*/"";
+const ARMAS = /*__ARMAS__*/{};
+const FICHA_COLS = [["nivel", "Nível"], ["vida", "Vida ♥"], ["armadura", "Armadura"], ["dano", "Dano ♥"], ["energia", "Energia"],
+  ["regen", "Regen/s"], ["terra", "Corrida"], ["vmax", "Supervel."], ["voo", "Voo"], ["nado", "Nado"], ["planar", "Planar"]];
+const num = v => v == null ? "–" : String(v).replace(".", ",");
 const CATS = { heroi: "Heróis", ajudante: "Ajudantes", anti: "Anti-heróis", vilao: "Vilões" };
 const TIPOS_SUP = { veiculo: "Veículo", armadura: "Armadura/mecha", construto: "Construto", forma: "Transformação", invocacao: "Invocação", mundo: "Estrutura/terreno" };
 const CAT1 = { heroi: "Herói", ajudante: "Ajudante", anti: "Anti-herói", vilao: "Vilão" };
@@ -126,6 +162,12 @@ filtros.addEventListener("click", e => {
   render();
 });
 
+function stats(f) {
+  const itens = [["Nível", f.nivel], ["Vida", f.vida + " ♥"], ["Armadura", f.armadura], ["Dano", f.dano + " ♥"], ["Energia", f.energia],
+    ["Corrida", f.terra], ["Supervel.", f.vmax], ["Voo", f.voo], ["Nado", f.nado], ["Planar", f.planar]];
+  return itens.filter(([, v]) => v != null).map(([r, v]) => `<span>${r} <b>${num(v)}</b></span>`).join("");
+}
+
 function ficha(p) {
   const reusa = p.reusa_n ? `<p class="reusa">Reaproveita sistemas de <b>${esc(porN[p.reusa_n].nome)}</b></p>` : "";
   const dl = CAMPOS.map(([k, r]) => `<div><dt>${r}</dt><dd><ul>${p[k].map(i => `<li>${esc(i)}</li>`).join("")}</ul></dd></div>`).join("");
@@ -133,6 +175,7 @@ function ficha(p) {
     <div class="top"><h3>${esc(p.nome)}</h3><span class="num">#${p.n}</span></div>
     <span class="tag">${CAT1[p.cat]}</span>
     <p class="exp">${esc(p.exp)}</p>${reusa}
+    <div class="stats">${stats(p.ficha)}</div>
     <div class="supremo"><span class="sup-rot">Habilidade suprema · ${TIPOS_SUP[p.supremo.tipo]}</span><strong>${esc(p.supremo.nome)}</strong><span>${esc(p.supremo.desc)}</span></div>
     <details${abertas ? " open" : ""}><summary>Habilidades</summary><dl>${dl}
       <div class="energia"><dt>Energia</dt><dd>${esc(p.energia)}</dd></div></dl></details>
@@ -154,24 +197,66 @@ document.getElementById("expandir").addEventListener("click", e => {
   render();
 });
 
-function plano() {
-  const el = document.getElementById("plano");
+function md(id, texto) {
+  const el = document.getElementById(id);
   if (el.dataset.ok) return;
-  el.innerHTML = window.marked ? marked.parse(PLANO) : `<pre>${esc(PLANO)}</pre>`;
+  el.innerHTML = window.marked ? marked.parse(texto) : `<pre>${esc(texto)}</pre>`;
   el.querySelectorAll("table").forEach(t => { const d = document.createElement("div"); d.className = "tbl"; t.before(d); d.append(t); });
   el.dataset.ok = 1;
 }
 
+let ordem = { col: "n", dir: 1 };
+function tabelaFichas() {
+  const cab = `<thead><tr><th data-col="n">#</th><th data-col="nome">Personagem</th>${FICHA_COLS.map(([c, r]) =>
+    `<th data-col="${c}">${r}</th>`).join("")}<th>Observação</th></tr></thead>`;
+  const val = (p, c) => c === "n" ? p.n : c === "nome" ? p.nome : p.ficha[c];
+  const lista = [...PERSONAGENS].sort((a, b) => {
+    const x = val(a, ordem.col), y = val(b, ordem.col);
+    if (x == null) return 1; if (y == null) return -1;
+    return (typeof x === "string" ? x.localeCompare(y) : x - y) * ordem.dir;
+  });
+  const corpo = lista.map(p => `<tr style="--c:${cor(p.cat)}"><td>${p.n}</td><td>${esc(p.nome)}</td>${FICHA_COLS.map(([c]) =>
+    `<td>${num(p.ficha[c])}</td>`).join("")}<td>${esc(p.ficha.obs || "")}</td></tr>`).join("");
+  const t = document.getElementById("tabela-fichas");
+  t.innerHTML = cab + `<tbody>${corpo}</tbody>`;
+  const th = t.querySelector(`[data-col="${ordem.col}"]`); if (th) th.setAttribute("aria-sort", ordem.dir > 0 ? "ascending" : "descending");
+}
+document.getElementById("tabela-fichas").addEventListener("click", e => {
+  const th = e.target.closest("[data-col]"); if (!th) return;
+  const col = th.dataset.col;
+  ordem = { col, dir: ordem.col === col ? -ordem.dir : (col === "n" || col === "nome" ? 1 : -1) };
+  tabelaFichas();
+});
+
+function armas() {
+  document.getElementById("armas").innerHTML = ARMAS.sistemas.map(s => {
+    const lista = ARMAS.armas.filter(a => a.sistema === s.id);
+    if (!lista.length) return "";
+    return `<section class="sistema"><h2>${esc(s.nome)}</h2><p>${esc(s.desc)}</p><div class="grid">${lista.map(a => `
+      <article class="card arma" style="--c:var(--gold)">
+        <h3>${esc(a.nome)}</h3>
+        <p class="donos">${a.donos.map(n => esc(porN[n].nome)).join(", ")}</p>
+        <div class="stats"><span>Dano <b>${num(a.dano)} ♥</b></span><span>Cooldown <b>${num(a.cooldown)} s</b></span><span>Alcance <b>${num(a.alcance)}</b></span></div>
+        <ul>${a.mecanica.map(m => `<li>${esc(m)}</li>`).join("")}</ul>
+        <p class="reusa"><b>Survival:</b> ${esc(a.survival)}</p>
+      </article>`).join("")}</div></section>`;
+  }).join("");
+}
+
+const ABAS = ["personagens", "fichas", "armas", "planejamento"];
 function aba(nome) {
   document.querySelectorAll("[role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
-  document.getElementById("aba-personagens").hidden = nome !== "personagens";
-  document.getElementById("aba-planejamento").hidden = nome !== "planejamento";
-  if (nome === "planejamento") plano();
+  ABAS.forEach(a => document.getElementById("aba-" + a).hidden = a !== nome);
+  if (nome === "planejamento") md("plano", PLANO);
+  if (nome === "fichas") md("balanc", BALANC);
 }
 document.querySelector("nav").addEventListener("click", e => {
   const b = e.target.closest("[data-aba]"); if (b) { aba(b.dataset.aba); history.replaceState(null, "", "#" + b.dataset.aba); }
 });
 
 render();
-if (location.hash === "#planejamento") aba("planejamento");
+tabelaFichas();
+armas();
+const inicial = location.hash.slice(1);
+if (ABAS.includes(inicial)) aba(inicial);
 </script>

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Gera docs/PERSONAGENS.md e docs/site/index.html a partir de docs/dados/personagens.json.
+"""Gera docs/PERSONAGENS.md, docs/FICHAS.md e docs/site/index.html a partir de docs/dados/*.json.
 
-Fonte única: edite só o JSON (e docs/PLANEJAMENTO.md) e rode este script.
-Também valida os dados (contagem, nomes únicos, referências de "reusa").
+Fonte única: edite só os JSON (e docs/PLANEJAMENTO.md, docs/BALANCEAMENTO.md) e rode este script.
+Também valida os dados (contagem, nomes únicos, referências, faixas de balanceamento).
 """
 import json
 import sys
@@ -13,12 +13,21 @@ RAIZ = Path(__file__).resolve().parent.parent
 DADOS = RAIZ / "docs/dados/personagens.json"
 MD = RAIZ / "docs/PERSONAGENS.md"
 PLANO = RAIZ / "docs/PLANEJAMENTO.md"
+ARMAS = RAIZ / "docs/dados/armas.json"
+FICHAS = RAIZ / "docs/FICHAS.md"
+BALANC = RAIZ / "docs/BALANCEAMENTO.md"
 MODELO = RAIZ / "tools/modelo_site.html"
 SITE = RAIZ / "docs/site/index.html"
 
 CATS = {"heroi": "Heróis", "ajudante": "Ajudantes", "anti": "Anti-heróis", "vilao": "Vilões"}
 TIPOS_SUP = {"veiculo": "Veículo", "armadura": "Armadura/mecha", "construto": "Construto",
              "forma": "Transformação", "invocacao": "Invocação", "mundo": "Estrutura/terreno"}
+# Faixas por nível (iguais às de docs/BALANCEAMENTO.md): vida, armadura, dano
+FAIXAS = {1: ((12, 16), (8, 14), (2, 4)), 2: ((14, 24), (8, 20), (3, 6)),
+          3: ((18, 30), (10, 20), (3, 9)), 4: ((34, 40), (18, 24), (8, 12))}
+FICHA_COLS = [("nivel", "Nível"), ("vida", "Vida ♥"), ("armadura", "Armadura"), ("dano", "Dano ♥"),
+              ("energia", "Energia"), ("regen", "Regen/s"), ("terra", "Corrida"), ("vmax", "Supervel."),
+              ("voo", "Voo"), ("nado", "Nado"), ("planar", "Planar")]
 CAMPOS = [("nat", "Naturais (ativam pela ação)"), ("ativ", "Poderes e combate (menu radial)"),
           ("equip", "Armas, ferramentas e invocações"), ("surv", "Utilidade no survival")]
 
@@ -52,7 +61,60 @@ def validar(dados):
         for campo in ["exp", "energia", "nat", "ativ", "equip", "surv", "supremo"]:
             if not p.get(campo):
                 erros.append(f"#{p['n']} {p['nome']}: campo '{campo}' vazio")
+        f = p.get("ficha")
+        if not f:
+            erros.append(f"#{p['n']} {p['nome']}: sem ficha")
+            continue
+        for (lo, hi), campo in zip(FAIXAS[f["nivel"]], ["vida", "armadura", "dano"]):
+            if not lo <= f[campo] <= hi:
+                erros.append(f"#{p['n']} {p['nome']}: {campo} {f[campo]} fora da faixa do nível {f['nivel']} ({lo}–{hi})")
     return erros + resolver_reusa(dados)
+
+
+def validar_armas(armas, dados):
+    sistemas = {s["id"] for s in armas["sistemas"]}
+    ns = {p["n"] for p in dados}
+    erros = []
+    for a in armas["armas"]:
+        if a["sistema"] not in sistemas:
+            erros.append(f"arma {a['nome']}: sistema inexistente {a['sistema']}")
+        erros += [f"arma {a['nome']}: dono #{n} inexistente" for n in a["donos"] if n not in ns]
+    nomes = Counter(a["nome"] for a in armas["armas"])
+    erros += [f"arma duplicada: {n}" for n, c in nomes.items() if c > 1]
+    return erros
+
+
+def fmt(v):
+    if v is None:
+        return "–"
+    return str(v).replace(".", ",")
+
+
+def gerar_fichas(dados, armas):
+    por_n = {p["n"]: p for p in dados}
+    out = ["# Fichas e armas", "",
+           "> Gerado por `tools/gerar_docs.py`. Unidades, níveis e regras em [BALANCEAMENTO.md](BALANCEAMENTO.md).", "",
+           "## Fichas dos personagens", "",
+           "| # | Personagem | " + " | ".join(r for _, r in FICHA_COLS) + " | Observação |",
+           "|---|---|" + "---:|" * len(FICHA_COLS) + "---|"]
+    for p in dados:
+        f = p["ficha"]
+        out.append(f"| {p['n']} | {p['nome']} | " + " | ".join(fmt(f[c]) for c, _ in FICHA_COLS) + f" | {f.get('obs', '')} |")
+    out += ["", "## Armas", ""]
+    for s in armas["sistemas"]:
+        lista = [a for a in armas["armas"] if a["sistema"] == s["id"]]
+        if not lista:
+            continue
+        out += [f"### {s['nome']}", "", s["desc"], ""]
+        for a in lista:
+            donos = ", ".join(por_n[n]["nome"] for n in a["donos"])
+            out.append(f"#### {a['nome']}")
+            out.append(f"Usada por: {donos} · Dano {fmt(a['dano'])} ♥ · Cooldown {fmt(a['cooldown'])} s · Alcance {fmt(a['alcance'])} blocos")
+            out.append("")
+            out += [f"- {m}" for m in a["mecanica"]]
+            out.append(f"- **Survival:** {a['survival']}")
+            out.append("")
+    FICHAS.write_text("\n".join(out), encoding="utf-8")
 
 
 def energia_tipo(p):
@@ -84,6 +146,8 @@ def gerar_md(dados):
             for campo, rotulo in CAMPOS:
                 out.append(f"- **{rotulo}:** " + "; ".join(p[campo]))
             out.append(f"- **Energia:** {p['energia']}")
+            f = p["ficha"]
+            out.append("- **Ficha:** " + " · ".join(f"{r} {fmt(f[c])}" for c, r in FICHA_COLS if f[c] is not None))
             out.append(f"- ⭐ **Habilidade suprema ({TIPOS_SUP[p['supremo']['tipo']]}): {p['supremo']['nome']}.** {p['supremo']['desc']}")
             out.append("")
     out += ["## 3. Sistemas compartilhados que surgem da lista", "",
@@ -110,12 +174,14 @@ def gerar_md(dados):
     MD.write_text("\n".join(out), encoding="utf-8")
 
 
-def gerar_site(dados):
+def gerar_site(dados, armas):
     def js(obj):
         return json.dumps(obj, ensure_ascii=False).replace("</", "<\\/")
     html = MODELO.read_text(encoding="utf-8")
     html = html.replace("/*__PERSONAGENS__*/[]", js(dados))
     html = html.replace("/*__PLANO__*/\"\"", js(PLANO.read_text(encoding="utf-8")))
+    html = html.replace("/*__BALANC__*/\"\"", js(BALANC.read_text(encoding="utf-8")))
+    html = html.replace("/*__ARMAS__*/{}", js(armas))
     SITE.parent.mkdir(parents=True, exist_ok=True)
     cabeca = '<!doctype html>\n<html lang="pt-BR">\n<meta charset="utf-8">\n' \
              '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' \
@@ -127,13 +193,15 @@ def gerar_site(dados):
 
 def main():
     dados = json.loads(DADOS.read_text(encoding="utf-8"))
-    erros = validar(dados)
+    armas = json.loads(ARMAS.read_text(encoding="utf-8"))
+    erros = validar(dados) + validar_armas(armas, dados)
     if erros:
         print("\n".join(erros))
         sys.exit(1)
     gerar_md(dados)
-    gerar_site(dados)
-    print(f"OK: {len(dados)} personagens -> {MD.relative_to(RAIZ)}, {SITE.relative_to(RAIZ)}")
+    gerar_fichas(dados, armas)
+    gerar_site(dados, armas)
+    print(f"OK: {len(dados)} personagens, {len(armas['armas'])} armas -> PERSONAGENS.md, FICHAS.md, site/index.html")
 
 
 if __name__ == "__main__":
