@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "dcuniverse:block/batcomputador"
+    },
+    "facing=east": {
+      "model": "dcuniverse:block/batcomputador",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "dcuniverse:block/batcomputador",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "dcuniverse:block/batcomputador",
+      "y": 270
+    }
+  }
+}

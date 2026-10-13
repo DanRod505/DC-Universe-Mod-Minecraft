@@ -5,7 +5,6 @@ import com.danrod.dcuniverse.ability.TipoHabilidade;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Params;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -14,13 +13,12 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 
 /**
  * projectile_beam: raio contínuo (visão de calor). Parâmetros: range, damage_mult (por segundo),
- * color, sets_fire, melts (derrete e funde blocos atingidos).
+ * color, sets_fire, melts (derrete e funde blocos atingidos). O feixe é desenhado no cliente (client/Efeitos).
  */
 public final class Raio implements TipoHabilidade {
     /** O que o raio de calor transforma depois de 1 s no mesmo bloco. */
@@ -39,7 +37,6 @@ public final class Raio implements TipoHabilidade {
         Params prm = h.params();
         HitResult alvo = Alvos.mirar(player, prm.d("range", 24));
         if (!(player.level() instanceof ServerLevel level)) return;
-        if (tick % 2 == 0) desenhar(level, player.getEyePosition().add(0, -0.15, 0), alvo.getLocation(), prm.color("color", 0xFF2200));
 
         if (alvo instanceof EntityHitResult eh && tick % 10 == 0) {
             Entity e = eh.getEntity();
@@ -51,18 +48,6 @@ public final class Raio implements TipoHabilidade {
             if (novo != null && player.mayBuild() && level.mayInteract(player, pos)) {
                 level.setBlockAndUpdate(pos, novo.defaultBlockState());
             }
-        }
-    }
-
-    /** Linha de partículas; começa um pouco à frente para não cobrir a câmera em primeira pessoa. */
-    static void desenhar(ServerLevel level, Vec3 de, Vec3 ate, int cor) {
-        DustParticleOptions part = new DustParticleOptions(cor, 0.6f);
-        Vec3 d = ate.subtract(de);
-        double comp = d.length();
-        Vec3 dir = d.normalize();
-        for (double t = Math.min(1.5, comp); t <= comp; t += 0.35) {
-            Vec3 pt = de.add(dir.scale(t));
-            level.sendParticles(part, pt.x, pt.y, pt.z, 1, 0, 0, 0, 0);
         }
     }
 }

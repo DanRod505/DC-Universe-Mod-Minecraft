@@ -1,6 +1,7 @@
 {
   "n": 2,
   "level": 1,
+  "color": "#E0B040",
   "stats": { "vida": 14, "armadura": 14, "dano": 3, "terra": 6 },
   "energy": {
     "max": 200,

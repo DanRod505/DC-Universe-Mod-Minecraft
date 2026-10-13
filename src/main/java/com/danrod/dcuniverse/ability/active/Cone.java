@@ -5,7 +5,6 @@ import com.danrod.dcuniverse.ability.TipoHabilidade;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Params;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -19,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * area_cone: sopro em cone (sopro congelante). Parâmetros: range, angle (graus), damage_mult (por segundo),
- * effect ("freeze"): deixa lentos e congela mobs, vira água em gelo e apaga fogo.
+ * effect ("freeze"): deixa lentos e congela mobs, vira água em gelo e apaga fogo. O jato é desenhado no cliente.
  */
 public final class Cone implements TipoHabilidade {
     @Override
@@ -32,17 +31,6 @@ public final class Cone implements TipoHabilidade {
         Vec3 dir = player.getLookAngle();
         boolean congela = "freeze".equals(prm.s("effect", "freeze"));
 
-        if (tick % 2 == 0) {
-            // Partículas espalhadas ao longo do cone, longe da câmera.
-            for (int i = 0; i < 8; i++) {
-                double d = 1.5 + level.getRandom().nextDouble() * (alcance - 1.5);
-                double r = d * Math.tan(Math.acos(cosMax)) * 0.8;
-                Vec3 pt = olhos.add(dir.scale(d)).add((level.getRandom().nextDouble() - 0.5) * r,
-                    (level.getRandom().nextDouble() - 0.5) * r - 0.2, (level.getRandom().nextDouble() - 0.5) * r);
-                level.sendParticles(congela ? ParticleTypes.SNOWFLAKE : ParticleTypes.CLOUD,
-                    pt.x, pt.y, pt.z, 0, dir.x, dir.y, dir.z, 0.15);
-            }
-        }
         if (tick % 10 != 0) return;
 
         AABB area = player.getBoundingBox().expandTowards(dir.scale(alcance)).inflate(alcance * 0.5);

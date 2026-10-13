@@ -32,8 +32,18 @@ public final class Cliente {
         AddGuiOverlayLayersEvent.BUS.addListener(e -> e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
             Identifier.fromNamespaceAndPath(DCUniverse.MODID, "energia"), Hud::desenhar));
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new));
-        TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
-        ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> EstadoCliente.atual = Rede.Sync.VAZIO);
+        TickEvent.ClientTickEvent.Post.BUS.addListener(e -> {
+            tick();
+            Efeitos.tick();
+        });
+        ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> {
+            EstadoCliente.atual = Rede.Sync.VAZIO;
+            EstadoCliente.APARENCIAS.clear();
+            EstadoCliente.TRANSFORMOU.clear();
+            Skins.limpar();
+        });
+        Skins.registrar();
+        Efeitos.registrarFeixe();
     }
 
     private static void tick() {

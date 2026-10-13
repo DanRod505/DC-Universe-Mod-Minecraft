@@ -19,6 +19,7 @@ public final class Habilidades {
         e.setCanalizando("");
         e.setSelecionada(indice);
         Rede.sincronizar(player);
+        Rede.aparencia(player);
     }
 
     /** Tecla de uso apertada (true) ou solta (false). */
@@ -41,6 +42,7 @@ public final class Habilidades {
         TipoHabilidade tipo = TiposHabilidade.TIPOS.get(h.tipo());
         if (h.modo() == Personagem.Modo.HOLD) {
             e.setCanalizando(h.id());
+            Rede.aparencia(player);
         } else if (e.energia() >= h.custo() && tipo.usar(player, p, h)) {
             Energia.gastar(player, p, h.custo());
             e.setProntaEm(h.id(), agora + Math.round(h.recargaSeg() * 20));
@@ -71,5 +73,6 @@ public final class Habilidades {
         Personagem.Habilidade h = p == null ? null : p.habilidade(id);
         if (h != null) e.setProntaEm(id, player.level().getGameTime() + Math.round(h.recargaSeg() * 20));
         Rede.sincronizar(player);
+        Rede.aparencia(player);
     }
 }

@@ -51,6 +51,9 @@ public final class Eventos {
             sync(e.getEntity());
         });
         PlayerEvent.PlayerRespawnEvent.BUS.addListener(e -> sync(e.getEntity()));
+        PlayerEvent.StartTracking.BUS.addListener(e -> {
+            if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof ServerPlayer alvo) Rede.aparenciaPara(quem, alvo);
+        });
         PlayerEvent.PlayerChangedDimensionEvent.BUS.addListener(e -> sync(e.getEntity()));
     }
 
@@ -82,6 +85,9 @@ public final class Eventos {
     }
 
     private static void sync(net.minecraft.world.entity.player.Player player) {
-        if (player instanceof ServerPlayer sp) Rede.sincronizar(sp);
+        if (player instanceof ServerPlayer sp) {
+            Rede.sincronizar(sp);
+            Rede.aparencia(sp);
+        }
     }
 }

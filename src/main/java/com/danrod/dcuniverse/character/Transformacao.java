@@ -57,6 +57,7 @@ public final class Transformacao {
         Passivas.aoTransformar(player, p);
         efeito(player, true);
         Rede.sincronizar(player);
+        Rede.aparencia(player);
         return true;
     }
 
@@ -81,6 +82,7 @@ public final class Transformacao {
         estado.limparTransformacao();
         efeito(player, false);
         Rede.sincronizar(player);
+        Rede.aparencia(player);
     }
 
     /** Tick do servidor: conclui a destransformação pedida e mantém traje e atributos corretos. */
@@ -104,8 +106,8 @@ public final class Transformacao {
 
     private static void efeito(ServerPlayer player, boolean entrando) {
         if (player.level() instanceof ServerLevel level && player.connection != null) {
-            level.sendParticles(entrando ? ParticleTypes.END_ROD : ParticleTypes.CLOUD,
-                player.getX(), player.getY() + 1, player.getZ(), 30, 0.4, 0.8, 0.4, 0.05);
+            // A espiral de entrada é desenhada no cliente (client/Efeitos); na saída, uma nuvem.
+            if (!entrando) level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1, player.getZ(), 30, 0.4, 0.8, 0.4, 0.05);
             level.playSound(null, player.blockPosition(),
                 entrando ? SoundEvents.BEACON_ACTIVATE : SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6f, 1.4f);
         }

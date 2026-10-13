@@ -28,7 +28,7 @@ public final class Blocos {
     public static final RegistryObject<Block> BLOCO_KRYPTONITA = bloco("bloco_kryptonita", Block::new,
         BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN).requiresCorrectToolForDrops().strength(5f, 6f)
             .sound(SoundType.AMETHYST).lightLevel(s -> 10));
-    public static final RegistryObject<Block> BATCOMPUTADOR = bloco("batcomputador", Block::new,
+    public static final RegistryObject<Block> BATCOMPUTADOR = bloco("batcomputador", BatcomputadorBlock::new,
         BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(3.5f, 6f)
             .sound(SoundType.METAL).lightLevel(s -> 5));
 

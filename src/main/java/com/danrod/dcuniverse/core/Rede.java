@@ -79,6 +79,11 @@ public final class Rede {
             .encoder(Sync::encode).decoder(Sync::decode)
             .consumerMainThread((m, ctx) -> EstadoCliente.atual = m)
             .add();
+        CANAL.messageBuilder(Aparencia.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(Aparencia::encode).decoder(Aparencia::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.aparencia(m))
+            .add();
         CANAL.messageBuilder(Selecionar.class)
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> b.writeVarInt(m.indice())).decoder(b -> new Selecionar(b.readVarInt()))
@@ -102,6 +107,43 @@ public final class Rede {
     }
 
     /** Envia o estado completo ao próprio jogador. Jogadores sem conexão (testes) são ignorados. */
+    /**
+     * Aparência de um jogador para quem está vendo ele: personagem ("" = normal), cor do personagem e o
+     * efeito visual da habilidade canalizada agora (tipo "" = nenhuma), desenhado no próprio cliente.
+     */
+    public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo) {
+        public static void encode(Aparencia m, FriendlyByteBuf b) {
+            b.writeVarInt(m.entidade); b.writeUtf(m.personagem); b.writeInt(m.cor);
+            b.writeUtf(m.efeito); b.writeInt(m.efeitoCor); b.writeFloat(m.alcance); b.writeFloat(m.angulo);
+        }
+
+        public static Aparencia decode(FriendlyByteBuf b) {
+            return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat());
+        }
+    }
+
+    /** Avisa o próprio jogador e quem está vendo ele que a skin mudou. */
+    public static void aparencia(ServerPlayer player) {
+        if (player.connection == null) return;
+        CANAL.send(montarAparencia(player), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(player));
+    }
+
+    /** Manda a aparência de alvo só para quem começou a ver ele. */
+    public static void aparenciaPara(ServerPlayer quemVe, ServerPlayer alvo) {
+        if (quemVe.connection == null) return;
+        CANAL.send(montarAparencia(alvo), PacketDistributor.PLAYER.with(quemVe));
+    }
+
+    public static Aparencia montarAparencia(ServerPlayer player) {
+        EstadoJogador e = EstadoJogador.de(player);
+        Personagem p = e.personagem();
+        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0);
+        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
+        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0);
+        return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
+            h.params().f("range", 8f), h.params().f("angle", 30f));
+    }
+
     public static void sincronizar(ServerPlayer player) {
         if (player.connection == null) return;
         CANAL.send(montar(player), PacketDistributor.PLAYER.with(player));

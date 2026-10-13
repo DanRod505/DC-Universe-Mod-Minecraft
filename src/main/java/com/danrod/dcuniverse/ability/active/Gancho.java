@@ -1,5 +1,6 @@
 package com.danrod.dcuniverse.ability.active;
 
+import net.minecraft.core.particles.DustParticleOptions;
 import com.danrod.dcuniverse.ability.Alvos;
 import com.danrod.dcuniverse.ability.TipoHabilidade;
 import com.danrod.dcuniverse.character.Personagem;
@@ -27,9 +28,21 @@ public final class Gancho implements TipoHabilidade {
         player.hurtMarked = true;
         player.resetFallDistance();
         if (player.level() instanceof ServerLevel level) {
-            Raio.desenhar(level, player.getEyePosition().add(0, -0.3, 0), ponto, h.params().color("color", 0x333333));
+            corda(level, player.getEyePosition().add(0, -0.3, 0), ponto, h.params().color("color", 0x333333));
             level.playSound(null, player.blockPosition(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 0.7f, 1.6f);
         }
         return true;
+    }
+
+    /** Cabo do gancho: linha fina de partículas escuras do cinto até o ponto de fixação. */
+    private static void corda(ServerLevel level, Vec3 de, Vec3 ate, int cor) {
+        DustParticleOptions part = new DustParticleOptions(cor, 0.5f);
+        Vec3 d = ate.subtract(de);
+        double comp = d.length();
+        Vec3 dir = d.normalize();
+        for (double t = Math.min(1.5, comp); t <= comp; t += 0.3) {
+            Vec3 pt = de.add(dir.scale(t));
+            level.sendParticles(part, pt.x, pt.y, pt.z, 1, 0, 0, 0, 0);
+        }
     }
 }

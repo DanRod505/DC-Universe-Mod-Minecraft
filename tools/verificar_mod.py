@@ -5,7 +5,7 @@ Verificações:
 - receitas: JSON válido e nenhuma receita duplicada (mesma forma, contando espelhamento e posição);
 - mod id: o modId do mods.toml e a constante MODID do código batem;
 - personagens: ficha igual à de docs/dados/personagens.json, tipos de habilidade/passiva/recarga
-  existentes no código e nome traduzido de cada personagem e habilidade;
+  existentes no código, nome traduzido de cada personagem e habilidade e skin 128x128;
 - teclas: duas ações do mod na mesma tecla padrão;
 - GameTests: cada test_instance aponta para uma função registrada e vice-versa;
 - registro: todo item/bloco com nome no lang está registrado no Java e todo item dcuniverse: usado em
@@ -113,6 +113,11 @@ def tipos_java(raiz, arquivo):
     return set(re.findall(r'"([a-z_]+)",\s*(?:new |\()', (raiz / JAVA / arquivo).read_text(encoding="utf-8")))
 
 
+def tamanho_png(arq):
+    cab = arq.read_bytes()[:24]
+    return int.from_bytes(cab[16:20], "big"), int.from_bytes(cab[20:24], "big")
+
+
 def verificar_personagens(raiz, recursos, erros):
     docs = {p["n"]: p for p in json.loads((raiz / "docs/dados/personagens.json").read_text(encoding="utf-8"))}
     habs = tipos_java(raiz, "ability/TiposHabilidade.java")
@@ -148,6 +153,11 @@ def verificar_personagens(raiz, recursos, erros):
         for r in c.get("energy", {}).get("recharge", []):
             if r.get("type") not in recargas:
                 erros.append(f"{nome}: tipo de recarga inexistente {r.get('type')}")
+        skin = recursos / f"assets/dcuniverse/textures/skin/{nome}.png"
+        if not skin.exists():
+            erros.append(f"{nome}: falta a skin textures/skin/{nome}.png")
+        elif tamanho_png(skin) != (128, 128):
+            erros.append(f"{nome}: skin com {tamanho_png(skin)}, deve ser 128x128")
         for i in IDIOMAS:
             if f"personagem.dcuniverse.{nome}" not in lang[i]:
                 erros.append(f"{nome}: falta personagem.dcuniverse.{nome} em {i}.json")

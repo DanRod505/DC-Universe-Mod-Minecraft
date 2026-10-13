@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "dcuniverse:block/batcomputador",
+    "side": "dcuniverse:block/batcomputador_lado",
+    "top": "dcuniverse:block/batcomputador_topo"
+  }
+}
