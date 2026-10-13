@@ -29,7 +29,9 @@ jobs:
       - name: Documentação em dia com docs/dados
         run: |
           python3 tools/gerar_docs.py
-          git diff --exit-code -- docs || (echo "Rode python3 tools/gerar_docs.py e faça commit dos docs gerados." && exit 1)
+          python3 -I tools/gerar_conteudo.py --raiz .
+          git add -N src/generated
+          git diff --exit-code -- docs src || (echo "Rode tools/gerar_docs.py e tools/gerar_conteudo.py e faça commit do resultado." && exit 1)
 
       - name: Build (dcuVerify, .jar e perfil .zip)
         run: ./gradlew build --console=plain

@@ -7,7 +7,10 @@ Verificações:
 - personagens: ficha igual à de docs/dados/personagens.json, tipos de habilidade/passiva/recarga
   existentes no código e nome traduzido de cada personagem e habilidade;
 - teclas: duas ações do mod na mesma tecla padrão;
-- GameTests: cada test_instance aponta para uma função registrada e vice-versa.
+- GameTests: cada test_instance aponta para uma função registrada e vice-versa;
+- registro: todo item/bloco com nome no lang está registrado no Java e todo item dcuniverse: usado em
+  receita, loot table ou tag tem nome no lang.
+Lê src/main/resources e src/generated/resources (receitas geradas por tools/gerar_conteudo.py).
 
 Novas verificações (teclas, modelos, texturas) entram junto com o sistema que precisa delas.
 Uso: python3 -I tools/verificar_mod.py --raiz .
@@ -61,9 +64,9 @@ def ingrediente(v):
     return v
 
 
-def verificar_receitas(recursos, erros):
+def verificar_receitas(pastas, erros):
     assinaturas = defaultdict(list)
-    for arq in sorted(recursos.glob("data/*/recipe/**/*.json")):
+    for recursos, arq in sorted((r, a) for r in pastas for a in r.glob("data/*/recipe/**/*.json")):
         r = ler_json(arq, erros)
         if r is None:
             continue
@@ -173,6 +176,22 @@ def verificar_testes(raiz, recursos, erros):
     erros.extend(f"Testes.java: função {f} sem test_instance" for f in sorted(funcoes - usadas))
 
 
+def verificar_registro(raiz, pastas, erros):
+    lang = ler_json(pastas[0] / "assets/dcuniverse/lang/en_us.json", erros) or {}
+    nomes = {k.split(".", 2)[2] for k in lang if k.startswith(("item.dcuniverse.", "block.dcuniverse."))}
+    java = "".join(a.read_text(encoding="utf-8") for a in (raiz / JAVA).rglob("*.java"))
+    registrados = set(re.findall(r'(?:item|bloco|traje)\("([a-z0-9_]+)"', java))
+    erros.extend(f"lang: {i} tem nome mas não está registrado no Java" for i in sorted(nomes - registrados))
+    erros.extend(f"Java: {i} registrado sem nome no lang" for i in sorted(registrados - nomes))
+    for recursos in pastas:
+        for arq in sorted(recursos.glob("data/*/*/**/*.json")):
+            if any(x in arq.as_posix() for x in ("/worldgen/", "/test_instance/", "/forge/", "/dc_characters/")):
+                continue  # ids de feature, função de teste e personagem não são itens
+            for i in sorted(set(re.findall(r'"dcuniverse:([a-z0-9_]+)"', arq.read_text(encoding="utf-8")))):
+                if i not in nomes:
+                    erros.append(f"{arq.relative_to(raiz)}: item dcuniverse:{i} inexistente")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--raiz", default=".")
@@ -180,11 +199,13 @@ def main():
     recursos = raiz / "src/main/resources"
     erros = []
     verificar_lang(recursos, erros)
-    verificar_receitas(recursos, erros)
+    pastas = [recursos] + [p for p in [raiz / "src/generated/resources"] if p.exists()]
+    verificar_receitas(pastas, erros)
     verificar_mod_id(raiz, erros)
     verificar_personagens(raiz, recursos, erros)
     verificar_teclas(raiz, erros)
     verificar_testes(raiz, recursos, erros)
+    verificar_registro(raiz, pastas, erros)
     if erros:
         print("\n".join(erros))
         sys.exit(1)

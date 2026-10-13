@@ -1,5 +1,8 @@
 package com.danrod.dcuniverse.core;
 
+import com.danrod.dcuniverse.content.Itens;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import com.danrod.dcuniverse.ability.Habilidades;
 import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.character.EstadoJogador;
@@ -43,9 +46,24 @@ public final class Eventos {
         LivingFallEvent.BUS.addListener((Predicate<LivingFallEvent>) e -> e.getEntity() instanceof ServerPlayer sp && Passivas.semQueda(sp));
         ItemTossEvent.BUS.addListener((Predicate<ItemTossEvent>) e -> Traje.ehTraje(e.getEntity().getItem()));
         EntityJoinLevelEvent.BUS.addListener((Predicate<EntityJoinLevelEvent>) e -> e.getEntity() instanceof ItemEntity item && Traje.ehTraje(item.getItem()));
-        PlayerEvent.PlayerLoggedInEvent.BUS.addListener(e -> sync(e.getEntity()));
+        PlayerEvent.PlayerLoggedInEvent.BUS.addListener(e -> {
+            if (e.getEntity() instanceof ServerPlayer p) darGuia(p);
+            sync(e.getEntity());
+        });
         PlayerEvent.PlayerRespawnEvent.BUS.addListener(e -> sync(e.getEntity()));
         PlayerEvent.PlayerChangedDimensionEvent.BUS.addListener(e -> sync(e.getEntity()));
+    }
+
+    /** Todo jogador recebe um Guia do Herói ao entrar no mundo pela primeira vez (marca sobrevive à morte). */
+    public static boolean darGuia(ServerPlayer player) {
+        CompoundTag dados = player.getPersistentData();
+        CompoundTag persistente = dados.getCompoundOrEmpty(ServerPlayer.PERSISTED_NBT_TAG);
+        if (persistente.getBooleanOr("dcuniverse_guia", false)) return false;
+        persistente.putBoolean("dcuniverse_guia", true);
+        dados.put(ServerPlayer.PERSISTED_NBT_TAG, persistente);
+        ItemStack guia = new ItemStack(Itens.GUIA_HEROI.get());
+        if (!player.getInventory().add(guia)) player.drop(guia, false);
+        return true;
     }
 
     static void tick(ServerPlayer player) {

@@ -9,6 +9,11 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -32,16 +37,32 @@ public final class Itens {
         p -> new TransformacaoItem("batman", p.rarity(Rarity.EPIC)));
 
     // Gadgets e munição
-    public static final RegistryObject<Item> BATARANGUE = item("batarangue_simples", p -> new Item(p.stacksTo(16)));
+    public static final RegistryObject<Item> BATARANGUE = item("batarangue_simples", p -> new BatarangueItem(p.stacksTo(16)));
+
+    // Recursos e componentes (docs/dados/itens.json; receitas geradas por tools/gerar_conteudo.py)
+    public static final RegistryObject<Item> FRAGMENTO_KRYPTONITA = item("fragmento_kryptonita", Item::new);
+    public static final RegistryObject<Item> FRAGMENTO_ALIENIGENA = item("fragmento_alienigena", Item::new);
+    public static final RegistryObject<Item> CRISTAL_KRYPTONIANO = item("cristal_kryptoniano", p -> new Item(p.rarity(Rarity.RARE)));
+    public static final RegistryObject<Item> PLACA_CIRCUITO = item("placa_circuito", Item::new);
+    public static final RegistryObject<Item> COMPONENTE_TECNOLOGICO = item("componente_tecnologico", Item::new);
+    public static final RegistryObject<Item> TECIDO_TATICO = item("tecido_tatico", Item::new);
+    public static final RegistryObject<Item> NUCLEO_META_1 = item("nucleo_meta_1", Item::new);
+    public static final RegistryObject<Item> NUCLEO_META_2 = item("nucleo_meta_2", p -> new Item(p.rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> NUCLEO_META_3 = item("nucleo_meta_3", p -> new Item(p.rarity(Rarity.RARE)));
+    public static final RegistryObject<Item> NUCLEO_META_4 = item("nucleo_meta_4", p -> new Item(p.rarity(Rarity.EPIC)));
+
+    // Utilidades
+    public static final RegistryObject<Item> GUIA_HEROI = item("guia_heroi", p -> new Item(p.stacksTo(1)));
+    public static final RegistryObject<Item> COMUNICADOR_LIGA = item("comunicador_liga", p -> new Item(p.stacksTo(1)));
+    public static final RegistryObject<Item> TORTA_MARTHA = item("torta_martha", p -> new TortaItem(p.food(
+        new FoodProperties.Builder().nutrition(8).saturationModifier(0.6f).build(),
+        Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 0))).build())));
 
     public static final RegistryObject<CreativeModeTab> ABA = ABAS.register("dcuniverse", () -> CreativeModeTab.builder()
         .title(Component.translatable("itemGroup.dcuniverse"))
         .icon(() -> new ItemStack(CRISTAL_SUPERMAN.get()))
-        .displayItems((params, out) -> {
-            out.accept(CRISTAL_SUPERMAN.get());
-            out.accept(CINTO_BATMAN.get());
-            out.accept(BATARANGUE.get());
-        })
+        .displayItems((params, out) -> ITEMS.getEntries().stream().map(RegistryObject::get)
+            .filter(i -> !(i instanceof TrajeItem)).forEach(out::accept))
         .build());
 
     private Itens() {}

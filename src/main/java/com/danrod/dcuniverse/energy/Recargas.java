@@ -23,6 +23,9 @@ public final class Recargas {
         },
         // Bônus no escuro (personagens sombrios; Batman à noite).
         "darkness", (player, p) -> player.level().getMaxLocalRawBrightness(BlockPos.containing(player.getEyePosition())) <= p.i("max_light", 4)
+            ? p.f("per_second", 0f) : 0f,
+        // Kryptonita por perto ou no inventário (per_second negativo): drena e, ao zerar, anula os poderes.
+        "kryptonite", (player, p) -> Kryptonita.exposto(player, p.i("ore_radius", 6), p.i("block_radius", 10))
             ? p.f("per_second", 0f) : 0f
     );
 

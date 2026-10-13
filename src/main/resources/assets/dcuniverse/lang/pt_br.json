@@ -23,5 +23,21 @@
   "dcuniverse.msg.personagem_desconhecido": "Personagem desconhecido: %s",
   "dcuniverse.msg.espera_transformacao": "Aguarde %s s para transformar de novo",
   "dcuniverse.msg.canalizando": "Termine a habilidade antes de destransformar",
-  "dcuniverse.msg.sem_energia": "Energia insuficiente"
+  "dcuniverse.msg.sem_energia": "Energia insuficiente",
+  "block.dcuniverse.batcomputador": "Batcomputador",
+  "block.dcuniverse.bloco_kryptonita": "Bloco de Kryptonita",
+  "item.dcuniverse.componente_tecnologico": "Componente Tecnológico",
+  "item.dcuniverse.comunicador_liga": "Comunicador da Liga",
+  "item.dcuniverse.cristal_kryptoniano": "Cristal Kryptoniano",
+  "item.dcuniverse.fragmento_alienigena": "Fragmento Alienígena",
+  "item.dcuniverse.fragmento_kryptonita": "Fragmento de Kryptonita",
+  "item.dcuniverse.guia_heroi": "Guia do Herói",
+  "block.dcuniverse.minerio_kryptonita": "Minério de Kryptonita",
+  "item.dcuniverse.nucleo_meta_1": "Núcleo Meta-Humano I",
+  "item.dcuniverse.nucleo_meta_2": "Núcleo Meta-Humano II",
+  "item.dcuniverse.nucleo_meta_3": "Núcleo Meta-Humano III",
+  "item.dcuniverse.nucleo_meta_4": "Núcleo Meta-Humano IV",
+  "item.dcuniverse.placa_circuito": "Placa de Circuito",
+  "item.dcuniverse.tecido_tatico": "Tecido Tático",
+  "item.dcuniverse.torta_martha": "Torta da Martha"
 }

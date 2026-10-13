@@ -5,7 +5,10 @@
   "energy": {
     "max": 300,
     "regen": 1.5,
-    "recharge": [ { "type": "sunlight", "per_second": 3.0 } ]
+    "recharge": [
+      { "type": "sunlight", "per_second": 3.0 },
+      { "type": "kryptonite", "per_second": -20.0, "ore_radius": 6, "block_radius": 10 }
+    ]
   },
   "suit": [ "chest", "legs", "feet" ],
   "passives": [

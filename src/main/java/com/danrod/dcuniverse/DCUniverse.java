@@ -1,6 +1,8 @@
 package com.danrod.dcuniverse;
 
+import com.danrod.dcuniverse.content.Blocos;
 import com.danrod.dcuniverse.content.Entidades;
+import com.danrod.dcuniverse.world.Mundo;
 import com.danrod.dcuniverse.content.Itens;
 import com.danrod.dcuniverse.core.Config;
 import com.danrod.dcuniverse.core.Eventos;
@@ -22,7 +24,9 @@ public final class DCUniverse {
 
     public DCUniverse(FMLJavaModLoadingContext context) {
         var bus = context.getModBusGroup();
+        Blocos.BLOCKS.register(bus);
         Itens.ITEMS.register(bus);
+        Mundo.FEATURES.register(bus);
         Itens.ABAS.register(bus);
         Entidades.TIPOS.register(bus);
         Testes.FUNCOES.register(bus);

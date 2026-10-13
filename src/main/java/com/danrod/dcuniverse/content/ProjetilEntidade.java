@@ -12,7 +12,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -61,6 +64,13 @@ public class ProjetilEntidade extends ThrowableItemProjectile {
         if (level() instanceof ServerLevel level && level.getBlockState(hit.getBlockPos()).is(Blocks.COBWEB)
             && (!(getOwner() instanceof ServerPlayer dono) || level.mayInteract(dono, hit.getBlockPos()))) {
             level.destroyBlock(hit.getBlockPos(), true, getOwner());
+        }
+        // Aciona botões à distância.
+        if (!level().isClientSide()) {
+            BlockState estado = level().getBlockState(hit.getBlockPos());
+            if (estado.getBlock() instanceof ButtonBlock botao && !estado.getValue(ButtonBlock.POWERED)) {
+                botao.press(estado, level(), hit.getBlockPos(), getOwner() instanceof Player pl ? pl : null);
+            }
         }
     }
 

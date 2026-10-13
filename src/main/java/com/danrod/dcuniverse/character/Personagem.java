@@ -49,6 +49,11 @@ public record Personagem(
         return null;
     }
 
+    /** Kryptoniano = sofre com kryptonita (recarga "kryptonite"); a Torta da Martha também usa isso. */
+    public boolean kryptoniano() {
+        return energia.recargas().stream().anyMatch(r -> r.tipo().equals("kryptonite"));
+    }
+
     public String chaveNome() {
         return "personagem." + id.getNamespace() + "." + id.getPath();
     }

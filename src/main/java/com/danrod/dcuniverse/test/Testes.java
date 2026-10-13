@@ -4,7 +4,14 @@ import com.danrod.dcuniverse.DCUniverse;
 import com.danrod.dcuniverse.character.EstadoJogador;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Transformacao;
+import com.danrod.dcuniverse.content.Blocos;
 import com.danrod.dcuniverse.content.Itens;
+import com.danrod.dcuniverse.content.TortaItem;
+import com.danrod.dcuniverse.core.Eventos;
+import com.danrod.dcuniverse.energy.Kryptonita;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.component.DataComponents;
 import com.danrod.dcuniverse.core.Rede;
 import com.danrod.dcuniverse.energy.Energia;
 import com.danrod.dcuniverse.suit.Traje;
@@ -35,6 +42,8 @@ public final class Testes {
         FUNCOES.register("suit_lock", () -> Testes::trajeTravado);
         FUNCOES.register("energy", () -> Testes::energia);
         FUNCOES.register("sync", () -> Testes::sincronizacao);
+        FUNCOES.register("kryptonite", () -> Testes::kryptonita);
+        FUNCOES.register("content", () -> Testes::conteudo);
     }
 
     private Testes() {}
@@ -109,6 +118,49 @@ public final class Testes {
         Rede.Sync s = Rede.Sync.decode(buf);
         h.assertValueEqual(s.personagem(), SUPERMAN.toString(), "personagem no sync");
         h.assertTrue(s.habilidades().stream().anyMatch(x -> x.id().equals("heat_vision") && x.hold()), "visão de calor canalizada");
+        h.succeed();
+    }
+
+    /** Bloco de Kryptonita a 3 blocos drena o Superman; longe dele a energia volta a subir. */
+    static void kryptonita(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        BlockPos bloco = h.absolutePos(new BlockPos(0, 1, 0));
+        h.getLevel().setBlockAndUpdate(bloco, Blocos.BLOCO_KRYPTONITA.get().defaultBlockState());
+        p.setPos(bloco.getX() + 3.5, bloco.getY(), bloco.getZ() + 0.5);
+        Transformacao.transformar(p, SUPERMAN, true);
+        Personagem sup = EstadoJogador.de(p).personagem();
+        h.assertTrue(sup.kryptoniano(), "Superman é kryptoniano");
+        float antes = EstadoJogador.de(p).energia();
+        Energia.tick(p, sup);
+        h.assertTrue(EstadoJogador.de(p).energia() < antes, "kryptonita perto drena energia");
+        h.assertTrue(Kryptonita.perto(p, 6, 10), "bloco detectado a 3 blocos");
+        h.assertFalse(Kryptonita.perto(p, 6, 2), "fora do raio do bloco");
+        p.getInventory().add(new ItemStack(Itens.FRAGMENTO_KRYPTONITA.get()));
+        h.assertTrue(Kryptonita.noInventario(p), "fragmento no inventário conta");
+        h.succeed();
+    }
+
+    /** Receitas geradas carregam, o Guia é dado uma vez só e a Torta recarrega kryptonianos. */
+    static void conteudo(GameTestHelper h) {
+        var receitas = h.getLevel().getServer().getRecipeManager();
+        for (String id : new String[] {"cristal_superman", "cinto_batman", "nucleo_meta_1", "batarangue_simples"}) {
+            var chave = ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(DCUniverse.MODID, id));
+            h.assertTrue(receitas.byKey(chave).isPresent(), "receita " + id);
+        }
+        ServerPlayer p = jogador(h);
+        h.assertTrue(Eventos.darGuia(p), "primeiro login recebe o guia");
+        h.assertFalse(Eventos.darGuia(p), "só uma vez");
+        h.assertTrue(p.getInventory().contains(s -> s.is(Itens.GUIA_HEROI.get())), "guia no inventário");
+
+        Transformacao.transformar(p, SUPERMAN, true);
+        Personagem sup = EstadoJogador.de(p).personagem();
+        float antes = EstadoJogador.de(p).energia();
+        h.assertTrue(TortaItem.recarregar(p), "torta recarrega kryptoniano");
+        h.assertValueEqual(EstadoJogador.de(p).energia(), antes + sup.energia().max() * TortaItem.ENERGIA, "torta devolve 10%");
+        var comida = new ItemStack(Itens.TORTA_MARTHA.get()).get(DataComponents.FOOD);
+        h.assertTrue(comida != null && comida.nutrition() == 8, "torta dá 8 de fome");
+        Transformacao.transformar(p, BATMAN, true);
+        h.assertFalse(TortaItem.recarregar(p), "Batman não é kryptoniano");
         h.succeed();
     }
 }

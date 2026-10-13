@@ -3,6 +3,8 @@
 Para cada chave item.dcuniverse.<id> do en_us.json, cria em <saida>/assets/dcuniverse/:
 - items/<id>.json e models/item/<id>.json, se não existirem em src/main/resources;
 - textures/item/<id>.png 16x16 com a cor principal do item, se não houver arte própria.
+Para cada chave block.dcuniverse.<id>, cria blockstates/<id>.json, models/block/<id>.json (cube_all),
+items/<id>.json e textures/block/<id>.png 16x16 (pedra salpicada com a cor do bloco).
 Quando a arte de verdade entra em src/main/resources, o provisório deixa de ser gerado.
 Uso: python3 -I tools/recursos_provisorios.py --raiz . --saida build/generated/provisorio
 """
@@ -20,7 +22,13 @@ CORES = {
     "cristal_superman": (40, 90, 220),
     "cinto_batman": (230, 190, 40),
     "batarangue_simples": (35, 35, 40),
+    "minerio_kryptonita": (60, 230, 70),
+    "bloco_kryptonita": (60, 230, 70),
+    "fragmento_kryptonita": (60, 230, 70),
+    "batcomputador": (25, 25, 30),
 }
+# Fundo dos blocos: minério sobre ardósia; os demais usam a própria cor.
+FUNDO = {"minerio_kryptonita": (70, 70, 78)}
 # Formato do ícone: (linhas de 16 caracteres) '#' = cor, '+' = cor clara, '.' = transparente.
 GEMA = [
     "................",
@@ -79,6 +87,21 @@ def textura(item_id):
     return png(final, 16, 16)
 
 
+def textura_bloco(bloco_id):
+    """Fundo com ruído e manchas da cor do bloco (minério) ou bloco liso com ruído."""
+    cor = cor_de(bloco_id)
+    fundo = FUNDO.get(bloco_id, cor)
+    h = hashlib.sha1(bloco_id.encode()).digest() * 20
+    pixels = []
+    for i in range(256):
+        x, y = i % 16, i // 16
+        ruido = (h[i] % 25) - 12
+        mancha = bloco_id in FUNDO and ((x * 7 + y * 13 + h[i // 8]) % 11 == 0 or (x + y * 3) % 17 == 0)
+        base = cor if mancha else fundo
+        pixels.append(tuple(max(0, min(255, c + ruido)) for c in base) + (255,))
+    return png(pixels, 16, 16)
+
+
 def escrever(arq, conteudo):
     arq.parent.mkdir(parents=True, exist_ok=True)
     if isinstance(conteudo, str):
@@ -108,7 +131,20 @@ def main():
         if not (rec / f"textures/item/{i}.png").exists():
             escrever(saida / f"textures/item/{i}.png", textura(i))
             geradas += 1
-    print(f"recursos provisórios: {len(itens)} itens, {geradas} texturas provisórias")
+    blocos = sorted(k.split(".", 2)[2] for k in lang if k.startswith(f"block.{NS}."))
+    for b in blocos:
+        modelo = f"{NS}:block/{b}"
+        if not (rec / f"blockstates/{b}.json").exists():
+            escrever(saida / f"blockstates/{b}.json", json.dumps({"variants": {"": {"model": modelo}}}, indent=2))
+        if not (rec / f"models/block/{b}.json").exists():
+            escrever(saida / f"models/block/{b}.json",
+                     json.dumps({"parent": "minecraft:block/cube_all", "textures": {"all": modelo}}, indent=2))
+        if not (rec / f"items/{b}.json").exists():
+            escrever(saida / f"items/{b}.json", json.dumps({"model": {"type": "minecraft:model", "model": modelo}}, indent=2))
+        if not (rec / f"textures/block/{b}.png").exists():
+            escrever(saida / f"textures/block/{b}.png", textura_bloco(b))
+            geradas += 1
+    print(f"recursos provisórios: {len(itens)} itens, {len(blocos)} blocos, {geradas} texturas provisórias")
 
 
 if __name__ == "__main__":

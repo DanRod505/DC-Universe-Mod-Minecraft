@@ -1,7 +1,7 @@
 {
   "mod.dcuniverse.nome": "DC Universe",
   "itemGroup.dcuniverse": "DC Universe",
-  "item.dcuniverse.cristal_superman": "House of El Crystal",
+  "item.dcuniverse.cristal_superman": "Crystal of the House of El",
   "item.dcuniverse.cinto_batman": "Utility Belt",
   "item.dcuniverse.batarangue_simples": "Batarang",
   "item.dcuniverse.traje_cabeca": "Suit (head)",
@@ -23,5 +23,21 @@
   "dcuniverse.msg.personagem_desconhecido": "Unknown character: %s",
   "dcuniverse.msg.espera_transformacao": "Wait %s s to transform again",
   "dcuniverse.msg.canalizando": "Finish the ability before untransforming",
-  "dcuniverse.msg.sem_energia": "Not enough energy"
+  "dcuniverse.msg.sem_energia": "Not enough energy",
+  "block.dcuniverse.batcomputador": "Batcomputer",
+  "block.dcuniverse.bloco_kryptonita": "Block of Kryptonite",
+  "item.dcuniverse.componente_tecnologico": "Tech Component",
+  "item.dcuniverse.comunicador_liga": "League Communicator",
+  "item.dcuniverse.cristal_kryptoniano": "Kryptonian Crystal",
+  "item.dcuniverse.fragmento_alienigena": "Alien Fragment",
+  "item.dcuniverse.fragmento_kryptonita": "Kryptonite Shard",
+  "item.dcuniverse.guia_heroi": "Hero's Guide",
+  "block.dcuniverse.minerio_kryptonita": "Kryptonite Ore",
+  "item.dcuniverse.nucleo_meta_1": "Meta-Human Core I",
+  "item.dcuniverse.nucleo_meta_2": "Meta-Human Core II",
+  "item.dcuniverse.nucleo_meta_3": "Meta-Human Core III",
+  "item.dcuniverse.nucleo_meta_4": "Meta-Human Core IV",
+  "item.dcuniverse.placa_circuito": "Circuit Board",
+  "item.dcuniverse.tecido_tatico": "Tactical Fabric",
+  "item.dcuniverse.torta_martha": "Martha's Pie"
 }

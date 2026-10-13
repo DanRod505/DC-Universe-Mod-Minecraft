@@ -93,7 +93,7 @@ def preparar(v, personagens, mundo, itens, nomes):
                       "missoes_nomes": [m["nome"] for m in ms],
                       "bosses_nomes": [bosses[b]["nome"] for b in bs],
                       "npcs_nomes": sorted({n["nome"] for n in mundo["npcs"]["npcs"] if n["local"] in locais}),
-                      "mobs_nomes": [], "itens_nomes": sorted(nomes.get(i, i) for i in novos)})
+                      "mobs_nomes": [], "itens_ids": sorted(novos), "itens_nomes": sorted(nomes.get(i, i) for i in novos)})
     restantes = sorted(nomes.get(i, i) for i in catalogo - visto)
     if restantes:  # itens que nada puxa ainda entram no lançamento
         saida[-1]["itens_nomes"] += restantes
