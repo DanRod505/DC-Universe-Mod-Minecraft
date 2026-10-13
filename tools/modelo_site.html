@@ -1,0 +1,172 @@
+<title>Planejamento DC Universe Mod</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: cabeçalho com contagem, abas, filtros e grade de fichas de personagem que expandem */
+:root {
+  --bg: #f3f5f9; --surface: #ffffff; --fg: #141a2b; --muted: #5a6378; --line: #d9dfea;
+  --accent: #1d4ed8; --gold: #b7791f;
+  --heroi: #1d4ed8; --ajudante: #0f766e; --anti: #7c3aed; --vilao: #c2262d;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0c1120; --surface: #151c30; --fg: #e8ecf6; --muted: #98a2bb; --line: #26304a;
+  --accent: #7aa2ff; --gold: #f2c14e;
+  --heroi: #7aa2ff; --ajudante: #4fd1c5; --anti: #b794f6; --vilao: #ff7b7f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0c1120; --surface: #151c30; --fg: #e8ecf6; --muted: #98a2bb; --line: #26304a;
+  --accent: #7aa2ff; --gold: #f2c14e;
+  --heroi: #7aa2ff; --ajudante: #4fd1c5; --anti: #b794f6; --vilao: #ff7b7f; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; }
+header { display: grid; gap: 8px; padding-block-end: 16px; border-bottom: 2px solid var(--fg); }
+.eyebrow { font: 600 13px var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+h1 { font: 700 clamp(34px, 6vw, 56px)/1 var(--display); margin: 0; text-wrap: balance; letter-spacing: .01em; }
+.meta { color: var(--muted); margin: 0; }
+.counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.count { font: 600 14px var(--body); padding: 2px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); font-variant-numeric: tabular-nums; }
+.count b { color: var(--c); }
+nav { display: flex; gap: 4px; margin-block: 20px 16px; border-bottom: 1px solid var(--line); }
+nav button { font: 700 20px var(--display); letter-spacing: .03em; text-transform: uppercase; background: none; border: 0; color: var(--muted); padding: 8px 14px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+nav button[aria-selected="true"] { color: var(--fg); border-color: var(--gold); }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.tools input { flex: 1 1 220px; min-width: 0; font: 16px var(--body); padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--fg); }
+.chip { font: 600 14px var(--body); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.toggle { margin-left: auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 6px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card .top { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+.card h3 { font: 700 23px/1.1 var(--display); margin: 0; letter-spacing: .01em; }
+.num { font: 600 13px var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tag { font: 600 11px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--c); white-space: nowrap; }
+.exp { margin: 0; font-style: italic; }
+.reusa { font-size: 14px; color: var(--muted); margin: 0; }
+.reusa b { color: var(--fg); font-weight: 600; }
+details summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: 15px; }
+details dl { margin: 8px 0 0; display: grid; gap: 8px; }
+dt { font: 600 12px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+dd { margin: 0; }
+dd ul { margin: 2px 0 0; padding-left: 18px; }
+.energia { border-left: 3px solid var(--gold); padding-left: 8px; }
+.empty { color: var(--muted); padding: 24px 0; }
+#plano { max-width: 78ch; }
+#plano h1 { font-size: 40px; margin-block: 8px 12px; }
+#plano h2 { font: 700 28px/1.15 var(--display); margin-block: 32px 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+#plano h3 { font: 700 21px var(--display); margin-block: 20px 6px; }
+#plano .tbl { overflow-x: auto; }
+#plano table { border-collapse: collapse; font-size: 15px; width: 100%; }
+#plano th, #plano td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+#plano th { background: var(--surface); }
+#plano pre { background: var(--surface); border: 1px solid var(--line); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+#plano code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
+#plano blockquote { margin: 0; padding: 8px 12px; border-left: 3px solid var(--gold); background: var(--surface); }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Minecraft Java 26.2 · Forge 65.1.0</span>
+    <h1>DC Universe Mod</h1>
+    <p class="meta">Planejamento: 100 personagens jogáveis, a experiência de cada um e as habilidades que a entregam.</p>
+    <div class="counts" id="counts"></div>
+  </header>
+
+  <nav role="tablist">
+    <button role="tab" id="tab-personagens" aria-selected="true" data-aba="personagens">Personagens</button>
+    <button role="tab" id="tab-planejamento" aria-selected="false" data-aba="planejamento">Planejamento</button>
+  </nav>
+
+  <section id="aba-personagens">
+    <div class="tools">
+      <input id="busca" type="search" placeholder="Buscar personagem, poder ou energia" aria-label="Buscar">
+      <div id="filtros" class="tools" style="margin:0"></div>
+      <button class="chip toggle" id="expandir" aria-pressed="false">Abrir todas as fichas</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="vazio" hidden>Nenhum personagem encontrado.</p>
+  </section>
+
+  <section id="aba-planejamento" hidden>
+    <article id="plano"></article>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+const PERSONAGENS = /*__PERSONAGENS__*/[];
+const PLANO = /*__PLANO__*/"";
+const CATS = { heroi: "Heróis", ajudante: "Ajudantes", anti: "Anti-heróis", vilao: "Vilões" };
+const CAT1 = { heroi: "Herói", ajudante: "Ajudante", anti: "Anti-herói", vilao: "Vilão" };
+const CAMPOS = [["nat", "Naturais (ativam pela ação)"], ["ativ", "Poderes e combate (menu radial)"],
+  ["equip", "Armas, ferramentas e invocações"], ["surv", "Utilidade no survival"]];
+const porN = Object.fromEntries(PERSONAGENS.map(p => [p.n, p]));
+let filtro = "todos", abertas = false;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const cor = c => `var(--${c})`;
+
+document.getElementById("counts").innerHTML =
+  `<span class="count" style="--c:var(--fg)"><b>${PERSONAGENS.length}</b> personagens</span>` +
+  Object.entries(CATS).map(([k, v]) =>
+    `<span class="count" style="--c:${cor(k)}"><b>${PERSONAGENS.filter(p => p.cat === k).length}</b> ${v}</span>`).join("");
+
+const filtros = document.getElementById("filtros");
+filtros.innerHTML = [["todos", "Todos"], ...Object.entries(CATS)].map(([k, v]) =>
+  `<button class="chip" data-cat="${k}" aria-pressed="${k === filtro}">${v}</button>`).join("");
+filtros.addEventListener("click", e => {
+  const b = e.target.closest("[data-cat]"); if (!b) return;
+  filtro = b.dataset.cat;
+  filtros.querySelectorAll("[data-cat]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+});
+
+function ficha(p) {
+  const reusa = p.reusa_n ? `<p class="reusa">Reaproveita sistemas de <b>${esc(porN[p.reusa_n].nome)}</b></p>` : "";
+  const dl = CAMPOS.map(([k, r]) => `<div><dt>${r}</dt><dd><ul>${p[k].map(i => `<li>${esc(i)}</li>`).join("")}</ul></dd></div>`).join("");
+  return `<article class="card" style="--c:${cor(p.cat)}">
+    <div class="top"><h3>${esc(p.nome)}</h3><span class="num">#${p.n}</span></div>
+    <span class="tag">${CAT1[p.cat]}</span>
+    <p class="exp">${esc(p.exp)}</p>${reusa}
+    <details${abertas ? " open" : ""}><summary>Habilidades</summary><dl>${dl}
+      <div class="energia"><dt>Energia</dt><dd>${esc(p.energia)}</dd></div></dl></details>
+  </article>`;
+}
+
+function render() {
+  const q = document.getElementById("busca").value.trim().toLowerCase();
+  const lista = PERSONAGENS.filter(p => (filtro === "todos" || p.cat === filtro) &&
+    (!q || JSON.stringify(p).toLowerCase().includes(q)));
+  document.getElementById("grid").innerHTML = lista.map(ficha).join("");
+  document.getElementById("vazio").hidden = lista.length > 0;
+}
+document.getElementById("busca").addEventListener("input", render);
+document.getElementById("expandir").addEventListener("click", e => {
+  abertas = !abertas;
+  e.target.setAttribute("aria-pressed", abertas);
+  e.target.textContent = abertas ? "Fechar todas as fichas" : "Abrir todas as fichas";
+  render();
+});
+
+function plano() {
+  const el = document.getElementById("plano");
+  if (el.dataset.ok) return;
+  el.innerHTML = window.marked ? marked.parse(PLANO) : `<pre>${esc(PLANO)}</pre>`;
+  el.querySelectorAll("table").forEach(t => { const d = document.createElement("div"); d.className = "tbl"; t.before(d); d.append(t); });
+  el.dataset.ok = 1;
+}
+
+function aba(nome) {
+  document.querySelectorAll("[role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
+  document.getElementById("aba-personagens").hidden = nome !== "personagens";
+  document.getElementById("aba-planejamento").hidden = nome !== "planejamento";
+  if (nome === "planejamento") plano();
+}
+document.querySelector("nav").addEventListener("click", e => {
+  const b = e.target.closest("[data-aba]"); if (b) { aba(b.dataset.aba); history.replaceState(null, "", "#" + b.dataset.aba); }
+});
+
+render();
+if (location.hash === "#planejamento") aba("planejamento");
+</script>

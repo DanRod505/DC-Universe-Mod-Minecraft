@@ -210,6 +210,8 @@ Os verificadores leem os arquivos gerados pelo datagen, então rodam em segundos
 
 ## 6. Personagens sugeridos (para validar)
 
+> A lista completa dos 100 personagens, com a experiência e as habilidades de cada um, está em [PERSONAGENS.md](PERSONAGENS.md) (gerada de `docs/dados/personagens.json` por `tools/gerar_docs.py`, que também gera a página `docs/site/index.html`). As fases abaixo definem a ordem de implementação.
+
 A ordem prioriza quem testa mais sistemas novos primeiro; os seguintes reaproveitam.
 
 ### Fase 1: núcleo (cada um introduz sistemas)
