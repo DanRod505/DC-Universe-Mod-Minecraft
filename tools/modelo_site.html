@@ -1,0 +1,442 @@
+<title>Planejamento DC Universe Mod</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: cabeçalho com contagem, abas, filtros e grade de fichas de personagem que expandem */
+:root {
+  --bg: #f3f5f9; --surface: #ffffff; --fg: #141a2b; --muted: #5a6378; --line: #d9dfea;
+  --accent: #1d4ed8; --gold: #b7791f;
+  --heroi: #1d4ed8; --ajudante: #0f766e; --anti: #7c3aed; --vilao: #c2262d;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0c1120; --surface: #151c30; --fg: #e8ecf6; --muted: #98a2bb; --line: #26304a;
+  --accent: #7aa2ff; --gold: #f2c14e;
+  --heroi: #7aa2ff; --ajudante: #4fd1c5; --anti: #b794f6; --vilao: #ff7b7f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0c1120; --surface: #151c30; --fg: #e8ecf6; --muted: #98a2bb; --line: #26304a;
+  --accent: #7aa2ff; --gold: #f2c14e;
+  --heroi: #7aa2ff; --ajudante: #4fd1c5; --anti: #b794f6; --vilao: #ff7b7f; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; }
+header { display: grid; gap: 8px; padding-block-end: 16px; border-bottom: 2px solid var(--fg); }
+.eyebrow { font: 600 13px var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+h1 { font: 700 clamp(34px, 6vw, 56px)/1 var(--display); margin: 0; text-wrap: balance; letter-spacing: .01em; }
+.meta { color: var(--muted); margin: 0; }
+.counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.count { font: 600 14px var(--body); padding: 2px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); font-variant-numeric: tabular-nums; }
+.count b { color: var(--c); }
+nav { display: flex; flex-wrap: wrap; gap: 4px; margin-block: 20px 16px; border-bottom: 1px solid var(--line); }
+nav button { font: 700 20px var(--display); letter-spacing: .03em; text-transform: uppercase; background: none; border: 0; color: var(--muted); padding: 8px 14px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+nav button[aria-selected="true"] { color: var(--fg); border-color: var(--gold); }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.tools input { flex: 1 1 220px; min-width: 0; font: 16px var(--body); padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--fg); }
+.chip { font: 600 14px var(--body); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.toggle { margin-left: auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 6px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card .top { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+.card h3 { font: 700 23px/1.1 var(--display); margin: 0; letter-spacing: .01em; }
+.num { font: 600 13px var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tag { font: 600 11px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--c); white-space: nowrap; }
+.exp { margin: 0; font-style: italic; }
+.reusa { font-size: 14px; color: var(--muted); margin: 0; }
+.reusa b { color: var(--fg); font-weight: 600; }
+.supremo { display: grid; gap: 2px; padding: 8px 10px; border-radius: 4px; background: color-mix(in srgb, var(--gold) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line)); font-size: 15px; }
+.supremo strong { font: 700 19px/1.15 var(--display); letter-spacing: .02em; }
+.sup-rot { font: 600 11px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+details summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: 15px; }
+details dl { margin: 8px 0 0; display: grid; gap: 8px; }
+dt { font: 600 12px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+dd { margin: 0; }
+dd ul { margin: 2px 0 0; padding-left: 18px; }
+.energia { border-left: 3px solid var(--gold); padding-left: 8px; }
+.empty { color: var(--muted); padding: 24px 0; }
+.md { max-width: 78ch; }
+nav { flex-wrap: wrap; }
+.stats { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--fg); font-weight: 600; }
+.sec { font: 700 28px/1.15 var(--display); margin-block: 32px 4px; }
+.tbl { overflow-x: auto; }
+table.fichas { border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.fichas th, table.fichas td { border-bottom: 1px solid var(--line); padding: 5px 8px; text-align: right; }
+table.fichas th { position: sticky; top: 0; background: var(--bg); cursor: pointer; user-select: none; font-weight: 600; }
+table.fichas th[aria-sort] { color: var(--accent); }
+table.fichas td:nth-child(2), table.fichas th:nth-child(2), table.fichas td:last-child { text-align: left; }
+table.fichas td:nth-child(2) { font-weight: 600; border-left: 3px solid var(--c); }
+table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(--muted); }
+.sistema { margin-block: 28px 12px; }
+.sistema h2 { font: 700 28px/1.15 var(--display); margin: 0 0 4px; }
+.sistema > p { margin: 0 0 12px; max-width: 78ch; color: var(--muted); }
+.arma h3 { font: 700 21px/1.1 var(--display); margin: 0; }
+.arma ul { margin: 0; padding-left: 18px; }
+.receita { display: grid; grid-template-columns: repeat(3, minmax(0, 76px)); gap: 3px; margin-block: 6px; }
+.receita span { aspect-ratio: 1; max-width: 100%; display: grid; place-items: center; text-align: center; font-size: 10.5px; line-height: 1.15; padding: 3px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); overflow-wrap: anywhere; }
+.receita span.n { border-color: var(--gold); font-weight: 600; }
+.receita span:empty { opacity: .45; }
+.receita-legenda { font-size: 13px; color: var(--muted); margin: 0; }
+.transf { display: grid; gap: 2px; font-size: 15px; }
+.transf b { font-weight: 600; }
+.cat-itens h2 { font: 700 28px/1.15 var(--display); margin: 28px 0 12px; }
+.chips-usado { font-size: 13px; color: var(--muted); margin: 0; }
+.lista-kv { margin: 0; display: grid; gap: 4px; font-size: 14px; }
+.lista-kv b { font-weight: 600; }
+.pill { display: inline-block; font: 600 11px var(--body); letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--c); color: var(--c); }
+.fases { margin: 0; padding-left: 18px; font-size: 14px; }
+.donos { font-size: 14px; color: var(--muted); margin: 0; }
+.corpo { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; }
+.corpo span { font-size: 12px; padding: 1px 7px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+.skin-base { margin: 0; font-size: 14.5px; }
+.skin-base b { font-weight: 600; }
+.alts { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
+.alts .como { color: var(--gold); font-weight: 600; font-size: 12.5px; }
+.regras-skins { margin-block: 4px 16px; }
+.regras-skins summary { cursor: pointer; font-weight: 600; }
+.regras-skins .lista-kv { margin-top: 8px; max-width: 90ch; }
+.md h1 { font-size: 40px; margin-block: 8px 12px; }
+.md h2 { font: 700 28px/1.15 var(--display); margin-block: 32px 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.md h3 { font: 700 21px var(--display); margin-block: 20px 6px; }
+.md .tbl { overflow-x: auto; }
+.md table { border-collapse: collapse; font-size: 15px; width: 100%; }
+.md th, .md td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+.md th { background: var(--surface); }
+.md pre { background: var(--surface); border: 1px solid var(--line); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+.md code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
+.md blockquote { margin: 0; padding: 8px 12px; border-left: 3px solid var(--gold); background: var(--surface); }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Minecraft Java 26.2 · Forge 65.1.0</span>
+    <h1>DC Universe Mod</h1>
+    <p class="meta">Planejamento: 100 personagens jogáveis, a experiência de cada um e as habilidades que a entregam.</p>
+    <div class="counts" id="counts"></div>
+  </header>
+
+  <nav role="tablist">
+    <button role="tab" id="tab-personagens" aria-selected="true" data-aba="personagens">Personagens</button>
+    <button role="tab" id="tab-fichas" aria-selected="false" data-aba="fichas">Fichas</button>
+    <button role="tab" id="tab-armas" aria-selected="false" data-aba="armas">Armas</button>
+    <button role="tab" id="tab-itens" aria-selected="false" data-aba="itens">Itens</button>
+    <button role="tab" id="tab-mundo" aria-selected="false" data-aba="mundo">Mundo</button>
+    <button role="tab" id="tab-skins" aria-selected="false" data-aba="skins">Skins</button>
+    <button role="tab" id="tab-guia" aria-selected="false" data-aba="guia">Guia</button>
+    <button role="tab" id="tab-roteiro" aria-selected="false" data-aba="roteiro">Roteiro</button>
+    <button role="tab" id="tab-planejamento" aria-selected="false" data-aba="planejamento">Planejamento</button>
+  </nav>
+
+  <section id="aba-personagens">
+    <div class="tools">
+      <input id="busca" type="search" placeholder="Buscar personagem, poder ou energia" aria-label="Buscar">
+      <div id="filtros" class="tools" style="margin:0"></div>
+      <button class="chip toggle" id="expandir" aria-pressed="false">Abrir todas as fichas</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="vazio" hidden>Nenhum personagem encontrado.</p>
+  </section>
+
+  <section id="aba-fichas" hidden>
+    <article class="md" id="balanc"></article>
+    <h2 class="sec">Fichas comparativas</h2>
+    <p class="meta">Clique no cabeçalho de uma coluna para ordenar.</p>
+    <div class="tbl"><table class="fichas" id="tabela-fichas"></table></div>
+  </section>
+
+  <section id="aba-armas" hidden>
+    <div id="armas"></div>
+  </section>
+
+  <section id="aba-itens" hidden>
+    <div class="tools">
+      <input id="busca-itens" type="search" placeholder="Buscar item, ingrediente ou uso" aria-label="Buscar itens">
+    </div>
+    <div id="itens"></div>
+  </section>
+
+  <section id="aba-mundo" hidden>
+    <div class="tools" id="mundo-secoes"></div>
+    <p class="meta" id="mundo-regra"></p>
+    <div id="mundo"></div>
+  </section>
+
+  <section id="aba-skins" hidden>
+    <div class="tools">
+      <input id="busca-skins" type="search" placeholder="Buscar personagem, skin ou desbloqueio" aria-label="Buscar skins">
+      <div id="skins-filtro" class="tools" style="margin:0"></div>
+    </div>
+    <details class="regras-skins"><summary>Como as skins funcionam: arte, corpo, modelos e desbloqueios</summary><div id="skins-regras" class="lista-kv"></div></details>
+    <div id="lista-skins" class="grid"></div>
+  </section>
+
+  <section id="aba-guia" hidden>
+    <article class="md" id="texto-guia"></article>
+  </section>
+
+  <section id="aba-roteiro" hidden>
+    <article class="md" id="texto-roteiro"></article>
+  </section>
+
+  <section id="aba-planejamento" hidden>
+    <article class="md" id="plano"></article>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+const PERSONAGENS = /*__PERSONAGENS__*/[];
+const PLANO = /*__PLANO__*/"";
+const BALANC = /*__BALANC__*/"";
+const ARMAS = /*__ARMAS__*/{};
+const ITENS = /*__ITENS__*/{};
+const MUNDO = /*__MUNDO__*/{};
+const SKINS = /*__SKINS__*/{};
+const GUIA = /*__GUIA__*/"";
+const ROTEIRO = /*__ROTEIRO__*/"";
+const FICHA_COLS = [["nivel", "Nível"], ["vida", "Vida ♥"], ["armadura", "Armadura"], ["dano", "Dano ♥"], ["energia", "Energia"],
+  ["regen", "Regen/s"], ["terra", "Corrida"], ["vmax", "Supervel."], ["voo", "Voo"], ["nado", "Nado"], ["planar", "Planar"]];
+const num = v => v == null ? "–" : String(v).replace(".", ",");
+const CATS = { heroi: "Heróis", ajudante: "Ajudantes", anti: "Anti-heróis", vilao: "Vilões" };
+const TIPOS_SUP = { veiculo: "Veículo", armadura: "Armadura/mecha", construto: "Construto", forma: "Transformação", invocacao: "Invocação", mundo: "Estrutura/terreno" };
+const CAT1 = { heroi: "Herói", ajudante: "Ajudante", anti: "Anti-herói", vilao: "Vilão" };
+const CAMPOS = [["nat", "Naturais (ativam pela ação)"], ["ativ", "Poderes e combate (menu radial)"],
+  ["equip", "Armas, ferramentas e invocações"], ["surv", "Utilidade no survival"]];
+const porN = Object.fromEntries(PERSONAGENS.map(p => [p.n, p]));
+let filtro = "todos", abertas = false;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const cor = c => `var(--${c})`;
+
+document.getElementById("counts").innerHTML =
+  `<span class="count" style="--c:var(--fg)"><b>${PERSONAGENS.length}</b> personagens</span>` +
+  Object.entries(CATS).map(([k, v]) =>
+    `<span class="count" style="--c:${cor(k)}"><b>${PERSONAGENS.filter(p => p.cat === k).length}</b> ${v}</span>`).join("");
+
+const filtros = document.getElementById("filtros");
+filtros.innerHTML = [["todos", "Todos"], ...Object.entries(CATS)].map(([k, v]) =>
+  `<button class="chip" data-cat="${k}" aria-pressed="${k === filtro}">${v}</button>`).join("");
+filtros.addEventListener("click", e => {
+  const b = e.target.closest("[data-cat]"); if (!b) return;
+  filtro = b.dataset.cat;
+  filtros.querySelectorAll("[data-cat]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+});
+
+function stats(f) {
+  const itens = [["Nível", f.nivel], ["Vida", f.vida + " ♥"], ["Armadura", f.armadura], ["Dano", f.dano + " ♥"], ["Energia", f.energia],
+    ["Corrida", f.terra], ["Supervel.", f.vmax], ["Voo", f.voo], ["Nado", f.nado], ["Planar", f.planar]];
+  return itens.filter(([, v]) => v != null).map(([r, v]) => `<span>${r} <b>${num(v)}</b></span>`).join("");
+}
+
+function receitaHtml(r) {
+  if (r.tipo === "shaped") {
+    const g = r.grade.map(l => [...l, ...Array(3 - l.length).fill(null)]);
+    while (g.length < 3) g.push([null, null, null]);
+    const qtd = r.qtd > 1 ? `<p class="receita-legenda">Rende ${r.qtd}</p>` : "";
+    return `<div class="receita">${g.flat().map(c => `<span class="${c && c.startsWith("Núcleo Meta") ? "n" : ""}">${c ? esc(c) : ""}</span>`).join("")}</div>${qtd}`;
+  }
+  if (r.tipo === "shapeless") return `<p class="receita-legenda">Sem forma: ${r.ingredientes.map(esc).join(", ")}${r.qtd > 1 ? ` (rende ${r.qtd})` : ""}</p>`;
+  return `<p class="receita-legenda">Fornalha: ${esc(r.entrada)}</p>`;
+}
+
+function ficha(p) {
+  const reusa = p.reusa_n ? `<p class="reusa">Reaproveita sistemas de <b>${esc(porN[p.reusa_n].nome)}</b></p>` : "";
+  const dl = CAMPOS.map(([k, r]) => `<div><dt>${r}</dt><dd><ul>${p[k].map(i => `<li>${esc(i)}</li>`).join("")}</ul></dd></div>`).join("");
+  return `<article class="card" style="--c:${cor(p.cat)}">
+    <div class="top"><h3>${esc(p.nome)}</h3><span class="num">#${p.n}</span></div>
+    <span class="tag">${CAT1[p.cat]}</span>
+    <p class="exp">${esc(p.exp)}</p>${reusa}
+    <div class="stats">${stats(p.ficha)}</div>
+    <div class="supremo"><span class="sup-rot">Habilidade suprema · ${TIPOS_SUP[p.supremo.tipo]}</span><strong>${esc(p.supremo.nome)}</strong><span>${esc(p.supremo.desc)}</span></div>
+    <details${abertas ? " open" : ""}><summary>Habilidades e transformação</summary><dl>
+      <div><dt>Item de transformação</dt><dd class="transf"><b>${esc(p.transformacao.nome)}</b><span>${esc(p.transformacao.desc)}</span>${receitaHtml(p.transformacao.receita)}</dd></div>${dl}
+      <div class="energia"><dt>Energia</dt><dd>${esc(p.energia)}</dd></div></dl></details>
+  </article>`;
+}
+
+function render() {
+  const q = document.getElementById("busca").value.trim().toLowerCase();
+  const lista = PERSONAGENS.filter(p => (filtro === "todos" || p.cat === filtro) &&
+    (!q || JSON.stringify(p).toLowerCase().includes(q)));
+  document.getElementById("grid").innerHTML = lista.map(ficha).join("");
+  document.getElementById("vazio").hidden = lista.length > 0;
+}
+document.getElementById("busca").addEventListener("input", render);
+document.getElementById("expandir").addEventListener("click", e => {
+  abertas = !abertas;
+  e.target.setAttribute("aria-pressed", abertas);
+  e.target.textContent = abertas ? "Fechar todas as fichas" : "Abrir todas as fichas";
+  render();
+});
+
+function md(id, texto) {
+  const el = document.getElementById(id);
+  if (el.dataset.ok) return;
+  el.innerHTML = window.marked ? marked.parse(texto) : `<pre>${esc(texto)}</pre>`;
+  el.querySelectorAll("table").forEach(t => { const d = document.createElement("div"); d.className = "tbl"; t.before(d); d.append(t); });
+  el.dataset.ok = 1;
+}
+
+let ordem = { col: "n", dir: 1 };
+function tabelaFichas() {
+  const cab = `<thead><tr><th data-col="n">#</th><th data-col="nome">Personagem</th>${FICHA_COLS.map(([c, r]) =>
+    `<th data-col="${c}">${r}</th>`).join("")}<th>Observação</th></tr></thead>`;
+  const val = (p, c) => c === "n" ? p.n : c === "nome" ? p.nome : p.ficha[c];
+  const lista = [...PERSONAGENS].sort((a, b) => {
+    const x = val(a, ordem.col), y = val(b, ordem.col);
+    if (x == null) return 1; if (y == null) return -1;
+    return (typeof x === "string" ? x.localeCompare(y) : x - y) * ordem.dir;
+  });
+  const corpo = lista.map(p => `<tr style="--c:${cor(p.cat)}"><td>${p.n}</td><td>${esc(p.nome)}</td>${FICHA_COLS.map(([c]) =>
+    `<td>${num(p.ficha[c])}</td>`).join("")}<td>${esc(p.ficha.obs || "")}</td></tr>`).join("");
+  const t = document.getElementById("tabela-fichas");
+  t.innerHTML = cab + `<tbody>${corpo}</tbody>`;
+  const th = t.querySelector(`[data-col="${ordem.col}"]`); if (th) th.setAttribute("aria-sort", ordem.dir > 0 ? "ascending" : "descending");
+}
+document.getElementById("tabela-fichas").addEventListener("click", e => {
+  const th = e.target.closest("[data-col]"); if (!th) return;
+  const col = th.dataset.col;
+  ordem = { col, dir: ordem.col === col ? -ordem.dir : (col === "n" || col === "nome" ? 1 : -1) };
+  tabelaFichas();
+});
+
+function armas() {
+  document.getElementById("armas").innerHTML = ARMAS.sistemas.map(s => {
+    const lista = ARMAS.armas.filter(a => a.sistema === s.id);
+    if (!lista.length) return "";
+    return `<section class="sistema"><h2>${esc(s.nome)}</h2><p>${esc(s.desc)}</p><div class="grid">${lista.map(a => `
+      <article class="card arma" style="--c:var(--gold)">
+        <h3>${esc(a.nome)}</h3>
+        <p class="donos">${a.donos.map(n => esc(porN[n].nome)).join(", ")}</p>
+        <div class="stats"><span>Dano <b>${num(a.dano)} ♥</b></span><span>Cooldown <b>${num(a.cooldown)} s</b></span><span>Alcance <b>${num(a.alcance)}</b></span></div>
+        <ul>${a.mecanica.map(m => `<li>${esc(m)}</li>`).join("")}</ul>
+        <p class="reusa"><b>Survival:</b> ${esc(a.survival)}</p>
+      </article>`).join("")}</div></section>`;
+  }).join("");
+}
+
+function itens() {
+  const q = document.getElementById("busca-itens").value.trim().toLowerCase();
+  const est = `<section class="cat-itens"><h2>Estruturas do mundo</h2><div class="grid">${ITENS.estruturas.map(e =>
+    `<article class="card" style="--c:var(--gold)"><h3>${esc(e.nome)}</h3><p class="donos">${esc(e.onde)}</p><p class="reusa">${esc(e.conteudo)}</p></article>`).join("")}</div></section>`;
+  const cats = Object.entries(ITENS.categorias).map(([k, titulo]) => {
+    const lista = ITENS.itens.filter(i => i.cat === k && (!q || JSON.stringify(i).toLowerCase().includes(q)));
+    if (!lista.length) return "";
+    return `<section class="cat-itens"><h2>${esc(titulo)}</h2><div class="grid">${lista.map(i => `
+      <article class="card" style="--c:var(--accent)">
+        <h3>${esc(i.nome)}</h3>
+        <p class="exp" style="font-style:normal">${esc(i.uso)}</p>
+        ${i.obtencao ? `<p class="reusa"><b>Obtenção:</b> ${esc(i.obtencao)}</p>` : ""}
+        ${i.receitas.map(r => (i.receitas.length > 1 ? `<p class="reusa"><b>${esc(r.nome)}</b></p>` : "") + receitaHtml(r)).join("")}
+        ${i.usado_em.length ? `<details><summary>Usado em ${i.usado_em.length} receita${i.usado_em.length > 1 ? "s" : ""}</summary><p class="chips-usado">${i.usado_em.map(esc).join(", ")}</p></details>` : ""}
+      </article>`).join("")}</div></section>`;
+  }).join("");
+  document.getElementById("itens").innerHTML = (q ? "" : est) + (cats || `<p class="empty">Nenhum item encontrado.</p>`);
+}
+document.getElementById("busca-itens").addEventListener("input", itens);
+
+const kv = (rot, v) => v && (!Array.isArray(v) || v.length) ? `<span><b>${rot}:</b> ${esc(Array.isArray(v) ? v.join(", ") : v)}</span>` : "";
+const COR_TIPO = { cidade: "var(--heroi)", estrutura: "var(--gold)", base: "var(--ajudante)", dimensao: "var(--anti)", planeta: "var(--vilao)" };
+const SECOES = {
+  locais: ["Locais", "Locais do mundo: cidades, estruturas, bases, dimensões e planetas, com a forma de chegar a cada um.", () =>
+    MUNDO.locais.map(l => `<article class="card" style="--c:${COR_TIPO[l.tipo]}">
+      <div class="top"><h3>${esc(l.nome)}</h3><span class="pill">${esc(l.tipo_nome)}</span></div>
+      <p class="exp" style="font-style:normal">${esc(l.desc)}</p>
+      <div class="lista-kv">${kv("Onde", l.onde)}${kv("Como chegar", l.acesso)}${kv("Pontos de interesse", l.sublocais)}${kv("Facção", l.faccao_nome)}
+      ${kv("NPCs", l.npcs)}${kv("Bosses", l.bosses)}${kv("Mobs", l.mobs)}${kv("Personagens ligados", l.personagens_nomes)}</div></article>`)],
+  npcs: ["NPCs", "", () => MUNDO.npcs.map(n => `<article class="card" style="--c:var(--ajudante)">
+      <h3>${esc(n.nome)}</h3><p class="donos">${esc(n.papel)} · ${esc(n.local_nome)}</p>
+      <div class="lista-kv">${kv("Interação", n.interacao)}${kv("Gosta de", n.gosta)}${kv("Como aliado", n.aliado)}${kv("Missões", n.missoes)}${kv("Reage a", n.reage_nomes)}</div></article>`)],
+  bosses: ["Bosses", "", () => MUNDO.bosses.map(b => `<article class="card" style="--c:var(--vilao)">
+      <div class="top"><h3>${esc(b.nome)}</h3><span class="num">${b.vida} ♥</span></div>
+      <p class="donos">${esc(b.local_nome)} · nível ${b.nivel}${b.missao ? " · missão " + esc(b.missao) : ""}</p>
+      <p class="reusa">${esc(b.invocacao)}</p>
+      <ol class="fases">${b.fases.map(f => `<li>${esc(f)}</li>`).join("")}</ol>
+      <div class="lista-kv">${kv("Drops", b.drops_nomes)}${kv("Extra", b.extra)}</div></article>`)],
+  missoes: ["Missões", "", () => {
+    const grupos = [...MUNDO.atos.map(a => [a.nome, MUNDO.missoes.filter(x => x.tipo === "campanha" && x.ato === a.id)]),
+      ["Missões secundárias", MUNDO.missoes.filter(x => x.tipo === "secundaria")], ["Missões repetíveis", MUNDO.missoes.filter(x => x.tipo === "repetivel")]];
+    return grupos.map(([titulo, lista]) => `</div><h2 class="sec">${esc(titulo)}</h2><div class="grid">` + lista.map(x => `<article class="card" style="--c:${x.tipo === "campanha" ? "var(--gold)" : "var(--accent)"}">
+      <h3>${esc(x.nome)}</h3><p class="donos">${esc(x.npc_nome)} · ${esc(x.local_nome)}</p>
+      <ul class="fases">${x.objetivos.map(o => `<li>${esc(o)}</li>`).join("")}</ul>
+      <div class="lista-kv">${kv("Boss", x.boss_nome)}${kv("Requer", x.requisitos_nomes)}${kv("Recompensa", x.recompensa_txt)}</div></article>`).join(""));
+  }],
+  mobs: ["Mobs", "", () => MUNDO.mobs.map(x => `<article class="card" style="--c:${x.cat === "capanga" || x.cat === "criatura" ? "var(--vilao)" : x.cat === "animal" ? "var(--ajudante)" : "var(--heroi)"}">
+      <div class="top"><h3>${esc(x.nome)}</h3><span class="pill">${esc(x.cat_nome)}</span></div>
+      <p class="exp" style="font-style:normal">${esc(x.comportamento)}</p>
+      <div class="lista-kv">${kv("Onde", x.locais_nomes)}${kv("Drops", x.drops_nomes)}</div></article>`)],
+  conquistas: ["Conquistas", "", () => MUNDO.conquistas.map(c => `<article class="card" style="--c:var(--gold)">
+      <h3>${esc(c.nome)}</h3><p class="exp" style="font-style:normal">${esc(c.condicao)}</p><p class="reusa"><b>Recompensa:</b> ${esc(c.recompensa)}</p></article>`)]
+};
+const REGRAS = { locais: () => MUNDO.faccoes.map(f => f.nome).join(" · "), npcs: () => MUNDO.relacionamento, bosses: () => MUNDO.regras_bosses,
+  missoes: () => MUNDO.regras_missoes, mobs: () => MUNDO.regras_mobs, conquistas: () => MUNDO.regras_conquistas };
+let secao = "locais";
+const secoesEl = document.getElementById("mundo-secoes");
+secoesEl.innerHTML = Object.entries(SECOES).map(([k, [nome]]) => `<button class="chip" data-secao="${k}" aria-pressed="${k === secao}">${nome}</button>`).join("");
+secoesEl.addEventListener("click", e => {
+  const b = e.target.closest("[data-secao]"); if (!b) return;
+  secao = b.dataset.secao;
+  secoesEl.querySelectorAll("[data-secao]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  mundo();
+});
+function mundo() {
+  const r = SECOES[secao][2]();
+  document.getElementById("mundo-regra").textContent = (secao === "locais" ? "Facções: " : "") + REGRAS[secao]();
+  document.getElementById("mundo").innerHTML = `<div class="grid">${Array.isArray(r) ? r.join("") : r}</div>`;
+}
+
+let filtroSkin = "todos";
+const FILTROS_SKIN = { todos: "Todos", masculino: "Masculino", feminino: "Feminino", especial: "Modelo especial", colosso: "Gigantes" };
+const filtroSkinEl = document.getElementById("skins-filtro");
+filtroSkinEl.innerHTML = Object.entries(FILTROS_SKIN).map(([k, v]) => `<button class="chip" data-f="${k}" aria-pressed="${k === filtroSkin}">${v}</button>`).join("");
+filtroSkinEl.addEventListener("click", e => {
+  const b = e.target.closest("[data-f]"); if (!b) return;
+  filtroSkin = b.dataset.f;
+  filtroSkinEl.querySelectorAll("[data-f]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  skins();
+});
+const R = SKINS.regras;
+document.getElementById("skins-regras").innerHTML = [
+  ...Object.entries(R.textura).map(([k, v]) => kv(k.replace("_", " "), v)), kv("Escala", R.escala.regra),
+  ...Object.entries(R.generos).map(([k, v]) => kv("Gênero " + k, v)),
+  ...Object.entries(R.constituicoes).map(([k, v]) => kv("Constituição " + k, v)),
+  ...Object.entries(R.modelos).map(([k, v]) => kv("Modelo " + k, v)),
+  ...Object.entries(R.desbloqueios).map(([k, v]) => kv("Desbloqueio " + k, v)), kv("Maestria", R.maestria.regra)].join("");
+function skins() {
+  const q = document.getElementById("busca-skins").value.trim().toLowerCase();
+  const passa = s => filtroSkin === "todos" || s.genero === filtroSkin || (filtroSkin === "especial" && s.modelo !== "humano") || (filtroSkin === "colosso" && s.escala >= 1.15);
+  const lista = SKINS.skins.filter(s => passa(s) && (!q || JSON.stringify(s).toLowerCase().includes(q)));
+  document.getElementById("lista-skins").innerHTML = lista.map(s => `<article class="card" style="--c:${cor(s.cat)}">
+    <div class="top"><h3>${esc(s.nome)}</h3><span class="num">#${s.n}</span></div>
+    <div class="corpo"><span>${esc(s.genero)}</span><span>${s.altura.toFixed(2).replace(".", ",")} m · escala ${String(s.escala).replace(".", ",")}</span><span>${esc(s.constituicao)}</span><span>modelo ${esc(s.modelo)}</span><span>braços ${esc(s.bracos)}</span>${s.extras.map(x => `<span>${esc(x.replace("_", " "))}</span>`).join("")}</div>
+    <p class="skin-base"><b>${esc(s.base.nome)}:</b> ${esc(s.base.desc)}</p>
+    <details><summary>${s.alt.length} skin${s.alt.length > 1 ? "s" : ""} alternativa${s.alt.length > 1 ? "s" : ""}</summary>
+    <ul class="alts">${s.alt.map(a => `<li><b>${esc(a.nome)}</b> <span class="como">${esc(a.como)}</span><br>${esc(a.desc)}${a.altura ? ` <i>(${a.altura.toFixed(2).replace(".", ",")} m)</i>` : ""}</li>`).join("")}</ul></details>
+  </article>`).join("") || `<p class="empty">Nenhuma skin encontrada.</p>`;
+}
+document.getElementById("busca-skins").addEventListener("input", skins);
+
+const ABAS = ["personagens", "fichas", "armas", "itens", "mundo", "skins", "guia", "roteiro", "planejamento"];
+function aba(nome) {
+  document.querySelectorAll("[role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
+  ABAS.forEach(a => document.getElementById("aba-" + a).hidden = a !== nome);
+  if (nome === "planejamento") md("plano", PLANO);
+  if (nome === "fichas") md("balanc", BALANC);
+  if (nome === "guia") md("texto-guia", GUIA);
+  if (nome === "roteiro") md("texto-roteiro", ROTEIRO);
+}
+document.querySelector("nav").addEventListener("click", e => {
+  const b = e.target.closest("[data-aba]"); if (b) { aba(b.dataset.aba); history.replaceState(null, "", "#" + b.dataset.aba); }
+});
+
+render();
+tabelaFichas();
+armas();
+itens();
+mundo();
+skins();
+const inicial = location.hash.slice(1);
+if (ABAS.includes(inicial)) aba(inicial);
+</script>
