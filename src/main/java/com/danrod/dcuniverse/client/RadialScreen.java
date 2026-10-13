@@ -25,6 +25,12 @@ public final class RadialScreen extends Screen {
         return false;
     }
 
+    /** Sem desfoque: o mundo continua visível enquanto escolhe. */
+    @Override
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
+        g.fill(0, 0, width, height, 0x40000000);
+    }
+
     @Override
     public void tick() {
         var tecla = Teclas.RADIAL.getKey();

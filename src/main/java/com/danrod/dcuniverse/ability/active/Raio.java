@@ -54,12 +54,14 @@ public final class Raio implements TipoHabilidade {
         }
     }
 
+    /** Linha de partículas; começa um pouco à frente para não cobrir a câmera em primeira pessoa. */
     static void desenhar(ServerLevel level, Vec3 de, Vec3 ate, int cor) {
-        DustParticleOptions part = new DustParticleOptions(cor, 1.0f);
+        DustParticleOptions part = new DustParticleOptions(cor, 0.6f);
         Vec3 d = ate.subtract(de);
-        int passos = (int) Math.ceil(d.length() * 2);
-        for (int i = 1; i <= passos; i++) {
-            Vec3 pt = de.add(d.scale(i / (double) passos));
+        double comp = d.length();
+        Vec3 dir = d.normalize();
+        for (double t = Math.min(1.5, comp); t <= comp; t += 0.35) {
+            Vec3 pt = de.add(dir.scale(t));
             level.sendParticles(part, pt.x, pt.y, pt.z, 1, 0, 0, 0, 0);
         }
     }

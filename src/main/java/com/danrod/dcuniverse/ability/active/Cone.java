@@ -33,11 +33,14 @@ public final class Cone implements TipoHabilidade {
         boolean congela = "freeze".equals(prm.s("effect", "freeze"));
 
         if (tick % 2 == 0) {
-            for (int i = 0; i < 6; i++) {
-                Vec3 v = dir.scale(0.6 + level.getRandom().nextDouble() * 0.6)
-                    .add((level.getRandom().nextDouble() - 0.5) * 0.4, (level.getRandom().nextDouble() - 0.5) * 0.4, (level.getRandom().nextDouble() - 0.5) * 0.4);
+            // Partículas espalhadas ao longo do cone, longe da câmera.
+            for (int i = 0; i < 8; i++) {
+                double d = 1.5 + level.getRandom().nextDouble() * (alcance - 1.5);
+                double r = d * Math.tan(Math.acos(cosMax)) * 0.8;
+                Vec3 pt = olhos.add(dir.scale(d)).add((level.getRandom().nextDouble() - 0.5) * r,
+                    (level.getRandom().nextDouble() - 0.5) * r - 0.2, (level.getRandom().nextDouble() - 0.5) * r);
                 level.sendParticles(congela ? ParticleTypes.SNOWFLAKE : ParticleTypes.CLOUD,
-                    olhos.x + dir.x, olhos.y + dir.y - 0.2, olhos.z + dir.z, 0, v.x, v.y, v.z, 1.0);
+                    pt.x, pt.y, pt.z, 0, dir.x, dir.y, dir.z, 0.15);
             }
         }
         if (tick % 10 != 0) return;

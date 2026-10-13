@@ -28,7 +28,9 @@ public final class Comandos {
                         .suggests((c, b) -> SharedSuggestionProvider.suggestResource(Personagens.todos().stream().map(Personagem::id), b))
                         .executes(c -> {
                             ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
-                            boolean ok = Transformacao.transformar(alvo, IdentifierArgument.getId(c, "personagem"), true);
+                            var id = IdentifierArgument.getId(c, "personagem");
+                            boolean ok = Transformacao.transformar(alvo, id, true);
+                            if (ok) c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + " -> " + id), true);
                             return ok ? 1 : 0;
                         }))))
             .then(Commands.literal("untransform")
@@ -37,6 +39,7 @@ public final class Comandos {
                         ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
                         if (!EstadoJogador.de(alvo).transformado()) return 0;
                         Transformacao.destransformar(alvo);
+                        c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + " destransformado"), true);
                         return 1;
                     })))
             .then(Commands.literal("energy")
