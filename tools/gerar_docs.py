@@ -17,6 +17,8 @@ MODELO = RAIZ / "tools/modelo_site.html"
 SITE = RAIZ / "docs/site/index.html"
 
 CATS = {"heroi": "Heróis", "ajudante": "Ajudantes", "anti": "Anti-heróis", "vilao": "Vilões"}
+TIPOS_SUP = {"veiculo": "Veículo", "armadura": "Armadura/mecha", "construto": "Construto",
+             "forma": "Transformação", "invocacao": "Invocação", "mundo": "Estrutura/terreno"}
 CAMPOS = [("nat", "Naturais (ativam pela ação)"), ("ativ", "Poderes e combate (menu radial)"),
           ("equip", "Armas, ferramentas e invocações"), ("surv", "Utilidade no survival")]
 
@@ -45,6 +47,8 @@ def validar(dados):
     for p in dados:
         if p["cat"] not in CATS:
             erros.append(f"#{p['n']}: categoria inválida {p['cat']}")
+        if p.get("supremo", {}).get("tipo") not in TIPOS_SUP:
+            erros.append(f"#{p['n']}: tipo de habilidade suprema inválido")
         for campo in ["exp", "energia", "nat", "ativ", "equip", "surv", "supremo"]:
             if not p.get(campo):
                 erros.append(f"#{p['n']} {p['nome']}: campo '{campo}' vazio")
@@ -80,7 +84,7 @@ def gerar_md(dados):
             for campo, rotulo in CAMPOS:
                 out.append(f"- **{rotulo}:** " + "; ".join(p[campo]))
             out.append(f"- **Energia:** {p['energia']}")
-            out.append(f"- ⭐ **Habilidade suprema: {p['supremo']['nome']}.** {p['supremo']['desc']}")
+            out.append(f"- ⭐ **Habilidade suprema ({TIPOS_SUP[p['supremo']['tipo']]}): {p['supremo']['nome']}.** {p['supremo']['desc']}")
             out.append("")
     out += ["## 3. Sistemas compartilhados que surgem da lista", "",
             "### Bases reaproveitadas", "", "| Base | Personagens que reaproveitam |", "|---|---|"]
@@ -90,6 +94,12 @@ def gerar_md(dados):
             grupos[p["reusa_n"]].append(p["nome"])
     for base, lista in sorted(grupos.items(), key=lambda kv: -len(kv[1])):
         out.append(f"| {por_n[base]['nome']} | {', '.join(lista)} |")
+    out += ["", "### Habilidades supremas por sistema", "", "| Sistema | Qtde | Personagens |", "|---|---|---|"]
+    sup = defaultdict(list)
+    for p in dados:
+        sup[p["supremo"]["tipo"]].append(f"{p['nome']} ({p['supremo']['nome']})")
+    for t, lista in sorted(sup.items(), key=lambda kv: -len(kv[1])):
+        out.append(f"| {TIPOS_SUP[t]} | {len(lista)} | {', '.join(lista)} |")
     out += ["", "### Medidores de energia", "", "| Medidor | Personagens |", "|---|---|"]
     tipos = defaultdict(list)
     for p in dados:

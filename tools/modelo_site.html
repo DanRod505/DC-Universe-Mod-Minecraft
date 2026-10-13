@@ -101,6 +101,7 @@ dd ul { margin: 2px 0 0; padding-left: 18px; }
 const PERSONAGENS = /*__PERSONAGENS__*/[];
 const PLANO = /*__PLANO__*/"";
 const CATS = { heroi: "Heróis", ajudante: "Ajudantes", anti: "Anti-heróis", vilao: "Vilões" };
+const TIPOS_SUP = { veiculo: "Veículo", armadura: "Armadura/mecha", construto: "Construto", forma: "Transformação", invocacao: "Invocação", mundo: "Estrutura/terreno" };
 const CAT1 = { heroi: "Herói", ajudante: "Ajudante", anti: "Anti-herói", vilao: "Vilão" };
 const CAMPOS = [["nat", "Naturais (ativam pela ação)"], ["ativ", "Poderes e combate (menu radial)"],
   ["equip", "Armas, ferramentas e invocações"], ["surv", "Utilidade no survival"]];
@@ -132,7 +133,7 @@ function ficha(p) {
     <div class="top"><h3>${esc(p.nome)}</h3><span class="num">#${p.n}</span></div>
     <span class="tag">${CAT1[p.cat]}</span>
     <p class="exp">${esc(p.exp)}</p>${reusa}
-    <div class="supremo"><span class="sup-rot">Habilidade suprema</span><strong>${esc(p.supremo.nome)}</strong><span>${esc(p.supremo.desc)}</span></div>
+    <div class="supremo"><span class="sup-rot">Habilidade suprema · ${TIPOS_SUP[p.supremo.tipo]}</span><strong>${esc(p.supremo.nome)}</strong><span>${esc(p.supremo.desc)}</span></div>
     <details${abertas ? " open" : ""}><summary>Habilidades</summary><dl>${dl}
       <div class="energia"><dt>Energia</dt><dd>${esc(p.energia)}</dd></div></dl></details>
   </article>`;

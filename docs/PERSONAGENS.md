@@ -12,121 +12,121 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 
 | # | Personagem | Experiência | Habilidade suprema |
 |---|---|---|---|
-| 1 | Superman (Clark Kent) | Força e poder absolutos: você é a pessoa mais forte do mundo e o mundo precisa ser tratado com cuidado. | Sem Limites |
-| 2 | Batman (Bruce Wayne) | Preparação, equipamento e estratégia: você vence porque planejou, não porque é mais forte. | Plano de Contingência |
-| 3 | Mulher-Maravilha (Diana) | Guerreira divina: combate corpo a corpo honrado, defesa impecável e liderança. | Ira de Themyscira |
-| 4 | Flash (Barry Allen) | Velocidade extraordinária: o mundo fica em câmera lenta e você chega antes de qualquer coisa. | Corrida Através do Tempo |
-| 5 | Flash (Wally West) | O velocista mais rápido de todos: ainda mais rápido que Barry, com controle fino e emprestando velocidade. | Cavalaria da Força de Aceleração |
-| 6 | Lanterna Verde (Hal Jordan) | Versatilidade e improvisação: construtos rápidos e simples para qualquer situação, com coragem de piloto. | Imaginação sem Limites |
+| 1 | Superman (Clark Kent) | Força e poder absolutos: você é a pessoa mais forte do mundo e o mundo precisa ser tratado com cuidado. | Fortaleza da Solidão |
+| 2 | Batman (Bruce Wayne) | Preparação, equipamento e estratégia: você vence porque planejou, não porque é mais forte. | Batwing |
+| 3 | Mulher-Maravilha (Diana) | Guerreira divina: combate corpo a corpo honrado, defesa impecável e liderança. | Jato Invisível |
+| 4 | Flash (Barry Allen) | Velocidade extraordinária: o mundo fica em câmera lenta e você chega antes de qualquer coisa. | Avatar da Força de Aceleração |
+| 5 | Flash (Wally West) | O velocista mais rápido de todos: ainda mais rápido que Barry, com controle fino e emprestando velocidade. | Esteira de Velocistas |
+| 6 | Lanterna Verde (Hal Jordan) | Versatilidade e improvisação: construtos rápidos e simples para qualquer situação, com coragem de piloto. | Caça de Construto |
 | 7 | Lanterna Verde (John Stewart) | O arquiteto: construtos complexos, sólidos e planejados que funcionam como estruturas reais. | Fortaleza do Arquiteto |
-| 8 | Lanterna Verde (Kyle Rayner) | Criatividade: construtos artísticos e vivos, cheios de detalhe, que agem por conta própria. | Galeria Viva |
-| 9 | Lanterna Verde (Guy Gardner) | Briga de rua: força bruta e construtos agressivos, sem sutileza. | Contra o Mundo |
-| 10 | Lanterna Verde (Jessica Cruz) | Coragem apesar do medo: defensiva, protetora, ficando mais forte sob pressão. | Coragem Indomável |
-| 11 | Lanterna Verde (Simon Baz) | Lanterna que também salva: construtos com tática e um poder raro de cura. | Sementeira de Vida |
-| 12 | Aquaman (Arthur Curry) | Rei dos mares: o oceano é seu território, e lá você é imbatível. | Chamado do Rei dos Mares |
-| 13 | Mera | Hidrocinese pura: a água vira arma, ferramenta e construção. | Muralha do Oceano |
-| 14 | Ciborgue (Victor Stone) | Tecnologia viva: você é um computador, uma arma e uma ferramenta ao mesmo tempo. | Boom Tube Mestre |
-| 15 | Caçador de Marte (J'onn J'onzz) | O alienígena que pode ser qualquer um: mente, forma e densidade sob controle. | Mente Coletiva |
-| 16 | Shazam (Billy Batson) | Uma criança com o poder dos deuses: poder mágico explosivo ativado por um relâmpago. | Relâmpago dos Deuses |
-| 17 | Supergirl (Kara Zor-El) | Kryptoniana mais ágil e impetuosa: mais velocidade e combate aéreo, menos força bruta. | Explosão Solar |
-| 18 | Arqueiro Verde (Oliver Queen) | Precisão e criatividade: um arco e uma aljava cheia de surpresas. | Chuva de Flechas |
-| 19 | Canário Negro (Dinah Lance) | Lutadora técnica com um grito que derruba qualquer um. | Grito Devastador |
-| 20 | Gavião Negro (Carter Hall) | Guerreiro alado ancestral: ataque aéreo brutal com armas medievais. | Mergulho do Falcão |
-| 21 | Mulher-Gavião (Shayera Hol) | Policial alienígena alada: agressiva, veloz e com arsenal de Thanagar. | Fúria de Thanagar |
-| 22 | Zatanna | Mágica de palco real: feitiços falados ao contrário que fazem qualquer coisa, se você souber pedir. | Palavra Final |
-| 23 | Senhor Destino (Kent Nelson) | Feiticeiro supremo de Nabu: magia ancestral, poderosa e calculada. | Banimento de Nabu |
+| 8 | Lanterna Verde (Kyle Rayner) | Criatividade: construtos artísticos e vivos, cheios de detalhe, que agem por conta própria. | Mecha de Construto |
+| 9 | Lanterna Verde (Guy Gardner) | Briga de rua: força bruta e construtos agressivos, sem sutileza. | Bola de Demolição Gigante |
+| 10 | Lanterna Verde (Jessica Cruz) | Coragem apesar do medo: defensiva, protetora, ficando mais forte sob pressão. | Cúpula de Proteção |
+| 11 | Lanterna Verde (Simon Baz) | Lanterna que também salva: construtos com tática e um poder raro de cura. | Ambulância Esmeralda |
+| 12 | Aquaman (Arthur Curry) | Rei dos mares: o oceano é seu território, e lá você é imbatível. | Montaria de Topo |
+| 13 | Mera | Hidrocinese pura: a água vira arma, ferramenta e construção. | Leviatã de Água |
+| 14 | Ciborgue (Victor Stone) | Tecnologia viva: você é um computador, uma arma e uma ferramenta ao mesmo tempo. | Armadura de Guerra de Ciborgue |
+| 15 | Caçador de Marte (J'onn J'onzz) | O alienígena que pode ser qualquer um: mente, forma e densidade sob controle. | Forma Marciana de Guerra |
+| 16 | Shazam (Billy Batson) | Uma criança com o poder dos deuses: poder mágico explosivo ativado por um relâmpago. | Pedra da Eternidade |
+| 17 | Supergirl (Kara Zor-El) | Kryptoniana mais ágil e impetuosa: mais velocidade e combate aéreo, menos força bruta. | Nave Kryptoniana |
+| 18 | Arqueiro Verde (Oliver Queen) | Precisão e criatividade: um arco e uma aljava cheia de surpresas. | Arqueiro-Móvel |
+| 19 | Canário Negro (Dinah Lance) | Lutadora técnica com um grito que derruba qualquer um. | Moto Sônica |
+| 20 | Gavião Negro (Carter Hall) | Guerreiro alado ancestral: ataque aéreo brutal com armas medievais. | Esquadrão Alado |
+| 21 | Mulher-Gavião (Shayera Hol) | Policial alienígena alada: agressiva, veloz e com arsenal de Thanagar. | Nave Thanagariana |
+| 22 | Zatanna | Mágica de palco real: feitiços falados ao contrário que fazem qualquer coisa, se você souber pedir. | Palco da Ilusão |
+| 23 | Senhor Destino (Kent Nelson) | Feiticeiro supremo de Nabu: magia ancestral, poderosa e calculada. | Torre do Destino |
 | 24 | Átomo (Ray Palmer) | Ciência do tamanho: encolher para explorar e crescer para esmagar. | Átomo Gigante |
-| 25 | Besouro Azul (Jaime Reyes) | Armadura alienígena que se adapta: a arma certa aparece quando você precisa. | Modo Guerra |
-| 26 | Gladiador Dourado (Booster Gold) | Herói do futuro com tecnologia chamativa e muita sorte. | Desfazer o Erro |
-| 27 | Homem-Elástico | Elasticidade cômica e criativa: você vira qualquer forma. | Forma Gigante |
-| 28 | Vixen (Mari McCabe) | Copiar o reino animal: cada animal do jogo empresta uma habilidade. | Arca da Natureza |
-| 29 | Estelar (Koriand'r) | Energia solar alienígena e alegria explosiva: voo e rajadas estelares. | Supernova |
-| 30 | Ravena (Rachel Roth) | Magia sombria contida: poder imenso controlado pela calma. | Libertar o Corvo |
-| 31 | Mutano (Garfield Logan) | Virar qualquer animal: diversão e utilidade ilimitadas. | Tiranossauro |
-| 32 | Asa Noturna (Dick Grayson) | Acrobacia e fluidez: o combate é uma coreografia no ar. | Coreografia Perfeita |
-| 33 | Batwoman (Kate Kane) | Soldada treinada no estilo Batman: tática militar e equipamento. | Takedown Tático |
-| 34 | Nuclear (Firestorm) | O homem nuclear: transmutar a matéria do mundo. | Fusão Nuclear |
-| 35 | Raio Negro (Jefferson Pierce) | Eletricidade sob comando: dano em cadeia e controle de máquinas. | Tempestade Elétrica |
-| 36 | Stargirl (Courtney Whitmore) | Herdeira entusiasmada: um bastão cósmico que faz de tudo. | Explosão Cósmica |
-| 37 | Senhor Incrível (Michael Holt) | O terceiro homem mais inteligente do mundo: drones e invisibilidade tecnológica. | Rede de T-Esferas |
-| 38 | Senhor Milagre (Scott Free) | Escapista definitivo: nada te prende. | Fuga Impossível |
-| 39 | Big Barda | Guerreira de Apokolips: impacto brutal com o Megabastão. | Megabastão Supremo |
-| 40 | Monstro do Pântano | O Verde vivo: a natureza obedece e você é parte dela. | O Verde Responde |
-| 41 | Questão (Vic Sage) | Investigação e mistério: informação é a arma. | A Resposta |
-| 42 | Orion | Filho de Darkseid lutando pelo bem: guerra cósmica pura. | Guerra dos Deuses |
-| 43 | Kilowog | O sargento da Tropa: construtos pesados e treinamento de aliados. | Treinamento de Recrutas |
-| 44 | Homem-Animal (Buddy Baker) | Emprestar poderes de todos os animais ao mesmo tempo, pela Rede da Vida. | Rede da Vida |
-| 45 | Tornado Vermelho | Androide do vento: controle de ar e clima. | Furacão |
+| 25 | Besouro Azul (Jaime Reyes) | Armadura alienígena que se adapta: a arma certa aparece quando você precisa. | Besouro Titã |
+| 26 | Gladiador Dourado (Booster Gold) | Herói do futuro com tecnologia chamativa e muita sorte. | Nave do Século 25 |
+| 27 | Homem-Elástico | Elasticidade cômica e criativa: você vira qualquer forma. | Forma Colossal |
+| 28 | Vixen (Mari McCabe) | Copiar o reino animal: cada animal do jogo empresta uma habilidade. | Fera Mítica |
+| 29 | Estelar (Koriand'r) | Energia solar alienígena e alegria explosiva: voo e rajadas estelares. | Nave de Tamaran |
+| 30 | Ravena (Rachel Roth) | Magia sombria contida: poder imenso controlado pela calma. | Corvo de Alma Gigante |
+| 31 | Mutano (Garfield Logan) | Virar qualquer animal: diversão e utilidade ilimitadas. | Tiranossauro Rex |
+| 32 | Asa Noturna (Dick Grayson) | Acrobacia e fluidez: o combate é uma coreografia no ar. | Moto de Asa Noturna |
+| 33 | Batwoman (Kate Kane) | Soldada treinada no estilo Batman: tática militar e equipamento. | Bat-Moto Tática |
+| 34 | Nuclear (Firestorm) | O homem nuclear: transmutar a matéria do mundo. | Forma Nuclear Total |
+| 35 | Raio Negro (Jefferson Pierce) | Eletricidade sob comando: dano em cadeia e controle de máquinas. | Tempestade Viva |
+| 36 | Stargirl (Courtney Whitmore) | Herdeira entusiasmada: um bastão cósmico que faz de tudo. | S.T.R.I.P.E. Pilotável |
+| 37 | Senhor Incrível (Michael Holt) | O terceiro homem mais inteligente do mundo: drones e invisibilidade tecnológica. | Enxame de T-Esferas |
+| 38 | Senhor Milagre (Scott Free) | Escapista definitivo: nada te prende. | Discos Aéreos do Grupo |
+| 39 | Big Barda | Guerreira de Apokolips: impacto brutal com o Megabastão. | Fúrias Femininas |
+| 40 | Monstro do Pântano | O Verde vivo: a natureza obedece e você é parte dela. | Floresta Viva |
+| 41 | Questão (Vic Sage) | Investigação e mistério: informação é a arma. | Mural da Investigação |
+| 42 | Orion | Filho de Darkseid lutando pelo bem: guerra cósmica pura. | Moto Cósmica |
+| 43 | Kilowog | O sargento da Tropa: construtos pesados e treinamento de aliados. | Quartel da Tropa |
+| 44 | Homem-Animal (Buddy Baker) | Emprestar poderes de todos os animais ao mesmo tempo, pela Rede da Vida. | Manada Mítica |
+| 45 | Tornado Vermelho | Androide do vento: controle de ar e clima. | Ciclone Vivo |
 
 ### Ajudantes
 
 | # | Personagem | Experiência | Habilidade suprema |
 |---|---|---|---|
-| 46 | Robin (Damian Wayne) | O filho do Morcego: agressivo, treinado pela Liga dos Assassinos. | Herdeiro do Demônio |
-| 47 | Batgirl (Barbara Gordon) | Hacker e lutadora: informação e agilidade. | Oráculo |
-| 48 | Superboy (Conner Kent) | Meio kryptoniano: telecinese tátil no lugar da visão de calor. | Telecinese Total |
-| 49 | Impulso (Bart Allen) | Velocista impaciente: rápido, descontrolado e divertido. | Explosão de Velocidade |
-| 50 | Aqualad (Jackson Hyde) | Hidrocinese elétrica: água e choque juntos. | Tempestade Elétrica Submersa |
-| 51 | Moça-Maravilha (Cassie Sandsmark) | Semideusa jovem com laço de Zeus: força e voo. | Fúria de Zeus |
-| 52 | Arsenal (Roy Harper) | Arqueiro que usa qualquer arma: improviso e poder de fogo. | Arsenal Completo |
-| 53 | Robin Vermelho (Tim Drake) | O detetive mais estratégico da família: planeja e prepara armadilhas. | Plano Mestre |
-| 54 | Abelha (Karen Beecher) | Pequena e perigosa: encolher e ferroar. | Enxame Rainha |
-| 55 | Cassandra Cain | A lutadora perfeita: lê o corpo do inimigo e antecipa tudo. | Leitura Perfeita |
+| 46 | Robin (Damian Wayne) | O filho do Morcego: agressivo, treinado pela Liga dos Assassinos. | Moto Ninja do Robin |
+| 47 | Batgirl (Barbara Gordon) | Hacker e lutadora: informação e agilidade. | Batgirl-Ciclo |
+| 48 | Superboy (Conner Kent) | Meio kryptoniano: telecinese tátil no lugar da visão de calor. | Ilha Telecinética |
+| 49 | Impulso (Bart Allen) | Velocista impaciente: rápido, descontrolado e divertido. | Esteira Cósmica |
+| 50 | Aqualad (Jackson Hyde) | Hidrocinese elétrica: água e choque juntos. | Tubarão de Água Viva |
+| 51 | Moça-Maravilha (Cassie Sandsmark) | Semideusa jovem com laço de Zeus: força e voo. | Águia de Zeus |
+| 52 | Arsenal (Roy Harper) | Arqueiro que usa qualquer arma: improviso e poder de fogo. | Blindado do Arsenal |
+| 53 | Robin Vermelho (Tim Drake) | O detetive mais estratégico da família: planeja e prepara armadilhas. | Robin-Copter |
+| 54 | Abelha (Karen Beecher) | Pequena e perigosa: encolher e ferroar. | Colmeia Rainha |
+| 55 | Cassandra Cain | A lutadora perfeita: lê o corpo do inimigo e antecipa tudo. | Sombra Perfeita |
 
 ### Anti-heróis
 
 | # | Personagem | Experiência | Habilidade suprema |
 |---|---|---|---|
-| 56 | Capuz Vermelho (Jason Todd) | Vigilante letal: armas de fogo e brutalidade calculada. | Retorno do Capuz |
-| 57 | Mulher-Gato (Selina Kyle) | Ladra felina: agilidade, furtividade e roubo. | O Grande Roubo |
-| 58 | Lobo | Brutalidade imortal: regenera de tudo e resolve com violência. | O Último Czarniano |
-| 59 | Adão Negro (Teth-Adam) | Poder divino sem misericórdia: o raio como dominação. | Ira de Kahndaq |
-| 60 | John Constantine | Malandro do oculto: magia por rituais, pactos e truques. | Pacto Final |
-| 61 | Etrigan | Demônio em rimas: fogo infernal e caos. | Inferno na Terra |
-| 62 | Espectro | O espírito da vingança divina: poder quase absoluto e assustador. | Julgamento Final |
-| 63 | Arlequina (Harleen Quinzel) | Caos alegre: imprevisível, acrobática e com marretada. | Grande Final |
-| 64 | Pistoleiro (Deadshot) | Nunca erra: precisão absoluta à distância. | Tiro Impossível |
-| 65 | Pacificador | Paz a qualquer custo: arsenal pesado e capacete com truques. | Pela Paz |
-| 66 | Tubarão-Rei (Nanaue) | Predador marinho: fome e mordida. | Frenesi das Profundezas |
-| 67 | Katana (Tatsu Yamashiro) | Samurai com uma espada que prende almas. | Prisão de Almas |
-| 68 | Azrael | Cavaleiro sagrado: espada flamejante e devoção. | Espada Flamejante |
-| 69 | Atrocitus | Fúria vermelha: o anel que vomita sangue em chamas. | Fúria de Sangue |
-| 70 | Jonah Hex | Caçador de recompensas do velho oeste. | Dia do Acerto de Contas |
+| 56 | Capuz Vermelho (Jason Todd) | Vigilante letal: armas de fogo e brutalidade calculada. | Moto do Capuz |
+| 57 | Mulher-Gato (Selina Kyle) | Ladra felina: agilidade, furtividade e roubo. | Exército de Gatos |
+| 58 | Lobo | Brutalidade imortal: regenera de tudo e resolve com violência. | Moto Espacial Suprema |
+| 59 | Adão Negro (Teth-Adam) | Poder divino sem misericórdia: o raio como dominação. | Deus de Kahndaq |
+| 60 | John Constantine | Malandro do oculto: magia por rituais, pactos e truques. | Demônio do Pacto |
+| 61 | Etrigan | Demônio em rimas: fogo infernal e caos. | Etrigan Colossal |
+| 62 | Espectro | O espírito da vingança divina: poder quase absoluto e assustador. | Espectro Colossal |
+| 63 | Arlequina (Harleen Quinzel) | Caos alegre: imprevisível, acrobática e com marretada. | Carro da Arlequina |
+| 64 | Pistoleiro (Deadshot) | Nunca erra: precisão absoluta à distância. | Traje de Atirador Supremo |
+| 65 | Pacificador | Paz a qualquer custo: arsenal pesado e capacete com truques. | Jato do Pacificador |
+| 66 | Tubarão-Rei (Nanaue) | Predador marinho: fome e mordida. | Megalodonte |
+| 67 | Katana (Tatsu Yamashiro) | Samurai com uma espada que prende almas. | Exército de Almas |
+| 68 | Azrael | Cavaleiro sagrado: espada flamejante e devoção. | Armadura de São Dumas |
+| 69 | Atrocitus | Fúria vermelha: o anel que vomita sangue em chamas. | Dragão de Fúria |
+| 70 | Jonah Hex | Caçador de recompensas do velho oeste. | Cavalo Fantasma |
 
 ### Vilões
 
 | # | Personagem | Experiência | Habilidade suprema |
 |---|---|---|---|
-| 71 | Coringa | Caos e imprevisibilidade: armadilhas, gás e risadas. | A Piada Mortal |
-| 72 | Lex Luthor | Gênio rico e tecnológico: a armadura é sua vantagem. | Armadura Suprema |
-| 73 | Darkseid | Tirania cósmica: poder esmagador e a Equação Anti-Vida. | Raios Ômega Supremos |
-| 74 | Sinestro | O medo como poder: construtos de terror. | Medo Absoluto |
-| 75 | Flash Reverso (Eobard Thawne) | Velocidade com ódio: o anti-Flash. | Paradoxo |
-| 76 | Zoom (Hunter Zolomon) | Velocidade por controle do tempo pessoal. | Tempo Morto |
-| 77 | Exterminador (Deathstroke) | Mercenário perfeito: combate tático e reflexos sobre-humanos. | Contrato Cumprido |
-| 78 | Bane | Força química: quanto mais Veneno, mais monstruoso. | Overdose de Veneno |
-| 79 | Charada (Edward Nygma) | Enigmas e armadilhas: o intelecto como arma. | Enigma Final |
-| 80 | Pinguim (Oswald Cobblepot) | O chefão do crime: guarda-chuvas e capangas. | Exército do Pinguim |
-| 81 | Duas-Caras (Harvey Dent) | A moeda decide: sorte ou azar em cada ação. | Cara ou Coroa |
-| 82 | Espantalho (Jonathan Crane) | Medo: toxina que faz o inimigo ver pesadelos. | Pesadelo Coletivo |
-| 83 | Hera Venenosa (Pamela Isley) | Plantas assassinas e venenos. | Jardim do Éden |
-| 84 | Sr. Frio (Victor Fries) | Gelo calculado: arma criogênica e traje lento e resistente. | Era do Gelo |
-| 85 | Crocodilo (Killer Croc) | Fera de esgoto: força e pele dura. | Rei do Esgoto |
-| 86 | Cara-de-Barro (Basil Karlo) | Lama que vira qualquer coisa: forma livre. | Monstro de Lama |
-| 87 | Ra's al Ghul | Imortal estrategista: espada e o Poço de Lázaro. | Banho de Lázaro |
-| 88 | General Zod | Kryptoniano militar: o Superman sem limites. | Ajoelhe-se |
-| 89 | Brainiac | Coletor de mundos: tecnologia que encolhe cidades. | Coleção |
-| 90 | Apocalypse (Doomsday) | Força implacável que evolui ao morrer. | Evolução |
+| 71 | Coringa | Caos e imprevisibilidade: armadilhas, gás e risadas. | Carro do Coringa |
+| 72 | Lex Luthor | Gênio rico e tecnológico: a armadura é sua vantagem. | Armadura de Guerra Suprema |
+| 73 | Darkseid | Tirania cósmica: poder esmagador e a Equação Anti-Vida. | Darkseid Ascendente |
+| 74 | Sinestro | O medo como poder: construtos de terror. | Monstro do Medo |
+| 75 | Flash Reverso (Eobard Thawne) | Velocidade com ódio: o anti-Flash. | Avatar da Força Negativa |
+| 76 | Zoom (Hunter Zolomon) | Velocidade por controle do tempo pessoal. | Sombra Veloz |
+| 77 | Exterminador (Deathstroke) | Mercenário perfeito: combate tático e reflexos sobre-humanos. | Armadura de Exterminador |
+| 78 | Bane | Força química: quanto mais Veneno, mais monstruoso. | Bane Titã |
+| 79 | Charada (Edward Nygma) | Enigmas e armadilhas: o intelecto como arma. | Labirinto do Charada |
+| 80 | Pinguim (Oswald Cobblepot) | O chefão do crime: guarda-chuvas e capangas. | Pato de Guerra |
+| 81 | Duas-Caras (Harvey Dent) | A moeda decide: sorte ou azar em cada ação. | Gangue das Duas Faces |
+| 82 | Espantalho (Jonathan Crane) | Medo: toxina que faz o inimigo ver pesadelos. | Campo de Espantalhos |
+| 83 | Hera Venenosa (Pamela Isley) | Plantas assassinas e venenos. | Jardim Carnívoro |
+| 84 | Sr. Frio (Victor Fries) | Gelo calculado: arma criogênica e traje lento e resistente. | Traje Criogênico Titã |
+| 85 | Crocodilo (Killer Croc) | Fera de esgoto: força e pele dura. | Crocodilo Ancestral |
+| 86 | Cara-de-Barro (Basil Karlo) | Lama que vira qualquer coisa: forma livre. | Colosso de Barro |
+| 87 | Ra's al Ghul | Imortal estrategista: espada e o Poço de Lázaro. | Poço de Lázaro |
+| 88 | General Zod | Kryptoniano militar: o Superman sem limites. | Armadura de Batalha Kryptoniana |
+| 89 | Brainiac | Coletor de mundos: tecnologia que encolhe cidades. | Nave Crânio |
+| 90 | Apocalypse (Doomsday) | Força implacável que evolui ao morrer. | Apocalypse Evoluído |
 | 91 | Bizarro | Superman ao contrário: poderes invertidos e cômicos. | Mundo Bizarro |
-| 92 | Arraia Negra (Black Manta) | Caçador das profundezas: tecnologia contra o Aquaman. | Arsenal das Profundezas |
-| 93 | Mulher-Leopardo (Cheetah) | Predadora veloz e selvagem. | Caçada Selvagem |
-| 94 | Gorila Grodd | Gorila telepata: mente e força. | Rei dos Gorilas |
-| 95 | Capitão Frio (Leonard Snart) | Ladrão com pistola de gelo. | Zero Absoluto |
-| 96 | Mestre dos Oceanos (Orm) | Rei rival: magia e tridente. | Rei de Atlantis |
-| 97 | Nevasca (Killer Frost) | Gelo que rouba calor. | Inverno Eterno |
-| 98 | Mão Negra (William Hand) | Lanterna Negro: morte e mortos-vivos. | O Dia Mais Negro |
-| 99 | Lobo da Estepe | General de Apokolips: machado e exército. | Invasão de Apokolips |
-| 100 | Parasita (Rudy Jones) | Rouba poder: fica mais forte absorvendo os outros. | Absorção Total |
+| 92 | Arraia Negra (Black Manta) | Caçador das profundezas: tecnologia contra o Aquaman. | Submarino Manta |
+| 93 | Mulher-Leopardo (Cheetah) | Predadora veloz e selvagem. | Grande Felina |
+| 94 | Gorila Grodd | Gorila telepata: mente e força. | Exército de Gorila City |
+| 95 | Capitão Frio (Leonard Snart) | Ladrão com pistola de gelo. | Rinque de Gelo |
+| 96 | Mestre dos Oceanos (Orm) | Rei rival: magia e tridente. | Tropa Atlante |
+| 97 | Nevasca (Killer Frost) | Gelo que rouba calor. | Palácio de Gelo |
+| 98 | Mão Negra (William Hand) | Lanterna Negro: morte e mortos-vivos. | Tropa dos Lanternas Negros |
+| 99 | Lobo da Estepe | General de Apokolips: machado e exército. | Nave de Guerra de Apokolips |
+| 100 | Parasita (Rudy Jones) | Rouba poder: fica mais forte absorvendo os outros. | Forma Absorvida |
 
 ## 2. Habilidades por personagem
 
@@ -140,7 +140,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhuma arma: o próprio corpo é a ferramenta
 - **Utilidade no survival:** Mineração manual rápida e captura de blocos pesados; Fundição instantânea com visão de calor; Raio X para achar diamantes e estruturas; Carregar mobs/animais voando até a base
 - **Energia:** Energia Solar: regenera sempre, rápido sob o sol, lento à noite/subterrâneo; kriptonita drena e anula poderes
-- ⭐ **Habilidade suprema: Sem Limites.** Segura o uso para concentrar o poder; ao soltar, um soco atravessa o terreno em linha reta abrindo um túnel de dezenas de blocos e lança os mobs no caminho. Também pode ser usado para cima, empurrando nuvens e limpando a chuva.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Fortaleza da Solidão.** Ergue do chão uma Fortaleza da Solidão de cristal kryptoniano no local escolhido: base temporária com câmara solar que acelera a recarga de energia, cura quem está dentro e protege contra mobs. Aliados podem entrar e usar.
 
 #### 2. Batman (Bruce Wayne)
 *Preparação, equipamento e estratégia: você vence porque planejou, não porque é mais forte.*
@@ -150,7 +150,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Cinto de utilidades com slots configuráveis (escolhe quais gadgets levar); Batcomputador (bloco) para fabricar gadgets e analisar amostras; Invocar o Batmóvel/Batwing (veículos craftados)
 - **Utilidade no survival:** Gadgets craftáveis com materiais do jogo (o preparo é o loop de progressão); Gancho para escalar e explorar cavernas; Gel explosivo para mineração controlada; Batcaverna: base com bancada de pesquisa
 - **Energia:** Recursos do Cinto: cada gadget tem cargas; recarrega no Batcomputador ou craftando munição
-- ⭐ **Habilidade suprema: Plano de Contingência.** Por um tempo, o Modo Detetive analisa todos os inimigos à vista; cada um recebe um contra-golpe preparado, e um único botão executa uma sequência automática de takedowns em câmera lenta, encadeando gadgets do cinto. Quanto mais gadgets equipados, mais alvos.
+- ⭐ **Habilidade suprema (Veículo): Batwing.** Invoca o Batwing: jato pilotável com assento para um passageiro, metralhadoras, mísseis teleguiados e modo furtivo. Pode descer e embarcar o Batman de volta com gancho.
 
 #### 3. Mulher-Maravilha (Diana)
 *Guerreira divina: combate corpo a corpo honrado, defesa impecável e liderança.*
@@ -160,7 +160,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Espada de Themyscira; Escudo; Laço da Verdade; Tiara arremessável
 - **Utilidade no survival:** Laço para domar e transportar animais/mobs; Reflexão de flechas contra esqueletos; Buff de aliados em multiplayer
 - **Energia:** Bênção dos Deuses: regenera com o tempo; altares (blocos) aceleram
-- ⭐ **Habilidade suprema: Ira de Themyscira.** Diana cruza os braceletes e libera uma explosão divina em esfera que derruba todos os mobs ao redor, reflete todos os projéteis por alguns segundos e concede força e resistência a aliados próximos.
+- ⭐ **Habilidade suprema (Veículo): Jato Invisível.** Invoca o Jato Invisível amazônico: aeronave pilotável e invisível para mobs, com espaço para três aliados e uma rampa que lança Diana em mergulho.
 
 #### 4. Flash (Barry Allen)
 *Velocidade extraordinária: o mundo fica em câmera lenta e você chega antes de qualquer coisa.*
@@ -170,7 +170,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel do traje (guarda o uniforme)
 - **Utilidade no survival:** Viagem rápida entre biomas; Colheita e plantio em alta velocidade; Construção acelerada (colocar blocos mais rápido); Fugir de qualquer ameaça
 - **Energia:** Força de Aceleração: recarrega enquanto corre; consome rápido em tempo de bala; fome aumenta muito (comer mais)
-- ⭐ **Habilidade suprema: Corrida Através do Tempo.** Corre tão rápido que o mundo quase para: durante vários segundos, tudo menos o Flash fica congelado (mobs, projéteis, água e lava). Ele pode reposicionar mobs, desviar flechas e colher uma plantação inteira antes do tempo voltar.
+- ⭐ **Habilidade suprema (Transformação): Avatar da Força de Aceleração.** Barry se funde com a Força de Aceleração: vira um corpo de relâmpago dourado que corre por cima de tudo, atravessa blocos e deixa um rastro elétrico que fere mobs. Outros jogadores não são afetados pelo tempo.
 
 #### 5. Flash (Wally West)
 *O velocista mais rápido de todos: ainda mais rápido que Barry, com controle fino e emprestando velocidade.*
@@ -181,7 +181,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel do traje
 - **Utilidade no survival:** Transporte de aliados; Escolta rápida de comerciantes/animais
 - **Energia:** Força de Aceleração (mesmo sistema do Barry, recarga maior por velocidade)
-- ⭐ **Habilidade suprema: Cavalaria da Força de Aceleração.** Invoca ecos de velocistas que correm em círculo pela área, desacelerando todos os inimigos e dando velocidade extrema e regeneração a todos os aliados próximos.
+- ⭐ **Habilidade suprema (Invocação): Esteira de Velocistas.** Abre uma pista de relâmpagos à frente; aliados que correm nela ganham supervelocidade e mobs que tocam nela ficam presos em lentidão.
 
 #### 6. Lanterna Verde (Hal Jordan)
 *Versatilidade e improvisação: construtos rápidos e simples para qualquer situação, com coragem de piloto.*
@@ -191,7 +191,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia (bloco)
 - **Utilidade no survival:** Pontes e plataformas temporárias para atravessar abismos; Construtos de ferramenta (picareta/machado de energia); Jaula para capturar mobs
 - **Energia:** Força de Vontade: só recarrega na Bateria de Energia (juramento); pequena regeneração ao vencer lutas
-- ⭐ **Habilidade suprema: Imaginação sem Limites.** Cria o construto que a situação pedir com um só comando: o jogo detecta o contexto (abismo vira ponte, queda vira paraquedas, horda vira canhão gatling, lava vira cúpula) e gera o construto ideal na hora.
+- ⭐ **Habilidade suprema (Veículo): Caça de Construto.** Cria um caça a jato verde pilotável (homenagem ao piloto Hal), com rajadas, escudo e assento para um aliado.
 
 #### 7. Lanterna Verde (John Stewart)
 *O arquiteto: construtos complexos, sólidos e planejados que funcionam como estruturas reais.*
@@ -202,7 +202,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Projetar andaimes, pontes e escadas grandes; Defesa de base com torres temporárias; Converter construto em blocos reais pagando materiais
 - **Energia:** Força de Vontade (Bateria); construtos maiores custam mais, mas duram mais
-- ⭐ **Habilidade suprema: Fortaleza do Arquiteto.** Projeta uma fortaleza inteira de energia verde a partir de uma planta salva: muralhas, torres de artilharia que atiram sozinhas e portões. Pagando materiais reais, a estrutura pode ser convertida em blocos permanentes.
+- ⭐ **Habilidade suprema (Construto): Fortaleza do Arquiteto.** Projeta uma fortaleza de energia com muralhas, portões e torres de artilharia que atiram sozinhas. Usa plantas salvas pelo jogador; pagando materiais, vira construção permanente.
 
 #### 8. Lanterna Verde (Kyle Rayner)
 *Criatividade: construtos artísticos e vivos, cheios de detalhe, que agem por conta própria.*
@@ -213,7 +213,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Criaturas de construto ajudam a minerar/defender; Formas personalizadas para decoração temporária
 - **Energia:** Força de Vontade (Bateria)
-- ⭐ **Habilidade suprema: Galeria Viva.** Desenha no ar um construto gigante e detalhado (um dragão, um robô de guerra) que ganha vida e luta ao lado do jogador; Kyle pode montar nele e pilotá-lo.
+- ⭐ **Habilidade suprema (Armadura/mecha): Mecha de Construto.** Kyle cria e entra num mecha verde gigante, detalhado, com punhos, canhão e propulsores. Um aliado pode subir no ombro como atirador.
 
 #### 9. Lanterna Verde (Guy Gardner)
 *Briga de rua: força bruta e construtos agressivos, sem sutileza.*
@@ -224,7 +224,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Demolição rápida de blocos; Tanque em combate de grupo
 - **Energia:** Força de Vontade (Bateria); ganha energia ao receber dano
-- ⭐ **Habilidade suprema: Contra o Mundo.** Guy fica maior, com punhos de construto gigantes; cada golpe abre crateras e empurra hordas. Quanto mais dano ele recebe, mais forte a investida final.
+- ⭐ **Habilidade suprema (Construto): Bola de Demolição Gigante.** Um guindaste de construto com bola de demolição colossal que Guy controla, destruindo estruturas e hordas.
 
 #### 10. Lanterna Verde (Jessica Cruz)
 *Coragem apesar do medo: defensiva, protetora, ficando mais forte sob pressão.*
@@ -235,7 +235,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Proteger aldeões e animais durante ataques; Resgate em cavernas
 - **Energia:** Força de Vontade (Bateria); recarga extra ao proteger aliados
-- ⭐ **Habilidade suprema: Coragem Indomável.** Quando a vida chega ao mínimo, Jessica fica imune ao medo e ao dano por alguns segundos e cria uma cúpula protetora gigante que cura aliados dentro dela.
+- ⭐ **Habilidade suprema (Construto): Cúpula de Proteção.** Uma cúpula verde gigante e translúcida que bloqueia mobs e projéteis e cura aliados dentro; perfeita para defender uma vila.
 
 #### 11. Lanterna Verde (Simon Baz)
 *Lanterna que também salva: construtos com tática e um poder raro de cura.*
@@ -246,7 +246,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia; Pistola reserva
 - **Utilidade no survival:** Curar aldeões zumbis (acelera a cura); Suporte em multiplayer
 - **Energia:** Força de Vontade (Bateria)
-- ⭐ **Habilidade suprema: Sementeira de Vida.** Cura instantaneamente todos os aliados na área, remove efeitos negativos, cura aldeões zumbis e faz brotar grama e flores ao redor.
+- ⭐ **Habilidade suprema (Construto): Ambulância Esmeralda.** Um veículo de construto que cura passageiros continuamente e cura aldeões zumbis ao tocá-los.
 
 #### 12. Aquaman (Arthur Curry)
 *Rei dos mares: o oceano é seu território, e lá você é imbatível.*
@@ -256,7 +256,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Tridente de Netuno; Concha de comando (item)
 - **Utilidade no survival:** Explorar monumentos oceânicos e naufrágios com facilidade; Golfinhos guiam até tesouros; Montar uma baleia/cavalo-marinho; Bolha de ar para amigos
 - **Energia:** Hidratação: recarrega na água, drena lentamente em terra seca e muito em desertos/Nether
-- ⭐ **Habilidade suprema: Chamado do Rei dos Mares.** Convoca uma criatura colossal das profundezas (Kraken ou Topo) que ataca a área marcada, ergue uma onda gigante e arrasta mobs para o mar.
+- ⭐ **Habilidade suprema (Invocação): Montaria de Topo.** Invoca Topo, o polvo gigante guardião de Atlântida, como montaria aquática: arrasta navios, agarra mobs com tentáculos e leva aliados nas costas.
 
 #### 13. Mera
 *Hidrocinese pura: a água vira arma, ferramenta e construção.*
@@ -267,7 +267,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Coroa de Xebel
 - **Utilidade no survival:** Drenar áreas inundadas para minerar; Irrigar plantações; Apagar lava/incêndios
 - **Energia:** Hidratação (mesmo sistema do Aquaman)
-- ⭐ **Habilidade suprema: Muralha do Oceano.** Ergue uma muralha ou um anel de água sólida e endurecida em volta da área, prendendo inimigos dentro e protegendo aliados. Pode drenar um lago inteiro para revelar o leito.
+- ⭐ **Habilidade suprema (Construto): Leviatã de Água.** Molda um dragão-marinho de água sólida que luta por ela e transporta aliados pelo mar.
 
 #### 14. Ciborgue (Victor Stone)
 *Tecnologia viva: você é um computador, uma arma e uma ferramenta ao mesmo tempo.*
@@ -277,7 +277,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Upgrades instaláveis no corpo (módulos craftáveis)
 - **Utilidade no survival:** Teletransporte entre bases; Controle remoto de redstone; Broca para túneis; Analisar blocos e minérios
 - **Energia:** Bateria interna: recarrega em blocos de energia/redstone ou dormindo
-- ⭐ **Habilidade suprema: Boom Tube Mestre.** Abre um tubo de explosão que transporta o grupo inteiro para qualquer ponto já visitado e marcado, inclusive entre dimensões.
+- ⭐ **Habilidade suprema (Armadura/mecha): Armadura de Guerra de Ciborgue.** Expande o corpo numa armadura blindada gigante com canhões sônicos duplos e voo, que um aliado pode usar como torre.
 
 #### 15. Caçador de Marte (J'onn J'onzz)
 *O alienígena que pode ser qualquer um: mente, forma e densidade sob controle.*
@@ -287,7 +287,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Infiltração em estruturas hostis disfarçado; Explorar atravessando paredes; Acalmar mobs para passar
 - **Energia:** Mente Marciana: regenera com o tempo; fogo drena e bloqueia poderes
-- ⭐ **Habilidade suprema: Mente Coletiva.** Assume o controle mental de todos os mobs ao redor: eles param de atacar, passam a lutar contra seus próprios aliados ou seguem J'onn como escudo.
+- ⭐ **Habilidade suprema (Transformação): Forma Marciana de Guerra.** J'onn assume sua forma marciana gigante e blindada, com força enorme e intangibilidade seletiva.
 
 #### 16. Shazam (Billy Batson)
 *Uma criança com o poder dos deuses: poder mágico explosivo ativado por um relâmpago.*
@@ -297,7 +297,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum; a transformação é um raio
 - **Utilidade no survival:** Raio para carregar creepers, transformar porcos/aldeões; Força para mineração
 - **Energia:** Magia de Shazam: recarrega durante tempestades e ao ser atingido por raios; regeneração lenta normal
-- ⭐ **Habilidade suprema: Relâmpago dos Deuses.** Grita SHAZAM e convoca uma tempestade de raios que atinge todos os inimigos na área, carrega creepers e recarrega instantaneamente a própria energia.
+- ⭐ **Habilidade suprema (Invocação): Pedra da Eternidade.** Invoca um portal para a Pedra da Eternidade: aliados que atravessam são curados e recebem força divina por um tempo.
 
 #### 17. Supergirl (Kara Zor-El)
 *Kryptoniana mais ágil e impetuosa: mais velocidade e combate aéreo, menos força bruta.*
@@ -308,7 +308,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Mesmo que Superman, com foco em transporte rápido
 - **Energia:** Energia Solar (mesmo sistema)
-- ⭐ **Habilidade suprema: Explosão Solar.** Libera de uma vez toda a energia solar acumulada numa onda gigante que vaporiza mobs na área; depois fica sem poderes por um tempo, até recarregar ao sol.
+- ⭐ **Habilidade suprema (Veículo): Nave Kryptoniana.** Invoca a cápsula/nave de Kara, pilotável, com escudo e canhão solar.
 
 #### 18. Arqueiro Verde (Oliver Queen)
 *Precisão e criatividade: um arco e uma aljava cheia de surpresas.*
@@ -318,7 +318,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Arco Composto; Aljava de flechas especiais (craftáveis)
 - **Utilidade no survival:** Flecha gancho para tirolesa; Caça eficiente; Flecha sinalizadora ilumina cavernas
 - **Energia:** Aljava: munição especial craftada; flechas comuns infinitas
-- ⭐ **Habilidade suprema: Chuva de Flechas.** Dispara para o céu uma flecha que se divide em dezenas de flechas especiais (aleatórias da aljava) caindo sobre a área marcada.
+- ⭐ **Habilidade suprema (Veículo): Arqueiro-Móvel.** Invoca o carro do Arqueiro Verde com lançador de flechas especiais no capô (rede, explosiva, gancho) e lugar para um passageiro atirar.
 
 #### 19. Canário Negro (Dinah Lance)
 *Lutadora técnica com um grito que derruba qualquer um.*
@@ -328,7 +328,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Bastão retrátil
 - **Utilidade no survival:** Quebrar blocos frágeis em área; Afastar hordas
 - **Energia:** Fôlego: regenera rápido; não recarrega debaixo d'água
-- ⭐ **Habilidade suprema: Grito Devastador.** Um grito sônico em linha reta que destrói blocos frágeis, quebra vidros e areia em sequência e arremessa todos os mobs no caminho.
+- ⭐ **Habilidade suprema (Veículo): Moto Sônica.** Invoca uma moto veloz; o Grito Canário em movimento abre caminho por blocos frágeis e derruba mobs à frente.
 
 #### 20. Gavião Negro (Carter Hall)
 *Guerreiro alado ancestral: ataque aéreo brutal com armas medievais.*
@@ -338,7 +338,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Maça de Metal Nth; Asas de Metal Nth (anti-gravidade)
 - **Utilidade no survival:** Explorar montanhas; Caçar do alto
 - **Energia:** Metal Nth: regenera com o tempo; mais rápido em altitude
-- ⭐ **Habilidade suprema: Mergulho do Falcão.** Sobe muito alto e mergulha numa velocidade absurda; o impacto da maça cria uma cratera e atordoa todos ao redor.
+- ⭐ **Habilidade suprema (Invocação): Esquadrão Alado.** Invoca guerreiros thanagarianos que voam em formação e atacam o alvo marcado; aliados podem ser carregados por eles.
 
 #### 21. Mulher-Gavião (Shayera Hol)
 *Policial alienígena alada: agressiva, veloz e com arsenal de Thanagar.*
@@ -349,7 +349,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Maça de Metal Nth; Asas
 - **Utilidade no survival:** Transporte aéreo; Exploração vertical
 - **Energia:** Metal Nth
-- ⭐ **Habilidade suprema: Fúria de Thanagar.** Uma sequência aérea de golpes com a maça eletrificada em múltiplos alvos, encadeando raios entre eles.
+- ⭐ **Habilidade suprema (Veículo): Nave Thanagariana.** Invoca uma nave thanagariana pilotável com canhão de Metal Nth e gancho para carregar cargas pesadas.
 
 #### 22. Zatanna
 *Mágica de palco real: feitiços falados ao contrário que fazem qualquer coisa, se você souber pedir.*
@@ -359,7 +359,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Cartola (guarda itens); Varinha
 - **Utilidade no survival:** Feitiço de crescer plantações; Feitiço de luz; Feitiço de conserto de itens
 - **Energia:** Mana: regenera; poções e livros mágicos aceleram; à noite regenera mais
-- ⭐ **Habilidade suprema: Palavra Final.** Um feitiço de alto custo que transforma a área: noite vira dia, a chuva para, todos os mobs hostis viram coelhos ou galinhas.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Palco da Ilusão.** Ergue um palco mágico gigante: mobs dentro ficam hipnotizados e parados, e aliados ganham velocidade e força enquanto estiverem no palco.
 
 #### 23. Senhor Destino (Kent Nelson)
 *Feiticeiro supremo de Nabu: magia ancestral, poderosa e calculada.*
@@ -369,7 +369,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Elmo de Nabu; Capa e Amuleto de Anúbis
 - **Utilidade no survival:** Portais entre bases; Proteção contra magia de bruxas e evocadores
 - **Energia:** Magia de Nabu: regenera; torre de Destino (bloco) acelera
-- ⭐ **Habilidade suprema: Banimento de Nabu.** Abre um portal místico que suga e bane todos os mobs hostis da área para outra dimensão.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Torre do Destino.** Ergue a Torre do Destino: estrutura mágica com biblioteca de encantamentos e portais que ligam a pontos marcados por qualquer aliado.
 
 #### 24. Átomo (Ray Palmer)
 *Ciência do tamanho: encolher para explorar e crescer para esmagar.*
@@ -379,7 +379,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Cinto de Massa Anã
 - **Utilidade no survival:** Explorar através de grades e frestas; Ficar gigante para colher/derrubar árvores; Encolher mobs perigosos
 - **Energia:** Estrela anã: regenera; mudar de tamanho custa
-- ⭐ **Habilidade suprema: Átomo Gigante.** Cresce até tamanho colossal por alguns segundos: cada passo esmaga mobs, ele derruba árvores com uma mão e pode carregar uma casa.
+- ⭐ **Habilidade suprema (Transformação): Átomo Gigante.** Cresce até tamanho colossal: derruba árvores inteiras, carrega mobs na mão e passa por cima de muralhas.
 
 #### 25. Besouro Azul (Jaime Reyes)
 *Armadura alienígena que se adapta: a arma certa aparece quando você precisa.*
@@ -389,7 +389,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Escaravelho (Khaji Da)
 - **Utilidade no survival:** Armadura se adapta a lava/frio; Ferramentas geradas pela armadura
 - **Energia:** Escaravelho: regenera lentamente; absorver energia de explosões recarrega
-- ⭐ **Habilidade suprema: Modo Guerra.** A armadura se adapta para o combate total: dispara de uma vez todos os canhões, mísseis e lâminas por alguns segundos em todos os alvos ao redor.
+- ⭐ **Habilidade suprema (Armadura/mecha): Besouro Titã.** A armadura se expande num mecha de escaravelho gigante com canhões de plasma, asas e garras de mineração.
 
 #### 26. Gladiador Dourado (Booster Gold)
 *Herói do futuro com tecnologia chamativa e muita sorte.*
@@ -399,7 +399,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel da Legião; Robô Skeets
 - **Utilidade no survival:** Skeets coleta itens; Voltar no tempo para desfazer queda
 - **Energia:** Bateria do futuro: recarrega em carregador (bloco)
-- ⭐ **Habilidade suprema: Desfazer o Erro.** Rebobina o tempo do jogador alguns segundos: volta posição, vida e itens perdidos (incluindo uma morte recente).
+- ⭐ **Habilidade suprema (Veículo): Nave do Século 25.** Invoca uma nave do futuro com teletransporte para pontos marcados, Skeets como copiloto e lugar para aliados.
 
 #### 27. Homem-Elástico
 *Elasticidade cômica e criativa: você vira qualquer forma.*
@@ -409,7 +409,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Óculos
 - **Utilidade no survival:** Pegar itens longe; Virar ponte/escada; Trampolim para outros jogadores
 - **Energia:** Elasticidade: regenera rápido; fogo e frio reduzem
-- ⭐ **Habilidade suprema: Forma Gigante.** Vira uma forma gigante (punho, rede ou paraquedas) que prende vários mobs ou transporta vários jogadores de uma vez.
+- ⭐ **Habilidade suprema (Transformação): Forma Colossal.** Vira objetos gigantes à escolha: trampolim enorme, paraquedas para o grupo, ponte viva ou bola de demolição.
 
 #### 28. Vixen (Mari McCabe)
 *Copiar o reino animal: cada animal do jogo empresta uma habilidade.*
@@ -419,7 +419,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Totem de Tantu
 - **Utilidade no survival:** Adaptação a qualquer bioma; Domesticação facilitada
 - **Energia:** Espírito Animal: recarrega estando perto de animais
-- ⭐ **Habilidade suprema: Arca da Natureza.** Canaliza todos os animais ao mesmo tempo: soma as melhores habilidades (força do lobo, velocidade do cavalo, resistência do urso) por um tempo.
+- ⭐ **Habilidade suprema (Transformação): Fera Mítica.** Funde-se num leão espiritual gigante que soma as habilidades de vários animais e pode levar aliados nas costas.
 
 #### 29. Estelar (Koriand'r)
 *Energia solar alienígena e alegria explosiva: voo e rajadas estelares.*
@@ -429,7 +429,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Desconto com aldeões; Iluminar cavernas
 - **Energia:** Energia Solar (mesmo sistema do Superman, sem kriptonita)
-- ⭐ **Habilidade suprema: Supernova.** Absorve toda a luz ao redor e explode numa estrela radiante que causa dano enorme e ilumina a área permanentemente com blocos de luz.
+- ⭐ **Habilidade suprema (Invocação): Nave de Tamaran.** Invoca uma nave tamaraniana que dispara raios estelares no alvo marcado e transporta aliados.
 
 #### 30. Ravena (Rachel Roth)
 *Magia sombria contida: poder imenso controlado pela calma.*
@@ -439,7 +439,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Capa
 - **Utilidade no survival:** Projeção astral para explorar cavernas sem risco; Teleporte; Curar aliados
 - **Energia:** Controle Emocional: recarrega meditando; tomar muito dano rápido descontrola (efeito aleatório)
-- ⭐ **Habilidade suprema: Libertar o Corvo.** Libera o poder de Trigon: um corvo de sombra gigante engole os inimigos da área e os devolve atordoados e enfraquecidos.
+- ⭐ **Habilidade suprema (Invocação): Corvo de Alma Gigante.** Libera um corvo de sombra gigante que transporta o grupo voando e engole mobs no caminho.
 
 #### 31. Mutano (Garfield Logan)
 *Virar qualquer animal: diversão e utilidade ilimitadas.*
@@ -449,7 +449,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Cada forma resolve um problema: morcego explora cavernas, cabra escala, golfinho nada, cavalo viaja
 - **Energia:** Energia de Transformação: regenera; formas maiores custam mais por segundo
-- ⭐ **Habilidade suprema: Tiranossauro.** Vira um T-Rex enorme: rugido que espanta mobs e mordidas que derrubam tudo.
+- ⭐ **Habilidade suprema (Transformação): Tiranossauro Rex.** Mutano vira um T-Rex gigante: rugido que espanta mobs, mordidas devastadoras e pode carregar aliados nas costas.
 
 #### 32. Asa Noturna (Dick Grayson)
 *Acrobacia e fluidez: o combate é uma coreografia no ar.*
@@ -459,7 +459,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Bastões de Escrima; Gancho de pulso
 - **Utilidade no survival:** Mobilidade vertical em montanhas e cidades; Exploração ágil
 - **Energia:** Fôlego: regenera rápido; acrobacias consomem
-- ⭐ **Habilidade suprema: Coreografia Perfeita.** Uma sequência acrobática automática entre vários inimigos, saltando de um para o outro sem tocar o chão.
+- ⭐ **Habilidade suprema (Veículo): Moto de Asa Noturna.** Invoca uma moto que corre pelas paredes, com gancho integrado e bastões elétricos nas laterais.
 
 #### 33. Batwoman (Kate Kane)
 *Soldada treinada no estilo Batman: tática militar e equipamento.*
@@ -470,7 +470,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Cinto de utilidades
 - **Utilidade no survival:** Mesmo kit do Batman, com marcação de alvos
 - **Energia:** Recursos do Cinto
-- ⭐ **Habilidade suprema: Takedown Tático.** Marca todos os inimigos e executa uma emboscada tática com granadas de choque e golpes encadeados.
+- ⭐ **Habilidade suprema (Veículo): Bat-Moto Tática.** Invoca uma moto blindada com mísseis e marcador de alvos que mostra os inimigos para todos os aliados.
 
 #### 34. Nuclear (Firestorm)
 *O homem nuclear: transmutar a matéria do mundo.*
@@ -480,7 +480,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Transmutação é uma ferramenta de economia (com custo alto); Fundição instantânea
 - **Energia:** Matriz Nuclear: regenera; instável se zerar (explosão pequena)
-- ⭐ **Habilidade suprema: Fusão Nuclear.** Transforma uma grande área de blocos ao redor: pedra vira minério, areia vira vidro, água vira gelo. Alto custo e cooldown longo.
+- ⭐ **Habilidade suprema (Transformação): Forma Nuclear Total.** Vira uma tocha nuclear gigante que voa e transmuta os blocos por onde passa (com custo alto).
 
 #### 35. Raio Negro (Jefferson Pierce)
 *Eletricidade sob comando: dano em cadeia e controle de máquinas.*
@@ -490,7 +490,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Energizar circuitos de redstone; Iluminação
 - **Energia:** Bioeletricidade: recarrega perto de redstone/para-raios ou em tempestade
-- ⭐ **Habilidade suprema: Tempestade Elétrica.** Carrega o ar: raios caem em todos os mobs da área e ativam todos os mecanismos de redstone próximos.
+- ⭐ **Habilidade suprema (Transformação): Tempestade Viva.** Vira um corpo de relâmpago que voa e eletrifica tudo ao redor, ativando redstone e carregando creepers.
 
 #### 36. Stargirl (Courtney Whitmore)
 *Herdeira entusiasmada: um bastão cósmico que faz de tudo.*
@@ -500,7 +500,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Bastão Cósmico; Cinturão Cósmico
 - **Utilidade no survival:** Voo acessível cedo; Robô carregador
 - **Energia:** Energia Cósmica: regenera à noite com céu aberto
-- ⭐ **Habilidade suprema: Explosão Cósmica.** O Bastão Cósmico dispara uma onda estelar em leque que atravessa os inimigos e os lança para longe.
+- ⭐ **Habilidade suprema (Armadura/mecha): S.T.R.I.P.E. Pilotável.** Invoca o robô S.T.R.I.P.E. em versão gigante e entra nele: armadura com canhões e voo.
 
 #### 37. Senhor Incrível (Michael Holt)
 *O terceiro homem mais inteligente do mundo: drones e invisibilidade tecnológica.*
@@ -510,7 +510,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** T-Esferas; Jaqueta
 - **Utilidade no survival:** Drones que mineram/iluminam; Mapear área
 - **Energia:** Bateria das T-Esferas: recarrega no laboratório (bloco)
-- ⭐ **Habilidade suprema: Rede de T-Esferas.** Lança todas as T-Esferas, que formam uma cúpula de força e atacam sozinhas qualquer inimigo dentro dela.
+- ⭐ **Habilidade suprema (Invocação): Enxame de T-Esferas.** Libera uma nuvem de T-Esferas que formam muralhas, pontes, iluminação e lutam sozinhas.
 
 #### 38. Senhor Milagre (Scott Free)
 *Escapista definitivo: nada te prende.*
@@ -520,7 +520,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Caixa-Mãe; Discos Aéreos
 - **Utilidade no survival:** Teleporte; Escapar de quedas e armadilhas
 - **Energia:** Caixa-Mãe: recarrega com o tempo
-- ⭐ **Habilidade suprema: Fuga Impossível.** Escapa de qualquer situação: teleporta instantaneamente para a cama ou base, limpando todos os efeitos negativos.
+- ⭐ **Habilidade suprema (Veículo): Discos Aéreos do Grupo.** Invoca um disco aéreo para cada aliado próximo, para todo o grupo voar junto.
 
 #### 39. Big Barda
 *Guerreira de Apokolips: impacto brutal com o Megabastão.*
@@ -530,7 +530,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Megabastão; Armadura das Fúrias
 - **Utilidade no survival:** Demolição; Teleporte
 - **Energia:** Disciplina Fúria: regenera; aumenta ao lutar
-- ⭐ **Habilidade suprema: Megabastão Supremo.** Um golpe que abre uma fenda de energia no chão em linha, explodindo tudo no caminho.
+- ⭐ **Habilidade suprema (Invocação): Fúrias Femininas.** Invoca guerreiras de Apokolips aliadas armadas com bastões e lanças.
 
 #### 40. Monstro do Pântano
 *O Verde vivo: a natureza obedece e você é parte dela.*
@@ -540,7 +540,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Agricultura acelerada; Reflorestamento; Teleporte por árvores
 - **Energia:** O Verde: recarrega perto de plantas; drena em desertos, Nether e fogo
-- ⭐ **Habilidade suprema: O Verde Responde.** Uma floresta inteira brota ao redor: árvores crescem na hora, vinhas prendem todos os inimigos e a plantação amadurece por completo.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Floresta Viva.** Faz surgir uma floresta inteira ao redor, com árvores, vinhas que prendem inimigos e plantações maduras. Fica permanente.
 
 #### 41. Questão (Vic Sage)
 *Investigação e mistério: informação é a arma.*
@@ -550,7 +550,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Máscara; Gás binário
 - **Utilidade no survival:** Rastrear jogadores/mobs; Descobrir estruturas próximas
 - **Energia:** Pistas: recarrega ao investigar blocos/mobs novos
-- ⭐ **Habilidade suprema: A Resposta.** Revela tudo da área: baús, minérios, estruturas, mobs e quem passou por ali.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Mural da Investigação.** Cria um quadro de investigação que revela por um tempo tudo da área: baús, minérios, estruturas e quem passou ali.
 
 #### 42. Orion
 *Filho de Darkseid lutando pelo bem: guerra cósmica pura.*
@@ -560,7 +560,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Astro-Arnês; Caixa-Mãe
 - **Utilidade no survival:** Combate pesado; Teleporte
 - **Energia:** Astro-Força: regenera
-- ⭐ **Habilidade suprema: Guerra dos Deuses.** Fúria divina: força e velocidade extremas, e cada golpe dispara uma rajada do Astro-Arnês.
+- ⭐ **Habilidade suprema (Veículo): Moto Cósmica.** O Astro-Arnês vira uma moto cósmica de alta velocidade com canhões e lugar para um passageiro.
 
 #### 43. Kilowog
 *O sargento da Tropa: construtos pesados e treinamento de aliados.*
@@ -571,7 +571,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel de Poder; Bateria de Energia
 - **Utilidade no survival:** Apoio em grupo
 - **Energia:** Força de Vontade (Bateria)
-- ⭐ **Habilidade suprema: Treinamento de Recrutas.** Invoca três Lanternas de construto que lutam ao seu lado e protegem aliados.
+- ⭐ **Habilidade suprema (Construto): Quartel da Tropa.** Projeta um campo de treino de construto com recrutas Lanternas aliados que defendem a área.
 
 #### 44. Homem-Animal (Buddy Baker)
 *Emprestar poderes de todos os animais ao mesmo tempo, pela Rede da Vida.*
@@ -582,7 +582,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Adaptação a biomas; Aliados animais
 - **Energia:** Espírito Animal
-- ⭐ **Habilidade suprema: Rede da Vida.** Chama todos os animais da região para atacar o alvo ou proteger a área.
+- ⭐ **Habilidade suprema (Invocação): Manada Mítica.** Chama pela Rede da Vida uma manada de animais gigantes que atropela os inimigos e depois some.
 
 #### 45. Tornado Vermelho
 *Androide do vento: controle de ar e clima.*
@@ -592,7 +592,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Mudar o clima; Juntar itens com tornado; Desviar flechas
 - **Energia:** Núcleo Androide: recarrega em altitude e em tempestades
-- ⭐ **Habilidade suprema: Furacão.** Cria um furacão gigante que puxa mobs e itens e os joga longe, mudando o clima para tempestade.
+- ⭐ **Habilidade suprema (Transformação): Ciclone Vivo.** Tornado Vermelho vira um ciclone colossal que voa pilotado pelo jogador: suga mobs e itens soltos (que vão direto para o inventário), apaga incêndios e pode carregar um aliado no olho do furacão.
 
 ### Ajudantes
 
@@ -605,7 +605,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Katana; Cinto de utilidades
 - **Utilidade no survival:** Kit do Batman simplificado; Combate rápido
 - **Energia:** Recursos do Cinto
-- ⭐ **Habilidade suprema: Herdeiro do Demônio.** Libera o treinamento da Liga dos Assassinos: um ataque em sequência com a espada sobre todos os inimigos próximos.
+- ⭐ **Habilidade suprema (Veículo): Moto Ninja do Robin.** Invoca uma moto compacta com lâminas laterais e lançador de bombas de fumaça; dá para empinar e saltar entre telhados com o gancho integrado.
 
 #### 47. Batgirl (Barbara Gordon)
 *Hacker e lutadora: informação e agilidade.*
@@ -616,7 +616,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Cinto de utilidades; Tablet
 - **Utilidade no survival:** Hackear redstone; Exploração
 - **Energia:** Recursos do Cinto
-- ⭐ **Habilidade suprema: Oráculo.** Hackeia toda a área: desativa armadilhas, controla redstone e revela todos os mobs e jogadores no mapa.
+- ⭐ **Habilidade suprema (Veículo): Batgirl-Ciclo.** Invoca uma moto com computador de bordo: enquanto pilota, mostra mobs e jogadores no mapa e hackeia portas, portões e redstone num raio grande.
 
 #### 48. Superboy (Conner Kent)
 *Meio kryptoniano: telecinese tátil no lugar da visão de calor.*
@@ -627,7 +627,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Mover blocos em massa (construção); Mineração em área
 - **Energia:** Energia Solar
-- ⭐ **Habilidade suprema: Telecinese Total.** Levanta uma área inteira de blocos e mobs ao redor e arremessa tudo de uma vez.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Ilha Telecinética.** Arranca um disco de terreno do chão e o faz flutuar como plataforma pilotável; aliados podem subir e ser levados junto, e dá para pousá-lo como base aérea permanente.
 
 #### 49. Impulso (Bart Allen)
 *Velocista impaciente: rápido, descontrolado e divertido.*
@@ -638,7 +638,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Coleta rápida; Aprender receitas
 - **Energia:** Força de Aceleração
-- ⭐ **Habilidade suprema: Explosão de Velocidade.** Corre tanto que dá a volta no mundo carregado: uma onda de vento em velocidade supersônica atravessa a área.
+- ⭐ **Habilidade suprema (Veículo): Esteira Cósmica.** Invoca a Esteira Cósmica: correr nela abre um túnel de velocidade para qualquer ponto marcado por ele ou por aliados, levando quem estiver na esteira.
 
 #### 50. Aqualad (Jackson Hyde)
 *Hidrocinese elétrica: água e choque juntos.*
@@ -649,7 +649,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Portadores de Água
 - **Utilidade no survival:** Pesca/defesa no oceano
 - **Energia:** Hidratação
-- ⭐ **Habilidade suprema: Tempestade Elétrica Submersa.** Eletrifica toda a água ao redor causando dano em área a mobs aquáticos e terrestres molhados.
+- ⭐ **Habilidade suprema (Construto): Tubarão de Água Viva.** Molda um tubarão de água endurecida que serve de montaria rápida no mar e ataca mobs aquáticos; em terra vira uma onda que derruba inimigos.
 
 #### 51. Moça-Maravilha (Cassie Sandsmark)
 *Semideusa jovem com laço de Zeus: força e voo.*
@@ -660,7 +660,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Laço de Zeus
 - **Utilidade no survival:** Mesmo que Mulher-Maravilha, laço elétrico
 - **Energia:** Bênção dos Deuses
-- ⭐ **Habilidade suprema: Fúria de Zeus.** O laço vira um chicote de raio gigante que atinge todos os inimigos ao redor.
+- ⭐ **Habilidade suprema (Invocação): Águia de Zeus.** Invoca uma águia gigante feita de raios como montaria voadora para dois jogadores; o mergulho dela cai como um relâmpago no alvo.
 
 #### 52. Arsenal (Roy Harper)
 *Arqueiro que usa qualquer arma: improviso e poder de fogo.*
@@ -671,7 +671,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Arco; Arsenal portátil
 - **Utilidade no survival:** Caça e defesa
 - **Energia:** Aljava
-- ⭐ **Habilidade suprema: Arsenal Completo.** Dispara todas as armas de uma vez (flechas, granadas, armas) numa barragem contra a área marcada.
+- ⭐ **Habilidade suprema (Veículo): Blindado do Arsenal.** Invoca um veículo blindado com torre giratória de flechas especiais que um aliado pode operar enquanto Arsenal dirige.
 
 #### 53. Robin Vermelho (Tim Drake)
 *O detetive mais estratégico da família: planeja e prepara armadilhas.*
@@ -682,7 +682,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Bastão retrátil; Cinto
 - **Utilidade no survival:** Armadilhas para fazendas de mobs
 - **Energia:** Recursos do Cinto
-- ⭐ **Habilidade suprema: Plano Mestre.** Monta uma rede de armadilhas pré-planejadas ao redor; inimigos que entram ficam presos e atordoados.
+- ⭐ **Habilidade suprema (Veículo): Robin-Copter.** Invoca um helicóptero tático pilotável com holofote, gancho de carga (transporta mobs, animais ou baús) e lugar para um passageiro.
 
 #### 54. Abelha (Karen Beecher)
 *Pequena e perigosa: encolher e ferroar.*
@@ -693,7 +693,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Traje Bumblebee
 - **Utilidade no survival:** Abelhas polinizam plantações e produzem mel
 - **Energia:** Bateria do traje
-- ⭐ **Habilidade suprema: Enxame Rainha.** Invoca um enxame de abelhas aliadas que ataca e depois poliniza as plantações próximas.
+- ⭐ **Habilidade suprema (Invocação): Colmeia Rainha.** Planta uma colmeia gigante que libera um enxame de abelhas aliadas: atacam inimigos, polinizam e fazem crescer plantações próximas e produzem mel.
 
 #### 55. Cassandra Cain
 *A lutadora perfeita: lê o corpo do inimigo e antecipa tudo.*
@@ -704,7 +704,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Cinto de utilidades
 - **Utilidade no survival:** Combate sem dano
 - **Energia:** Foco: aumenta acertando golpes
-- ⭐ **Habilidade suprema: Leitura Perfeita.** Durante alguns segundos, desvia de todos os ataques automaticamente e contra-ataca cada um.
+- ⭐ **Habilidade suprema (Transformação): Sombra Perfeita.** Cassandra vira uma silhueta impossível de acertar: por alguns segundos desvia de tudo automaticamente e cada desvio vira um contra-ataque crítico.
 
 ### Anti-heróis
 
@@ -717,7 +717,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Pistolas; Munição craftável
 - **Utilidade no survival:** Caça e defesa à distância
 - **Energia:** Munição
-- ⭐ **Habilidade suprema: Retorno do Capuz.** Uma sequência de tiros com pistolas duplas que atinge todos os inimigos à vista.
+- ⭐ **Habilidade suprema (Veículo): Moto do Capuz.** Invoca uma moto pesada com metralhadoras frontais e lançador de granadas; o garupa pode atirar com as próprias armas.
 
 #### 57. Mulher-Gato (Selina Kyle)
 *Ladra felina: agilidade, furtividade e roubo.*
@@ -727,7 +727,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Chicote; Garras
 - **Utilidade no survival:** Afastar creepers; Saquear estruturas; Domar gatos
 - **Energia:** Agilidade: regenera
-- ⭐ **Habilidade suprema: O Grande Roubo.** Rouba os melhores itens de todos os mobs ao redor de uma vez e some numa nuvem de fumaça.
+- ⭐ **Habilidade suprema (Invocação): Exército de Gatos.** Invoca dezenas de gatos de rua que roubam itens dos mobs, espantam creepers e phantoms e trazem o saque para Selina.
 
 #### 58. Lobo
 *Brutalidade imortal: regenera de tudo e resolve com violência.*
@@ -737,7 +737,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Gancho; Moto Espacial
 - **Utilidade no survival:** Explorar sem medo de morrer; Veículo
 - **Energia:** Fúria: aumenta lutando, cai fora de combate
-- ⭐ **Habilidade suprema: O Último Czarniano.** Fúria sem limites: Lobo fica imortal por um tempo e cada golpe causa dano gigantesco.
+- ⭐ **Habilidade suprema (Veículo): Moto Espacial Suprema.** Invoca a moto espacial de Lobo, que voa, atravessa o vácuo do End sem cair e tem canhões e um arpão com corrente para arrastar mobs.
 
 #### 59. Adão Negro (Teth-Adam)
 *Poder divino sem misericórdia: o raio como dominação.*
@@ -748,7 +748,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Como Shazam, mais agressivo
 - **Energia:** Magia de Shazam
-- ⭐ **Habilidade suprema: Ira de Kahndaq.** Uma descarga de relâmpagos divinos que destrói blocos e mobs numa área enorme.
+- ⭐ **Habilidade suprema (Transformação): Deus de Kahndaq.** Adão Negro cresce e vira um colosso de relâmpagos: voa, cada pisão vira trovão e mobs fracos fogem só de vê-lo.
 
 #### 60. John Constantine
 *Malandro do oculto: magia por rituais, pactos e truques.*
@@ -758,7 +758,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Isqueiro; Grimório
 - **Utilidade no survival:** Rituais de utilidade: clima, dia/noite, proteção da base
 - **Energia:** Sorte: rituais custam materiais e às vezes vida
-- ⭐ **Habilidade suprema: Pacto Final.** Um ritual sombrio que invoca uma entidade demoníaca para lutar por ele, ao custo de parte da vida.
+- ⭐ **Habilidade suprema (Invocação): Demônio do Pacto.** Desenha um círculo e invoca um demônio gigante aliado por um tempo; custa parte da vida máxima de Constantine até ele descansar.
 
 #### 61. Etrigan
 *Demônio em rimas: fogo infernal e caos.*
@@ -768,7 +768,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Explorar o Nether livremente
 - **Energia:** Fogo infernal: recarrega no Nether ou perto de fogo/lava
-- ⭐ **Habilidade suprema: Inferno na Terra.** Transforma a área ao redor num pedaço do Nether: fogo, lava e mobs aliados do inferno.
+- ⭐ **Habilidade suprema (Transformação): Etrigan Colossal.** Vira uma fera infernal gigante que anda sobre lava, cospe fogo infernal e deixa um rastro de chamas que não queima aliados.
 
 #### 62. Espectro
 *O espírito da vingança divina: poder quase absoluto e assustador.*
@@ -778,7 +778,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Fim de jogo: limpar áreas hostis
 - **Energia:** Ira divina: só recarrega derrotando mobs hostis
-- ⭐ **Habilidade suprema: Julgamento Final.** Cresce até tamanho gigante e pune todos os mobs hostis na área de uma vez.
+- ⭐ **Habilidade suprema (Transformação): Espectro Colossal.** Cresce até tamanho gigantesco, fica intangível e pode pegar mobs hostis com a mão e julgá-los (viram cinzas ou criaturas inofensivas).
 
 #### 63. Arlequina (Harleen Quinzel)
 *Caos alegre: imprevisível, acrobática e com marretada.*
@@ -788,7 +788,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Marreta; Taco
 - **Utilidade no survival:** Hienas como pets; Diversão
 - **Energia:** Caos: aleatório, enche ao acertar
-- ⭐ **Habilidade suprema: Grande Final.** Uma explosão gigante de confete e marretada que lança todos os mobs da área para o alto.
+- ⭐ **Habilidade suprema (Veículo): Carro da Arlequina.** Invoca um carro de palhaço armado com canhão de confete, buzina que atordoa e porta-malas de onde saem as hienas.
 
 #### 64. Pistoleiro (Deadshot)
 *Nunca erra: precisão absoluta à distância.*
@@ -798,7 +798,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Rifle; Pistolas de pulso; Monóculo
 - **Utilidade no survival:** Caça a longa distância
 - **Energia:** Munição
-- ⭐ **Habilidade suprema: Tiro Impossível.** Um disparo que ricocheteia em todos os inimigos à vista, um após o outro.
+- ⭐ **Habilidade suprema (Armadura/mecha): Traje de Atirador Supremo.** Veste um traje com braço-canhão e monóculo avançado que trava a mira em todos os alvos à vista; cada disparo acerta o próximo da fila.
 
 #### 65. Pacificador
 *Paz a qualquer custo: arsenal pesado e capacete com truques.*
@@ -808,7 +808,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Capacete; Armas
 - **Utilidade no survival:** Águia como pet de reconhecimento
 - **Energia:** Munição
-- ⭐ **Habilidade suprema: Pela Paz.** Bombardeio aéreo de granadas sobre a área marcada.
+- ⭐ **Habilidade suprema (Veículo): Jato do Pacificador.** Invoca um jato bombardeiro pilotável com espaço para um artilheiro; o capacete do Pacificador controla o bombardeio.
 
 #### 66. Tubarão-Rei (Nanaue)
 *Predador marinho: fome e mordida.*
@@ -819,7 +819,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Caça no oceano
 - **Energia:** Hidratação
-- ⭐ **Habilidade suprema: Frenesi das Profundezas.** Fica enorme e com fome: cada mordida cura e aumenta a força até o fim do efeito.
+- ⭐ **Habilidade suprema (Transformação): Megalodonte.** Nanaue vira um tubarão pré-histórico gigante: engole mobs aquáticos, arrasta barcos e pode levar aliados agarrados nas barbatanas.
 
 #### 67. Katana (Tatsu Yamashiro)
 *Samurai com uma espada que prende almas.*
@@ -829,7 +829,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Espada Soultaker
 - **Utilidade no survival:** Espíritos aliados ajudam a lutar
 - **Energia:** Almas: recarrega abatendo mobs
-- ⭐ **Habilidade suprema: Prisão de Almas.** A Soultaker suga as almas de todos os mobs da área e os transforma em guerreiros espirituais aliados.
+- ⭐ **Habilidade suprema (Invocação): Exército de Almas.** A Soultaker libera todas as almas guardadas como uma tropa de samurais espectrais que luta enquanto houver almas armazenadas.
 
 #### 68. Azrael
 *Cavaleiro sagrado: espada flamejante e devoção.*
@@ -839,7 +839,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Espada da Misericórdia; Armadura de São Dumas
 - **Utilidade no survival:** Combate pesado
 - **Energia:** Fé: regenera
-- ⭐ **Habilidade suprema: Espada Flamejante.** A espada vira uma lâmina de fogo gigante que corta em arco e incendeia os inimigos.
+- ⭐ **Habilidade suprema (Armadura/mecha): Armadura de São Dumas.** Veste a armadura sagrada completa com asas de fogo para planar e a Espada da Misericórdia flamejante gigante.
 
 #### 69. Atrocitus
 *Fúria vermelha: o anel que vomita sangue em chamas.*
@@ -850,7 +850,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel Vermelho; Bateria Vermelha
 - **Utilidade no survival:** Dano em área
 - **Energia:** Fúria: só recarrega em combate e na Bateria Vermelha
-- ⭐ **Habilidade suprema: Fúria de Sangue.** Vomita uma onda de plasma vermelho que queima tudo na área e enche a energia.
+- ⭐ **Habilidade suprema (Invocação): Dragão de Fúria.** Vomita plasma que forma um dragão vermelho vivo que voa pela área queimando inimigos; Atrocitus pode montá-lo.
 
 #### 70. Jonah Hex
 *Caçador de recompensas do velho oeste.*
@@ -860,7 +860,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Revólveres; Cavalo
 - **Utilidade no survival:** Cavalos melhores; Caçar alvos
 - **Energia:** Munição
-- ⭐ **Habilidade suprema: Dia do Acerto de Contas.** Duelo: tudo fica lento menos Jonah; seis tiros perfeitos em seis alvos.
+- ⭐ **Habilidade suprema (Invocação): Cavalo Fantasma.** Invoca um cavalo negro espectral imune a dano, muito rápido e capaz de correr sobre a água, com alforjes extras de inventário.
 
 ### Vilões
 
@@ -872,7 +872,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Cartas afiadas; Bengala
 - **Utilidade no survival:** Armadilhas; Fazendas de mobs
 - **Energia:** Caos: aleatório; enche quando efeitos aleatórios disparam
-- ⭐ **Habilidade suprema: A Piada Mortal.** Uma armadilha gigante: o gás do riso cobre a área e todos os mobs atacam uns aos outros.
+- ⭐ **Habilidade suprema (Veículo): Carro do Coringa.** Invoca o carro roxo do Coringa com canhão de gás do riso e armadilhas que caem do porta-malas; o garupa joga as bombas.
 
 #### 72. Lex Luthor
 *Gênio rico e tecnológico: a armadura é sua vantagem.*
@@ -882,7 +882,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Armadura de Guerra; LexCorp (bloco de pesquisa)
 - **Utilidade no survival:** Pesquisa tecnológica e economia (vende itens)
 - **Energia:** Bateria da armadura: recarga em estação LexCorp
-- ⭐ **Habilidade suprema: Armadura Suprema.** A armadura de guerra fica gigante e dispara mísseis e raios de kriptonita em todos os alvos.
+- ⭐ **Habilidade suprema (Armadura/mecha): Armadura de Guerra Suprema.** Lex veste a armadura de guerra gigante: mísseis teleguiados, raio de kriptonita, voo pesado e escudo que um aliado pode compartilhar.
 
 #### 73. Darkseid
 *Tirania cósmica: poder esmagador e a Equação Anti-Vida.*
@@ -892,7 +892,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Exército de Parademônios
 - **Energia:** Poder de Apokolips: regenera lentamente
-- ⭐ **Habilidade suprema: Raios Ômega Supremos.** Raios Ômega perseguem todos os inimigos na área ao mesmo tempo.
+- ⭐ **Habilidade suprema (Transformação): Darkseid Ascendente.** Darkseid cresce em tamanho e poder, os Raios Ômega viram contínuos e perseguidores, e Parademônios surgem ao seu redor.
 
 #### 74. Sinestro
 *O medo como poder: construtos de terror.*
@@ -903,7 +903,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel Amarelo; Bateria Amarela
 - **Utilidade no survival:** Afastar mobs
 - **Energia:** Medo: recarrega na Bateria Amarela e assustando mobs
-- ⭐ **Habilidade suprema: Medo Absoluto.** Todos os mobs da área fogem aterrorizados e os construtos amarelos os atacam.
+- ⭐ **Habilidade suprema (Construto): Monstro do Medo.** Cria um construto amarelo gigante e aterrorizante (uma fera de garras) que luta por ele e faz mobs fugirem em pânico.
 
 #### 75. Flash Reverso (Eobard Thawne)
 *Velocidade com ódio: o anti-Flash.*
@@ -914,7 +914,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel
 - **Utilidade no survival:** Velocidade
 - **Energia:** Força de Aceleração Negativa
-- ⭐ **Habilidade suprema: Paradoxo.** Corre de volta no tempo e apaga um inimigo: o alvo some e todos os vizinhos ficam atordoados.
+- ⭐ **Habilidade suprema (Transformação): Avatar da Força Negativa.** Thawne vira relâmpago vermelho puro: corre através de blocos e deixa um rastro que desacelera mobs. Outros jogadores não são afetados pelo tempo.
 
 #### 76. Zoom (Hunter Zolomon)
 *Velocidade por controle do tempo pessoal.*
@@ -925,7 +925,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Velocidade
 - **Energia:** Força de Aceleração
-- ⭐ **Habilidade suprema: Tempo Morto.** Congela o tempo de todos ao redor por mais tempo que o Flash comum.
+- ⭐ **Habilidade suprema (Transformação): Sombra Veloz.** Zoom vira uma silhueta azul distorcida que se move num tempo próprio; ataques dele chegam em vários impactos ao mesmo tempo.
 
 #### 77. Exterminador (Deathstroke)
 *Mercenário perfeito: combate tático e reflexos sobre-humanos.*
@@ -935,7 +935,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Espada; Bastão; Rifle
 - **Utilidade no survival:** Combate versátil
 - **Energia:** Munição + regeneração
-- ⭐ **Habilidade suprema: Contrato Cumprido.** Marca um alvo e executa uma sequência letal de golpes e tiros que causa dano crítico garantido.
+- ⭐ **Habilidade suprema (Armadura/mecha): Armadura de Exterminador.** Veste a armadura tática completa com espada, rifle e mochila a jato para saltos longos e mira tática em todos os alvos.
 
 #### 78. Bane
 *Força química: quanto mais Veneno, mais monstruoso.*
@@ -945,7 +945,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Tanques de Veneno
 - **Utilidade no survival:** Força para mineração
 - **Energia:** Veneno: recarrega com frascos craftados
-- ⭐ **Habilidade suprema: Overdose de Veneno.** Fica gigante por alguns segundos e cada golpe arremessa mobs longe.
+- ⭐ **Habilidade suprema (Transformação): Bane Titã.** Overdose de Veneno: vira um gigante de músculos que esmaga blocos, arremessa mobs e carrega rochas como armas.
 
 #### 79. Charada (Edward Nygma)
 *Enigmas e armadilhas: o intelecto como arma.*
@@ -955,7 +955,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Bengala
 - **Utilidade no survival:** Redstone e puzzles
 - **Energia:** Intelecto: regenera
-- ⭐ **Habilidade suprema: Enigma Final.** Prende todos os mobs ao redor em armadilhas de enigma que só se abrem quando o efeito acaba.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Labirinto do Charada.** Ergue um labirinto verde com interrogações ao redor dos inimigos; mobs lá dentro ficam presos até achar a saída. Pode virar estrutura permanente.
 
 #### 80. Pinguim (Oswald Cobblepot)
 *O chefão do crime: guarda-chuvas e capangas.*
@@ -965,7 +965,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Guarda-chuvas
 - **Utilidade no survival:** Comércio; Paraquedas
 - **Energia:** Riqueza: esmeraldas recarregam
-- ⭐ **Habilidade suprema: Exército do Pinguim.** Invoca capangas e um batalhão de pinguins-bomba.
+- ⭐ **Habilidade suprema (Veículo): Pato de Guerra.** Invoca o pato gigante do Pinguim, anfíbio, armado com canhões de guarda-chuva e espaço para passageiros.
 
 #### 81. Duas-Caras (Harvey Dent)
 *A moeda decide: sorte ou azar em cada ação.*
@@ -975,7 +975,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Moeda; Pistolas
 - **Utilidade no survival:** Aposta
 - **Energia:** Moeda: recarga aleatória
-- ⭐ **Habilidade suprema: Cara ou Coroa.** Joga a moeda: cara cura e dá buff forte em todos os aliados; coroa causa dano enorme em todos os inimigos.
+- ⭐ **Habilidade suprema (Invocação): Gangue das Duas Faces.** Invoca capangas aliados; a moeda decide se vêm armados (cara) ou se chegam em dobro (coroa).
 
 #### 82. Espantalho (Jonathan Crane)
 *Medo: toxina que faz o inimigo ver pesadelos.*
@@ -985,7 +985,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Foice; Máscara
 - **Utilidade no survival:** Fazendas: assustar mobs para onde quiser
 - **Energia:** Toxina: frascos craftados
-- ⭐ **Habilidade suprema: Pesadelo Coletivo.** A toxina do medo se espalha pela área: os mobs veem pesadelos e se matam entre si.
+- ⭐ **Habilidade suprema (Invocação): Campo de Espantalhos.** Planta espantalhos ao redor que espalham toxina do medo e mantêm mobs longe da área (ótimo para proteger plantações).
 
 #### 83. Hera Venenosa (Pamela Isley)
 *Plantas assassinas e venenos.*
@@ -996,7 +996,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Agricultura acelerada
 - **Energia:** O Verde
-- ⭐ **Habilidade suprema: Jardim do Éden.** Uma selva carnívora brota ao redor: plantas devoram mobs e a plantação cresce.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Jardim Carnívoro.** Faz brotar um jardim de plantas carnívoras gigantes que devoram inimigos, protegem a área e fazem a plantação crescer.
 
 #### 84. Sr. Frio (Victor Fries)
 *Gelo calculado: arma criogênica e traje lento e resistente.*
@@ -1006,7 +1006,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Arma criogênica; Traje
 - **Utilidade no survival:** Criar gelo/estradas de gelo
 - **Energia:** Refrigeração: drena no calor (deserto/Nether)
-- ⭐ **Habilidade suprema: Era do Gelo.** Congela tudo numa grande área: água vira gelo, mobs ficam presos em blocos de gelo.
+- ⭐ **Habilidade suprema (Armadura/mecha): Traje Criogênico Titã.** Veste um traje criogênico gigante: anda devagar mas congela o chão, cria pontes de gelo e prende mobs em blocos de gelo.
 
 #### 85. Crocodilo (Killer Croc)
 *Fera de esgoto: força e pele dura.*
@@ -1016,7 +1016,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Pântanos e água
 - **Energia:** Hidratação
-- ⭐ **Habilidade suprema: Rei do Esgoto.** Mergulha no chão e emerge debaixo do alvo, agarrando e arremessando.
+- ⭐ **Habilidade suprema (Transformação): Crocodilo Ancestral.** Vira um crocodilo gigante anfíbio: arrasta mobs para a água e pode carregar aliados nas costas pelo pântano.
 
 #### 86. Cara-de-Barro (Basil Karlo)
 *Lama que vira qualquer coisa: forma livre.*
@@ -1026,7 +1026,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Disfarce
 - **Energia:** Massa: argila e lama recarregam
-- ⭐ **Habilidade suprema: Monstro de Lama.** Cresce numa massa de lama gigante que engole mobs e os solta atordoados.
+- ⭐ **Habilidade suprema (Transformação): Colosso de Barro.** Vira um monstro de barro gigante que absorve blocos de terra/argila para crescer e engole mobs.
 
 #### 87. Ra's al Ghul
 *Imortal estrategista: espada e o Poço de Lázaro.*
@@ -1036,7 +1036,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Espada; Poço de Lázaro
 - **Utilidade no survival:** Cura total no poço
 - **Energia:** Lázaro: recarrega no Poço
-- ⭐ **Habilidade suprema: Banho de Lázaro.** Revive com vida cheia após a morte por um tempo, e cura todos os aliados próximos.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Poço de Lázaro.** Ergue um Poço de Lázaro permanente: quem entra é curado por completo e um aliado morto pode ser revivido ali uma vez por dia.
 
 #### 88. General Zod
 *Kryptoniano militar: o Superman sem limites.*
@@ -1047,7 +1047,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Igual Superman
 - **Energia:** Energia Solar
-- ⭐ **Habilidade suprema: Ajoelhe-se.** Uma onda de choque que força todos os mobs da área a ficarem no chão, sem poder se mexer.
+- ⭐ **Habilidade suprema (Armadura/mecha): Armadura de Batalha Kryptoniana.** Veste a armadura de guerra de Krypton com canhão de energia e escudo; protege contra kriptonita enquanto durar.
 
 #### 89. Brainiac
 *Coletor de mundos: tecnologia que encolhe cidades.*
@@ -1057,7 +1057,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nave
 - **Utilidade no survival:** Coletar estruturas (miniaturas)
 - **Energia:** Conhecimento: recarrega escaneando
-- ⭐ **Habilidade suprema: Coleção.** Encolhe uma estrutura inteira (vila, templo, fortaleza) e guarda numa garrafa; pode soltá-la em outro lugar.
+- ⭐ **Habilidade suprema (Veículo): Nave Crânio.** Invoca a nave-crânio de Brainiac: pilotável, com raio trator que encolhe estruturas e garrafas onde guardá-las.
 
 #### 90. Apocalypse (Doomsday)
 *Força implacável que evolui ao morrer.*
@@ -1067,7 +1067,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Fim de jogo
 - **Energia:** Fúria
-- ⭐ **Habilidade suprema: Evolução.** Ao morrer, revive mais forte e imune ao tipo de dano que o matou.
+- ⭐ **Habilidade suprema (Transformação): Apocalypse Evoluído.** Vira uma forma ainda maior coberta de ossos-espinhos: fica imune ao último tipo de dano sofrido e cada golpe abre crateras.
 
 #### 91. Bizarro
 *Superman ao contrário: poderes invertidos e cômicos.*
@@ -1078,7 +1078,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Igual Superman, invertido
 - **Energia:** Energia Solar Azul
-- ⭐ **Habilidade suprema: Mundo Bizarro.** Explosão de poderes ao contrário: congela com visão e queima com sopro numa área enorme.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Mundo Bizarro.** Ergue um mini mundo bizarro quadrado ao redor: gravidade invertida para mobs (caem para cima) e blocos trocados de lugar.
 
 #### 92. Arraia Negra (Black Manta)
 *Caçador das profundezas: tecnologia contra o Aquaman.*
@@ -1089,7 +1089,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Capacete
 - **Utilidade no survival:** Oceano
 - **Energia:** Bateria do traje
-- ⭐ **Habilidade suprema: Arsenal das Profundezas.** Dispara um enxame de torpedos que perseguem os alvos na água e na terra.
+- ⭐ **Habilidade suprema (Veículo): Submarino Manta.** Invoca o submarino em forma de arraia pilotável, com torpedos, raio do capacete e espaço para aliados.
 
 #### 93. Mulher-Leopardo (Cheetah)
 *Predadora veloz e selvagem.*
@@ -1099,7 +1099,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Caça
 - **Energia:** Fome de caça
-- ⭐ **Habilidade suprema: Caçada Selvagem.** Velocidade extrema e ataques em sequência que pulam de um alvo para o outro.
+- ⭐ **Habilidade suprema (Transformação): Grande Felina.** Vira uma leoparda gigante: velocidade extrema, saltos longos e um rugido que marca todos os mobs da área como presa.
 
 #### 94. Gorila Grodd
 *Gorila telepata: mente e força.*
@@ -1109,7 +1109,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Mobs como trabalhadores
 - **Energia:** Psiquismo
-- ⭐ **Habilidade suprema: Rei dos Gorilas.** Controla mentalmente todos os mobs ao redor para lutarem por ele.
+- ⭐ **Habilidade suprema (Invocação): Exército de Gorila City.** Invoca gorilas guerreiros aliados com armaduras e controla mentalmente mobs fracos para lutarem junto.
 
 #### 95. Capitão Frio (Leonard Snart)
 *Ladrão com pistola de gelo.*
@@ -1120,7 +1120,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Pistola de frio
 - **Utilidade no survival:** Gelo
 - **Energia:** Refrigeração
-- ⭐ **Habilidade suprema: Zero Absoluto.** Raio de frio extremo que congela uma linha inteira de mobs em blocos de gelo.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Rinque de Gelo.** Congela uma grande área: água vira gelo, chão vira pista escorregadia onde Snart patina rápido e mobs escorregam.
 
 #### 96. Mestre dos Oceanos (Orm)
 *Rei rival: magia e tridente.*
@@ -1131,7 +1131,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Tridente
 - **Utilidade no survival:** Oceano
 - **Energia:** Hidratação
-- ⭐ **Habilidade suprema: Rei de Atlantis.** Invoca uma tropa de guerreiros atlantes e monstros marinhos para atacar.
+- ⭐ **Habilidade suprema (Invocação): Tropa Atlante.** Invoca guerreiros atlantes montados em cavalos-marinhos que lutam na água e em terra.
 
 #### 97. Nevasca (Killer Frost)
 *Gelo que rouba calor.*
@@ -1142,7 +1142,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Gelo
 - **Energia:** Calor roubado
-- ⭐ **Habilidade suprema: Inverno Eterno.** Neve e gelo cobrem a área e drenam vida de todos os inimigos para curar Nevasca.
+- ⭐ **Habilidade suprema (Estrutura/terreno): Palácio de Gelo.** Ergue um palácio de gelo permanente que drena calor dos inimigos e cura Nevasca e aliados dentro dele.
 
 #### 98. Mão Negra (William Hand)
 *Lanterna Negro: morte e mortos-vivos.*
@@ -1153,7 +1153,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Anel Negro
 - **Utilidade no survival:** Exército de mortos-vivos
 - **Energia:** Morte: recarrega quando mobs morrem perto
-- ⭐ **Habilidade suprema: O Dia Mais Negro.** Reanima todos os mobs mortos na área como zumbis aliados.
+- ⭐ **Habilidade suprema (Invocação): Tropa dos Lanternas Negros.** Reanima os mobs mortos na área como Lanternas Negros aliados, que lutam até a energia acabar.
 
 #### 99. Lobo da Estepe
 *General de Apokolips: machado e exército.*
@@ -1163,7 +1163,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Machado
 - **Utilidade no survival:** Derrubar árvores e mineração
 - **Energia:** Apokolips
-- ⭐ **Habilidade suprema: Invasão de Apokolips.** Abre um portal de Boom Tube de onde saem dezenas de Parademônios.
+- ⭐ **Habilidade suprema (Veículo): Nave de Guerra de Apokolips.** Invoca uma nave de guerra pilotável que solta Parademônios e dispara raios no chão.
 
 #### 100. Parasita (Rudy Jones)
 *Rouba poder: fica mais forte absorvendo os outros.*
@@ -1173,7 +1173,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** PvP
 - **Energia:** Absorção: só recarrega drenando
-- ⭐ **Habilidade suprema: Absorção Total.** Drena a energia de todos os transformados ao redor e copia temporariamente a habilidade suprema de um deles.
+- ⭐ **Habilidade suprema (Transformação): Forma Absorvida.** Parasita cresce e copia a habilidade suprema de outro transformado próximo (que só perde energia, nunca a habilidade).
 
 ## 3. Sistemas compartilhados que surgem da lista
 
@@ -1194,6 +1194,17 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 | Átomo (Ray Palmer) | Abelha (Karen Beecher) |
 | Shazam (Billy Batson) | Adão Negro (Teth-Adam) |
 | Monstro do Pântano | Hera Venenosa (Pamela Isley) |
+
+### Habilidades supremas por sistema
+
+| Sistema | Qtde | Personagens |
+|---|---|---|
+| Veículo | 26 | Batman (Bruce Wayne) (Batwing), Mulher-Maravilha (Diana) (Jato Invisível), Lanterna Verde (Hal Jordan) (Caça de Construto), Supergirl (Kara Zor-El) (Nave Kryptoniana), Arqueiro Verde (Oliver Queen) (Arqueiro-Móvel), Canário Negro (Dinah Lance) (Moto Sônica), Mulher-Gavião (Shayera Hol) (Nave Thanagariana), Gladiador Dourado (Booster Gold) (Nave do Século 25), Asa Noturna (Dick Grayson) (Moto de Asa Noturna), Batwoman (Kate Kane) (Bat-Moto Tática), Senhor Milagre (Scott Free) (Discos Aéreos do Grupo), Orion (Moto Cósmica), Robin (Damian Wayne) (Moto Ninja do Robin), Batgirl (Barbara Gordon) (Batgirl-Ciclo), Impulso (Bart Allen) (Esteira Cósmica), Arsenal (Roy Harper) (Blindado do Arsenal), Robin Vermelho (Tim Drake) (Robin-Copter), Capuz Vermelho (Jason Todd) (Moto do Capuz), Lobo (Moto Espacial Suprema), Arlequina (Harleen Quinzel) (Carro da Arlequina), Pacificador (Jato do Pacificador), Coringa (Carro do Coringa), Pinguim (Oswald Cobblepot) (Pato de Guerra), Brainiac (Nave Crânio), Arraia Negra (Black Manta) (Submarino Manta), Lobo da Estepe (Nave de Guerra de Apokolips) |
+| Transformação | 23 | Flash (Barry Allen) (Avatar da Força de Aceleração), Caçador de Marte (J'onn J'onzz) (Forma Marciana de Guerra), Átomo (Ray Palmer) (Átomo Gigante), Homem-Elástico (Forma Colossal), Vixen (Mari McCabe) (Fera Mítica), Mutano (Garfield Logan) (Tiranossauro Rex), Nuclear (Firestorm) (Forma Nuclear Total), Raio Negro (Jefferson Pierce) (Tempestade Viva), Tornado Vermelho (Ciclone Vivo), Cassandra Cain (Sombra Perfeita), Adão Negro (Teth-Adam) (Deus de Kahndaq), Etrigan (Etrigan Colossal), Espectro (Espectro Colossal), Tubarão-Rei (Nanaue) (Megalodonte), Darkseid (Darkseid Ascendente), Flash Reverso (Eobard Thawne) (Avatar da Força Negativa), Zoom (Hunter Zolomon) (Sombra Veloz), Bane (Bane Titã), Crocodilo (Killer Croc) (Crocodilo Ancestral), Cara-de-Barro (Basil Karlo) (Colosso de Barro), Apocalypse (Doomsday) (Apocalypse Evoluído), Mulher-Leopardo (Cheetah) (Grande Felina), Parasita (Rudy Jones) (Forma Absorvida) |
+| Invocação | 21 | Flash (Wally West) (Esteira de Velocistas), Aquaman (Arthur Curry) (Montaria de Topo), Shazam (Billy Batson) (Pedra da Eternidade), Gavião Negro (Carter Hall) (Esquadrão Alado), Estelar (Koriand'r) (Nave de Tamaran), Ravena (Rachel Roth) (Corvo de Alma Gigante), Senhor Incrível (Michael Holt) (Enxame de T-Esferas), Big Barda (Fúrias Femininas), Homem-Animal (Buddy Baker) (Manada Mítica), Moça-Maravilha (Cassie Sandsmark) (Águia de Zeus), Abelha (Karen Beecher) (Colmeia Rainha), Mulher-Gato (Selina Kyle) (Exército de Gatos), John Constantine (Demônio do Pacto), Katana (Tatsu Yamashiro) (Exército de Almas), Atrocitus (Dragão de Fúria), Jonah Hex (Cavalo Fantasma), Duas-Caras (Harvey Dent) (Gangue das Duas Faces), Espantalho (Jonathan Crane) (Campo de Espantalhos), Gorila Grodd (Exército de Gorila City), Mestre dos Oceanos (Orm) (Tropa Atlante), Mão Negra (William Hand) (Tropa dos Lanternas Negros) |
+| Estrutura/terreno | 12 | Superman (Clark Kent) (Fortaleza da Solidão), Zatanna (Palco da Ilusão), Senhor Destino (Kent Nelson) (Torre do Destino), Monstro do Pântano (Floresta Viva), Questão (Vic Sage) (Mural da Investigação), Superboy (Conner Kent) (Ilha Telecinética), Charada (Edward Nygma) (Labirinto do Charada), Hera Venenosa (Pamela Isley) (Jardim Carnívoro), Ra's al Ghul (Poço de Lázaro), Bizarro (Mundo Bizarro), Capitão Frio (Leonard Snart) (Rinque de Gelo), Nevasca (Killer Frost) (Palácio de Gelo) |
+| Armadura/mecha | 10 | Lanterna Verde (Kyle Rayner) (Mecha de Construto), Ciborgue (Victor Stone) (Armadura de Guerra de Ciborgue), Besouro Azul (Jaime Reyes) (Besouro Titã), Stargirl (Courtney Whitmore) (S.T.R.I.P.E. Pilotável), Pistoleiro (Deadshot) (Traje de Atirador Supremo), Azrael (Armadura de São Dumas), Lex Luthor (Armadura de Guerra Suprema), Exterminador (Deathstroke) (Armadura de Exterminador), Sr. Frio (Victor Fries) (Traje Criogênico Titã), General Zod (Armadura de Batalha Kryptoniana) |
+| Construto | 8 | Lanterna Verde (John Stewart) (Fortaleza do Arquiteto), Lanterna Verde (Guy Gardner) (Bola de Demolição Gigante), Lanterna Verde (Jessica Cruz) (Cúpula de Proteção), Lanterna Verde (Simon Baz) (Ambulância Esmeralda), Mera (Leviatã de Água), Kilowog (Quartel da Tropa), Aqualad (Jackson Hyde) (Tubarão de Água Viva), Sinestro (Monstro do Medo) |
 
 ### Medidores de energia
 

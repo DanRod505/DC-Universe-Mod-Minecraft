@@ -162,6 +162,31 @@ Cada passiva tem parâmetros visuais (rastro, partículas, som) além dos de jog
 5. Lang (pt_br e en_us).
 6. **Só se necessário**: um tipo novo de habilidade/recarga em código, que passa a servir para personagens futuros.
 
+### 2.11 Habilidade suprema
+
+Cada personagem tem uma habilidade suprema: a mais satisfatória de usar. Ela fica no menu radial como as outras, sem medidor próprio; a diferença é o **custo alto de energia** (proposta: 60–80% do medidor) e um cooldown maior. O estilo é de algo grande e marcante: veículos (Batwing), armaduras e mechas (mecha do Kyle Rayner), construtos complexos (fortaleza do John Stewart), transformações (T-Rex do Mutano), invocações e mudanças no terreno (floresta do Monstro do Pântano).
+
+As supremas também viram sistemas reutilizáveis, cada uma é um tipo parametrizado no JSON:
+
+| Tipo | Sistema compartilhado |
+|---|---|
+| `veiculo` | entidade pilotável com assentos, armas e modo de voo/terra/água configuráveis |
+| `armadura` | mecha ou traje gigante em que o jogador entra (modelo maior, armas próprias) |
+| `construto` | estrutura ou criatura temporária feita de energia, a partir de modelo ou planta salva |
+| `forma` | transformação em outra criatura/forma com modelo, atributos e ataques próprios |
+| `invocacao` | aliados ou montarias invocados que pertencem ao jogador |
+| `mundo` | estrutura ou mudança de terreno no local (temporária ou permanente) |
+
+### 2.12 Regras de multiplayer
+
+- Servidor autoritativo: toda habilidade é validada e executada no servidor; o cliente só pede e desenha.
+- Tudo que é invocado (veículo, construto, aliado, estrutura) tem **dono**: não ataca o dono nem os aliados dele (mesmo time ou grupo) e some quando o dono destransforma, desconecta ou morre (exceto estruturas marcadas como permanentes).
+- Dano em área afeta mobs; outros jogadores só são atingidos se o PvP estiver ligado no servidor (opção de configuração).
+- Efeitos de tempo (tempo de bala, congelar o tempo) afetam só o próprio jogador e os mobs ao redor, nunca a velocidade do mundo para os outros jogadores.
+- Efeitos globais (mudar clima ou dia/noite) têm configuração própria e ficam desligados por padrão em servidores.
+- Estruturas permanentes respeitam proteção de área (spawn protegido e claims de outros mods).
+- Limite configurável de invocações e veículos ativos por jogador, para proteger o desempenho do servidor.
+
 ## 3. Testes e verificadores automáticos
 
 ### 3.1 Testes incrementais
