@@ -1,84 +1,1213 @@
 {
-"categorias": {
- "minerio": "Minérios", "recurso": "Recursos", "componente": "Componentes", "ferramenta": "Ferramentas e armas",
- "equipamento": "Equipamentos", "utilidade": "Itens de utilidade", "bloco": "Blocos funcionais", "decoracao": "Decoração"
-},
-"estruturas": [
- {"id":"cratera_meteoro","nome":"Cratera de Meteoro","onde":"Overworld, planícies, desertos e taigas (rara)","conteudo":"Minério de Kryptonita exposto, Fragmentos Alienígenas e, no núcleo, 1 Cristal Kryptoniano"},
- {"id":"meteoro_espectro","nome":"Meteorito do Espectro","onde":"Cai do céu à noite perto de jogadores (evento raro, mais comum na lua cheia)","conteudo":"Fragmentos do Espectro (4 a 8)"},
- {"id":"destrocos_thanagar","nome":"Destroços Thanagarianos","onde":"Picos de montanha","conteudo":"Metal Nth Bruto, peças de nave (decoração) e um baú com Maça de Metal Nth danificada"},
- {"id":"ruinas_themyscira","nome":"Ruínas de Themyscira","onde":"Ilhas em oceanos quentes","conteudo":"Minério de Oricalco, Tijolos de Themyscira e baús com Essência Mística"},
- {"id":"poco_lazaro","nome":"Poço de Lázaro","onde":"Desertos e badlands, subterrâneo","conteudo":"Fonte de Água de Lázaro (coleta com balde, recarrega a cada dia do jogo)"},
- {"id":"ruinas_atlantes","nome":"Ruínas Atlantes","onde":"Oceanos profundos","conteudo":"Pérolas de Atlântida, Blocos Atlantes e afogados guardiões com tridente"}
-],
-"itens": [
- {"id":"minerio_kryptonita","nome":"Minério de Kryptonita","cat":"minerio","obtencao":"Overworld, Y -60 a 0 (raro) e exposto em Crateras de Meteoro. Picareta de diamante ou melhor.","uso":"Dropa Fragmento de Kryptonita. Brilha no escuro. Kryptonianos transformados perdem energia a até 6 blocos."},
- {"id":"fragmento_kryptonita","nome":"Fragmento de Kryptonita","cat":"recurso","obtencao":"Minerar Minério de Kryptonita (Fortuna funciona).","uso":"Armas anti-kryptonianas, Núcleo da Armadura de Guerra (Lex Luthor)."},
- {"id":"bloco_kryptonita","nome":"Bloco de Kryptonita","cat":"bloco","receita":{"tipo":"shaped","padrao":["FFF","FFF","FFF"],"chaves":{"F":"fragmento_kryptonita"}},"uso":"Armazenamento. Aura que drena kryptonianos a até 10 blocos: defesa de base em multiplayer."},
- {"id":"cristal_kryptoniano","nome":"Cristal Kryptoniano","cat":"recurso","obtencao":"Núcleo da Cratera de Meteoro (1 por cratera). Raro em baús de fim de jogo.","uso":"Itens de transformação kryptonianos, Câmara Solar, decoração da Fortaleza."},
- {"id":"fragmento_alienigena","nome":"Fragmento Alienígena","cat":"recurso","obtencao":"Crateras de Meteoro (blocos de rocha do meteoro).","uso":"Tecnologia e transformações alienígenas (Besouro Azul, Caçador de Marte, Brainiac)."},
- {"id":"minerio_nth","nome":"Minério de Metal Nth","cat":"minerio","obtencao":"Picos de montanha (Y 120+) e Destroços Thanagarianos.","uso":"Dropa Metal Nth Bruto."},
- {"id":"nth_bruto","nome":"Metal Nth Bruto","cat":"recurso","obtencao":"Minerar Minério de Metal Nth.","uso":"Fundir em Lingote de Metal Nth."},
- {"id":"lingote_nth","nome":"Lingote de Metal Nth","cat":"recurso","receita":{"tipo":"fundicao","entrada":"nth_bruto"},"uso":"Ferramentas e armadura de Metal Nth (antigravidade), itens thanagarianos."},
- {"id":"minerio_oricalco","nome":"Minério de Oricalco","cat":"minerio","obtencao":"Ruínas de Themyscira e praias de ilhas em oceanos quentes.","uso":"Fundir em Lingote de Oricalco."},
- {"id":"lingote_oricalco","nome":"Lingote de Oricalco","cat":"recurso","receita":{"tipo":"fundicao","entrada":"minerio_oricalco"},"uso":"Equipamento amazônico (durabilidade alta, encantabilidade máxima)."},
- {"id":"minerio_prometio","nome":"Minério de Prométio","cat":"minerio","obtencao":"Deepslate, Y -60 a -30 (muito raro, veios de 1 a 3).","uso":"Fundir em Lingote de Prométio."},
- {"id":"lingote_prometio","nome":"Lingote de Prométio","cat":"recurso","receita":{"tipo":"fundicao","entrada":"minerio_prometio"},"uso":"Armadura resistente a explosões, tecnologia pesada (Ciborgue, Lex, Exterminador)."},
- {"id":"minerio_apokolips","nome":"Minério do Fosso de Fogo","cat":"minerio","obtencao":"Nether, deltas de basalto.","uso":"Dropa Fragmento de Apokolips."},
- {"id":"fragmento_apokolips","nome":"Fragmento de Apokolips","cat":"recurso","obtencao":"Minerar Minério do Fosso de Fogo.","uso":"Liga de Apokolips."},
- {"id":"liga_apokolips","nome":"Liga de Apokolips","cat":"recurso","receita":{"tipo":"shapeless","ingredientes":["fragmento_apokolips","fragmento_apokolips","fragmento_apokolips","fragmento_apokolips","minecraft:gold_ingot","minecraft:gold_ingot","minecraft:gold_ingot","minecraft:gold_ingot"]},"uso":"Tecnologia do Quarto Mundo (Darkseid, Orion, Big Barda, Senhor Milagre)."},
- {"id":"fragmento_espectro","nome":"Fragmento do Espectro","cat":"recurso","obtencao":"Meteorito do Espectro.","uso":"Base dos Cristais do Espectro Emocional."},
- {"id":"cristal_vontade","nome":"Cristal da Vontade (verde)","cat":"recurso","receita":{"tipo":"shapeless","ingredientes":["fragmento_espectro","minecraft:emerald","minecraft:diamond"]},"uso":"Anéis e Bateria dos Lanternas Verdes."},
- {"id":"cristal_medo","nome":"Cristal do Medo (amarelo)","cat":"recurso","receita":{"tipo":"shapeless","ingredientes":["fragmento_espectro","minecraft:fermented_spider_eye","minecraft:gold_ingot"]},"uso":"Anel e Bateria da Tropa Sinestro."},
- {"id":"cristal_furia","nome":"Cristal da Fúria (vermelho)","cat":"recurso","receita":{"tipo":"shapeless","ingredientes":["fragmento_espectro","minecraft:redstone_block","minecraft:blaze_powder"]},"uso":"Anel e Bateria dos Lanternas Vermelhos."},
- {"id":"cristal_morte","nome":"Cristal da Morte (negro)","cat":"recurso","receita":{"tipo":"shapeless","ingredientes":["fragmento_espectro","minecraft:wither_rose","minecraft:bone"]},"uso":"Anel e Bateria dos Lanternas Negros."},
- {"id":"perola_atlantida","nome":"Pérola de Atlântida","cat":"recurso","obtencao":"Drop raro de afogados, baús de Ruínas Atlantes, Ruínas Oceânicas e Monumentos.","uso":"Itens atlantes e Blocos Atlantes."},
- {"id":"garrafa_raio","nome":"Garrafa de Raio","cat":"recurso","obtencao":"Usar uma garrafa de vidro no Para-raios Captor depois que ele for atingido por um raio (até 4 cargas).","uso":"Velocistas, Shazam, Raio Negro. Recarrega energia elétrica ao beber (transformado)."},
- {"id":"seiva_verde","nome":"Seiva do Verde","cat":"recurso","obtencao":"Usar garrafa de vidro em tronco de mangue ou carvalho de pântano (o tronco vira descascado).","uso":"Personagens ligados ao Verde (Monstro do Pântano, Hera Venenosa, Mutano)."},
- {"id":"essencia_mistica","nome":"Essência Mística","cat":"recurso","receita":{"tipo":"shapeless","ingredientes":["minecraft:amethyst_shard","minecraft:lapis_lazuli","minecraft:glowstone_dust","minecraft:experience_bottle"]},"obtencao":"Também em baús de Ruínas de Themyscira e drop raro de bruxas.","uso":"Magia (Zatanna, Senhor Destino, Shazam, Constantine)."},
- {"id":"agua_lazaro","nome":"Água de Lázaro","cat":"recurso","obtencao":"Balde na fonte do Poço de Lázaro.","uso":"Cura total ao beber (cooldown longo, náusea). Transformação de Ra's al Ghul e Fonte de Lázaro."},
- {"id":"frasco_veneno","nome":"Frasco de Veneno","cat":"utilidade","receita":{"tipo":"shapeless","ingredientes":["minecraft:glass_bottle","minecraft:blaze_powder","minecraft:sugar","minecraft:redstone","minecraft:spider_eye"]},"uso":"Recarga do Bane. Qualquer jogador: Força II por 20 s e depois Fraqueza por 40 s."},
- {"id":"toxina_medo","nome":"Toxina do Medo","cat":"utilidade","receita":{"tipo":"shapeless","ingredientes":["minecraft:glass_bottle","minecraft:fermented_spider_eye","minecraft:poisonous_potato","minecraft:phantom_membrane"]},"uso":"Arremessável: mobs na área fogem por 6 s. Recarga do Espantalho."},
- {"id":"gas_riso","nome":"Gás do Riso","cat":"utilidade","receita":{"tipo":"shapeless","ingredientes":["minecraft:glass_bottle","minecraft:gunpowder","minecraft:slime_ball","minecraft:purple_dye"]},"uso":"Arremessável: efeito negativo aleatório nos mobs da área. Transformação do Coringa."},
- {"id":"tecido_tatico","nome":"Tecido Tático","cat":"componente","receita":{"tipo":"shaped","padrao":["SLS","LIL","SLS"],"chaves":{"S":"minecraft:string","L":"minecraft:leather","I":"minecraft:iron_nugget"},"qtd":4},"uso":"Base dos trajes e de equipamentos de tecido."},
- {"id":"placa_circuito","nome":"Placa de Circuito","cat":"componente","receita":{"tipo":"shaped","padrao":["QRQ","CGC","QRQ"],"chaves":{"Q":"minecraft:quartz","R":"minecraft:redstone","C":"minecraft:copper_ingot","G":"minecraft:gold_nugget"},"qtd":2},"uso":"Eletrônicos e gadgets."},
- {"id":"componente_tecnologico","nome":"Componente Tecnológico","cat":"componente","receita":{"tipo":"shaped","padrao":["IPI","RCR","IPI"],"chaves":{"I":"minecraft:iron_ingot","P":"placa_circuito","R":"minecraft:redstone","C":"minecraft:comparator"}},"uso":"Gadgets, armaduras tecnológicas, Batcomputador."},
- {"id":"nucleo_energia","nome":"Núcleo de Energia","cat":"componente","receita":{"tipo":"shaped","padrao":["PGP","GCG","PGP"],"chaves":{"P":"lingote_prometio","G":"minecraft:glowstone","C":"componente_tecnologico"}},"uso":"Armaduras de energia, Carregador Tecnológico, Matriz Nuclear."},
- {"id":"nucleo_caixa_mae","nome":"Núcleo da Caixa-Mãe","cat":"componente","receita":{"tipo":"shaped","padrao":["LEL","ENE","LEL"],"chaves":{"L":"liga_apokolips","E":"minecraft:ender_eye","N":"nucleo_energia"}},"uso":"Tubos de explosão (teleporte) e itens do Quarto Mundo."},
- {"id":"nucleo_meta_1","nome":"Núcleo Meta-Humano I","cat":"componente","receita":{"tipo":"shaped","padrao":["IRI","RGR","IRI"],"chaves":{"I":"minecraft:iron_ingot","R":"minecraft:redstone","G":"minecraft:gold_ingot"}},"uso":"Base de todo item de transformação de nível 1 (início do jogo)."},
- {"id":"nucleo_meta_2","nome":"Núcleo Meta-Humano II","cat":"componente","receita":{"tipo":"shaped","padrao":["DLD","LNL","DLD"],"chaves":{"D":"minecraft:diamond","L":"minecraft:glowstone_dust","N":"nucleo_meta_1"}},"uso":"Base dos itens de transformação de nível 2 (diamante)."},
- {"id":"nucleo_meta_3","nome":"Núcleo Meta-Humano III","cat":"componente","receita":{"tipo":"shaped","padrao":["BPB","ANA","BPB"],"chaves":{"B":"minecraft:blaze_rod","P":"minecraft:ender_pearl","A":"minecraft:amethyst_shard","N":"nucleo_meta_2"}},"uso":"Base dos itens de transformação de nível 3 (Nether)."},
- {"id":"nucleo_meta_4","nome":"Núcleo Meta-Humano IV","cat":"componente","receita":{"tipo":"shaped","padrao":["SKS","KNK","SKS"],"chaves":{"S":"minecraft:echo_shard","K":"minecraft:netherite_scrap","N":"nucleo_meta_3"}},"uso":"Base dos itens de transformação de nível 4 (fim de jogo: Cidade Ancestral e netherita)."},
- {"id":"ferramentas_nth","nome":"Ferramentas de Metal Nth","cat":"ferramenta","familia":"ferramentas","material":"lingote_nth","uso":"Nível entre diamante e netherita. Antigravidade: segurar na mão reduz o dano de queda pela metade."},
- {"id":"armadura_nth","nome":"Armadura de Metal Nth","cat":"equipamento","familia":"armadura","material":"lingote_nth","uso":"Como diamante; conjunto completo dá queda lenta ao agachar no ar."},
- {"id":"ferramentas_oricalco","nome":"Ferramentas de Oricalco","cat":"ferramenta","familia":"ferramentas","material":"lingote_oricalco","uso":"Como ferro, com durabilidade de diamante e encantabilidade do ouro."},
- {"id":"armadura_prometio","nome":"Armadura de Prométio","cat":"equipamento","familia":"armadura","material":"lingote_prometio","uso":"Como diamante, com Proteção contra Explosões embutida e sem perder durabilidade com explosões."},
- {"id":"lanca_kryptonita","nome":"Lança de Kryptonita","cat":"ferramenta","receita":{"tipo":"shaped","padrao":["  F"," S ","S  "],"chaves":{"F":"fragmento_kryptonita","S":"minecraft:stick"}},"uso":"Arma de qualquer jogador: dano 3 ♥, dano x4 contra kryptonianos transformados (multiplayer com PvP)."},
- {"id":"batarangue_simples","nome":"Batarangue","cat":"ferramenta","receita":{"tipo":"shaped","padrao":[" I ","IBI"],"chaves":{"I":"minecraft:iron_ingot","B":"minecraft:black_dye"},"qtd":4},"uso":"Arremessável que volta (2 ♥). Qualquer jogador pode usar; corta teias e aciona botões."},
- {"id":"gancho_escalada","nome":"Gancho de Escalada","cat":"ferramenta","receita":{"tipo":"shaped","padrao":["  H"," S ","I  "],"chaves":{"H":"minecraft:tripwire_hook","S":"minecraft:string","I":"minecraft:iron_ingot"}},"uso":"Puxa o jogador até o bloco mirado (30 blocos, 200 usos). Versão sem poderes do gancho do Batman."},
- {"id":"escudo_amazonico","nome":"Escudo Amazônico","cat":"equipamento","receita":{"tipo":"shaped","padrao":["OGO","OOO"," O "],"chaves":{"O":"lingote_oricalco","G":"minecraft:gold_ingot"}},"uso":"Escudo com bloqueio perfeito que reflete flechas. Durabilidade 3x maior que o escudo comum."},
- {"id":"capa_planador","nome":"Capa Planadora","cat":"equipamento","receita":{"tipo":"shaped","padrao":["T T","TMT","T T"],"chaves":{"T":"tecido_tatico","M":"minecraft:phantom_membrane"}},"uso":"Vestida no peito: planar a 9 b/s segurando pulo. Alternativa inicial ao élitro."},
- {"id":"visor_tatico","nome":"Visor Tático","cat":"equipamento","receita":{"tipo":"shaped","padrao":["IPI","G G"],"chaves":{"I":"minecraft:iron_ingot","P":"placa_circuito","G":"minecraft:tinted_glass"}},"uso":"Capacete: destaca mobs hostis a até 24 blocos e dá visão noturna (gasta durabilidade)."},
- {"id":"comunicador_liga","nome":"Comunicador da Liga","cat":"utilidade","receita":{"tipo":"shaped","padrao":[" P ","CEC"],"chaves":{"P":"placa_circuito","C":"minecraft:copper_ingot","E":"minecraft:ender_pearl"}},"uso":"Multiplayer: mostra no HUD a direção e distância dos aliados vinculados e permite marcar pontos de encontro."},
- {"id":"kit_medico","nome":"Kit de Primeiros Socorros","cat":"utilidade","receita":{"tipo":"shapeless","ingredientes":["minecraft:paper","minecraft:string","minecraft:golden_carrot","minecraft:honey_bottle"]},"uso":"Cura 6 ♥ em 3 s; pode ser usado em outro jogador."},
- {"id":"para_raios_captor","nome":"Para-raios Captor","cat":"bloco","receita":{"tipo":"shaped","padrao":[" L ","GCG","GCG"],"chaves":{"L":"minecraft:lightning_rod","G":"minecraft:glass","C":"minecraft:copper_block"}},"uso":"Guarda até 4 cargas de raio para encher Garrafas de Raio. Recarga de Flash, Shazam e Raio Negro."},
- {"id":"bateria_verde","nome":"Bateria de Energia Verde","cat":"bloco","receita":{"tipo":"shaped","padrao":["GCG","GLG","OOO"],"chaves":{"G":"minecraft:glass","C":"cristal_vontade","L":"minecraft:lantern","O":"minecraft:gold_block"}},"uso":"Recarrega anéis verdes (juramento: segurar clique direito por 3 s). Pode ser compartilhada por toda a Tropa no servidor."},
- {"id":"bateria_amarela","nome":"Bateria de Energia Amarela","cat":"bloco","receita":{"tipo":"shaped","padrao":["GCG","GLG","OOO"],"chaves":{"G":"minecraft:glass","C":"cristal_medo","L":"minecraft:lantern","O":"minecraft:gold_block"}},"uso":"Recarrega anéis amarelos."},
- {"id":"bateria_vermelha","nome":"Bateria de Energia Vermelha","cat":"bloco","receita":{"tipo":"shaped","padrao":["GCG","GLG","OOO"],"chaves":{"G":"minecraft:glass","C":"cristal_furia","L":"minecraft:lantern","O":"minecraft:gold_block"}},"uso":"Recarrega anéis vermelhos."},
- {"id":"bateria_negra","nome":"Bateria de Energia Negra","cat":"bloco","receita":{"tipo":"shaped","padrao":["GCG","GLG","OOO"],"chaves":{"G":"minecraft:glass","C":"cristal_morte","L":"minecraft:soul_lantern","O":"minecraft:gold_block"}},"uso":"Recarrega anéis negros."},
- {"id":"camara_solar","nome":"Câmara Solar","cat":"bloco","receita":{"tipo":"shaped","padrao":["GGG","GKG","QDQ"],"chaves":{"G":"minecraft:glass","K":"cristal_kryptoniano","Q":"minecraft:quartz_block","D":"minecraft:daylight_detector"}},"uso":"Kryptonianos e Estelar recarregam como se estivessem sob o sol, mesmo no subterrâneo ou à noite."},
- {"id":"carregador_tecnologico","nome":"Carregador Tecnológico","cat":"bloco","receita":{"tipo":"shaped","padrao":["IRI","INI","IRI"],"chaves":{"I":"minecraft:iron_block","R":"minecraft:redstone_block","N":"nucleo_energia"}},"uso":"Recarga de Ciborgue, Gladiador Dourado, Senhor Incrível, Lex Luthor e armaduras tecnológicas. Funciona como estação compartilhada."},
- {"id":"batcomputador","nome":"Batcomputador","cat":"bloco","receita":{"tipo":"shaped","padrao":["PPP","CTC","BBB"],"chaves":{"P":"minecraft:glass_pane","C":"componente_tecnologico","T":"minecraft:crafter","B":"minecraft:black_concrete"}},"uso":"Fabrica e recarrega gadgets da família Batman, analisa amostras (revela fraquezas de mobs) e mostra um mapa da área."},
- {"id":"altar_deuses","nome":"Altar dos Deuses","cat":"bloco","receita":{"tipo":"shaped","padrao":[" C ","OEO","OOO"],"chaves":{"C":"minecraft:candle","O":"lingote_oricalco","E":"essencia_mistica"}},"uso":"Acelera a recarga de Mulher-Maravilha, Moça-Maravilha e Shazam."},
- {"id":"fonte_lazaro","nome":"Fonte de Lázaro","cat":"bloco","receita":{"tipo":"shaped","padrao":["PAP","PGP","PPP"],"chaves":{"P":"minecraft:prismarine_bricks","A":"agua_lazaro","G":"minecraft:gold_block"}},"uso":"Versão construível do Poço: recarga de Ra's al Ghul e cura total uma vez por dia por jogador."},
- {"id":"bat_sinal","nome":"Bat-Sinal","cat":"decoracao","receita":{"tipo":"shaped","padrao":["IGI","ILI","I I"],"chaves":{"I":"minecraft:iron_ingot","G":"minecraft:glass","L":"minecraft:redstone_lamp"}},"uso":"Projeta o símbolo do morcego nas nuvens à noite. Com redstone, envia um aviso aos jogadores transformados em personagens da família Batman."},
- {"id":"cristal_fortaleza","nome":"Bloco de Cristal da Fortaleza","cat":"decoracao","receita":{"tipo":"shaped","padrao":["QQ","QK"],"chaves":{"Q":"minecraft:quartz_block","K":"fragmento_alienigena"},"qtd":8},"uso":"Cristal translúcido e luminoso para construir uma Fortaleza da Solidão."},
- {"id":"tijolo_themyscira","nome":"Tijolos de Themyscira","cat":"decoracao","receita":{"tipo":"shaped","padrao":["CC","CG"],"chaves":{"C":"minecraft:calcite","G":"minecraft:gold_nugget"},"qtd":4},"uso":"Mármore com detalhes dourados, com escadas, lajes, muros e colunas."},
- {"id":"bloco_atlante","nome":"Bloco Atlante","cat":"decoracao","receita":{"tipo":"shaped","padrao":["PP","PE"],"chaves":{"P":"minecraft:prismarine","E":"perola_atlantida"},"qtd":8},"uso":"Pedra atlante que brilha debaixo d'água."},
- {"id":"painel_tecnologico","nome":"Painel Tecnológico","cat":"decoracao","receita":{"tipo":"shaped","padrao":["IGI","GPG","IGI"],"chaves":{"I":"minecraft:iron_ingot","G":"minecraft:glowstone_dust","P":"minecraft:glass_pane"},"qtd":8},"uso":"Paredes iluminadas no estilo Torre de Vigilância / LexCorp."},
- {"id":"poste_gotham","nome":"Poste de Gotham","cat":"decoracao","receita":{"tipo":"shaped","padrao":[" L "," B "," B "],"chaves":{"L":"minecraft:lantern","B":"minecraft:iron_bars"}},"uso":"Iluminação de rua gótica."},
- {"id":"globo_planeta_diario","nome":"Globo do Planeta Diário","cat":"decoracao","receita":{"tipo":"shaped","padrao":["GCG","CMC","GCG"],"chaves":{"G":"minecraft:gold_ingot","C":"minecraft:compass","M":"minecraft:map"}},"uso":"Globo giratório decorativo de 3x3 blocos."},
- {"id":"estatua_heroi","nome":"Estátua de Herói","cat":"decoracao","receita":{"tipo":"shaped","padrao":[" S ","SAS"," S "],"chaves":{"S":"minecraft:smooth_stone","A":"minecraft:armor_stand"}},"uso":"Clique com um item de transformação para a estátua assumir a forma daquele personagem (pose ajustável)."},
- {"id":"trofeu_batcaverna","nome":"Moeda Gigante da Batcaverna","cat":"decoracao","receita":{"tipo":"shaped","padrao":["GGG","GCG","GGG"],"chaves":{"G":"minecraft:gold_block","C":"minecraft:copper_block"}},"uso":"Troféu decorativo de 2x2 blocos."}
-]
+ "categorias": {
+  "minerio": "Minérios",
+  "recurso": "Recursos",
+  "componente": "Componentes",
+  "ferramenta": "Ferramentas e armas",
+  "equipamento": "Equipamentos",
+  "utilidade": "Itens de utilidade",
+  "bloco": "Blocos funcionais",
+  "decoracao": "Decoração"
+ },
+ "estruturas": [
+  {
+   "id": "cratera_meteoro",
+   "nome": "Cratera de Meteoro",
+   "onde": "Overworld, planícies, desertos e taigas (rara)",
+   "conteudo": "Minério de Kryptonita exposto, Fragmentos Alienígenas e, no núcleo, 1 Cristal Kryptoniano"
+  },
+  {
+   "id": "meteoro_espectro",
+   "nome": "Meteorito do Espectro",
+   "onde": "Cai do céu à noite perto de jogadores (evento raro, mais comum na lua cheia)",
+   "conteudo": "Fragmentos do Espectro (4 a 8)"
+  },
+  {
+   "id": "destrocos_thanagar",
+   "nome": "Destroços Thanagarianos",
+   "onde": "Picos de montanha",
+   "conteudo": "Metal Nth Bruto, peças de nave (decoração) e um baú com Maça de Metal Nth danificada"
+  },
+  {
+   "id": "ruinas_themyscira",
+   "nome": "Ruínas de Themyscira",
+   "onde": "Ilhas em oceanos quentes",
+   "conteudo": "Minério de Oricalco, Tijolos de Themyscira e baús com Essência Mística"
+  },
+  {
+   "id": "poco_lazaro",
+   "nome": "Poço de Lázaro",
+   "onde": "Desertos e badlands, subterrâneo",
+   "conteudo": "Fonte de Água de Lázaro (coleta com balde, recarrega a cada dia do jogo)"
+  },
+  {
+   "id": "ruinas_atlantes",
+   "nome": "Ruínas Atlantes",
+   "onde": "Oceanos profundos",
+   "conteudo": "Pérolas de Atlântida, Blocos Atlantes e afogados guardiões com tridente"
+  }
+ ],
+ "itens": [
+  {
+   "id": "minerio_kryptonita",
+   "nome": "Minério de Kryptonita",
+   "cat": "minerio",
+   "obtencao": "Overworld, Y -60 a 0 (raro) e exposto em Crateras de Meteoro. Picareta de diamante ou melhor.",
+   "uso": "Dropa Fragmento de Kryptonita. Brilha no escuro. Kryptonianos transformados perdem energia a até 6 blocos."
+  },
+  {
+   "id": "fragmento_kryptonita",
+   "nome": "Fragmento de Kryptonita",
+   "cat": "recurso",
+   "obtencao": "Minerar Minério de Kryptonita (Fortuna funciona).",
+   "uso": "Armas anti-kryptonianas, Núcleo da Armadura de Guerra (Lex Luthor)."
+  },
+  {
+   "id": "bloco_kryptonita",
+   "nome": "Bloco de Kryptonita",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "FFF",
+     "FFF",
+     "FFF"
+    ],
+    "chaves": {
+     "F": "fragmento_kryptonita"
+    }
+   },
+   "uso": "Armazenamento. Aura que drena kryptonianos a até 10 blocos: defesa de base em multiplayer."
+  },
+  {
+   "id": "cristal_kryptoniano",
+   "nome": "Cristal Kryptoniano",
+   "cat": "recurso",
+   "obtencao": "Núcleo da Cratera de Meteoro (1 por cratera). Raro em baús de fim de jogo.",
+   "uso": "Itens de transformação kryptonianos, Câmara Solar, decoração da Fortaleza."
+  },
+  {
+   "id": "fragmento_alienigena",
+   "nome": "Fragmento Alienígena",
+   "cat": "recurso",
+   "obtencao": "Crateras de Meteoro (blocos de rocha do meteoro).",
+   "uso": "Tecnologia e transformações alienígenas (Besouro Azul, Caçador de Marte, Brainiac)."
+  },
+  {
+   "id": "minerio_nth",
+   "nome": "Minério de Metal Nth",
+   "cat": "minerio",
+   "obtencao": "Picos de montanha (Y 120+) e Destroços Thanagarianos.",
+   "uso": "Dropa Metal Nth Bruto."
+  },
+  {
+   "id": "nth_bruto",
+   "nome": "Metal Nth Bruto",
+   "cat": "recurso",
+   "obtencao": "Minerar Minério de Metal Nth.",
+   "uso": "Fundir em Lingote de Metal Nth."
+  },
+  {
+   "id": "lingote_nth",
+   "nome": "Lingote de Metal Nth",
+   "cat": "recurso",
+   "receita": {
+    "tipo": "fundicao",
+    "entrada": "nth_bruto"
+   },
+   "uso": "Ferramentas e armadura de Metal Nth (antigravidade), itens thanagarianos."
+  },
+  {
+   "id": "minerio_oricalco",
+   "nome": "Minério de Oricalco",
+   "cat": "minerio",
+   "obtencao": "Ruínas de Themyscira e praias de ilhas em oceanos quentes.",
+   "uso": "Fundir em Lingote de Oricalco."
+  },
+  {
+   "id": "lingote_oricalco",
+   "nome": "Lingote de Oricalco",
+   "cat": "recurso",
+   "receita": {
+    "tipo": "fundicao",
+    "entrada": "minerio_oricalco"
+   },
+   "uso": "Equipamento amazônico (durabilidade alta, encantabilidade máxima)."
+  },
+  {
+   "id": "minerio_prometio",
+   "nome": "Minério de Prométio",
+   "cat": "minerio",
+   "obtencao": "Deepslate, Y -60 a -30 (muito raro, veios de 1 a 3).",
+   "uso": "Fundir em Lingote de Prométio."
+  },
+  {
+   "id": "lingote_prometio",
+   "nome": "Lingote de Prométio",
+   "cat": "recurso",
+   "receita": {
+    "tipo": "fundicao",
+    "entrada": "minerio_prometio"
+   },
+   "uso": "Armadura resistente a explosões, tecnologia pesada (Ciborgue, Lex, Exterminador)."
+  },
+  {
+   "id": "minerio_apokolips",
+   "nome": "Minério do Fosso de Fogo",
+   "cat": "minerio",
+   "obtencao": "Nether, deltas de basalto.",
+   "uso": "Dropa Fragmento de Apokolips."
+  },
+  {
+   "id": "fragmento_apokolips",
+   "nome": "Fragmento de Apokolips",
+   "cat": "recurso",
+   "obtencao": "Minerar Minério do Fosso de Fogo.",
+   "uso": "Liga de Apokolips."
+  },
+  {
+   "id": "liga_apokolips",
+   "nome": "Liga de Apokolips",
+   "cat": "recurso",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "fragmento_apokolips",
+     "fragmento_apokolips",
+     "fragmento_apokolips",
+     "fragmento_apokolips",
+     "minecraft:gold_ingot",
+     "minecraft:gold_ingot",
+     "minecraft:gold_ingot",
+     "minecraft:gold_ingot"
+    ]
+   },
+   "uso": "Tecnologia do Quarto Mundo (Darkseid, Orion, Big Barda, Senhor Milagre)."
+  },
+  {
+   "id": "fragmento_espectro",
+   "nome": "Fragmento do Espectro",
+   "cat": "recurso",
+   "obtencao": "Meteorito do Espectro.",
+   "uso": "Base dos Cristais do Espectro Emocional."
+  },
+  {
+   "id": "cristal_vontade",
+   "nome": "Cristal da Vontade (verde)",
+   "cat": "recurso",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "fragmento_espectro",
+     "minecraft:emerald",
+     "minecraft:diamond"
+    ]
+   },
+   "uso": "Anéis e Bateria dos Lanternas Verdes."
+  },
+  {
+   "id": "cristal_medo",
+   "nome": "Cristal do Medo (amarelo)",
+   "cat": "recurso",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "fragmento_espectro",
+     "minecraft:fermented_spider_eye",
+     "minecraft:gold_ingot"
+    ]
+   },
+   "uso": "Anel e Bateria da Tropa Sinestro."
+  },
+  {
+   "id": "cristal_furia",
+   "nome": "Cristal da Fúria (vermelho)",
+   "cat": "recurso",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "fragmento_espectro",
+     "minecraft:redstone_block",
+     "minecraft:blaze_powder"
+    ]
+   },
+   "uso": "Anel e Bateria dos Lanternas Vermelhos."
+  },
+  {
+   "id": "cristal_morte",
+   "nome": "Cristal da Morte (negro)",
+   "cat": "recurso",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "fragmento_espectro",
+     "minecraft:wither_rose",
+     "minecraft:bone"
+    ]
+   },
+   "uso": "Anel e Bateria dos Lanternas Negros."
+  },
+  {
+   "id": "perola_atlantida",
+   "nome": "Pérola de Atlântida",
+   "cat": "recurso",
+   "obtencao": "Drop raro de afogados, baús de Ruínas Atlantes, Ruínas Oceânicas e Monumentos.",
+   "uso": "Itens atlantes e Blocos Atlantes."
+  },
+  {
+   "id": "garrafa_raio",
+   "nome": "Garrafa de Raio",
+   "cat": "recurso",
+   "obtencao": "Usar uma garrafa de vidro no Para-raios Captor depois que ele for atingido por um raio (até 4 cargas).",
+   "uso": "Velocistas, Shazam, Raio Negro. Recarrega energia elétrica ao beber (transformado)."
+  },
+  {
+   "id": "seiva_verde",
+   "nome": "Seiva do Verde",
+   "cat": "recurso",
+   "obtencao": "Usar garrafa de vidro em tronco de mangue ou carvalho de pântano (o tronco vira descascado).",
+   "uso": "Personagens ligados ao Verde (Monstro do Pântano, Hera Venenosa, Mutano)."
+  },
+  {
+   "id": "essencia_mistica",
+   "nome": "Essência Mística",
+   "cat": "recurso",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "minecraft:amethyst_shard",
+     "minecraft:lapis_lazuli",
+     "minecraft:glowstone_dust",
+     "minecraft:experience_bottle"
+    ]
+   },
+   "obtencao": "Também em baús de Ruínas de Themyscira e drop raro de bruxas.",
+   "uso": "Magia (Zatanna, Senhor Destino, Shazam, Constantine)."
+  },
+  {
+   "id": "agua_lazaro",
+   "nome": "Água de Lázaro",
+   "cat": "recurso",
+   "obtencao": "Balde na fonte do Poço de Lázaro.",
+   "uso": "Cura total ao beber (cooldown longo, náusea). Transformação de Ra's al Ghul e Fonte de Lázaro."
+  },
+  {
+   "id": "frasco_veneno",
+   "nome": "Frasco de Veneno",
+   "cat": "utilidade",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "minecraft:glass_bottle",
+     "minecraft:blaze_powder",
+     "minecraft:sugar",
+     "minecraft:redstone",
+     "minecraft:spider_eye"
+    ]
+   },
+   "uso": "Recarga do Bane. Qualquer jogador: Força II por 20 s e depois Fraqueza por 40 s."
+  },
+  {
+   "id": "toxina_medo",
+   "nome": "Toxina do Medo",
+   "cat": "utilidade",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "minecraft:glass_bottle",
+     "minecraft:fermented_spider_eye",
+     "minecraft:poisonous_potato",
+     "minecraft:phantom_membrane"
+    ]
+   },
+   "uso": "Arremessável: mobs na área fogem por 6 s. Recarga do Espantalho."
+  },
+  {
+   "id": "gas_riso",
+   "nome": "Gás do Riso",
+   "cat": "utilidade",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "minecraft:glass_bottle",
+     "minecraft:gunpowder",
+     "minecraft:slime_ball",
+     "minecraft:purple_dye"
+    ]
+   },
+   "uso": "Arremessável: efeito negativo aleatório nos mobs da área. Transformação do Coringa."
+  },
+  {
+   "id": "tecido_tatico",
+   "nome": "Tecido Tático",
+   "cat": "componente",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "SLS",
+     "LIL",
+     "SLS"
+    ],
+    "chaves": {
+     "S": "minecraft:string",
+     "L": "minecraft:leather",
+     "I": "minecraft:iron_nugget"
+    },
+    "qtd": 4
+   },
+   "uso": "Base dos trajes e de equipamentos de tecido."
+  },
+  {
+   "id": "placa_circuito",
+   "nome": "Placa de Circuito",
+   "cat": "componente",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "QRQ",
+     "CGC",
+     "QRQ"
+    ],
+    "chaves": {
+     "Q": "minecraft:quartz",
+     "R": "minecraft:redstone",
+     "C": "minecraft:copper_ingot",
+     "G": "minecraft:gold_nugget"
+    },
+    "qtd": 2
+   },
+   "uso": "Eletrônicos e gadgets."
+  },
+  {
+   "id": "componente_tecnologico",
+   "nome": "Componente Tecnológico",
+   "cat": "componente",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "IPI",
+     "RCR",
+     "IPI"
+    ],
+    "chaves": {
+     "I": "minecraft:iron_ingot",
+     "P": "placa_circuito",
+     "R": "minecraft:redstone",
+     "C": "minecraft:comparator"
+    }
+   },
+   "uso": "Gadgets, armaduras tecnológicas, Batcomputador."
+  },
+  {
+   "id": "nucleo_energia",
+   "nome": "Núcleo de Energia",
+   "cat": "componente",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "PGP",
+     "GCG",
+     "PGP"
+    ],
+    "chaves": {
+     "P": "lingote_prometio",
+     "G": "minecraft:glowstone",
+     "C": "componente_tecnologico"
+    }
+   },
+   "uso": "Armaduras de energia, Carregador Tecnológico, Matriz Nuclear."
+  },
+  {
+   "id": "nucleo_caixa_mae",
+   "nome": "Núcleo da Caixa-Mãe",
+   "cat": "componente",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "LEL",
+     "ENE",
+     "LEL"
+    ],
+    "chaves": {
+     "L": "liga_apokolips",
+     "E": "minecraft:ender_eye",
+     "N": "nucleo_energia"
+    }
+   },
+   "uso": "Tubos de explosão (teleporte) e itens do Quarto Mundo."
+  },
+  {
+   "id": "nucleo_meta_1",
+   "nome": "Núcleo Meta-Humano I",
+   "cat": "componente",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "IRI",
+     "RGR",
+     "IRI"
+    ],
+    "chaves": {
+     "I": "minecraft:iron_ingot",
+     "R": "minecraft:redstone",
+     "G": "minecraft:gold_ingot"
+    }
+   },
+   "uso": "Base de todo item de transformação de nível 1 (início do jogo)."
+  },
+  {
+   "id": "nucleo_meta_2",
+   "nome": "Núcleo Meta-Humano II",
+   "cat": "componente",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "DLD",
+     "LNL",
+     "DLD"
+    ],
+    "chaves": {
+     "D": "minecraft:diamond",
+     "L": "minecraft:glowstone_dust",
+     "N": "nucleo_meta_1"
+    }
+   },
+   "uso": "Base dos itens de transformação de nível 2 (diamante)."
+  },
+  {
+   "id": "nucleo_meta_3",
+   "nome": "Núcleo Meta-Humano III",
+   "cat": "componente",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "BPB",
+     "ANA",
+     "BPB"
+    ],
+    "chaves": {
+     "B": "minecraft:blaze_rod",
+     "P": "minecraft:ender_pearl",
+     "A": "minecraft:amethyst_shard",
+     "N": "nucleo_meta_2"
+    }
+   },
+   "uso": "Base dos itens de transformação de nível 3 (Nether)."
+  },
+  {
+   "id": "nucleo_meta_4",
+   "nome": "Núcleo Meta-Humano IV",
+   "cat": "componente",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "SKS",
+     "KNK",
+     "SKS"
+    ],
+    "chaves": {
+     "S": "minecraft:echo_shard",
+     "K": "minecraft:netherite_scrap",
+     "N": "nucleo_meta_3"
+    }
+   },
+   "uso": "Base dos itens de transformação de nível 4 (fim de jogo: Cidade Ancestral e netherita)."
+  },
+  {
+   "id": "ferramentas_nth",
+   "nome": "Ferramentas de Metal Nth",
+   "cat": "ferramenta",
+   "familia": "ferramentas",
+   "material": "lingote_nth",
+   "uso": "Nível entre diamante e netherita. Antigravidade: segurar na mão reduz o dano de queda pela metade."
+  },
+  {
+   "id": "armadura_nth",
+   "nome": "Armadura de Metal Nth",
+   "cat": "equipamento",
+   "familia": "armadura",
+   "material": "lingote_nth",
+   "uso": "Como diamante; conjunto completo dá queda lenta ao agachar no ar."
+  },
+  {
+   "id": "ferramentas_oricalco",
+   "nome": "Ferramentas de Oricalco",
+   "cat": "ferramenta",
+   "familia": "ferramentas",
+   "material": "lingote_oricalco",
+   "uso": "Como ferro, com durabilidade de diamante e encantabilidade do ouro."
+  },
+  {
+   "id": "armadura_prometio",
+   "nome": "Armadura de Prométio",
+   "cat": "equipamento",
+   "familia": "armadura",
+   "material": "lingote_prometio",
+   "uso": "Como diamante, com Proteção contra Explosões embutida e sem perder durabilidade com explosões."
+  },
+  {
+   "id": "lanca_kryptonita",
+   "nome": "Lança de Kryptonita",
+   "cat": "ferramenta",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "  F",
+     " S ",
+     "S  "
+    ],
+    "chaves": {
+     "F": "fragmento_kryptonita",
+     "S": "minecraft:stick"
+    }
+   },
+   "uso": "Arma de qualquer jogador: dano 3 ♥, dano x4 contra kryptonianos transformados (multiplayer com PvP)."
+  },
+  {
+   "id": "batarangue_simples",
+   "nome": "Batarangue",
+   "cat": "ferramenta",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     " I ",
+     "IBI"
+    ],
+    "chaves": {
+     "I": "minecraft:iron_ingot",
+     "B": "minecraft:black_dye"
+    },
+    "qtd": 4
+   },
+   "uso": "Arremessável que volta (2 ♥). Qualquer jogador pode usar; corta teias e aciona botões."
+  },
+  {
+   "id": "gancho_escalada",
+   "nome": "Gancho de Escalada",
+   "cat": "ferramenta",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "  H",
+     " S ",
+     "I  "
+    ],
+    "chaves": {
+     "H": "minecraft:tripwire_hook",
+     "S": "minecraft:string",
+     "I": "minecraft:iron_ingot"
+    }
+   },
+   "uso": "Puxa o jogador até o bloco mirado (30 blocos, 200 usos). Versão sem poderes do gancho do Batman."
+  },
+  {
+   "id": "escudo_amazonico",
+   "nome": "Escudo Amazônico",
+   "cat": "equipamento",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "OGO",
+     "OOO",
+     " O "
+    ],
+    "chaves": {
+     "O": "lingote_oricalco",
+     "G": "minecraft:gold_ingot"
+    }
+   },
+   "uso": "Escudo com bloqueio perfeito que reflete flechas. Durabilidade 3x maior que o escudo comum."
+  },
+  {
+   "id": "capa_planador",
+   "nome": "Capa Planadora",
+   "cat": "equipamento",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "T T",
+     "TMT",
+     "T T"
+    ],
+    "chaves": {
+     "T": "tecido_tatico",
+     "M": "minecraft:phantom_membrane"
+    }
+   },
+   "uso": "Vestida no peito: planar a 9 b/s segurando pulo. Alternativa inicial ao élitro."
+  },
+  {
+   "id": "visor_tatico",
+   "nome": "Visor Tático",
+   "cat": "equipamento",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "IPI",
+     "G G"
+    ],
+    "chaves": {
+     "I": "minecraft:iron_ingot",
+     "P": "placa_circuito",
+     "G": "minecraft:tinted_glass"
+    }
+   },
+   "uso": "Capacete: destaca mobs hostis a até 24 blocos e dá visão noturna (gasta durabilidade)."
+  },
+  {
+   "id": "comunicador_liga",
+   "nome": "Comunicador da Liga",
+   "cat": "utilidade",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     " P ",
+     "CEC"
+    ],
+    "chaves": {
+     "P": "placa_circuito",
+     "C": "minecraft:copper_ingot",
+     "E": "minecraft:ender_pearl"
+    }
+   },
+   "uso": "Multiplayer: mostra no HUD a direção e distância dos aliados vinculados e permite marcar pontos de encontro."
+  },
+  {
+   "id": "kit_medico",
+   "nome": "Kit de Primeiros Socorros",
+   "cat": "utilidade",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "minecraft:paper",
+     "minecraft:string",
+     "minecraft:golden_carrot",
+     "minecraft:honey_bottle"
+    ]
+   },
+   "uso": "Cura 6 ♥ em 3 s; pode ser usado em outro jogador."
+  },
+  {
+   "id": "para_raios_captor",
+   "nome": "Para-raios Captor",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     " L ",
+     "GCG",
+     "GCG"
+    ],
+    "chaves": {
+     "L": "minecraft:lightning_rod",
+     "G": "minecraft:glass",
+     "C": "minecraft:copper_block"
+    }
+   },
+   "uso": "Guarda até 4 cargas de raio para encher Garrafas de Raio. Recarga de Flash, Shazam e Raio Negro."
+  },
+  {
+   "id": "bateria_verde",
+   "nome": "Bateria de Energia Verde",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "GCG",
+     "GLG",
+     "OOO"
+    ],
+    "chaves": {
+     "G": "minecraft:glass",
+     "C": "cristal_vontade",
+     "L": "minecraft:lantern",
+     "O": "minecraft:gold_block"
+    }
+   },
+   "uso": "Recarrega anéis verdes (juramento: segurar clique direito por 3 s). Pode ser compartilhada por toda a Tropa no servidor."
+  },
+  {
+   "id": "bateria_amarela",
+   "nome": "Bateria de Energia Amarela",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "GCG",
+     "GLG",
+     "OOO"
+    ],
+    "chaves": {
+     "G": "minecraft:glass",
+     "C": "cristal_medo",
+     "L": "minecraft:lantern",
+     "O": "minecraft:gold_block"
+    }
+   },
+   "uso": "Recarrega anéis amarelos."
+  },
+  {
+   "id": "bateria_vermelha",
+   "nome": "Bateria de Energia Vermelha",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "GCG",
+     "GLG",
+     "OOO"
+    ],
+    "chaves": {
+     "G": "minecraft:glass",
+     "C": "cristal_furia",
+     "L": "minecraft:lantern",
+     "O": "minecraft:gold_block"
+    }
+   },
+   "uso": "Recarrega anéis vermelhos."
+  },
+  {
+   "id": "bateria_negra",
+   "nome": "Bateria de Energia Negra",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "GCG",
+     "GLG",
+     "OOO"
+    ],
+    "chaves": {
+     "G": "minecraft:glass",
+     "C": "cristal_morte",
+     "L": "minecraft:soul_lantern",
+     "O": "minecraft:gold_block"
+    }
+   },
+   "uso": "Recarrega anéis negros."
+  },
+  {
+   "id": "camara_solar",
+   "nome": "Câmara Solar",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "GGG",
+     "GKG",
+     "QDQ"
+    ],
+    "chaves": {
+     "G": "minecraft:glass",
+     "K": "cristal_kryptoniano",
+     "Q": "minecraft:quartz_block",
+     "D": "minecraft:daylight_detector"
+    }
+   },
+   "uso": "Kryptonianos e Estelar recarregam como se estivessem sob o sol, mesmo no subterrâneo ou à noite."
+  },
+  {
+   "id": "carregador_tecnologico",
+   "nome": "Carregador Tecnológico",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "IRI",
+     "INI",
+     "IRI"
+    ],
+    "chaves": {
+     "I": "minecraft:iron_block",
+     "R": "minecraft:redstone_block",
+     "N": "nucleo_energia"
+    }
+   },
+   "uso": "Recarga de Ciborgue, Gladiador Dourado, Senhor Incrível, Lex Luthor e armaduras tecnológicas. Funciona como estação compartilhada."
+  },
+  {
+   "id": "batcomputador",
+   "nome": "Batcomputador",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "PPP",
+     "CTC",
+     "BBB"
+    ],
+    "chaves": {
+     "P": "minecraft:glass_pane",
+     "C": "componente_tecnologico",
+     "T": "minecraft:crafter",
+     "B": "minecraft:black_concrete"
+    }
+   },
+   "uso": "Fabrica e recarrega gadgets da família Batman, analisa amostras (revela fraquezas de mobs) e mostra um mapa da área."
+  },
+  {
+   "id": "altar_deuses",
+   "nome": "Altar dos Deuses",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     " C ",
+     "OEO",
+     "OOO"
+    ],
+    "chaves": {
+     "C": "minecraft:candle",
+     "O": "lingote_oricalco",
+     "E": "essencia_mistica"
+    }
+   },
+   "uso": "Acelera a recarga de Mulher-Maravilha, Moça-Maravilha e Shazam."
+  },
+  {
+   "id": "fonte_lazaro",
+   "nome": "Fonte de Lázaro",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "PAP",
+     "PGP",
+     "PPP"
+    ],
+    "chaves": {
+     "P": "minecraft:prismarine_bricks",
+     "A": "agua_lazaro",
+     "G": "minecraft:gold_block"
+    }
+   },
+   "uso": "Versão construível do Poço: recarga de Ra's al Ghul e cura total uma vez por dia por jogador."
+  },
+  {
+   "id": "bat_sinal",
+   "nome": "Bat-Sinal",
+   "cat": "decoracao",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "IGI",
+     "ILI",
+     "I I"
+    ],
+    "chaves": {
+     "I": "minecraft:iron_ingot",
+     "G": "minecraft:glass",
+     "L": "minecraft:redstone_lamp"
+    }
+   },
+   "uso": "Projeta o símbolo do morcego nas nuvens à noite. Com redstone, envia um aviso aos jogadores transformados em personagens da família Batman."
+  },
+  {
+   "id": "cristal_fortaleza",
+   "nome": "Bloco de Cristal da Fortaleza",
+   "cat": "decoracao",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "QQ",
+     "QK"
+    ],
+    "chaves": {
+     "Q": "minecraft:quartz_block",
+     "K": "fragmento_alienigena"
+    },
+    "qtd": 8
+   },
+   "uso": "Cristal translúcido e luminoso para construir uma Fortaleza da Solidão."
+  },
+  {
+   "id": "tijolo_themyscira",
+   "nome": "Tijolos de Themyscira",
+   "cat": "decoracao",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "CC",
+     "CG"
+    ],
+    "chaves": {
+     "C": "minecraft:calcite",
+     "G": "minecraft:gold_nugget"
+    },
+    "qtd": 4
+   },
+   "uso": "Mármore com detalhes dourados, com escadas, lajes, muros e colunas."
+  },
+  {
+   "id": "bloco_atlante",
+   "nome": "Bloco Atlante",
+   "cat": "decoracao",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "PP",
+     "PE"
+    ],
+    "chaves": {
+     "P": "minecraft:prismarine",
+     "E": "perola_atlantida"
+    },
+    "qtd": 8
+   },
+   "uso": "Pedra atlante que brilha debaixo d'água."
+  },
+  {
+   "id": "painel_tecnologico",
+   "nome": "Painel Tecnológico",
+   "cat": "decoracao",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "IGI",
+     "GPG",
+     "IGI"
+    ],
+    "chaves": {
+     "I": "minecraft:iron_ingot",
+     "G": "minecraft:glowstone_dust",
+     "P": "minecraft:glass_pane"
+    },
+    "qtd": 8
+   },
+   "uso": "Paredes iluminadas no estilo Torre de Vigilância / LexCorp."
+  },
+  {
+   "id": "poste_gotham",
+   "nome": "Poste de Gotham",
+   "cat": "decoracao",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     " L ",
+     " B ",
+     " B "
+    ],
+    "chaves": {
+     "L": "minecraft:lantern",
+     "B": "minecraft:iron_bars"
+    }
+   },
+   "uso": "Iluminação de rua gótica."
+  },
+  {
+   "id": "globo_planeta_diario",
+   "nome": "Globo do Planeta Diário",
+   "cat": "decoracao",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "GCG",
+     "CMC",
+     "GCG"
+    ],
+    "chaves": {
+     "G": "minecraft:gold_ingot",
+     "C": "minecraft:compass",
+     "M": "minecraft:map"
+    }
+   },
+   "uso": "Globo giratório decorativo de 3x3 blocos."
+  },
+  {
+   "id": "estatua_heroi",
+   "nome": "Estátua de Herói",
+   "cat": "decoracao",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     " S ",
+     "SAS",
+     " S "
+    ],
+    "chaves": {
+     "S": "minecraft:smooth_stone",
+     "A": "minecraft:armor_stand"
+    }
+   },
+   "uso": "Clique com um item de transformação para a estátua assumir a forma daquele personagem (pose ajustável)."
+  },
+  {
+   "id": "trofeu_batcaverna",
+   "nome": "Moeda Gigante da Batcaverna",
+   "cat": "decoracao",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "GGG",
+     "GCG",
+     "GGG"
+    ],
+    "chaves": {
+     "G": "minecraft:gold_block",
+     "C": "minecraft:copper_block"
+    }
+   },
+   "uso": "Troféu decorativo de 2x2 blocos."
+  },
+  {
+   "id": "mapa_liga",
+   "nome": "Mapa da Liga",
+   "cat": "utilidade",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     " P ",
+     "CMC",
+     " P "
+    ],
+    "chaves": {
+     "P": "placa_circuito",
+     "C": "minecraft:compass",
+     "M": "minecraft:map"
+    }
+   },
+   "uso": "Abre a lista de locais já descobertos ou revelados por missões e aponta o caminho como uma bússola. Em multiplayer, mostra também os locais descobertos pelo time."
+  },
+  {
+   "id": "bussola_atlante",
+   "nome": "Bússola Atlante",
+   "cat": "utilidade",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     " E ",
+     "ECE",
+     " E "
+    ],
+    "chaves": {
+     "E": "perola_atlantida",
+     "C": "minecraft:compass"
+    }
+   },
+   "uso": "Aponta para a Atlântida mais próxima. Funciona debaixo d'água."
+  },
+  {
+   "id": "bussola_amazonica",
+   "nome": "Bússola Amazônica",
+   "cat": "utilidade",
+   "obtencao": "Baú das Ruínas de Themyscira ou recompensa da missão de Steve Trevor.",
+   "uso": "Aponta para Themyscira e dissipa a névoa que esconde a ilha."
+  },
+  {
+   "id": "teleporte_zeta",
+   "nome": "Tubo Zeta",
+   "cat": "bloco",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "IEI",
+     "ECE",
+     "IEI"
+    ],
+    "chaves": {
+     "I": "minecraft:iron_block",
+     "E": "minecraft:ender_pearl",
+     "C": "componente_tecnologico"
+    }
+   },
+   "obtencao": "O primeiro é dado pelo Monitor da Liga no Prólogo.",
+   "uso": "Rede de teleporte entre Tubos Zeta do mesmo dono ou time. Todo Tubo Zeta tem a Torre de Vigilância como destino."
+  },
+  {
+   "id": "chave_boom_tube",
+   "nome": "Chave do Tubo de Explosão",
+   "cat": "utilidade",
+   "receita": {
+    "tipo": "shapeless",
+    "ingredientes": [
+     "nucleo_caixa_mae",
+     "minecraft:ender_eye",
+     "minecraft:obsidian"
+    ]
+   },
+   "uso": "Abre por 30 s um portal para Apokolips ou Nova Gênese (escolhido ao usar). O grupo pode atravessar junto."
+  },
+  {
+   "id": "projetor_zona_fantasma",
+   "nome": "Projetor da Zona Fantasma",
+   "cat": "bloco",
+   "obtencao": "Câmara central da Fortaleza da Solidão (não craftável; pode ser coletado com Toque Suave).",
+   "uso": "Abre o portal para a Zona Fantasma. Clique com Cristal Kryptoniano para ativar por 60 s."
+  },
+  {
+   "id": "raio_duplicador",
+   "nome": "Raio Duplicador",
+   "cat": "utilidade",
+   "obtencao": "Laboratório secreto da Torre LexCorp.",
+   "uso": "Disparado num espelho, cria um portal para o Mundo Bizarro."
+  },
+  {
+   "id": "livro_azarath",
+   "nome": "Livro de Azarath",
+   "cat": "utilidade",
+   "obtencao": "Biblioteca da Torre do Destino ou recompensa de Madame Xanadu.",
+   "uso": "Ritual que abre o Reino de Trigon (círculo de velas + obsidiana chorosa)."
+  },
+  {
+   "id": "camera_planeta",
+   "nome": "Câmera do Planeta Diário",
+   "cat": "utilidade",
+   "receita": {
+    "tipo": "shaped",
+    "padrao": [
+     "III",
+     "GRG",
+     "III"
+    ],
+    "chaves": {
+     "I": "minecraft:iron_ingot",
+     "G": "minecraft:glass_pane",
+     "R": "minecraft:redstone"
+    }
+   },
+   "uso": "Tira fotos (viram mapas-imagem). Missões de Lois Lane e Jimmy Olsen pedem fotos de locais e bosses."
+  },
+  {
+   "id": "kandor_garrafa",
+   "nome": "Kandor Engarrafada",
+   "cat": "decoracao",
+   "obtencao": "Drop do Brainiac.",
+   "uso": "Cidade kryptoniana miniatura dentro de uma garrafa, animada. Colocada perto da Câmara Solar, dobra a recarga de kryptonianos."
+  },
+  {
+   "id": "equacao_antivida",
+   "nome": "Fragmento da Equação Anti-Vida",
+   "cat": "recurso",
+   "obtencao": "Drop do Darkseid (1 por derrota).",
+   "uso": "Material mais raro do mod. Substitui o Núcleo Meta-Humano IV em qualquer receita de transformação e é a peça final do troféu da campanha."
+  },
+  {
+   "id": "cartas_coringa",
+   "nome": "Baralho do Coringa",
+   "cat": "ferramenta",
+   "obtencao": "Drop do Coringa.",
+   "uso": "Arremessa 3 cartas afiadas (2 ♥ cada) e efeito aleatório do gás do riso. 52 usos."
+  },
+  {
+   "id": "fragmento_parallax",
+   "nome": "Fragmento de Parallax",
+   "cat": "recurso",
+   "obtencao": "Drop do Parallax.",
+   "uso": "Converte qualquer Cristal do Espectro em outro (mesa de trabalho) e cria a Bateria de Energia Branca (decoração lendária)."
+  },
+  {
+   "id": "elmo_ares",
+   "nome": "Elmo de Ares",
+   "cat": "equipamento",
+   "obtencao": "Drop do Ares.",
+   "uso": "Capacete com armadura 4 e Fúria: cada abate dá Força I por 5 s."
+  },
+  {
+   "id": "selo_liga",
+   "nome": "Selo da Liga da Justiça",
+   "cat": "recurso",
+   "obtencao": "Recompensa de missões da Liga (campanha e Alertas da Liga).",
+   "uso": "Moeda trocada com o Monitor da Liga por itens raros, mapas de locais e Tubos Zeta."
+  }
+ ]
 }

@@ -82,6 +82,10 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
 .transf b { font-weight: 600; }
 .cat-itens h2 { font: 700 28px/1.15 var(--display); margin: 28px 0 12px; }
 .chips-usado { font-size: 13px; color: var(--muted); margin: 0; }
+.lista-kv { margin: 0; display: grid; gap: 4px; font-size: 14px; }
+.lista-kv b { font-weight: 600; }
+.pill { display: inline-block; font: 600 11px var(--body); letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--c); color: var(--c); }
+.fases { margin: 0; padding-left: 18px; font-size: 14px; }
 .donos { font-size: 14px; color: var(--muted); margin: 0; }
 .md h1 { font-size: 40px; margin-block: 8px 12px; }
 .md h2 { font: 700 28px/1.15 var(--display); margin-block: 32px 8px; padding-top: 8px; border-top: 1px solid var(--line); }
@@ -108,6 +112,7 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
     <button role="tab" id="tab-fichas" aria-selected="false" data-aba="fichas">Fichas</button>
     <button role="tab" id="tab-armas" aria-selected="false" data-aba="armas">Armas</button>
     <button role="tab" id="tab-itens" aria-selected="false" data-aba="itens">Itens</button>
+    <button role="tab" id="tab-mundo" aria-selected="false" data-aba="mundo">Mundo</button>
     <button role="tab" id="tab-planejamento" aria-selected="false" data-aba="planejamento">Planejamento</button>
   </nav>
 
@@ -139,6 +144,12 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
     <div id="itens"></div>
   </section>
 
+  <section id="aba-mundo" hidden>
+    <div class="tools" id="mundo-secoes"></div>
+    <p class="meta" id="mundo-regra"></p>
+    <div id="mundo"></div>
+  </section>
+
   <section id="aba-planejamento" hidden>
     <article class="md" id="plano"></article>
   </section>
@@ -151,6 +162,7 @@ const PLANO = /*__PLANO__*/"";
 const BALANC = /*__BALANC__*/"";
 const ARMAS = /*__ARMAS__*/{};
 const ITENS = /*__ITENS__*/{};
+const MUNDO = /*__MUNDO__*/{};
 const FICHA_COLS = [["nivel", "Nível"], ["vida", "Vida ♥"], ["armadura", "Armadura"], ["dano", "Dano ♥"], ["energia", "Energia"],
   ["regen", "Regen/s"], ["terra", "Corrida"], ["vmax", "Supervel."], ["voo", "Voo"], ["nado", "Nado"], ["planar", "Planar"]];
 const num = v => v == null ? "–" : String(v).replace(".", ",");
@@ -293,7 +305,57 @@ function itens() {
 }
 document.getElementById("busca-itens").addEventListener("input", itens);
 
-const ABAS = ["personagens", "fichas", "armas", "itens", "planejamento"];
+const kv = (rot, v) => v && (!Array.isArray(v) || v.length) ? `<span><b>${rot}:</b> ${esc(Array.isArray(v) ? v.join(", ") : v)}</span>` : "";
+const COR_TIPO = { cidade: "var(--heroi)", estrutura: "var(--gold)", base: "var(--ajudante)", dimensao: "var(--anti)", planeta: "var(--vilao)" };
+const SECOES = {
+  locais: ["Locais", "Locais do mundo: cidades, estruturas, bases, dimensões e planetas, com a forma de chegar a cada um.", () =>
+    MUNDO.locais.map(l => `<article class="card" style="--c:${COR_TIPO[l.tipo]}">
+      <div class="top"><h3>${esc(l.nome)}</h3><span class="pill">${esc(l.tipo_nome)}</span></div>
+      <p class="exp" style="font-style:normal">${esc(l.desc)}</p>
+      <div class="lista-kv">${kv("Onde", l.onde)}${kv("Como chegar", l.acesso)}${kv("Pontos de interesse", l.sublocais)}${kv("Facção", l.faccao_nome)}
+      ${kv("NPCs", l.npcs)}${kv("Bosses", l.bosses)}${kv("Mobs", l.mobs)}${kv("Personagens ligados", l.personagens_nomes)}</div></article>`)],
+  npcs: ["NPCs", "", () => MUNDO.npcs.map(n => `<article class="card" style="--c:var(--ajudante)">
+      <h3>${esc(n.nome)}</h3><p class="donos">${esc(n.papel)} · ${esc(n.local_nome)}</p>
+      <div class="lista-kv">${kv("Interação", n.interacao)}${kv("Gosta de", n.gosta)}${kv("Como aliado", n.aliado)}${kv("Missões", n.missoes)}${kv("Reage a", n.reage_nomes)}</div></article>`)],
+  bosses: ["Bosses", "", () => MUNDO.bosses.map(b => `<article class="card" style="--c:var(--vilao)">
+      <div class="top"><h3>${esc(b.nome)}</h3><span class="num">${b.vida} ♥</span></div>
+      <p class="donos">${esc(b.local_nome)} · nível ${b.nivel}${b.missao ? " · missão " + esc(b.missao) : ""}</p>
+      <p class="reusa">${esc(b.invocacao)}</p>
+      <ol class="fases">${b.fases.map(f => `<li>${esc(f)}</li>`).join("")}</ol>
+      <div class="lista-kv">${kv("Drops", b.drops_nomes)}${kv("Extra", b.extra)}</div></article>`)],
+  missoes: ["Missões", "", () => {
+    const grupos = [...MUNDO.atos.map(a => [a.nome, MUNDO.missoes.filter(x => x.tipo === "campanha" && x.ato === a.id)]),
+      ["Missões secundárias", MUNDO.missoes.filter(x => x.tipo === "secundaria")], ["Missões repetíveis", MUNDO.missoes.filter(x => x.tipo === "repetivel")]];
+    return grupos.map(([titulo, lista]) => `</div><h2 class="sec">${esc(titulo)}</h2><div class="grid">` + lista.map(x => `<article class="card" style="--c:${x.tipo === "campanha" ? "var(--gold)" : "var(--accent)"}">
+      <h3>${esc(x.nome)}</h3><p class="donos">${esc(x.npc_nome)} · ${esc(x.local_nome)}</p>
+      <ul class="fases">${x.objetivos.map(o => `<li>${esc(o)}</li>`).join("")}</ul>
+      <div class="lista-kv">${kv("Boss", x.boss_nome)}${kv("Requer", x.requisitos_nomes)}${kv("Recompensa", x.recompensa_txt)}</div></article>`).join(""));
+  }],
+  mobs: ["Mobs", "", () => MUNDO.mobs.map(x => `<article class="card" style="--c:${x.cat === "capanga" || x.cat === "criatura" ? "var(--vilao)" : x.cat === "animal" ? "var(--ajudante)" : "var(--heroi)"}">
+      <div class="top"><h3>${esc(x.nome)}</h3><span class="pill">${esc(x.cat_nome)}</span></div>
+      <p class="exp" style="font-style:normal">${esc(x.comportamento)}</p>
+      <div class="lista-kv">${kv("Onde", x.locais_nomes)}${kv("Drops", x.drops_nomes)}</div></article>`)],
+  conquistas: ["Conquistas", "", () => MUNDO.conquistas.map(c => `<article class="card" style="--c:var(--gold)">
+      <h3>${esc(c.nome)}</h3><p class="exp" style="font-style:normal">${esc(c.condicao)}</p><p class="reusa"><b>Recompensa:</b> ${esc(c.recompensa)}</p></article>`)]
+};
+const REGRAS = { locais: () => MUNDO.faccoes.map(f => f.nome).join(" · "), npcs: () => MUNDO.relacionamento, bosses: () => MUNDO.regras_bosses,
+  missoes: () => MUNDO.regras_missoes, mobs: () => MUNDO.regras_mobs, conquistas: () => MUNDO.regras_conquistas };
+let secao = "locais";
+const secoesEl = document.getElementById("mundo-secoes");
+secoesEl.innerHTML = Object.entries(SECOES).map(([k, [nome]]) => `<button class="chip" data-secao="${k}" aria-pressed="${k === secao}">${nome}</button>`).join("");
+secoesEl.addEventListener("click", e => {
+  const b = e.target.closest("[data-secao]"); if (!b) return;
+  secao = b.dataset.secao;
+  secoesEl.querySelectorAll("[data-secao]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  mundo();
+});
+function mundo() {
+  const r = SECOES[secao][2]();
+  document.getElementById("mundo-regra").textContent = (secao === "locais" ? "Facções: " : "") + REGRAS[secao]();
+  document.getElementById("mundo").innerHTML = `<div class="grid">${Array.isArray(r) ? r.join("") : r}</div>`;
+}
+
+const ABAS = ["personagens", "fichas", "armas", "itens", "mundo", "planejamento"];
 function aba(nome) {
   document.querySelectorAll("[role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
   ABAS.forEach(a => document.getElementById("aba-" + a).hidden = a !== nome);
@@ -308,6 +370,7 @@ render();
 tabelaFichas();
 armas();
 itens();
+mundo();
 const inicial = location.hash.slice(1);
 if (ABAS.includes(inicial)) aba(inicial);
 </script>

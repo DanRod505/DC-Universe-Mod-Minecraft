@@ -7,6 +7,7 @@ Também valida os dados (contagem, nomes únicos, referências, faixas de balanc
 import json
 import sys
 
+import mundo as M
 import receitas as R
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -20,6 +21,8 @@ FICHAS = RAIZ / "docs/FICHAS.md"
 ITENS = RAIZ / "docs/dados/itens.json"
 VANILLA = RAIZ / "docs/dados/vanilla.json"
 ITENS_MD = RAIZ / "docs/ITENS.md"
+MUNDO_DIR = RAIZ / "docs/dados/mundo"
+MUNDO_MD = RAIZ / "docs/MUNDO.md"
 BALANC = RAIZ / "docs/BALANCEAMENTO.md"
 MODELO = RAIZ / "tools/modelo_site.html"
 SITE = RAIZ / "docs/site/index.html"
@@ -278,7 +281,7 @@ def gerar_itens_md(info, dados):
     ITENS_MD.write_text("\n".join(out), encoding="utf-8")
 
 
-def gerar_site(dados, armas, info):
+def gerar_site(dados, armas, info, mundo):
     def js(obj):
         return json.dumps(obj, ensure_ascii=False).replace("</", "<\\/")
     html = MODELO.read_text(encoding="utf-8")
@@ -287,6 +290,7 @@ def gerar_site(dados, armas, info):
     html = html.replace("/*__BALANC__*/\"\"", js(BALANC.read_text(encoding="utf-8")))
     html = html.replace("/*__ARMAS__*/{}", js(armas))
     html = html.replace("/*__ITENS__*/{}", js(info))
+    html = html.replace("/*__MUNDO__*/{}", js(mundo))
     SITE.parent.mkdir(parents=True, exist_ok=True)
     cabeca = '<!doctype html>\n<html lang="pt-BR">\n<meta charset="utf-8">\n' \
              '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' \
@@ -302,7 +306,8 @@ def main():
     cat_itens = json.loads(ITENS.read_text(encoding="utf-8"))
     vanilla = json.loads(VANILLA.read_text(encoding="utf-8"))
     erros_r, receitas, nomes = R.verificar(cat_itens["itens"], dados, vanilla)
-    erros = validar(dados) + validar_armas(armas, dados) + erros_r
+    mundo = M.carregar(MUNDO_DIR)
+    erros = validar(dados) + validar_armas(armas, dados) + erros_r + M.verificar(mundo, dados, nomes, vanilla)
     if erros:
         print("\n".join(erros))
         sys.exit(1)
@@ -310,9 +315,12 @@ def main():
     gerar_md(dados)
     gerar_fichas(dados, armas)
     gerar_itens_md(info, dados)
-    gerar_site(dados, armas, info)
+    info_mundo = M.preparar(mundo, dados, nomes, vanilla)
+    M.gerar_md(info_mundo, MUNDO_MD)
+    gerar_site(dados, armas, info, info_mundo)
     print(f"OK: {len(dados)} personagens, {len(armas['armas'])} armas, {len(receitas)} receitas verificadas "
-          "-> PERSONAGENS.md, FICHAS.md, ITENS.md, site/index.html")
+          f"e mundo ({len(info_mundo['locais'])} locais, {len(info_mundo['missoes'])} missões) "
+          "-> PERSONAGENS.md, FICHAS.md, ITENS.md, MUNDO.md, site/index.html")
 
 
 if __name__ == "__main__":

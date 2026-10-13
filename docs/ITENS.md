@@ -295,7 +295,7 @@ Itens atlantes e Blocos Atlantes.
 
 **Obtenção:** Drop raro de afogados, baús de Ruínas Atlantes, Ruínas Oceânicas e Monumentos.
 
-**Usado em:** Bloco Atlante, Capacete da Arraia Negra, Coroa de Xebel, Dente do Tubarão-Rei, Insígnia Real de Atlântida, Insígnia de Orm, Portadores de Água
+**Usado em:** Bloco Atlante, Bússola Atlante, Capacete da Arraia Negra, Coroa de Xebel, Dente do Tubarão-Rei, Insígnia Real de Atlântida, Insígnia de Orm, Portadores de Água
 
 ### Garrafa de Raio
 
@@ -331,6 +331,24 @@ Cura total ao beber (cooldown longo, náusea). Transformação de Ra's al Ghul e
 
 **Usado em:** Fonte de Lázaro, Frasco de Lázaro
 
+### Fragmento da Equação Anti-Vida
+
+Material mais raro do mod. Substitui o Núcleo Meta-Humano IV em qualquer receita de transformação e é a peça final do troféu da campanha.
+
+**Obtenção:** Drop do Darkseid (1 por derrota).
+
+### Fragmento de Parallax
+
+Converte qualquer Cristal do Espectro em outro (mesa de trabalho) e cria a Bateria de Energia Branca (decoração lendária).
+
+**Obtenção:** Drop do Parallax.
+
+### Selo da Liga da Justiça
+
+Moeda trocada com o Monitor da Liga por itens raros, mapas de locais e Tubos Zeta.
+
+**Obtenção:** Recompensa de missões da Liga (campanha e Alertas da Liga).
+
 ## Componentes
 
 ### Tecido Tático
@@ -359,7 +377,7 @@ A B A
 
 A = Quartzo do Nether; B = Redstone; C = Lingote de Cobre; D = Pepita de Ouro → 2 unidades
 
-**Usado em:** Anel da Legião, Capuz da Batgirl, Componente Tecnológico, Comunicador da Liga, Crânio de Coluan, Escaravelho Khaji Da, Jaqueta T, Traje Bumblebee (núcleo), Visor Tático
+**Usado em:** Anel da Legião, Capuz da Batgirl, Componente Tecnológico, Comunicador da Liga, Crânio de Coluan, Escaravelho Khaji Da, Jaqueta T, Mapa da Liga, Traje Bumblebee (núcleo), Visor Tático
 
 ### Componente Tecnológico
 
@@ -373,7 +391,7 @@ A B A
 
 A = Lingote de Ferro; B = Placa de Circuito; C = Redstone; D = Comparador de Redstone
 
-**Usado em:** Batcomputador, Cinto da Batwoman, Cinto de Massa Anã, Cinto de Utilidades, Núcleo Androide, Núcleo Cibernético, Núcleo Criogênico, Núcleo da Pistola de Frio, Núcleo de Energia
+**Usado em:** Batcomputador, Cinto da Batwoman, Cinto de Massa Anã, Cinto de Utilidades, Núcleo Androide, Núcleo Cibernético, Núcleo Criogênico, Núcleo da Pistola de Frio, Núcleo de Energia, Tubo Zeta
 
 ### Núcleo de Energia
 
@@ -401,7 +419,7 @@ A B A
 
 A = Liga de Apokolips; B = Olho do Ender; C = Núcleo de Energia
 
-**Usado em:** Caixa-Mãe do Senhor Milagre, Núcleo Cibernético, Pedra de Apokolips
+**Usado em:** Caixa-Mãe do Senhor Milagre, Chave do Tubo de Explosão, Núcleo Cibernético, Pedra de Apokolips
 
 ### Núcleo Meta-Humano I
 
@@ -606,6 +624,12 @@ C · ·
 
 A = Gancho de Armadilha; B = Linha; C = Lingote de Ferro
 
+### Baralho do Coringa
+
+Arremessa 3 cartas afiadas (2 ♥ cada) e efeito aleatório do gás do riso. 52 usos.
+
+**Obtenção:** Drop do Coringa.
+
 ## Equipamentos
 
 ### Armadura de Metal Nth
@@ -727,6 +751,12 @@ C · C
 
 A = Lingote de Ferro; B = Placa de Circuito; C = Vidro Fumê
 
+### Elmo de Ares
+
+Capacete com armadura 4 e Fúria: cada abate dá Força I por 5 s.
+
+**Obtenção:** Drop do Ares.
+
 ## Itens de utilidade
 
 ### Frasco de Veneno
@@ -769,6 +799,66 @@ A = Placa de Circuito; B = Lingote de Cobre; C = Pérola do Ender
 Cura 6 ♥ em 3 s; pode ser usado em outro jogador.
 
 Sem forma: Papel, Linha, Cenoura Dourada, Frasco de Mel
+
+### Mapa da Liga
+
+Abre a lista de locais já descobertos ou revelados por missões e aponta o caminho como uma bússola. Em multiplayer, mostra também os locais descobertos pelo time.
+
+```
+· A ·
+B C B
+· A ·
+```
+
+A = Placa de Circuito; B = Bússola; C = Mapa
+
+### Bússola Atlante
+
+Aponta para a Atlântida mais próxima. Funciona debaixo d'água.
+
+```
+· A ·
+A B A
+· A ·
+```
+
+A = Pérola de Atlântida; B = Bússola
+
+### Bússola Amazônica
+
+Aponta para Themyscira e dissipa a névoa que esconde a ilha.
+
+**Obtenção:** Baú das Ruínas de Themyscira ou recompensa da missão de Steve Trevor.
+
+### Chave do Tubo de Explosão
+
+Abre por 30 s um portal para Apokolips ou Nova Gênese (escolhido ao usar). O grupo pode atravessar junto.
+
+Sem forma: Núcleo da Caixa-Mãe, Olho do Ender, Obsidiana
+
+### Raio Duplicador
+
+Disparado num espelho, cria um portal para o Mundo Bizarro.
+
+**Obtenção:** Laboratório secreto da Torre LexCorp.
+
+### Livro de Azarath
+
+Ritual que abre o Reino de Trigon (círculo de velas + obsidiana chorosa).
+
+**Obtenção:** Biblioteca da Torre do Destino ou recompensa de Madame Xanadu.
+
+### Câmera do Planeta Diário
+
+Tira fotos (viram mapas-imagem). Missões de Lois Lane e Jimmy Olsen pedem fotos de locais e bosses.
+
+```
+A A A
+B C B
+A A A
+```
+
+A = Lingote de Ferro; B = Painel de Vidro; C = Redstone
 
 ## Blocos funcionais
 
@@ -904,6 +994,26 @@ A A A
 
 A = Tijolos de Prismarinho; B = Água de Lázaro; C = Bloco de Ouro
 
+### Tubo Zeta
+
+Rede de teleporte entre Tubos Zeta do mesmo dono ou time. Todo Tubo Zeta tem a Torre de Vigilância como destino.
+
+**Obtenção:** O primeiro é dado pelo Monitor da Liga no Prólogo.
+
+```
+A B A
+B C B
+A B A
+```
+
+A = Bloco de Ferro; B = Pérola do Ender; C = Componente Tecnológico
+
+### Projetor da Zona Fantasma
+
+Abre o portal para a Zona Fantasma. Clique com Cristal Kryptoniano para ativar por 60 s.
+
+**Obtenção:** Câmara central da Fortaleza da Solidão (não craftável; pode ser coletado com Toque Suave).
+
 ## Decoração
 
 ### Bat-Sinal
@@ -1010,3 +1120,9 @@ A A A
 ```
 
 A = Bloco de Ouro; B = Bloco de Cobre
+
+### Kandor Engarrafada
+
+Cidade kryptoniana miniatura dentro de uma garrafa, animada. Colocada perto da Câmara Solar, dobra a recarga de kryptonianos.
+
+**Obtenção:** Drop do Brainiac.
