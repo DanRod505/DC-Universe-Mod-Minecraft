@@ -261,22 +261,22 @@ Os verificadores leem os arquivos gerados pelo datagen, então rodam em segundos
 
 ## 6. Personagens e ordem de implementação
 
-A lista completa dos 100 personagens, com a experiência e as habilidades de cada um, está em [PERSONAGENS.md](PERSONAGENS.md). A ordem em que entram no mod está no roteiro de versões (seção 7): cada versão traz primeiro quem introduz sistemas novos e depois quem só reaproveita (a coluna "Reaproveita" de cada personagem diz de quem).
+A lista completa dos 100 personagens, com a experiência e as habilidades de cada um, está em [PERSONAGENS.md](PERSONAGENS.md). A ordem em que entram no mod está no roteiro de versões (seção 7): um personagem completo por versão, e quem só reaproveita o kit de outro entra como variação depois dele (a coluna "Reaproveita" de cada personagem diz de quem).
 
 ## 7. Roteiro de versões
 
 O roteiro completo, com personagens, locais, missões, bosses, NPCs, mobs e itens de cada versão, está em [ROTEIRO.md](ROTEIRO.md), gerado de `docs/dados/versoes.json`. O gerador recusa uma missão que dependa de algo de uma versão posterior (missão exigida, local, NPC ou boss) e calcula sozinho os bosses, NPCs, mobs e itens de cada versão.
 
-| Versão | O que entrega |
+**Formato (decidido em 2026-10-13): qualidade acima de quantidade.** Cada versão entrega **uma coisa complexa completa e jogável**: um personagem com todas as habilidades, a skin final e a suprema; ou um local com suas missões e NPCs; ou um chefe com suas fases (e o vilão jogável, quando ele é um dos 100); ou um sistema grande. Junto vem **um lote de coisas simples** (minérios, blocos, itens de craft) e até 2 **variações**, personagens que reaproveitam quase todo o kit de outro já pronto (Supergirl depois do Superman, Robin depois do Batman). O gerador recusa uma versão com mais de um foco. Cada versão reaproveita os sistemas das anteriores e deixa os seus prontos para as próximas.
+
+A numeração segue a campanha: a **v1.0** fecha o Ato 1, a **v2.0** o Ato 2, a **v3.0** o Ato 3 e a **v4.0** fecha o Ato 4 e todo o planejamento (100 personagens, todos os locais e missões). Entre elas, as versões menores (v0.1, v0.2, …, v1.13) entram uma a uma.
+
+| Faixa | O que entrega |
 |---|---|
-| v0.1 Núcleo | Superman e Batman completos, Smallville e o Prólogo. Prova o .jar, o perfil .zip e o servidor dedicado. |
-| v0.2 Liga Fundadora | **Primeira versão jogável de verdade**: Mulher-Maravilha, Flash e Lanterna Verde, mais Supergirl e Superboy (só reuso), Gotham, Batcaverna, Torre de Vigilância e o começo do Ato 1. |
-| v0.3 Ato 1: as Cidades | Metrópolis, Central City, Arkham e LexCorp, primeiros bosses, família Batman e vilões de Gotham e Central City, skins alternativas e Guarda-Roupa. |
-| v0.4 Ato 2: os Reinos | Themyscira, Atlântida e Oa, Lanternas de todas as cores, heróis do mar e Gaviões. |
-| v0.5 Ato 3: Krypton | Apocalypse, Brainiac, Zona Fantasma e Mundo Bizarro. |
-| v0.6 O Lado Místico | Shazam, magia, Trigon, Monstro do Pântano, Nanda Parbat e Cidade dos Gorilas. |
-| v0.7 Ato 4: Apokolips | Final da campanha contra Darkseid e modo Lenda. |
-| v1.0 Lançamento | Os 16 heróis restantes, balanceamento com dados reais, tradução completa e compatibilidade JEI e EMI. |
+| v0.1 a v1.0 | Prólogo e Ato 1: Superman, Batman, Mulher-Maravilha, Flash e Lanterna Verde, um por versão; Smallville, Torre de Vigilância, Gotham, Batcaverna, Arkham, Metrópolis e Central City; chefes Coringa, Bane, Lex Luthor e Flash Reverso. |
+| v1.1 a v2.0 | Ato 2: Guarda-Roupa e maestria, Aquaman, Atlântida, Themyscira, Gavião Negro, Belle Reve, Oa e as cores do espectro; chefes Orm, Ares, Mulher-Leopardo, Parallax, Atrocitus e Sinestro. |
+| v2.1 a v3.0 | Ato 3: Caçador de Marte, Fortaleza da Solidão, Ciborgue, Mundo Bizarro, Parasita, Zona Fantasma, Nevasca, Estelar, Besouro Azul; chefes Apocalypse e Brainiac. |
+| v3.1 a v4.0 | Lado Místico e Ato 4: Shazam, magia, Trigon, Monstro do Pântano, Nanda Parbat, Cidade dos Gorilas, os heróis restantes, Nova Gênese e Apokolips; Darkseid e o Modo Lenda fecham tudo. |
 
 Cada versão gera o `.jar` e o perfil `.zip` e é testada num servidor dedicado com 2 jogadores antes da release.
 
@@ -286,8 +286,9 @@ Cada versão gera o `.jar` e o perfil `.zip` e é testada num servidor dedicado 
 1. Esqueleto do projeto, CI, `dcuVerify` lendo os mesmos JSON de `docs/dados` e a tarefa do perfil `.zip`. Primeira release vazia para validar a importação no CurseForge.
 2. Núcleo: estado do jogador, transformação, traje travado, skin, energia e HUD.
 3. Menu radial e os primeiros tipos de habilidade; voo e planar.
-4. Superman completo, depois Batman (com o Batwing como primeiro veículo).
-5. Smallville, Martha, Prólogo e o Guia do Herói com Primeiros Passos.
+4. Superman 100% completo (skin final, todas as habilidades, suprema, efeitos e sons) e o Guia do Herói com Primeiros Passos.
+
+Batman entra completo na v0.2 e Smallville com o Prólogo na v0.3.
 
 ## 8. Decisões
 
@@ -295,14 +296,14 @@ Propostas do planejamento, todas configuráveis no servidor onde fizer sentido. 
 
 | # | Tema | Decisão |
 |---|---|---|
-| 1 | Ordem dos personagens | Pelo roteiro de versões (seção 7): primeiro quem traz sistemas novos, depois quem reaproveita. |
+| 1 | Ordem dos personagens | Pelo roteiro de versões (seção 7): uma coisa complexa completa por versão, mais um lote simples e até 2 variações que reaproveitam um kit pronto. |
 | 2 | Como obter o item de transformação | Só por receita, com o nível do personagem decidindo o Núcleo Meta-Humano (I a IV), o que liga o poder ao avanço no survival. Bosses que são personagens jogáveis têm 10% de chance de dropar o próprio item. Sem itens de transformação em baús. |
 | 3 | Morte transformado | Destransforma antes do drop e devolve a armadura original (o traje nunca cai no chão). O item de transformação segue a regra normal de drop do mundo. Ao renascer, o jogador volta sem transformação. |
 | 4 | Vários personagens | O jogador pode ter vários itens e trocar à vontade, com 30 s de espera entre transformações (configurável). O novo personagem começa com 50% de energia, para ninguém trocar só para encher a barra. |
 | 5 | Destransformar | Usar o item de novo ou a tecla **H**, que funciona sem o item na mão. Leva 1 s e não pode ser feito durante uma habilidade canalizada. |
 | 6 | Energia zerada no voo | Queda amortecida: o personagem passa a planar devagar até o chão, sem dano de queda, e as habilidades ativas ficam bloqueadas até recuperar 10%. |
 | 7 | Quem produz a arte | Arte própria em Blockbench seguindo `docs/dados/skins.json`. Enquanto a arte de um personagem não fica pronta, o build gera uma textura provisória com as cores principais dele, para o código nunca esperar pela arte. Créditos de quem desenhou ficam em `CREDITS.md`. |
-| 8 | Dependências externas | Nenhuma até a v0.2. Na v0.3 (bosses e formas grandes) avaliamos GeckoLib para animações, se houver versão para 26.2; sem ela, usamos animação de modelo do próprio jogo. JEI e EMI são integrações opcionais, nunca obrigatórias. |
+| 8 | Dependências externas | Nenhuma até o primeiro chefe. Na v0.11 (Coringa, o primeiro chefe com fases) avaliamos GeckoLib para animações, se houver versão para 26.2; sem ela, usamos animação de modelo do próprio jogo. JEI e EMI são integrações opcionais, nunca obrigatórias. |
 | 9 | Multiplayer | Suportado desde a v0.1 com servidor autoritativo. O CI roda os testes também num servidor dedicado. |
 | 10 | Mod ID e idiomas | Mod ID `dcuniverse`, pacote `com.danrod.dcuniverse`. Português (`pt_br`) é a língua de origem e o inglês (`en_us`) entra desde a v0.1. O verificador acusa chave faltando em qualquer um dos dois. |
 
