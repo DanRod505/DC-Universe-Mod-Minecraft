@@ -45,7 +45,7 @@ def validar(dados):
     for p in dados:
         if p["cat"] not in CATS:
             erros.append(f"#{p['n']}: categoria inválida {p['cat']}")
-        for campo in ["exp", "energia", "nat", "ativ", "equip", "surv"]:
+        for campo in ["exp", "energia", "nat", "ativ", "equip", "surv", "supremo"]:
             if not p.get(campo):
                 erros.append(f"#{p['n']} {p['nome']}: campo '{campo}' vazio")
     return erros + resolver_reusa(dados)
@@ -65,8 +65,8 @@ def gerar_md(dados):
     out.append("Total: " + ", ".join(f"{CATS[c]} {cont[c]}" for c in CATS) + ".")
     out += ["", "## 1. Lista e experiência", ""]
     for c, titulo in CATS.items():
-        out += [f"### {titulo}", "", "| # | Personagem | Experiência |", "|---|---|---|"]
-        out += [f"| {p['n']} | {p['nome']} | {p['exp']} |" for p in dados if p["cat"] == c]
+        out += [f"### {titulo}", "", "| # | Personagem | Experiência | Habilidade suprema |", "|---|---|---|---|"]
+        out += [f"| {p['n']} | {p['nome']} | {p['exp']} | {p['supremo']['nome']} |" for p in dados if p["cat"] == c]
         out.append("")
     out += ["## 2. Habilidades por personagem", ""]
     for c, titulo in CATS.items():
@@ -80,6 +80,7 @@ def gerar_md(dados):
             for campo, rotulo in CAMPOS:
                 out.append(f"- **{rotulo}:** " + "; ".join(p[campo]))
             out.append(f"- **Energia:** {p['energia']}")
+            out.append(f"- ⭐ **Habilidade suprema: {p['supremo']['nome']}.** {p['supremo']['desc']}")
             out.append("")
     out += ["## 3. Sistemas compartilhados que surgem da lista", "",
             "### Bases reaproveitadas", "", "| Base | Personagens que reaproveitam |", "|---|---|"]

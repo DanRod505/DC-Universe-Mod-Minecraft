@@ -45,6 +45,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px 
 .exp { margin: 0; font-style: italic; }
 .reusa { font-size: 14px; color: var(--muted); margin: 0; }
 .reusa b { color: var(--fg); font-weight: 600; }
+.supremo { display: grid; gap: 2px; padding: 8px 10px; border-radius: 4px; background: color-mix(in srgb, var(--gold) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line)); font-size: 15px; }
+.supremo strong { font: 700 19px/1.15 var(--display); letter-spacing: .02em; }
+.sup-rot { font: 600 11px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
 details summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: 15px; }
 details dl { margin: 8px 0 0; display: grid; gap: 8px; }
 dt { font: 600 12px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -129,6 +132,7 @@ function ficha(p) {
     <div class="top"><h3>${esc(p.nome)}</h3><span class="num">#${p.n}</span></div>
     <span class="tag">${CAT1[p.cat]}</span>
     <p class="exp">${esc(p.exp)}</p>${reusa}
+    <div class="supremo"><span class="sup-rot">Habilidade suprema</span><strong>${esc(p.supremo.nome)}</strong><span>${esc(p.supremo.desc)}</span></div>
     <details${abertas ? " open" : ""}><summary>Habilidades</summary><dl>${dl}
       <div class="energia"><dt>Energia</dt><dd>${esc(p.energia)}</dd></div></dl></details>
   </article>`;
