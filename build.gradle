@@ -1,0 +1,122 @@
+// Projeto do mod DC Universe (Forge 26.2). Base: MDK forge-26.2-65.1.0.
+plugins {
+    id 'java'
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+}
+
+def modId = providers.gradleProperty('mod_id').get()
+def mcVersion = providers.gradleProperty('minecraft_version').get()
+def forgeVersion = providers.gradleProperty('forge_version').get()
+
+version = providers.gradleProperty('mod_version').get()
+group = providers.gradleProperty('mod_group').get()
+base.archivesName = modId
+
+// O Minecraft 26.1+ roda em Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+minecraft {
+    runs {
+        configureEach {
+            workingDir = layout.projectDirectory.dir('run')
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
+            systemProperty 'forge.enabledGameTestNamespaces', modId
+        }
+
+        register('client')
+
+        register('server') {
+            args '--nogui'
+        }
+
+        register('gameTestServer')
+
+        register('data') {
+            workingDir = layout.projectDirectory.dir('run-data')
+            args '--mod', modId, '--all', '--output', layout.projectDirectory.dir('src/generated/resources'), '--existing', layout.projectDirectory.dir('src/main/resources')
+        }
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${mcVersion}-${forgeVersion}")
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.5'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('processResources', ProcessResources) {
+    def props = [
+        mod_id: modId,
+        mod_name: providers.gradleProperty('mod_name').get(),
+        mod_version: version.toString(),
+        mod_authors: providers.gradleProperty('mod_authors').get(),
+        minecraft_version: mcVersion,
+        forge_version: forgeVersion,
+        forge_major: forgeVersion.tokenize('.')[0],
+    ]
+    inputs.properties(props)
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand(props)
+    }
+}
+
+// Verificador automático: lang, receitas duplicadas, ids e teclas (tools/verificar_mod.py).
+def dcuVerify = tasks.register('dcuVerify', Exec) {
+    group = 'verification'
+    description = 'Confere os recursos do mod (lang pt_br/en_us, receitas, ids e teclas).'
+    inputs.dir('src/main/resources')
+    inputs.dir('src/main/java')
+    inputs.file('tools/verificar_mod.py')
+    commandLine 'python3', '-I', 'tools/verificar_mod.py', '--raiz', '.'
+}
+tasks.named('check') { dependsOn dcuVerify }
+
+// Perfil importável no CurseForge: manifest.json + overrides/mods/<jar>.
+def manifestoDir = layout.buildDirectory.dir('perfil')
+def manifesto = tasks.register('manifestoPerfil') {
+    def saida = manifestoDir.map { it.file('manifest.json') }
+    def versaoMod = version.toString()
+    def nome = providers.gradleProperty('mod_name').get()
+    def autor = providers.gradleProperty('mod_authors').get()
+    inputs.property('versao', versaoMod)
+    inputs.property('mc', mcVersion)
+    inputs.property('forge', forgeVersion)
+    outputs.file(saida)
+    doLast {
+        def json = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
+            minecraft: [version: mcVersion, modLoaders: [[id: "forge-${forgeVersion}".toString(), primary: true]]],
+            manifestType: 'minecraftModpack',
+            manifestVersion: 1,
+            name: nome,
+            version: versaoMod,
+            author: autor,
+            files: [],
+            overrides: 'overrides',
+        ]))
+        saida.get().asFile.text = json + '\n'
+    }
+}
+
+tasks.register('perfilCurseForge', Zip) {
+    group = 'build'
+    description = 'Gera o perfil .zip para importar no CurseForge.'
+    archiveFileName = "DC-Universe-${version}-perfil-curseforge.zip"
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+    from(manifesto)
+    from(tasks.named('jar')) { into 'overrides/mods' }
+}
+
+tasks.named('assemble') { dependsOn 'perfilCurseForge' }

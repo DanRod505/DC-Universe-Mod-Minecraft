@@ -1,1 +1,27 @@
 __pycache__/
+
+# gradle
+build
+.gradle
+
+# idea / eclipse
+out
+*.ipr
+*.iws
+*.iml
+.idea
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+eclipse
+
+# execução local
+run
+run-data
+
+# Arquivos do Forge MDK
+forge_README.txt
+forge*changelog.txt
