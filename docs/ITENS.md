@@ -132,7 +132,7 @@ Detalhes de cada item de transformação estão na página (aba Itens) e no JSON
 
 | Estrutura | Onde | O que tem |
 |---|---|---|
-| Cratera de Meteoro | Overworld, planícies, desertos e taigas (rara) | Minério de Kryptonita exposto, Fragmentos Alienígenas e, no núcleo, 1 Cristal Kryptoniano |
+| Cratera de Meteoro | Overworld, planícies, desertos e taigas (rara) | Minério de Kryptonita exposto, Fragmentos Alienígenas e, no núcleo, 1 Cristal Kryptoniano e, raramente, um Cristal de Memória |
 | Meteorito do Espectro | Cai do céu à noite perto de jogadores (evento raro, mais comum na lua cheia) | Fragmentos do Espectro (4 a 8) |
 | Destroços Thanagarianos | Picos de montanha | Metal Nth Bruto, peças de nave (decoração) e um baú com Maça de Metal Nth danificada |
 | Ruínas de Themyscira | Ilhas em oceanos quentes | Minério de Oricalco, Tijolos de Themyscira e baús com Essência Mística |
@@ -191,7 +191,7 @@ Itens de transformação kryptonianos, Câmara Solar, decoração da Fortaleza.
 
 **Obtenção:** Núcleo da Cratera de Meteoro (1 por cratera). Raro em baús de fim de jogo.
 
-**Usado em:** Cristal Bizarro, Cristal da Casa de El, Cristal da Casa de Zor-El, Cristal do General Zod, Câmara Solar, Jaqueta de Couro de Conner
+**Usado em:** Cristal Bizarro, Cristal da Casa de El, Cristal da Casa de Zor-El, Cristal do General Zod, Câmara Solar, Jaqueta de Couro de Conner, Osso de Cristal Kryptoniano
 
 ### Fragmento Alienígena
 
@@ -199,7 +199,7 @@ Tecnologia e transformações alienígenas (Besouro Azul, Caçador de Marte, Bra
 
 **Obtenção:** Crateras de Meteoro (blocos de rocha do meteoro).
 
-**Usado em:** Bloco de Cristal da Fortaleza, Cinto de Massa Anã, Coroa Psíquica, Crânio de Coluan, Escaravelho Khaji Da, Medalhão Marciano, Osso de Apocalypse, Pedra Estelar de Tamaran
+**Usado em:** Bloco de Cristal da Fortaleza, Cinto de Massa Anã, Coroa Psíquica, Crânio de Coluan, Escaravelho Khaji Da, Guia do Herói, Medalhão Marciano, Osso de Apocalypse, Pedra Estelar de Tamaran
 
 ### Metal Nth Bruto
 
@@ -311,7 +311,7 @@ Personagens ligados ao Verde (Monstro do Pântano, Hera Venenosa, Mutano).
 
 **Obtenção:** Usar garrafa de vidro em tronco de mangue ou carvalho de pântano (o tronco vira descascado).
 
-**Usado em:** Amuleto Animal, Amuleto de Urzkartaga, Dente de Crocodilo, Flor da Hera, Jaqueta da Rede da Vida, Semente do Verde
+**Usado em:** Amuleto Animal, Amuleto de Urzkartaga, Dente de Crocodilo, Flor da Hera, Jaqueta da Rede da Vida, Muda do Verde, Semente do Verde
 
 ### Essência Mística
 
@@ -348,6 +348,12 @@ Converte qualquer Cristal do Espectro em outro (mesa de trabalho) e cria a Bater
 Moeda trocada com o Monitor da Liga por itens raros, mapas de locais e Tubos Zeta.
 
 **Obtenção:** Recompensa de missões da Liga (campanha e Alertas da Liga).
+
+### Cristal de Memória
+
+Missão Legado de Krypton; entregue a Jor-El ensina receitas kryptonianas; cada 3 cristais libera uma skin alternativa kryptoniana.
+
+**Obtenção:** Raro nas Crateras de Meteoro (1 a cada 5 crateras) e nos arquivos da Fortaleza da Solidão.
 
 ## Componentes
 
@@ -860,6 +866,78 @@ A A A
 
 A = Lingote de Ferro; B = Painel de Vidro; C = Redstone
 
+### Guia do Herói
+
+Abre o guia do jogador (capítulos, fichas, receitas, mapa de locais e diário de missões). Ver docs/GUIA.md.
+
+**Obtenção:** Todo jogador recebe um ao entrar no mundo pela primeira vez.
+
+Sem forma: Livro, Fragmento Alienígena
+
+### Cartão de Acesso LexCorp
+
+Abre as portas dos andares 2 a 15 da Torre LexCorp (consome 1 por porta).
+
+**Obtenção:** Drop de Seguranças da LexCorp (15%).
+
+### Cartão Dourado da LexCorp
+
+Não se gasta: abre o cofre secreto da LexCorp (loot renovado a cada 7 dias de jogo, por jogador).
+
+**Obtenção:** Drop de Lex Luthor.
+
+### Foto do Planeta Diário
+
+Entregue a Lois e Jimmy (missões e venda); fotos de boss valem mais.
+
+**Obtenção:** Tirada com a Câmera do Planeta Diário; guarda o nome do local, mob ou boss fotografado.
+
+### Torta da Martha
+
+Comida: 8 de fome e Regeneração I por 10 s; recarrega 10% da energia de kryptonianos.
+
+**Obtenção:** Também trocada com Martha Kent por colheitas.
+
+Sem forma: Maçã, Trigo, Açúcar, Ovo
+
+### Osso de Cristal Kryptoniano
+
+Doma o Krypto (um por jogador) e o cura quando ferido.
+
+Sem forma: Osso, Cristal Kryptoniano
+
+### Muda do Verde
+
+Cresce em um dia de jogo e cura solo morto do Apodrecimento num raio de 5 blocos. Usada na missão de Abby.
+
+Sem forma: Muda de Carvalho, Seiva do Verde → 4 unidades
+
+### Cristal da Casa de El
+
+Segurado, aponta para a Fortaleza da Solidão mais próxima.
+
+Sem forma: Cristal Kryptoniano, Bússola, Lingote de Ouro
+
+## Itens de missão
+
+### Carta de Tarô de Madame Xanadu
+
+Missão O Tarô de Xanadu; entregue a Xanadu revela um local ou evento próximo.
+
+**Obtenção:** Uma escondida em cada cidade (estante, baú ou com um cidadão).
+
+### Relíquia Atlante
+
+Missão Tesouros Afundados; trocada com Vulko por Pérolas de Atlântida.
+
+**Obtenção:** Baús guardados nas Ruínas Atlantes.
+
+### Peça do Museu dos Vilões
+
+Missão de Íris; depois de devolvidas viram decoração no Museu.
+
+**Obtenção:** Com capangas dos Vilões de Central City (Pistola de Frio, Bumerangue, Espelho, Pistola de Calor).
+
 ## Blocos funcionais
 
 ### Bloco de Kryptonita
@@ -1126,3 +1204,83 @@ A = Bloco de Ouro; B = Bloco de Cobre
 Cidade kryptoniana miniatura dentro de uma garrafa, animada. Colocada perto da Câmara Solar, dobra a recarga de kryptonianos.
 
 **Obtenção:** Drop do Brainiac.
+
+### Coleira do S
+
+Cosmético para animais domados (Krypto, Ace, Streaky): capa vermelha com o S.
+
+**Obtenção:** Conquista Melhor Amigo do Homem de Aço.
+
+### Pintura da Liga Reunida
+
+Quadro 4x3 com a foto real dos jogadores transformados no momento da conquista.
+
+**Obtenção:** Conquista Liga da Justiça Reunida.
+
+## Troféus de boss
+
+### Carta Coringa Dourada
+
+Troféu de parede; ri quando um jogador passa perto.
+
+**Obtenção:** Drop do Coringa.
+
+### Máscara do Bane
+
+Troféu; pode ser usada como capacete cosmético.
+
+**Obtenção:** Drop do Bane.
+
+### Osso de Apocalypse
+
+Troféu; também vira 1 Fragmento Alienígena por dia se ficar num pedestal.
+
+**Obtenção:** Drop do Apocalypse.
+
+### Insígnia de Zod
+
+Troféu de parede com o brasão da Casa de Zod.
+
+**Obtenção:** Drop do General Zod.
+
+### Anel Amarelo
+
+Troféu; ao ser clicado ejeta o traje em miniatura.
+
+**Obtenção:** Drop do Flash Reverso.
+
+### Coroa de Orm
+
+Troféu; capacete cosmético que permite respirar 30 s a mais na água.
+
+**Obtenção:** Drop do Mestre dos Oceanos.
+
+### Espada de Ra's al Ghul
+
+Troféu de parede (também funciona como espada de ferro).
+
+**Obtenção:** Drop de Ra's al Ghul.
+
+### Coroa de Grodd
+
+Troféu; capacete cosmético.
+
+**Obtenção:** Drop do Gorila Grodd.
+
+### Gema de Trigon
+
+Troféu; brilha em vermelho e emite luz 10.
+
+**Obtenção:** Drop de Trigon.
+
+### Medalha Bizarro Número 1
+
+Troféu; escrita ao contrário.
+
+**Obtenção:** Drop do Bizarro.
+
+### Símbolo Ômega
+
+Troféu final da campanha; ilumina a Torre de Vigilância.
+
+**Obtenção:** Drop de Darkseid.

@@ -100,11 +100,31 @@ Eventos de borda já previstos: morte (proposta: destransforma e devolve a armad
 - Itens de traje nunca existem fora de um jogador transformado (não craftáveis, não aparecem no criativo por padrão).
 - Bônus vêm por modificadores de atributo do item + `attributes` do personagem.
 
-### 2.6 Skin
+### 2.6 Skin, corpo e skins alternativas
 
-- Ao transformar, o renderizador do jogador troca a textura pela do personagem (evento de renderização do jogador no cliente). Modelo `default` (braços largos) ou `slim`.
-- Elementos fora do formato de skin (capa do Superman/Batman, asas da Mulher-Gavião, anel brilhando) viram **camadas de renderização reutilizáveis** (`cape_layer`, `wings_layer`, `glow_layer`) configuradas no JSON.
-- As peças de armadura do traje são renderizadas invisíveis (a skin já mostra o traje), evitando armadura "por cima" da skin.
+Os dados de corpo e skin de cada personagem ficam em `docs/dados/skins.json`, e a lista completa, com as skins alternativas e como liberar cada uma, está em [SKINS.md](SKINS.md) (gerada).
+
+**Arte detalhada**
+- Textura 128x128 (o dobro da skin comum) com a segunda camada completa, mais uma textura emissiva `_glow` para olhos, anéis, raios e linhas de energia que acendem no escuro.
+- Partes fora do formato de skin (capa, asas, cauda, capacete, chapéu, cabelo longo, tanques) são **peças 3D reutilizáveis** feitas no Blockbench e ligadas por nome no JSON (`capa`, `asas`, `cauda`...). Uma capa feita uma vez serve para Superman, Batman, Shazam e todos os outros.
+- Arte própria inspirada nas versões dos quadrinhos, sem copiar assets oficiais.
+
+**Corpo**
+- **Gênero**: masculino ou feminino, muda a silhueta (ombros, cintura, quadril, busto discreto na camada do peito), os braços padrão (largos ou finos) e os sons de esforço e dano.
+- **Altura**: em metros, como nos quadrinhos. A escala visual é altura / 1,85 (atributo `minecraft:scale`), de 0,7 (Damian, 1,40 m) a 1,45 (Darkseid, 2,67 m).
+- **Hitbox justa**: a hitbox de dano segue a escala da skin base, mas a de colisão nunca passa de 1,08 (todo personagem cabe numa passagem de 2 blocos). Alcance e velocidade vêm sempre da ficha, nunca do tamanho.
+- **Constituição**: esguio, atlético, musculoso, robusto ou colosso. Musculoso e robusto ganham volume em camada 3D; colosso usa modelo próprio.
+- **Modelo**: `humano` para a maioria e 9 modelos especiais reaproveitáveis (colosso, réptil, tubarão, felino, gorila, vegetal, argila, demônio, espectral). Formas de habilidade (T-Rex do Mutano, mecha do Kyle) usam os modelos da própria habilidade.
+
+**Skins alternativas**
+- Cada personagem tem uma skin base e de 1 a 5 alternativas (224 no total). Elas mudam **só o visual**: textura, peças 3D e, quando a skin pede, a cor dos efeitos (raios vermelhos do Batman do Futuro, construtos amarelos do Parallax). Nunca mudam números da ficha; se a alternativa tem outra altura (Billy Batson, Robin de Dick Grayson), muda só a escala visual, e a hitbox continua a da base.
+- **Guarda-Roupa**: tela aberta pela página do personagem no Guia, por um botão no centro do menu radial ou pela tecla **K**. Mostra a prévia 3D girando, as skins liberadas e as bloqueadas com o que falta para liberar.
+- **Troca**: dá para trocar transformado, fora de combate (5 s sem levar dano), com 1 s de animação. A escolha fica salva por personagem.
+- **Desbloqueio por jogador**: liberada desde o início, missão, conquista, boss derrotado, maestria do personagem (nível 1 a 5, sobe com o uso), itens entregues no Guarda-Roupa (por exemplo 3 Cristais de Memória para skins kryptonianas), reputação com facção e eventos do calendário real (Halloween, Natal, aniversário do mod). O validador confere se cada desbloqueio aponta para algo que existe.
+- **Identidade secreta**: alguns personagens têm uma skin civil (Clark Kent, Bruce Wayne, Diana Prince...). Com ela, NPCs não reconhecem o jogador e capangas não o atacam à primeira vista. Usar qualquer habilidade ativa ou voar troca para a skin escolhida do traje por 30 s.
+- **Multiplayer**: o servidor guarda as skins liberadas e a escolhida e envia aos outros só o id (jogador, personagem, skin). Todas as texturas estão dentro do mod, então todo mundo vê a skin certa sem baixar nada. Opções do servidor: liberar todas as skins e desligar os eventos de calendário.
+- **Extensível**: um resource pack pode adicionar skins em `assets/dcuniverse/skins/<personagem>/<id>.json` com textura e peças; um data pack define o desbloqueio. O verificador também confere esses arquivos.
+- As peças de armadura do traje continuam invisíveis (a skin já mostra o traje).
 
 ### 2.7 Energia e recarga
 
@@ -187,6 +207,10 @@ As supremas também viram sistemas reutilizáveis, cada uma é um tipo parametri
 - Estruturas permanentes respeitam proteção de área (spawn protegido e claims de outros mods).
 - Limite configurável de invocações e veículos ativos por jogador, para proteger o desempenho do servidor.
 
+### 2.13 Guia do jogador
+
+O **Guia do Herói** é um item que abre uma tela em forma de livro com os capítulos Primeiros Passos, Personagens, Itens e Receitas, Atlas, Diário de Missões, Bestiário, Facções e Conquistas. O conteúdo é gerado dos mesmos dados do mod e vai sendo liberado conforme o jogador descobre as coisas. O plano completo está em [GUIA.md](GUIA.md).
+
 ## 3. Testes e verificadores automáticos
 
 ### 3.1 Testes incrementais
@@ -208,6 +232,8 @@ As supremas também viram sistemas reutilizáveis, cada uma é um tipo parametri
 | IDs | ID duplicado de personagem, habilidade ou item |
 | Item de transformação | personagem sem item ou item sem receita/fonte de obtenção |
 | Teclas | duas ações do mod na mesma tecla padrão |
+| Skins | personagem sem skin, textura fora de 128x128, peça 3D ou modelo inexistente, escala fora de 0,7–1,45, desbloqueio apontando para missão, conquista, boss, item, facção ou evento inexistente |
+| Guia | personagem, item, local, missão, mob, boss ou conquista sem página; link entre páginas quebrado; dica sem tradução |
 
 Os verificadores leem os arquivos gerados pelo datagen, então rodam em segundos, sem abrir o jogo.
 

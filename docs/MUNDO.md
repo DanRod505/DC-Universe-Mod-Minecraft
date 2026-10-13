@@ -376,7 +376,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 1:** Show de horrores: esconde-se atrás de capangas e armadilhas de brinquedo
 - **Fase 2:** Gás do riso: a arena enche de gás, abrir as janelas (alavancas) limpa o ar
 - **Fase 3:** Grande final: monta num robô-palhaço gigante
-- **Drops:** Baralho do Coringa, Gás do Riso · Troféu: carta coringa dourada
+- **Drops:** Baralho do Coringa, Gás do Riso, Carta Coringa Dourada
 
 ### Bane
 
@@ -385,7 +385,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Missão:** Nos Esgotos
 - **Fase 1:** Força bruta: investidas que quebram paredes
 - **Fase 2:** Veneno: cresce e fica mais rápido; cortar os tubos nas costas (golpes por trás) o enfraquece
-- **Drops:** Frasco de Veneno · Máscara do Bane (decoração)
+- **Drops:** Frasco de Veneno, Máscara do Bane
 
 ### Solomon Grundy
 
@@ -402,7 +402,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 1:** Mísseis e drones de segurança
 - **Fase 2:** Raio de kriptonita (kryptonianos precisam de cobertura)
 - **Fase 3:** Sobrecarga: o núcleo fica exposto por 5 s após cada ataque carregado
-- **Drops:** Núcleo de Energia, Fragmento de Kryptonita, Raio Duplicador · Cartão de acesso dourado da LexCorp
+- **Drops:** Núcleo de Energia, Fragmento de Kryptonita, Raio Duplicador, Cartão Dourado da LexCorp
 
 ### Apocalypse
 
@@ -412,7 +412,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 1:** Fúria cega: ataca tudo, destrói blocos
 - **Fase 2:** Adaptação: fica imune ao último tipo de dano recebido (exige trocar de ataque)
 - **Fase 3:** Ossos: espinhos saem do chão em área
-- **Drops:** Fragmento Alienígena, Cristal Kryptoniano · Osso de Apocalypse extra
+- **Drops:** Fragmento Alienígena, Cristal Kryptoniano, Osso de Apocalypse
 
 ### General Zod
 
@@ -422,7 +422,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 1:** Duelo kryptoniano: visão de calor e investidas
 - **Fase 2:** Exército: soldados kryptonianos se juntam
 - **Fase 3:** Desespero: tenta fugir pelo projetor (fechar o portal em 20 s)
-- **Drops:** Cristal Kryptoniano · Insígnia de Zod (decoração)
+- **Drops:** Cristal Kryptoniano, Insígnia de Zod
 
 ### Brainiac
 
@@ -442,7 +442,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 1:** Perseguição: corrida pelos corredores de luz
 - **Fase 2:** Tempo de bala inimigo: o mundo do jogador desacelera
 - **Fase 3:** Paradoxo: cria cópias de si mesmo do passado
-- **Drops:** Garrafa de Raio · Anel amarelo (decoração)
+- **Drops:** Garrafa de Raio, Anel Amarelo
 
 ### Ares
 
@@ -471,7 +471,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 1:** Tridente e magia aquática
 - **Fase 2:** Monstros marinhos invocados
 - **Fase 3:** Maremoto: a arena enche e esvazia
-- **Drops:** Pérola de Atlântida · Coroa de Orm (decoração)
+- **Drops:** Pérola de Atlântida, Coroa de Orm
 
 ### Rainha da Fossa
 
@@ -519,7 +519,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 1:** Duelo de espadas
 - **Fase 2:** Ninjas da Liga
 - **Fase 3:** Lázaro: tenta mergulhar no poço para se curar (impedir)
-- **Drops:** Água de Lázaro · Espada de Ra's (decoração)
+- **Drops:** Água de Lázaro, Espada de Ra's al Ghul
 
 ### Gorila Grodd
 
@@ -529,7 +529,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 1:** Força bruta
 - **Fase 2:** Controle mental: aliados e mobs próximos atacam o jogador
 - **Fase 3:** Exército de gorilas
-- **Drops:** Fragmento Alienígena · Coroa de Grodd (decoração)
+- **Drops:** Fragmento Alienígena, Coroa de Grodd
 
 ### Trigon
 
@@ -539,7 +539,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 1:** Gigante: só os chifres e mãos são alvos
 - **Fase 2:** Demônios e chuva de fogo
 - **Fase 3:** Aprisionamento: completar o ritual reverso com velas
-- **Drops:** Essência Mística · Gema de Trigon (decoração)
+- **Drops:** Essência Mística, Gema de Trigon
 
 ### Anton Arcane
 
@@ -557,7 +557,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Missão:** Eu Não Ser Herói
 - **Fase 1:** Poderes invertidos
 - **Fase 2:** Confusão: os controles do jogador ficam invertidos por alguns segundos
-- **Drops:** Cristal Kryptoniano · Medalha 'Bizarro número 1' (decoração)
+- **Drops:** Cristal Kryptoniano, Medalha Bizarro Número 1
 
 ### Sete Pecados Capitais
 
@@ -587,7 +587,7 @@ Bosses têm barra de vida no topo da tela, escalam com o número de jogadores pr
 - **Fase 2:** Exército de Apokolips
 - **Fase 3:** Equação Anti-Vida: tenta controlar os jogadores (resistir apertando a tecla mostrada)
 - **Fase 4:** Desespero: lutar no fosso de fogo
-- **Drops:** Fragmento da Equação Anti-Vida, Liga de Apokolips · Conquista final e troféu da campanha
+- **Drops:** Fragmento da Equação Anti-Vida, Liga de Apokolips, Símbolo Ômega · Conquista final da campanha
 
 ## Missões
 
@@ -968,7 +968,7 @@ Todo mob e NPC tem ovo de invocação (criativo e comandos; alguns animais tamb�
 | Capanga do Duas-Caras | Gotham City | Metade age com cautela, metade com agressividade (moeda decide ao nascer). | Pepita de Ouro |
 | Ninja da Liga dos Assassinos | Nanda Parbat, Gotham City | Furtivos, atacam pelas costas e usam bombas de fumaça. | Tecido Tático |
 | Mercenário | Penitenciária Belle Reve, Torre LexCorp | Usam rifles e granadas, se cobrem atrás de blocos. | Pólvora, Lingote de Ferro |
-| Segurança LexCorp | Torre LexCorp, Metrópolis | Armaduras leves com escudo de energia e armas de kryptonita. | Placa de Circuito, Fragmento de Kryptonita |
+| Segurança LexCorp | Torre LexCorp, Metrópolis | Armaduras leves com escudo de energia e armas de kryptonita. | Placa de Circuito, Fragmento de Kryptonita, Cartão de Acesso LexCorp |
 | Parademônio | Apokolips | Voam em bandos, atacam com lanças e explodem ao morrer perto de fogo. | Fragmento de Apokolips |
 | Fúria Feminina | Apokolips | Guerreiras de elite com bastões e chicotes de energia. | Liga de Apokolips |
 | Soldado Kryptoniano | Zona Fantasma | Voam e usam visão de calor fraca; perdem poder perto de kryptonita. | Bloco de Cristal da Fortaleza |
@@ -1042,7 +1042,7 @@ Conquistas usam o sistema de avanços do Minecraft (aba própria 'Universo DC').
 | Acima das Nuvens | Voar acima da altura 300. | Título: Celeste |
 | Arquiteto Esmeralda | Ter 3 construtos ativos ao mesmo tempo. | Cristal da Vontade |
 | Ponto Fraco | Derrotar um kryptoniano usando kryptonita. | Título: Luthor Aprovaria |
-| Fim da Piada | Derrotar o Coringa. | Troféu na Torre de Vigilância |
+| Fim da Piada | Derrotar o Coringa. | Troféu: Carta Coringa Dourada em moldura |
 | Sem Armadura | Derrotar Lex Luthor. | Troféu |
 | Paz Divina | Derrotar Ares. | Título: Campeão Amazona |
 | Sem Medo | Derrotar Parallax. | Título: Lanterna |

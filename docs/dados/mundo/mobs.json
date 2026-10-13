@@ -1,5 +1,5 @@
 {
-"categorias": {"capanga":"Capangas e inimigos","guarda":"Guardas","cidadao":"Cidadãos","animal":"Animais","criatura":"Criaturas"},
+"categorias": {"capanga": "Capangas e inimigos", "guarda": "Guardas", "cidadao": "Cidadãos", "animal": "Animais", "criatura": "Criaturas"},
 "regras": "Todo mob e NPC tem ovo de invocação (criativo e comandos; alguns animais também por troca). Bosses têm ovo só no criativo. Mobs de cidade reagem ao personagem do jogador: cidadãos acenam para heróis e fogem de vilões; capangas atacam heróis e ignoram vilões com reputação no Submundo. Os mobs usam os mesmos sistemas de habilidades dos personagens (voo, projéteis, construtos), sem código novo.",
 "mobs": [
  {"id":"capanga_coringa","nome":"Capanga do Coringa","cat":"capanga","locais":["gotham","arkham"],"comportamento":"Palhaços com tacos, pistolas e tortas explosivas. Riem e fogem com pouca vida.","drops":["gas_riso"]},
@@ -7,7 +7,7 @@
  {"id":"capanga_duas_caras","nome":"Capanga do Duas-Caras","cat":"capanga","locais":["gotham"],"comportamento":"Metade age com cautela, metade com agressividade (moeda decide ao nascer).","drops":["minecraft:gold_nugget"]},
  {"id":"ninja_assassino","nome":"Ninja da Liga dos Assassinos","cat":"capanga","locais":["nanda_parbat","gotham"],"comportamento":"Furtivos, atacam pelas costas e usam bombas de fumaça.","drops":["tecido_tatico"]},
  {"id":"mercenario","nome":"Mercenário","cat":"capanga","locais":["belle_reve","lexcorp"],"comportamento":"Usam rifles e granadas, se cobrem atrás de blocos.","drops":["minecraft:gunpowder","minecraft:iron_ingot"]},
- {"id":"seguranca_lexcorp","nome":"Segurança LexCorp","cat":"capanga","locais":["lexcorp","metropolis"],"comportamento":"Armaduras leves com escudo de energia e armas de kryptonita.","drops":["placa_circuito","fragmento_kryptonita"]},
+ {"id":"seguranca_lexcorp","nome":"Segurança LexCorp","cat":"capanga","locais":["lexcorp","metropolis"],"comportamento":"Armaduras leves com escudo de energia e armas de kryptonita.","drops":["placa_circuito","fragmento_kryptonita","cartao_lexcorp"]},
  {"id":"parademonio","nome":"Parademônio","cat":"capanga","locais":["apokolips"],"comportamento":"Voam em bandos, atacam com lanças e explodem ao morrer perto de fogo.","drops":["fragmento_apokolips"]},
  {"id":"furia","nome":"Fúria Feminina","cat":"capanga","locais":["apokolips"],"comportamento":"Guerreiras de elite com bastões e chicotes de energia.","drops":["liga_apokolips"]},
  {"id":"soldado_kryptoniano","nome":"Soldado Kryptoniano","cat":"capanga","locais":["zona_fantasma"],"comportamento":"Voam e usam visão de calor fraca; perdem poder perto de kryptonita.","drops":["cristal_fortaleza"]},

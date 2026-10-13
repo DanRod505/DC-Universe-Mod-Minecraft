@@ -7,13 +7,13 @@
  {"id":"colecionador_100","nome":"Multiverso Completo","condicao":"Fabricar os 100 itens de transformação.","recompensa":"Título: Monitor do Multiverso e Estátua de Herói dourada","itens":[["estatua_heroi",1]]},
  {"id":"todas_cidades","nome":"Turista do Universo DC","condicao":"Descobrir Gotham, Metrópolis, Central City, Themyscira e Atlântida.","recompensa":"Título: Viajante","itens":[["mapa_liga",1]]},
  {"id":"todas_dimensoes","nome":"Além da Terra","condicao":"Visitar todas as dimensões e planetas.","recompensa":"Título: Cósmico","itens":[["chave_boom_tube",2]]},
- {"id":"krypto","nome":"Melhor Amigo do Homem de Aço","condicao":"Domar o Krypto.","recompensa":"Coleira com o S (cosmético)","itens":[]},
+ {"id":"krypto","nome":"Melhor Amigo do Homem de Aço","condicao":"Domar o Krypto.","recompensa":"Coleira com o S (cosmético)","itens":[["coleira_s",1]]},
  {"id":"montarias","nome":"Cavaleiro de Todos os Reinos","condicao":"Montar um Kanga, um Cavalo-Marinho Gigante e a Moto Espacial.","recompensa":"Título: Cavaleiro","itens":[]},
  {"id":"som_barreira","nome":"Barreira do Som","condicao":"Atingir 40 blocos/s.","recompensa":"Rastro de raio cosmético","itens":[]},
  {"id":"voo_alto","nome":"Acima das Nuvens","condicao":"Voar acima da altura 300.","recompensa":"Título: Celeste","itens":[]},
  {"id":"construto_gigante","nome":"Arquiteto Esmeralda","condicao":"Ter 3 construtos ativos ao mesmo tempo.","recompensa":"Cristal da Vontade","itens":[["cristal_vontade",1]]},
  {"id":"kryptonita","nome":"Ponto Fraco","condicao":"Derrotar um kryptoniano usando kryptonita.","recompensa":"Título: Luthor Aprovaria","itens":[]},
- {"id":"boss_coringa","nome":"Fim da Piada","condicao":"Derrotar o Coringa.","recompensa":"Troféu na Torre de Vigilância","itens":[]},
+ {"id":"boss_coringa","nome":"Fim da Piada","condicao":"Derrotar o Coringa.","recompensa":"Troféu: Carta Coringa Dourada em moldura","itens":[]},
  {"id":"boss_lex","nome":"Sem Armadura","condicao":"Derrotar Lex Luthor.","recompensa":"Troféu","itens":[]},
  {"id":"boss_ares","nome":"Paz Divina","condicao":"Derrotar Ares.","recompensa":"Título: Campeão Amazona","itens":[]},
  {"id":"boss_parallax","nome":"Sem Medo","condicao":"Derrotar Parallax.","recompensa":"Título: Lanterna","itens":[]},
@@ -25,6 +25,6 @@
  {"id":"cidade_salva","nome":"Herói da Cidade","condicao":"Completar 50 Alertas da Liga.","recompensa":"Estátua do jogador na praça da cidade mais visitada","itens":[]},
  {"id":"esquadrao","nome":"Missão Suicida","condicao":"Completar 25 contratos de Amanda Waller.","recompensa":"Título: Descartável","itens":[]},
  {"id":"suprema","nome":"Poder Máximo","condicao":"Usar a habilidade suprema de 10 personagens diferentes.","recompensa":"Título: Supremo","itens":[]},
- {"id":"time_liga","nome":"Liga da Justiça Reunida","condicao":"Multiplayer: 7 jogadores transformados em membros da Liga perto da Torre de Vigilância ao mesmo tempo.","recompensa":"Foto do grupo em pintura (decoração)","itens":[]}
+ {"id":"time_liga","nome":"Liga da Justiça Reunida","condicao":"Multiplayer: 7 jogadores transformados em membros da Liga perto da Torre de Vigilância ao mesmo tempo.","recompensa":"Foto do grupo em pintura (decoração)","itens":[["pintura_liga",1]]}
 ]
 }

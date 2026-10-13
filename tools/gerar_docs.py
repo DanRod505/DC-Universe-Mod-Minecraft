@@ -8,6 +8,7 @@ import json
 import sys
 
 import mundo as M
+import skins as S
 import receitas as R
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -24,6 +25,9 @@ ITENS_MD = RAIZ / "docs/ITENS.md"
 MUNDO_DIR = RAIZ / "docs/dados/mundo"
 MUNDO_MD = RAIZ / "docs/MUNDO.md"
 BALANC = RAIZ / "docs/BALANCEAMENTO.md"
+SKINS = RAIZ / "docs/dados/skins.json"
+SKINS_MD = RAIZ / "docs/SKINS.md"
+GUIA = RAIZ / "docs/GUIA.md"
 MODELO = RAIZ / "tools/modelo_site.html"
 SITE = RAIZ / "docs/site/index.html"
 
@@ -281,7 +285,7 @@ def gerar_itens_md(info, dados):
     ITENS_MD.write_text("\n".join(out), encoding="utf-8")
 
 
-def gerar_site(dados, armas, info, mundo):
+def gerar_site(dados, armas, info, mundo, skins):
     def js(obj):
         return json.dumps(obj, ensure_ascii=False).replace("</", "<\\/")
     html = MODELO.read_text(encoding="utf-8")
@@ -291,6 +295,8 @@ def gerar_site(dados, armas, info, mundo):
     html = html.replace("/*__ARMAS__*/{}", js(armas))
     html = html.replace("/*__ITENS__*/{}", js(info))
     html = html.replace("/*__MUNDO__*/{}", js(mundo))
+    html = html.replace("/*__SKINS__*/{}", js(skins))
+    html = html.replace("/*__GUIA__*/\"\"", js(GUIA.read_text(encoding="utf-8")))
     SITE.parent.mkdir(parents=True, exist_ok=True)
     cabeca = '<!doctype html>\n<html lang="pt-BR">\n<meta charset="utf-8">\n' \
              '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' \
@@ -307,7 +313,9 @@ def main():
     vanilla = json.loads(VANILLA.read_text(encoding="utf-8"))
     erros_r, receitas, nomes = R.verificar(cat_itens["itens"], dados, vanilla)
     mundo = M.carregar(MUNDO_DIR)
-    erros = validar(dados) + validar_armas(armas, dados) + erros_r + M.verificar(mundo, dados, nomes, vanilla)
+    skins = json.loads(SKINS.read_text(encoding="utf-8"))
+    erros = validar(dados) + validar_armas(armas, dados) + erros_r + M.verificar(mundo, dados, nomes, vanilla) \
+        + S.verificar(skins, dados, mundo, nomes)
     if erros:
         print("\n".join(erros))
         sys.exit(1)
@@ -317,10 +325,13 @@ def main():
     gerar_itens_md(info, dados)
     info_mundo = M.preparar(mundo, dados, nomes, vanilla)
     M.gerar_md(info_mundo, MUNDO_MD)
-    gerar_site(dados, armas, info, info_mundo)
+    info_skins = S.preparar(skins, dados, mundo, nomes)
+    S.gerar_md(info_skins, SKINS_MD)
+    gerar_site(dados, armas, info, info_mundo, info_skins)
     print(f"OK: {len(dados)} personagens, {len(armas['armas'])} armas, {len(receitas)} receitas verificadas "
           f"e mundo ({len(info_mundo['locais'])} locais, {len(info_mundo['missoes'])} missões) "
-          "-> PERSONAGENS.md, FICHAS.md, ITENS.md, MUNDO.md, site/index.html")
+          f"e {sum(len(x['alt']) for x in info_skins['skins'])} skins alternativas "
+          "-> PERSONAGENS.md, FICHAS.md, ITENS.md, MUNDO.md, SKINS.md, site/index.html")
 
 
 if __name__ == "__main__":

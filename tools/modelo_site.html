@@ -27,7 +27,7 @@ h1 { font: 700 clamp(34px, 6vw, 56px)/1 var(--display); margin: 0; text-wrap: ba
 .counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .count { font: 600 14px var(--body); padding: 2px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); font-variant-numeric: tabular-nums; }
 .count b { color: var(--c); }
-nav { display: flex; gap: 4px; margin-block: 20px 16px; border-bottom: 1px solid var(--line); }
+nav { display: flex; flex-wrap: wrap; gap: 4px; margin-block: 20px 16px; border-bottom: 1px solid var(--line); }
 nav button { font: 700 20px var(--display); letter-spacing: .03em; text-transform: uppercase; background: none; border: 0; color: var(--muted); padding: 8px 14px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
 nav button[aria-selected="true"] { color: var(--fg); border-color: var(--gold); }
 button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -87,6 +87,15 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
 .pill { display: inline-block; font: 600 11px var(--body); letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--c); color: var(--c); }
 .fases { margin: 0; padding-left: 18px; font-size: 14px; }
 .donos { font-size: 14px; color: var(--muted); margin: 0; }
+.corpo { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; }
+.corpo span { font-size: 12px; padding: 1px 7px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+.skin-base { margin: 0; font-size: 14.5px; }
+.skin-base b { font-weight: 600; }
+.alts { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
+.alts .como { color: var(--gold); font-weight: 600; font-size: 12.5px; }
+.regras-skins { margin-block: 4px 16px; }
+.regras-skins summary { cursor: pointer; font-weight: 600; }
+.regras-skins .lista-kv { margin-top: 8px; max-width: 90ch; }
 .md h1 { font-size: 40px; margin-block: 8px 12px; }
 .md h2 { font: 700 28px/1.15 var(--display); margin-block: 32px 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .md h3 { font: 700 21px var(--display); margin-block: 20px 6px; }
@@ -113,6 +122,8 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
     <button role="tab" id="tab-armas" aria-selected="false" data-aba="armas">Armas</button>
     <button role="tab" id="tab-itens" aria-selected="false" data-aba="itens">Itens</button>
     <button role="tab" id="tab-mundo" aria-selected="false" data-aba="mundo">Mundo</button>
+    <button role="tab" id="tab-skins" aria-selected="false" data-aba="skins">Skins</button>
+    <button role="tab" id="tab-guia" aria-selected="false" data-aba="guia">Guia</button>
     <button role="tab" id="tab-planejamento" aria-selected="false" data-aba="planejamento">Planejamento</button>
   </nav>
 
@@ -150,6 +161,19 @@ table.fichas td:last-child { white-space: normal; min-width: 220px; color: var(-
     <div id="mundo"></div>
   </section>
 
+  <section id="aba-skins" hidden>
+    <div class="tools">
+      <input id="busca-skins" type="search" placeholder="Buscar personagem, skin ou desbloqueio" aria-label="Buscar skins">
+      <div id="skins-filtro" class="tools" style="margin:0"></div>
+    </div>
+    <details class="regras-skins"><summary>Como as skins funcionam: arte, corpo, modelos e desbloqueios</summary><div id="skins-regras" class="lista-kv"></div></details>
+    <div id="lista-skins" class="grid"></div>
+  </section>
+
+  <section id="aba-guia" hidden>
+    <article class="md" id="texto-guia"></article>
+  </section>
+
   <section id="aba-planejamento" hidden>
     <article class="md" id="plano"></article>
   </section>
@@ -163,6 +187,8 @@ const BALANC = /*__BALANC__*/"";
 const ARMAS = /*__ARMAS__*/{};
 const ITENS = /*__ITENS__*/{};
 const MUNDO = /*__MUNDO__*/{};
+const SKINS = /*__SKINS__*/{};
+const GUIA = /*__GUIA__*/"";
 const FICHA_COLS = [["nivel", "Nível"], ["vida", "Vida ♥"], ["armadura", "Armadura"], ["dano", "Dano ♥"], ["energia", "Energia"],
   ["regen", "Regen/s"], ["terra", "Corrida"], ["vmax", "Supervel."], ["voo", "Voo"], ["nado", "Nado"], ["planar", "Planar"]];
 const num = v => v == null ? "–" : String(v).replace(".", ",");
@@ -355,12 +381,44 @@ function mundo() {
   document.getElementById("mundo").innerHTML = `<div class="grid">${Array.isArray(r) ? r.join("") : r}</div>`;
 }
 
-const ABAS = ["personagens", "fichas", "armas", "itens", "mundo", "planejamento"];
+let filtroSkin = "todos";
+const FILTROS_SKIN = { todos: "Todos", masculino: "Masculino", feminino: "Feminino", especial: "Modelo especial", colosso: "Gigantes" };
+const filtroSkinEl = document.getElementById("skins-filtro");
+filtroSkinEl.innerHTML = Object.entries(FILTROS_SKIN).map(([k, v]) => `<button class="chip" data-f="${k}" aria-pressed="${k === filtroSkin}">${v}</button>`).join("");
+filtroSkinEl.addEventListener("click", e => {
+  const b = e.target.closest("[data-f]"); if (!b) return;
+  filtroSkin = b.dataset.f;
+  filtroSkinEl.querySelectorAll("[data-f]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  skins();
+});
+const R = SKINS.regras;
+document.getElementById("skins-regras").innerHTML = [
+  ...Object.entries(R.textura).map(([k, v]) => kv(k.replace("_", " "), v)), kv("Escala", R.escala.regra),
+  ...Object.entries(R.generos).map(([k, v]) => kv("Gênero " + k, v)),
+  ...Object.entries(R.constituicoes).map(([k, v]) => kv("Constituição " + k, v)),
+  ...Object.entries(R.modelos).map(([k, v]) => kv("Modelo " + k, v)),
+  ...Object.entries(R.desbloqueios).map(([k, v]) => kv("Desbloqueio " + k, v)), kv("Maestria", R.maestria.regra)].join("");
+function skins() {
+  const q = document.getElementById("busca-skins").value.trim().toLowerCase();
+  const passa = s => filtroSkin === "todos" || s.genero === filtroSkin || (filtroSkin === "especial" && s.modelo !== "humano") || (filtroSkin === "colosso" && s.escala >= 1.15);
+  const lista = SKINS.skins.filter(s => passa(s) && (!q || JSON.stringify(s).toLowerCase().includes(q)));
+  document.getElementById("lista-skins").innerHTML = lista.map(s => `<article class="card" style="--c:${cor(s.cat)}">
+    <div class="top"><h3>${esc(s.nome)}</h3><span class="num">#${s.n}</span></div>
+    <div class="corpo"><span>${esc(s.genero)}</span><span>${s.altura.toFixed(2).replace(".", ",")} m · escala ${String(s.escala).replace(".", ",")}</span><span>${esc(s.constituicao)}</span><span>modelo ${esc(s.modelo)}</span><span>braços ${esc(s.bracos)}</span>${s.extras.map(x => `<span>${esc(x.replace("_", " "))}</span>`).join("")}</div>
+    <p class="skin-base"><b>${esc(s.base.nome)}:</b> ${esc(s.base.desc)}</p>
+    <details><summary>${s.alt.length} skin${s.alt.length > 1 ? "s" : ""} alternativa${s.alt.length > 1 ? "s" : ""}</summary>
+    <ul class="alts">${s.alt.map(a => `<li><b>${esc(a.nome)}</b> <span class="como">${esc(a.como)}</span><br>${esc(a.desc)}${a.altura ? ` <i>(${a.altura.toFixed(2).replace(".", ",")} m)</i>` : ""}</li>`).join("")}</ul></details>
+  </article>`).join("") || `<p class="empty">Nenhuma skin encontrada.</p>`;
+}
+document.getElementById("busca-skins").addEventListener("input", skins);
+
+const ABAS = ["personagens", "fichas", "armas", "itens", "mundo", "skins", "guia", "planejamento"];
 function aba(nome) {
   document.querySelectorAll("[role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.aba === nome));
   ABAS.forEach(a => document.getElementById("aba-" + a).hidden = a !== nome);
   if (nome === "planejamento") md("plano", PLANO);
   if (nome === "fichas") md("balanc", BALANC);
+  if (nome === "guia") md("texto-guia", GUIA);
 }
 document.querySelector("nav").addEventListener("click", e => {
   const b = e.target.closest("[data-aba]"); if (b) { aba(b.dataset.aba); history.replaceState(null, "", "#" + b.dataset.aba); }
@@ -371,6 +429,7 @@ tabelaFichas();
 armas();
 itens();
 mundo();
+skins();
 const inicial = location.hash.slice(1);
 if (ABAS.includes(inicial)) aba(inicial);
 </script>
