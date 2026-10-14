@@ -128,35 +128,56 @@ def preparar(v, personagens, mundo, itens, nomes):
 
 
 def etapas(x):
-    """Ordem de trabalho da versão: uma coisa por etapa, cada uma com build de teste (0.N.0-alpha.K)."""
+    """Blocos de trabalho da versão, cada um com build de teste (0.N.0-alpha.K).
+
+    Sistemas em "destaque" (voo, HUD...) ganham etapa própria para serem ajustados até ficarem satisfatórios;
+    os demais sistemas novos vão juntos numa etapa. Locais são construídos antes das missões e o lote de itens
+    é sempre separado. O teste em servidor com 2 jogadores vale para todo build.
+    """
+    lista = lambda xs: ", ".join(xs)
+    sis = lambda xs: "; ".join(xs)
     var = [n for n, c in zip(x["personagens_nomes"], x["personagens"]) if c in x["variacoes"]]
     principal = [n for n, c in zip(x["personagens_nomes"], x["personagens"]) if c not in x["variacoes"]]
-    sistemas = [f"Sistema: {s}" for s in x["cria"]]
-    missoes = [f"Missão: {m}" for m in x["missoes_nomes"]]
-    # sistemas de terreno vêm antes da construção do local ou da arena; os demais, depois
+    comuns = [s for s in x["cria"] if s not in x["destaque"]]
+    # sistemas de terreno vão com a construção do local ou da arena; os demais, com a etapa que os usa
     base = ("Estrutura", "Cidade", "Dimensão", "Planetas", "Prédios", "Abismo", "Ruínas", "Pântano", "Regras", "Torre",
-            "Planeta", "Arena")
-    antes = [s for s in sistemas if s.removeprefix("Sistema: ").startswith(base)]
-    depois = [s for s in sistemas if s not in antes]
+            "Planeta", "Arena", "Base", "Poço", "Cristais", "Laboratório", "Provas", "Sala", "Campo")
+    terreno = [s for s in comuns if s.startswith(base)]
+    resto = [s for s in comuns if s not in terreno]
+    com = lambda xs: f" (sistemas: {sis(xs)})" if xs else ""
+    destaque = [f"Sistema em destaque: {s}" for s in x["destaque"]]
+    e = []
+    if x["tipo"] == "local":  # o sistema em destaque de um local (ex.: gerador de cidade) vem antes da construção
+        e += destaque
+        destaque = []
+        e.append(f"Construção de {x['locais_nomes'][0]}{com(terreno)}")
+    elif x["tipo"] == "chefe" and x["locais_nomes"]:
+        e.append(f"Arena: {x['locais_nomes'][0]}{com(terreno)}")
+    elif x["tipo"] != "chefe" and comuns:
+        e.append(f"Sistemas: {sis(comuns)}")
+    e += destaque
     if x["tipo"] == "personagem":
-        e = sistemas + [f"Skin e modelo final de {x['foco']}", f"Habilidades do menu radial de {x['foco']}", f"Suprema de {x['foco']}",
-                        "Efeitos visuais e sons das habilidades"]
+        e += [f"Skin e modelo final de {x['foco']}", "Habilidades do menu radial e suprema, com efeitos e sons"]
     elif x["tipo"] == "local":
-        e = antes + [f"Construção de {x['locais_nomes'][0]}: estrutura, geração no mundo e decoração"] + depois
-        e += [f"NPCs: {', '.join(x['npcs_nomes'])}"] if x["npcs_nomes"] else []
-        e += [f"Mobs: {', '.join(x['mobs_nomes'])}"] if x["mobs_nomes"] else []
-        e += missoes + [f"Chefe: {b}" for b in x["bosses_nomes"] if not any(m for m in x["missoes"])]
+        povo = x["npcs_nomes"] + x["mobs_nomes"]
+        if povo or resto:
+            e.append(f"NPCs e mobs: {lista(povo) or 'nenhum novo'}{com(resto)}")
+        if x["missoes_nomes"] or x["bosses_nomes"]:
+            rot = "Missões e chefe" if x["bosses_nomes"] else "Missões"
+            e.append(f"{rot}: {lista(x['missoes_nomes'] + x['bosses_nomes'])}")
     elif x["tipo"] == "chefe":
-        e = antes + ([f"Arena: {x['locais_nomes'][0]}"] if x["locais_nomes"] else []) + depois
-        e += [f"Mobs: {', '.join(x['mobs_nomes'])}"] if x["mobs_nomes"] else []
-        e += [f"Chefe {b}: modelo, ataques e fases" for b in x["bosses_nomes"]] + ["Recompensas e troféu"]
-        e += [f"Vilão jogável: {n} (skin, habilidades e suprema)" for n in principal] + missoes
-    else:
-        e = sistemas
-    e += [f"Variação: {n}" for n in var]
+        if x["mobs_nomes"]:
+            e.append(f"Mobs: {lista(x['mobs_nomes'])}")
+        sobra = resto + ([] if x["locais_nomes"] else terreno)
+        e.append(f"Chefe {lista(x['bosses_nomes'])}: modelo, ataques, fases e recompensas{com(sobra)}")
+        e += [f"Vilão jogável: {n}" for n in principal]
+        if x["missoes_nomes"]:
+            e.append(f"Missões: {lista(x['missoes_nomes'])}")
+    if var:
+        e.append(f"Variações: {lista(var)}")
     if x["itens_nomes"]:
-        e.append(f"Lote de itens ({len(x['itens_nomes'])}): receitas, texturas e Guia")
-    return e + ["Teste final em servidor com 2 jogadores e build da versão"]
+        e.append(f"Lote de itens ({len(x['itens_nomes'])})")
+    return e
 
 
 TIPOS = {"personagem": "Personagem", "local": "Local", "chefe": "Chefe", "sistema": "Sistema"}
@@ -171,10 +192,10 @@ def gerar_md(info, destino):
            "**um lote de coisas simples** (minérios, blocos, itens de craft). Variações são personagens que "
            "reaproveitam quase todo o kit de outro já pronto e entram no lote, no máximo 2 por versão. "
            "A versão principal (v1.0, v2.0, v3.0) fecha um ato da campanha; a v4.0 conclui todo o planejamento.", "",
-           "**Etapas:** dentro de cada versão o trabalho anda **uma coisa por vez** (um sistema, a skin, as habilidades, "
-           "a construção do local, cada missão, o lote de itens), na ordem listada. Cada etapa termina com um build de "
-           "teste (`0.N.0-alpha.K`) para você jogar e aprovar antes da próxima. Sistemas como voo e HUD são etapas "
-           "próprias, ajustadas até ficarem satisfatórias; locais são construídos primeiro e as missões vêm depois.", "",
+           "**Etapas:** cada versão é feita em poucos blocos de trabalho, na ordem listada, e cada um termina com um "
+           "build de teste (`0.N.0-alpha.K`, testado em servidor com 2 jogadores) para você jogar e aprovar. Sistemas "
+           "em destaque, como voo e HUD, ganham etapa própria para serem ajustados até ficarem satisfatórios; os outros "
+           "sistemas novos vão juntos. Locais são construídos antes das missões e o lote de itens é sempre separado.", "",
            "| Versão | Foco | Tipo | Etapas | Variações | Missões | Itens novos |", "|---|---|---|---|---|---|---|"]
     out += [f"| {x['id']} | {x['foco']} | {TIPOS[x['tipo']]} | {len(etapas(x))} | {len(x['variacoes'])} | "
             f"{len(x['missoes'])} | {len(x['itens_nomes'])} |" for x in info]
