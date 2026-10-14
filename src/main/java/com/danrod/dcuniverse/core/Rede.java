@@ -7,6 +7,7 @@ import com.danrod.dcuniverse.character.Personagens;
 import com.danrod.dcuniverse.character.Transformacao;
 import com.danrod.dcuniverse.ability.DemoHud;
 import com.danrod.dcuniverse.ability.Habilidades;
+import com.danrod.dcuniverse.ability.passive.Voo;
 import com.danrod.dcuniverse.energy.Recargas;
 import com.danrod.dcuniverse.guia.Guia;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,7 +26,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 4;
+    private static final int VERSAO = 5;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -41,8 +42,8 @@ public final class Rede {
      */
     public record Sync(String personagem, float energia, float max, boolean esgotado, int selecionada,
                        String canalizando, List<HabInfo> habilidades, float planar, boolean amortecendo,
-                       float recarga, boolean solar, boolean sol) {
-        public static final Sync VAZIO = new Sync("", 0, 0, false, 0, "", List.of(), 0, false, 0, false, false);
+                       float recarga, boolean solar, boolean sol, float voo) {
+        public static final Sync VAZIO = new Sync("", 0, 0, false, 0, "", List.of(), 0, false, 0, false, false, 0);
 
         /** A habilidade pode ser usada agora: sem recarga pendente e com energia para o custo. */
         public boolean pronta(HabInfo h) {
@@ -70,6 +71,7 @@ public final class Rede {
             b.writeFloat(m.recarga);
             b.writeBoolean(m.solar);
             b.writeBoolean(m.sol);
+            b.writeFloat(m.voo);
         }
 
         public static Sync decode(FriendlyByteBuf b) {
@@ -84,16 +86,16 @@ public final class Rede {
                 habs.add(new HabInfo(b.readUtf(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readVarInt(), b.readVarInt()));
             }
             return new Sync(p, e, max, esg, sel, can, List.copyOf(habs), b.readFloat(), b.readBoolean(),
-                b.readFloat(), b.readBoolean(), b.readBoolean());
+                b.readFloat(), b.readBoolean(), b.readBoolean(), b.readFloat());
         }
     }
 
     /**
      * Aparência de um jogador para quem está vendo ele: personagem ("" = normal), a cor do personagem e o
      * efeito da habilidade canalizada agora (tipo, "" = nenhuma), com cor, alcance e ângulo, para todo mundo
-     * ver o raio ou o sopro.
+     * ver o raio ou o sopro, e se ele está voando (para a pose de voo).
      */
-    public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo) {
+    public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo, boolean voando) {
         public static void encode(Aparencia m, FriendlyByteBuf b) {
             b.writeVarInt(m.entidade);
             b.writeUtf(m.personagem);
@@ -102,10 +104,11 @@ public final class Rede {
             b.writeInt(m.efeitoCor);
             b.writeFloat(m.alcance);
             b.writeFloat(m.angulo);
+            b.writeBoolean(m.voando);
         }
 
         public static Aparencia decode(FriendlyByteBuf b) {
-            return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat());
+            return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat(), b.readBoolean());
         }
     }
 
@@ -140,6 +143,9 @@ public final class Rede {
 
     /** Tecla de uso apertada (true) ou solta (false). */
     public record Usar(boolean pressionado) {}
+
+    /** O cliente passou da barreira do som voando (o servidor confere e solta o estrondo). */
+    public record Estrondo() {}
 
     public record Destransformar() {}
 
@@ -176,6 +182,11 @@ public final class Rede {
             .encoder((m, b) -> b.writeBoolean(m.pressionado())).decoder(b -> new Usar(b.readBoolean()))
             .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Habilidades.usar(p, m.pressionado())))
             .add();
+        CANAL.messageBuilder(Estrondo.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> {}).decoder(b -> new Estrondo())
+            .consumerMainThread((m, ctx) -> comJogador(ctx, Voo::estrondo))
+            .add();
         CANAL.messageBuilder(Destransformar.class)
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> {}).decoder(b -> new Destransformar())
@@ -203,11 +214,12 @@ public final class Rede {
     public static Aparencia montarAparencia(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0);
+        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false);
         Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
-        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0);
+        boolean voando = Voo.voando(player);
+        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0, voando);
         return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
-            h.params().f("range", 8), h.params().f("angle", 30));
+            h.params().f("range", 8), h.params().f("angle", 30), voando);
     }
 
     /** Envia o estado completo ao próprio jogador. */
@@ -219,7 +231,7 @@ public final class Rede {
     public static Sync montar(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return e.amortecendo() ? new Sync("", 0, 0, false, 0, "", List.of(), 0, true, 0, false, false) : Sync.VAZIO;
+        if (p == null) return e.amortecendo() ? new Sync("", 0, 0, false, 0, "", List.of(), 0, true, 0, false, false, 0) : Sync.VAZIO;
         long agora = player.level().getGameTime();
         List<HabInfo> habs = new ArrayList<>();
         for (Personagem.Habilidade h : p.habilidades()) {
@@ -234,7 +246,7 @@ public final class Rede {
         boolean solar = p.energia().recargas().stream().anyMatch(r -> r.tipo().equals("sunlight"));
         return new Sync(p.id().toString(), e.energia(), p.energia().max(), e.esgotado(), selecionada,
             e.canalizando(), List.copyOf(habs), planar == null ? 0f : planar.params().f("speed", 10f), e.amortecendo(),
-            Recargas.porSegundo(player, p), solar, solar && Recargas.sobOSol(player));
+            Recargas.porSegundo(player, p), solar, solar && Recargas.sobOSol(player), Voo.velocidade(p));
     }
 
     public static void catalogo(ServerPlayer player) {

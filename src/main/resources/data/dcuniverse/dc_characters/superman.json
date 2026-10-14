@@ -12,6 +12,7 @@
   },
   "suit": [ "chest", "legs", "feet" ],
   "passives": [
+    { "type": "flight", "speed": 32, "drain": 0.5, "boost_drain": 3 },
     { "type": "fall_immunity" },
     { "type": "fire_immunity" }
   ],

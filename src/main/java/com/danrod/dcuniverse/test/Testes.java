@@ -7,6 +7,8 @@ import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.ability.QuedaAmortecida;
 import com.danrod.dcuniverse.ability.TipoHabilidade;
 import com.danrod.dcuniverse.ability.TiposHabilidade;
+import com.danrod.dcuniverse.ability.TiposPassiva;
+import com.danrod.dcuniverse.ability.passive.Voo;
 import com.danrod.dcuniverse.character.EstadoJogador;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Transformacao;
@@ -50,6 +52,7 @@ public final class Testes {
         FUNCOES.register("guide", () -> Testes::guia);
         FUNCOES.register("hud", () -> Testes::hud);
         FUNCOES.register("abilities", () -> Testes::habilidades);
+        FUNCOES.register("flight", () -> Testes::voo);
     }
 
     private Testes() {}
@@ -120,7 +123,7 @@ public final class Testes {
         Rede.Sync s = Rede.Sync.decode(buf);
         h.assertValueEqual(s.personagem(), SUPERMAN.toString(), "personagem no sync");
         h.assertValueEqual(s.max(), 300f, "energia máxima no sync");
-        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false);
+        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false, 32f);
         Rede.Sync.encode(hab, buf);
         h.assertValueEqual(Rede.Sync.decode(buf), hab, "sync com suprema e queda amortecida");
         var guia = new Rede.GuiaSync(List.of("transformar"), List.of(SUPERMAN.toString()), "sol");
@@ -228,7 +231,7 @@ public final class Testes {
         h.assertTrue(s.pronta(suprema), "com energia cheia a suprema está pronta");
         e.setEnergia(suprema.custo() - 1);
         h.assertFalse(Rede.montar(p).pronta(suprema), "sem energia suficiente não está pronta");
-        h.assertFalse(new Rede.Sync("x", 300, 300, false, 0, "", List.of(), 0, false, 0, false, false)
+        h.assertFalse(new Rede.Sync("x", 300, 300, false, 0, "", List.of(), 0, false, 0, false, false, 0)
             .pronta(new Rede.HabInfo("a", false, true, 210, 20, 1800)), "em recarga não está pronta");
         Transformacao.destransformar(p);
         h.assertFalse(DemoHud.ativa(p), "destransformar encerra a demonstração");
@@ -238,6 +241,9 @@ public final class Testes {
     /** Menu radial e tipos: escolher, canalizar o raio (gasta por tick, recarga ao soltar) e disparar o soco sônico. */
     static void habilidades(GameTestHelper h) {
         ServerPlayer p = jogador(h);
+        // No lugar do teste: na origem do mundo o chunk pode não estar carregado e a onda some.
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
         Transformacao.transformar(p, SUPERMAN, true);
         EstadoJogador e = EstadoJogador.de(p);
         Personagem sup = e.personagem();
@@ -268,6 +274,43 @@ public final class Testes {
         Habilidades.usar(p, false);
         Habilidades.usar(p, true);
         h.assertValueEqual(e.energia(), energia - 40f, "em recarga não dispara de novo");
+        h.succeed();
+    }
+
+    /**
+     * Voo: transformado libera o pulo duplo, voar gasta energia, conclui as tarefas e avisa quem vê;
+     * sem energia o voo desliga e a descida é amortecida.
+     */
+    static void voo(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var alto = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 20, 1.5));
+        p.setPos(alto.x, alto.y, alto.z);
+        p.setOnGround(false);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        // Só a passiva de voo: as de efeito (fogo) precisam de conexão.
+        var voo = TiposPassiva.TIPOS.get("flight");
+        var prm = e.personagem().passiva("flight").params();
+        h.assertTrue(p.getAbilities().mayfly, "transformado pode voar");
+        h.assertValueEqual(p.getAbilities().getFlyingSpeed(), 0f, "quem move é o cliente");
+        h.assertValueEqual(Rede.montar(p).voo(), 32f, "velocidade máxima vai no sync");
+        p.getAbilities().flying = true;
+        e.setEnergia(100);
+        voo.tick(p, prm);
+        h.assertTrue(e.energia() < 100, "voar gasta energia");
+        h.assertTrue(Guia.concluida(p, "voar"), "tarefa voar");
+        h.assertTrue(Rede.montarAparencia(p).voando(), "quem vê sabe que ele voa");
+        Voo.estrondo(p);
+        h.assertTrue(Guia.concluida(p, "estrondo"), "tarefa estrondo");
+        // Esgota direto: o aviso de energia zerada precisa de conexão.
+        e.setEnergia(0);
+        e.setEsgotado(true);
+        voo.tick(p, prm);
+        h.assertFalse(p.getAbilities().flying, "sem energia o voo desliga");
+        h.assertFalse(p.getAbilities().mayfly, "e não religa sem energia");
+        h.assertTrue(QuedaAmortecida.ativa(p), "desce amortecido");
+        Transformacao.destransformar(p);
+        h.assertFalse(p.getAbilities().mayfly, "normal não voa");
         h.succeed();
     }
 }

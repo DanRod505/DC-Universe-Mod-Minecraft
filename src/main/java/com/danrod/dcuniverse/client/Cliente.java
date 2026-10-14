@@ -18,7 +18,7 @@ import net.minecraftforge.client.gui.overlay.ForgeLayeredDraw;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.network.PacketDistributor;
 
-/** Tudo que só existe no cliente: teclas, HUD, menu radial, Guia do Herói, física do planar, skins e efeitos. */
+/** Tudo que só existe no cliente: teclas, HUD, menu radial, Guia do Herói, física do voo e do planar, skins e efeitos. */
 public final class Cliente {
     /** Se a tecla de uso está apertada (o servidor só fica sabendo quando muda). */
     private static boolean usando;
@@ -40,10 +40,12 @@ public final class Cliente {
             EstadoCliente.limpar();
             Skins.limpar();
             Hud.limpar();
+            Voador.limpar();
             usando = false;
         });
         GuiaItem.abrir = GuiaScreen::abrir;
         Skins.registrar();
+        Voador.registrar();
         Efeitos.registrarFeixe();
     }
 
@@ -77,6 +79,7 @@ public final class Cliente {
         }
         Hud.tick(mc);
         Planador.tick(mc);
+        Voador.tick(mc);
         Efeitos.tick(mc);
     }
 }
