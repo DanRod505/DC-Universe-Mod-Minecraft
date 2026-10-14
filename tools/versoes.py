@@ -1,6 +1,11 @@
 """Roteiro de versões: validação de dependências e geração de docs/ROTEIRO.md.
 
+Formato (decisão de 2026-10-13, qualidade acima de quantidade): cada versão entrega UMA coisa complexa
+completa e jogável (tipo personagem, local, chefe ou sistema) e um lote de coisas simples.
+
 Verificações:
+- regra de foco: no máximo 1 personagem que não seja variação, no máximo 2 variações e no máximo 1 local;
+  versão de personagem não traz local e versão de local traz exatamente 1;
 - cada personagem, local e missão está em exatamente uma versão (e só ids que existem);
 - itens listados à mão existem e aparecem uma vez só;
 - nenhuma missão depende de algo de uma versão posterior: missões exigidas, local, local do NPC e local do boss.
@@ -40,6 +45,21 @@ def verificar(v, personagens, mundo, nomes_itens):
     soltos = [i for x in v["versoes"] for i in x["itens"]]
     erros += [f"versões: item inexistente {i}" for i in soltos if i not in catalogo]
     erros += [f"versões: item {i} listado em mais de uma versão" for i in set(soltos) if soltos.count(i) > 1]
+    tipos = {"personagem", "local", "chefe", "sistema"}
+    for x in v["versoes"]:
+        nid = x["id"]
+        principais = [n for n in x["personagens"] if n not in x["variacoes"]]
+        if x["tipo"] not in tipos:
+            erros.append(f"versões: {nid} com tipo desconhecido {x['tipo']}")
+        if set(x["variacoes"]) - set(x["personagens"]):
+            erros.append(f"versões: {nid} tem variação fora da lista de personagens")
+        if len(principais) > 1 or len(x["variacoes"]) > 2 or len(x["locais"]) > 1:
+            erros.append(f"versões: {nid} tem mais de um foco (personagens {principais}, variações {x['variacoes']}, "
+                         f"locais {x['locais']})")
+        if x["tipo"] == "personagem" and (len(principais) != 1 or x["locais"]):
+            erros.append(f"versões: {nid} é de personagem e precisa de 1 personagem principal e nenhum local")
+        if x["tipo"] == "local" and len(x["locais"]) != 1:
+            erros.append(f"versões: {nid} é de local e precisa de exatamente 1 local")
     if erros:
         return erros
     ver = lambda grupo, i: ordem[de[grupo][i][0]]
@@ -107,18 +127,89 @@ def preparar(v, personagens, mundo, itens, nomes):
     return saida
 
 
+def etapas(x):
+    """Blocos de trabalho da versão, cada um com build de teste (0.N.0-alpha.K).
+
+    Sistemas em "destaque" (voo, HUD...) ganham etapa própria para serem ajustados até ficarem satisfatórios;
+    os demais sistemas novos vão juntos numa etapa. Locais são construídos antes das missões e o lote de itens
+    é sempre separado. O teste em servidor com 2 jogadores vale para todo build.
+    """
+    lista = lambda xs: ", ".join(xs)
+    sis = lambda xs: "; ".join(xs)
+    var = [n for n, c in zip(x["personagens_nomes"], x["personagens"]) if c in x["variacoes"]]
+    principal = [n for n, c in zip(x["personagens_nomes"], x["personagens"]) if c not in x["variacoes"]]
+    comuns = [s for s in x["cria"] if s not in x["destaque"]]
+    # sistemas de terreno vão com a construção do local ou da arena; os demais, com a etapa que os usa
+    base = ("Estrutura", "Cidade", "Dimensão", "Planetas", "Prédios", "Abismo", "Ruínas", "Pântano", "Regras", "Torre",
+            "Planeta", "Arena", "Base", "Poço", "Cristais", "Laboratório", "Provas", "Sala", "Campo")
+    terreno = [s for s in comuns if s.startswith(base)]
+    resto = [s for s in comuns if s not in terreno]
+    com = lambda xs: f" (sistemas: {sis(xs)})" if xs else ""
+    destaque = [f"Sistema em destaque: {s}" for s in x["destaque"]]
+    e = []
+    if x["tipo"] == "local":  # o sistema em destaque de um local (ex.: gerador de cidade) vem antes da construção
+        e += destaque
+        destaque = []
+        e.append(f"Construção de {x['locais_nomes'][0]}{com(terreno)}")
+    elif x["tipo"] == "chefe" and x["locais_nomes"]:
+        e.append(f"Arena: {x['locais_nomes'][0]}{com(terreno)}")
+    elif x["tipo"] != "chefe" and comuns:
+        e.append(f"Sistemas: {sis(comuns)}")
+    e += destaque
+    if x["tipo"] == "personagem":
+        e += [f"Skin e modelo final de {x['foco']}", "Habilidades do menu radial e suprema, com efeitos e sons"]
+    elif x["tipo"] == "local":
+        povo = x["npcs_nomes"] + x["mobs_nomes"]
+        if povo or resto:
+            e.append(f"NPCs e mobs: {lista(povo) or 'nenhum novo'}{com(resto)}")
+        if x["missoes_nomes"] or x["bosses_nomes"]:
+            rot = "Missões e chefe" if x["bosses_nomes"] else "Missões"
+            e.append(f"{rot}: {lista(x['missoes_nomes'] + x['bosses_nomes'])}")
+    elif x["tipo"] == "chefe":
+        if x["mobs_nomes"]:
+            e.append(f"Mobs: {lista(x['mobs_nomes'])}")
+        sobra = resto + ([] if x["locais_nomes"] else terreno)
+        e.append(f"Chefe {lista(x['bosses_nomes'])}: modelo, ataques, fases e recompensas{com(sobra)}")
+        e += [f"Vilão jogável: {n}" for n in principal]
+        if x["missoes_nomes"]:
+            e.append(f"Missões: {lista(x['missoes_nomes'])}")
+    if var:
+        e.append(f"Variações: {lista(var)}")
+    if x["itens_nomes"]:
+        e.append(f"Lote de itens ({len(x['itens_nomes'])})")
+    return e
+
+
+TIPOS = {"personagem": "Personagem", "local": "Local", "chefe": "Chefe", "sistema": "Sistema"}
+
+
 def gerar_md(info, destino):
     out = ["# Roteiro de versões", "",
            "> Gerado por `tools/gerar_docs.py` a partir de `docs/dados/versoes.json`. Não edite à mão.",
            "> Bosses, NPCs, mobs e itens de cada versão são calculados: entram na primeira versão que precisa deles.", "",
-           "| Versão | Nome | Personagens | Locais | Missões | Bosses | Itens novos |", "|---|---|---|---|---|---|---|"]
-    out += [f"| {x['id']} | {x['nome']} | {len(x['personagens'])} | {len(x['locais'])} | {len(x['missoes'])} | "
-            f"{len(x['bosses_nomes'])} | {len(x['itens_nomes'])} |" for x in info]
+           "**Formato:** cada versão entrega **uma coisa complexa completa e jogável** (um personagem com todas as "
+           "habilidades e a skin final, um local com suas missões, um chefe com suas fases ou um sistema grande) e "
+           "**um lote de coisas simples** (minérios, blocos, itens de craft). Variações são personagens que "
+           "reaproveitam quase todo o kit de outro já pronto e entram no lote, no máximo 2 por versão. "
+           "A versão principal (v1.0, v2.0, v3.0) fecha um ato da campanha; a v4.0 conclui todo o planejamento.", "",
+           "**Etapas:** cada versão é feita em poucos blocos de trabalho, na ordem listada, e cada um termina com um "
+           "build de teste (`0.N.0-alpha.K`, testado em servidor com 2 jogadores) para você jogar e aprovar. Sistemas "
+           "em destaque, como voo e HUD, ganham etapa própria para serem ajustados até ficarem satisfatórios; os outros "
+           "sistemas novos vão juntos. Locais são construídos antes das missões e o lote de itens é sempre separado.", "",
+           "| Versão | Foco | Tipo | Etapas | Variações | Missões | Itens novos |", "|---|---|---|---|---|---|---|"]
+    out += [f"| {x['id']} | {x['foco']} | {TIPOS[x['tipo']]} | {len(etapas(x))} | {len(x['variacoes'])} | "
+            f"{len(x['missoes'])} | {len(x['itens_nomes'])} |" for x in info]
     for x in info:
-        out += ["", f"## {x['id']}: {x['nome']}", "", x["objetivo"], "", "**Sistemas novos:**", ""]
-        out += [f"- {s}" for s in x["sistemas"]]
-        for rot, chave in (("Personagens", "personagens_nomes"), ("Locais", "locais_nomes"), ("Missões", "missoes_nomes"),
-                           ("Bosses", "bosses_nomes"), ("NPCs", "npcs_nomes"), ("Mobs", "mobs_nomes"), ("Itens novos", "itens_nomes")):
+        out += ["", f"## {x['id']}: {x['nome']}", "", f"**{TIPOS[x['tipo']]}:** {x['foco']}", "", x["objetivo"], ""]
+        out += ["**Etapas:**", ""] + [f"{i}. {e}" for i, e in enumerate(etapas(x), 1)] + [""]
+        out += ["**Cria (fica para as próximas):**", ""] + [f"- {s}" for s in x["cria"]]
+        if x["reaproveita"]:
+            out += ["", "**Reaproveita:**", ""] + [f"- {s}" for s in x["reaproveita"]]
+        var = [n for n, c in zip(x["personagens_nomes"], x["personagens"]) if c in x["variacoes"]]
+        if var:
+            out += ["", f"**Variações no lote ({len(var)}):** {', '.join(var)}"]
+        for rot, chave in (("Locais", "locais_nomes"), ("Missões", "missoes_nomes"), ("Bosses", "bosses_nomes"),
+                           ("NPCs", "npcs_nomes"), ("Mobs", "mobs_nomes"), ("Itens novos (lote)", "itens_nomes")):
             if x[chave]:
                 out += ["", f"**{rot} ({len(x[chave])}):** {', '.join(x[chave])}"]
     destino.write_text("\n".join(out) + "\n", encoding="utf-8")
