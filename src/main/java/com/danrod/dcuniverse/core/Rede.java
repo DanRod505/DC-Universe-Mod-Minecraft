@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 6;
+    private static final int VERSAO = 7;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -97,7 +97,7 @@ public final class Rede {
      * ver o raio ou o sopro, e se ele está voando (para a pose de voo).
      */
     public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo, boolean voando,
-                            int rastro, int rastro2) {
+                            int rastro, int rastro2, int rastro3) {
         public static void encode(Aparencia m, FriendlyByteBuf b) {
             b.writeVarInt(m.entidade);
             b.writeUtf(m.personagem);
@@ -109,11 +109,12 @@ public final class Rede {
             b.writeBoolean(m.voando);
             b.writeInt(m.rastro);
             b.writeInt(m.rastro2);
+            b.writeInt(m.rastro3);
         }
 
         public static Aparencia decode(FriendlyByteBuf b) {
             return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat(), b.readBoolean(),
-                b.readInt(), b.readInt());
+                b.readInt(), b.readInt(), b.readInt());
         }
     }
 
@@ -239,7 +240,7 @@ public final class Rede {
         CANAL.send(montarAparencia(alvo), PacketDistributor.PLAYER.with(quemVe));
     }
 
-    /** Miolo padrão da cauda luminosa: a cor do brilho quase branca. */
+    /** Terceira cor padrão do rastro: a principal quase branca. */
     private static int clarear(int c) {
         int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
         return ((r + (255 - r) * 4 / 5) << 16) | ((g + (255 - g) * 4 / 5) << 8) | (b + (255 - b) * 4 / 5);
@@ -248,15 +249,16 @@ public final class Rede {
     public static Aparencia montarAparencia(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0);
+        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0);
         Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
         boolean voando = Voo.voando(player);
         Personagem.Tipo voo = p.passiva("flight");
         int rastro = voo == null ? 0 : voo.params().color("trail_color", p.cor());
-        int rastro2 = voo == null ? 0 : voo.params().color("trail_color2", clarear(rastro));
-        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0, voando, rastro, rastro2);
+        int rastro2 = voo == null ? 0 : voo.params().color("trail_color2", rastro);
+        int rastro3 = voo == null ? 0 : voo.params().color("trail_color3", clarear(rastro));
+        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0, voando, rastro, rastro2, rastro3);
         return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
-            h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2);
+            h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2, rastro3);
     }
 
     /** Envia o estado completo ao próprio jogador. */

@@ -5,6 +5,7 @@ import com.danrod.dcuniverse.ability.Alvos;
 import com.danrod.dcuniverse.character.Params;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.client.Skins;
+import com.danrod.dcuniverse.client.Voador;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.guia.Guia;
 import com.google.gson.JsonParser;
@@ -373,7 +374,7 @@ public final class GuiaScreen extends Screen {
                 out.add(item(Component.translatable("dcuniverse.guia.passiva." + t.tipo())));
                 if (t.tipo().equals("flight")) {
                     double max = t.params().d("speed", 12);
-                    texto(out, Component.translatable("dcuniverse.guia.voo.detalhe", fmt(max * 0.45), fmt(max),
+                    texto(out, Component.translatable("dcuniverse.guia.voo.detalhe", fmt(max * Voador.CRUZEIRO), fmt(max),
                         fmt(t.params().d("dash_cost", 15))), SUAVE, 2);
                 }
             }
@@ -582,7 +583,7 @@ public final class GuiaScreen extends Screen {
 
     /** Maiores valores da ficha entre os 100 personagens (docs/dados/personagens.json): a barra cheia. */
     static final class FichaEscala {
-        static final double VIDA = 40, ARMADURA = 24, DANO = 12, ENERGIA = 320, VELOCIDADE = 7.5, VOO = 34, PLANAR = 14;
+        static final double VIDA = 40, ARMADURA = 24, DANO = 12, ENERGIA = 320, VELOCIDADE = 7.5, VOO = 60, PLANAR = 14;
 
         private FichaEscala() {}
     }

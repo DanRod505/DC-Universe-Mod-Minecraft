@@ -96,7 +96,7 @@
   "dcuniverse.guia.atributo.voo": "Flight",
   "dcuniverse.guia.atributo.planar": "Gliding",
   "dcuniverse.guia.ficha.unidades": "Health and damage in hearts; running, flight and gliding in blocks per second.",
-  "dcuniverse.guia.voo.detalhe": "Cruise %s b/s, top speed %s b/s (Ctrl). The dash costs %s energy.",
+  "dcuniverse.guia.voo.detalhe": "Cruise %s b/s. Holding Ctrl (boost) speed keeps rising up to %s b/s and the trail shows. The dash costs %s energy.",
   "dcuniverse.guia.secao.historia": "Story",
   "dcuniverse.guia.hab.segurar": "Hold V: %s energy per second",
   "dcuniverse.guia.hab.apertar": "Press V: %s energy",

@@ -96,7 +96,7 @@
   "dcuniverse.guia.atributo.voo": "Voo",
   "dcuniverse.guia.atributo.planar": "Planar",
   "dcuniverse.guia.ficha.unidades": "Vida e dano em corações; corrida, voo e planar em blocos por segundo.",
-  "dcuniverse.guia.voo.detalhe": "Cruzeiro de %s b/s e máxima de %s b/s (Ctrl). A arrancada custa %s de energia.",
+  "dcuniverse.guia.voo.detalhe": "Cruzeiro de %s b/s. Segurando Ctrl (boost) a velocidade vai subindo até %s b/s e o rastro aparece. A arrancada custa %s de energia.",
   "dcuniverse.guia.secao.historia": "História",
   "dcuniverse.guia.hab.segurar": "Segure V: %s de energia por segundo",
   "dcuniverse.guia.hab.apertar": "Aperte V: %s de energia",

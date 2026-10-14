@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * cliente (client/Voador), como o do élitro; o servidor libera o voo, gasta energia, solta o estrondo sônico
  * e o impacto do pouso, e avisa quem está vendo que o jogador voa (para a pose).
  * Parâmetros: speed (blocos/s no máximo), drain e boost_drain (energia/s em cruzeiro e acelerando),
- * dash_cost (energia da arrancada) e trail_color/trail_color2 (o brilho e o miolo da cauda luminosa).
+ * dash_cost (energia da arrancada) e trail_color, trail_color2 e trail_color3 (as cores do rastro do boost).
  * No criativo vale o mesmo voo, sem gastar energia; ao destransformar volta o voo do criativo.
  */
 public final class Voo implements Passiva {

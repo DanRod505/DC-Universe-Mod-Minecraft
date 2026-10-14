@@ -7,7 +7,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -22,20 +25,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Rastro luminoso do voo, como a cauda de um cometa: uma fita de luz (mistura aditiva, brilha no escuro)
- * que segue o caminho de quem voa, virada sempre para a câmera, larga e forte junto do corpo e afinando e
- * apagando para trás. São três camadas: o brilho largo na cor do rastro, o corpo e um miolo quase branco.
- * O brilho tem a cor trail_color e o miolo, trail_color2.
+ * Rastro luminoso do voo no boost, como a cauda de um cometa: dois fios de luz (trail_color e trail_color2)
+ * com um miolo claro, virados sempre para a câmera, que afinam e apagam para trás, mais poeira nas três cores
+ * do personagem (trail_color3 também) e faíscas de luz espalhadas pelo caminho.
  */
 public final class Cauda {
     /** Quanto tempo (ticks) cada ponto do caminho fica aceso. */
     static final int VIDA = 22;
     /** Largura do brilho junto do corpo, em blocos, na velocidade máxima. */
-    static final float LARGURA = 1.3f;
+    static final float LARGURA = 0.8f;
     /** Subdivisões de cada trecho entre dois ticks (a curva sai lisa mesmo em alta velocidade). */
     static final int PASSOS = 4;
+    /** Ticks sem boost até o rastro apagar. */
+    static final int APAGA = 6;
 
-    private record Ponto(Vec3 pos, long nasceu, float forca) {}
+    /** inicio: primeiro ponto depois que o rastro acendeu (a fita não liga com um rastro antigo ainda apagando). */
+    private record Ponto(Vec3 pos, long nasceu, float forca, boolean inicio) {}
 
     private static final class Rastro {
         final ArrayDeque<Ponto> pontos = new ArrayDeque<>();
@@ -43,7 +48,9 @@ public final class Cauda {
         Vec3 desloc = Vec3.ZERO;
         boolean aceso;
         float forca;
-        int cor, cor2;
+        int cor, cor2, cor3;
+        /** Ticks seguidos sem boost (o rastro só apaga depois de alguns, pois a posição de outro jogador chega aos solavancos). */
+        int semBoost = 99;
         /** Caixa que contém a cauda (refeita a cada tick). */
         AABB caixa;
     }
@@ -58,25 +65,54 @@ public final class Cauda {
         });
     }
 
-    /** Chamado a cada tick para quem está voando: acende o rastro acima de minVel, com a força dada (0 a 1). */
-    static void ponto(ClientLevel level, Player pl, Vec3 base, boolean aceso, float forca) {
+    /**
+     * Chamado a cada tick para quem está voando: acende o rastro (no boost), com a força dada (0 a 1), e solta as
+     * partículas nas cores do personagem ao longo do caminho do tick.
+     */
+    static void ponto(ClientLevel level, Player pl, Vec3 base, boolean aceso, float forca, boolean visivel) {
         Rede.Aparencia a = EstadoCliente.APARENCIAS.get(pl.getId());
         if (a == null || a.rastro() == 0) aceso = false;
         Rastro r = RASTROS.get(pl.getId());
+        if (r != null) {
+            r.semBoost = aceso ? 0 : r.semBoost + 1;
+            if (r.aceso && r.semBoost < APAGA) aceso = a != null && a.rastro() != 0;
+        }
         if (r == null) {
             if (!aceso) return;
             RASTROS.put(pl.getId(), r = new Rastro());
         }
+        boolean acendeu = aceso && !r.aceso;
         r.aceso = aceso;
         if (!aceso) return;
         r.cor = a.rastro();
         r.cor2 = a.rastro2();
+        r.cor3 = a.rastro3();
         r.forca = forca;
         r.desloc = base.subtract(pl.position());
         Ponto ult = r.pontos.peekFirst();
         // Teleporte ou troca de mundo: começa um rastro novo.
         if (ult != null && ult.pos.distanceToSqr(base) > 100) r.pontos.clear();
-        r.pontos.addFirst(new Ponto(base, level.getGameTime(), forca));
+        if (visivel && ult != null && !acendeu) particulas(level, r, ult.pos, base, forca);
+        r.pontos.addFirst(new Ponto(base, level.getGameTime(), forca, acendeu));
+    }
+
+    /** Poeira nas três cores do rastro e algumas faíscas de luz, espalhadas pelo caminho do último tick. */
+    private static void particulas(ClientLevel level, Rastro r, Vec3 de, Vec3 ate, float forca) {
+        RandomSource rnd = level.getRandom();
+        int n = Math.max(1, (int) (de.distanceTo(ate) * (1.2 + forca)));
+        for (int i = 0; i < n; i++) {
+            Vec3 p = de.lerp(ate, rnd.nextDouble());
+            float sorte = rnd.nextFloat();
+            int cor = sorte < 0.42f ? r.cor : sorte < 0.8f ? r.cor2 : r.cor3;
+            float tamanho = 0.5f + rnd.nextFloat() * 0.6f;
+            level.addParticle(new DustParticleOptions(cor, tamanho), p.x + rnd.nextGaussian() * 0.22,
+                p.y + rnd.nextGaussian() * 0.22, p.z + rnd.nextGaussian() * 0.22, 0, 0, 0);
+        }
+        if (rnd.nextFloat() < 0.35f + 0.4f * forca) {
+            Vec3 p = de.lerp(ate, rnd.nextDouble());
+            level.addParticle(ParticleTypes.END_ROD, p.x, p.y, p.z, rnd.nextGaussian() * 0.02, rnd.nextGaussian() * 0.02,
+                rnd.nextGaussian() * 0.02);
+        }
     }
 
     /** Apaga quem parou de voar e os pontos velhos. */
@@ -133,6 +169,7 @@ public final class Cauda {
             pos.add(p.pos);
             idade.add(Math.max(0, t));
             forca.add(p.forca);
+            if (p.inicio) break;
         }
         if (pos.size() < 2) return;
 
@@ -164,7 +201,6 @@ public final class Cauda {
         }
         Vec3[] rel = new Vec3[n];
         float[] larg = new float[n], brilho = new float[n];
-        int[] cor = new int[n];
         double dist = 0;
         for (int i = 0; i < n; i++) {
             float t = Math.min(1, ci.get(i));
@@ -177,36 +213,42 @@ public final class Cauda {
             brilho[i] = (float) Math.pow(1 - t, 1.4) * (0.4f + 0.6f * cabeca);
             // Perto da câmera (a própria cauda em terceira pessoa) fica mais transparente, para não tapar a vista.
             brilho[i] *= Mth.clamp(((float) c.get(i).distanceTo(cam) - 1.5f) / 4f, 0.3f, 1f);
-            cor[i] = r.cor;
         }
-        int claro = r.cor2;
-        // Cor de verdade (mistura comum, aparece de dia) por baixo; luz (mistura aditiva, brilha à noite) por cima.
+        int claro = Efeitos.misturar(r.cor, 0xFFFFFF, 0.85f);
+        // Dois fios (cor 1 e cor 2) lado a lado e um miolo claro bem fino entre eles. Cor de verdade (mistura comum,
+        // aparece de dia) por baixo; luz (mistura aditiva, brilha à noite) por cima.
         e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.debugQuads(), (pose, buf) -> {
             Matrix4fc m = pose.pose();
-            fita(m, buf, rel, lado, paraCam, 0f, larg, 1.0f, cor, brilho, 0.22f, 0, false);
-            fita(m, buf, rel, lado, paraCam, 0.02f, larg, 0.55f, cor, brilho, 0.45f, 0, false);
+            // Halo largo e fraco, e o fio de cor viva no meio de cada um.
+            fita(m, buf, rel, lado, paraCam, 0f, larg, 0.3f, 0.7f, r.cor, brilho, 0.12f, false);
+            fita(m, buf, rel, lado, paraCam, 0.01f, larg, -0.3f, 0.7f, r.cor2, brilho, 0.12f, false);
+            fita(m, buf, rel, lado, paraCam, 0.02f, larg, 0.3f, 0.2f, r.cor, brilho, 0.75f, false);
+            fita(m, buf, rel, lado, paraCam, 0.03f, larg, -0.3f, 0.2f, r.cor2, brilho, 0.75f, false);
         });
         e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.lightning(), (pose, buf) -> {
             Matrix4fc m = pose.pose();
             // Cada camada um pouco mais perto da câmera, para não brigar com a de baixo no teste de profundidade.
-            fita(m, buf, rel, lado, paraCam, 0.04f, larg, 0.6f, cor, brilho, 0.8f, 0, true);
-            fita(m, buf, rel, lado, paraCam, 0.06f, larg, 0.16f, null, brilho, 0.9f, claro, true);
+            fita(m, buf, rel, lado, paraCam, 0.04f, larg, 0.3f, 0.3f, r.cor, brilho, 0.3f, true);
+            fita(m, buf, rel, lado, paraCam, 0.05f, larg, -0.3f, 0.3f, r.cor2, brilho, 0.3f, true);
+            fita(m, buf, rel, lado, paraCam, 0.06f, larg, 0f, 0.07f, claro, brilho, 0.45f, true);
         });
     }
 
-    /** Uma camada da fita: quads entre pontos vizinhos, com largura e brilho de cada ponto (dos dois lados). */
+    /**
+     * Uma camada da fita: quads entre pontos vizinhos, com a largura e o brilho de cada ponto, deslocada de lado
+     * (desvio, em fração da largura) e um pouco para a câmera (frente).
+     */
     private static void fita(Matrix4fc m, VertexConsumer buf, Vec3[] p, Vec3[] lado, Vec3[] paraCam, float frente,
-                             float[] larg, float escala,
-                             int[] cor, float[] brilho, float alfa, int corFixa, boolean dosDoisLados) {
+                             float[] larg, float desvio, float escala, int cor, float[] brilho, float alfa,
+                             boolean dosDoisLados) {
         for (int i = 0; i < p.length - 1; i++) {
             Vec3 a = lado[i].scale(larg[i] * escala / 2), b = lado[i + 1].scale(larg[i + 1] * escala / 2);
-            Vec3 p0 = p[i].add(paraCam[i].scale(frente)), p1 = p[i + 1].add(paraCam[i + 1].scale(frente));
+            Vec3 p0 = p[i].add(paraCam[i].scale(frente)).add(lado[i].scale(larg[i] * desvio));
+            Vec3 p1 = p[i + 1].add(paraCam[i + 1].scale(frente)).add(lado[i + 1].scale(larg[i + 1] * desvio));
             Vec3[] v = {p0.add(a), p1.add(b), p1.subtract(b), p0.subtract(a)};
-            int c0 = cor != null ? cor[i] : corFixa, c1 = cor != null ? cor[i + 1] : corFixa;
-            int[] vc = {c0, c1, c1, c0};
             float[] va = {brilho[i] * alfa, brilho[i + 1] * alfa, brilho[i + 1] * alfa, brilho[i] * alfa};
-            for (int k = 0; k < 4; k++) vertice(m, buf, v[k], vc[k], va[k]);
-            if (dosDoisLados) for (int k = 3; k >= 0; k--) vertice(m, buf, v[k], vc[k], va[k]);
+            for (int k = 0; k < 4; k++) vertice(m, buf, v[k], cor, va[k]);
+            if (dosDoisLados) for (int k = 3; k >= 0; k--) vertice(m, buf, v[k], cor, va[k]);
         }
     }
 

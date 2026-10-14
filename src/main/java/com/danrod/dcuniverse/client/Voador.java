@@ -39,24 +39,29 @@ import java.util.function.Predicate;
  * de todo jogador voando e dos rastros (cauda luminosa em Cauda e vapor).
  */
 public final class Voador {
-    /** Velocidade de cruzeiro (sem correr), em fração da máxima. */
-    static final double CRUZEIRO = 0.45;
-    /** Ganho de velocidade por tick, em fração da máxima (0 até a máxima em ~1 s). */
-    static final double ACEL = 0.05;
+    /** Velocidade de cruzeiro (sem o boost), em fração da máxima. */
+    public static final double CRUZEIRO = 0.27;
+    /** Ganho de velocidade por tick até o cruzeiro, em fração da máxima (0 ao cruzeiro em ~0,5 s). */
+    static final double ACEL = 0.03;
+    /**
+     * Ganho por tick no boost, em fração da máxima, no começo; cai conforme a velocidade sobe, então o boost vai
+     * acelerando aos poucos (do cruzeiro a ~90% da máxima em ~3 s).
+     */
+    static final double ACEL_BOOST = 0.022;
     /** Perda de velocidade por tick sem nenhuma tecla (a inércia leva ~1 s para parar). */
-    static final double FREIO = 0.05;
+    static final double FREIO = 0.04;
     /** Quanto a curva (mudança de direção) é mais rápida que a aceleração em linha reta. */
     static final double CURVA = 2.2;
     /** Estrondo sônico ao passar desta fração da máxima; rearma abaixo de REARMA. */
     static final double BARREIRA = 0.95, REARMA = 0.7;
-    /** Arrancada: dispara acima da máxima e volta a ela pela própria aceleração. */
-    static final double ARRANCADA = 1.3;
+    /** Arrancada: dispara na velocidade máxima de uma vez. */
+    static final double ARRANCADA = 1.0;
     /** Toque duplo: o segundo toque precisa vir até este número de ticks depois do primeiro. */
     static final int TOQUE_DUPLO = 6;
     /** Duração das manobras (ticks). */
     static final int GIRO_TICKS = 12, MEIA_VOLTA_TICKS = 10, ARRANCADA_TICKS = 10;
-    /** Rastro colorido a partir desta velocidade (blocos/s); vapor branco a partir de VAPOR. */
-    static final double RASTRO = 10, VAPOR = 28;
+    /** O rastro acende no boost acima desta velocidade (blocos/s); vapor branco a partir de VAPOR. */
+    static final double RASTRO = 18, VAPOR = 40;
 
     /** Velocidade atual do jogador local (blocos/tick), null quando não está voando. */
     private static Vec3 vel;
@@ -156,7 +161,9 @@ public final class Voador {
             Vec3 dv = alvo.subtract(vel);
             double v = vel.length();
             boolean parando = alvo.lengthSqr() < 1e-6;
-            double acc = max * (parando ? FREIO : ACEL);
+            boolean boost = alvo.length() > max * CRUZEIRO * 1.01 && v > max * CRUZEIRO * 0.9;
+            double acc = parando ? max * FREIO
+                : boost ? max * ACEL_BOOST * (1 - 0.65 * Math.min(1, v / max)) : max * ACEL;
             if (v > max * 0.1) {
                 // Separa a mudança na direção do movimento (acelera ou freia) da mudança de direção (curva).
                 Vec3 n = vel.scale(1 / v);
@@ -277,7 +284,7 @@ public final class Voador {
             float inclinar = Mth.clamp(dYaw * 0.06f, -0.75f, 0.75f) * ps.deitado;
             ps.inclinacao += (inclinar - ps.inclinacao) * 0.2f;
             boolean visivel = !pl.isInvisible() && !(pl == mc.player && mc.options.getCameraType().isFirstPerson());
-            cauda(level, pl, ps, d);
+            cauda(level, pl, ps, d, visivel);
             if (ps.blocosPorSeg >= VAPOR && visivel && pl != mc.player) vapor(level, pl, d);
         }
         Cauda.tick(level, POSES.keySet());
@@ -295,11 +302,12 @@ public final class Voador {
     }
 
     /** Base do rastro (atrás dos pés quando o corpo está deitado) e quanto ele brilha. */
-    private static void cauda(ClientLevel level, Player pl, Pose ps, Vec3 d) {
+    private static void cauda(ClientLevel level, Player pl, Pose ps, Vec3 d, boolean visivel) {
         Vec3 n = d.lengthSqr() < 1e-8 ? pl.getLookAngle() : d.normalize();
         Vec3 base = pl.position().add(0, 0.3 + 0.6 * (1 - ps.deitado), 0).subtract(n.scale(0.15 * ps.deitado));
-        float forca = (float) Mth.clamp((ps.blocosPorSeg - RASTRO) / 20.0, 0, 1);
-        Cauda.ponto(level, pl, base, ps.blocosPorSeg >= RASTRO, forca);
+        float forca = (float) Mth.clamp((ps.blocosPorSeg - RASTRO) / 35.0, 0, 1);
+        boolean boost = pl.isSprinting() || ps.manobra == Voo.ARRANCADA;
+        Cauda.ponto(level, pl, base, boost && ps.blocosPorSeg >= RASTRO, forca, visivel);
     }
 
     /** Vapor branco perto da barreira do som. */

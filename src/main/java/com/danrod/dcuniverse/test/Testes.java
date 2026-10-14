@@ -293,7 +293,7 @@ public final class Testes {
         var prm = e.personagem().passiva("flight").params();
         h.assertTrue(p.getAbilities().mayfly, "transformado pode voar");
         h.assertValueEqual(p.getAbilities().getFlyingSpeed(), 0f, "quem move é o cliente");
-        h.assertValueEqual(Rede.montar(p).voo(), 32f, "velocidade máxima vai no sync");
+        h.assertValueEqual(Rede.montar(p).voo(), 56f, "velocidade máxima vai no sync");
         p.getAbilities().flying = true;
         e.setEnergia(100);
         voo.tick(p, prm);
