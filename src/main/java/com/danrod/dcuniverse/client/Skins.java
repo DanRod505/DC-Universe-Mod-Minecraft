@@ -25,6 +25,8 @@ import java.util.function.Predicate;
  */
 public final class Skins {
     private static final Map<String, PlayerSkin> CACHE = new HashMap<>();
+    /** renderRightHand/renderLeftHand disparam o RenderArmEvent de novo; sem isto a chamada se repete até estourar a pilha. */
+    private static boolean desenhandoBraco;
 
     private Skins() {}
 
@@ -51,18 +53,24 @@ public final class Skins {
         });
         // Braço em primeira pessoa com a skin do personagem.
         RenderArmEvent.BUS.addListener((Predicate<RenderArmEvent>) e -> {
+            if (desenhandoBraco) return false;
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return false;
             PlayerSkin skin = skinDe(mc.player.getId());
             if (skin == null) return false;
             var renderer = mc.getEntityRenderDispatcher().getPlayerRenderer(mc.player);
             Identifier tex = skin.body().texturePath();
-            if (e.getArm() == HumanoidArm.RIGHT) {
-                renderer.renderRightHand(e.getPoseStack(), e.getNodeCollector(), e.getPackedLight(), tex,
-                    mc.player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE));
-            } else {
-                renderer.renderLeftHand(e.getPoseStack(), e.getNodeCollector(), e.getPackedLight(), tex,
-                    mc.player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE));
+            desenhandoBraco = true;
+            try {
+                if (e.getArm() == HumanoidArm.RIGHT) {
+                    renderer.renderRightHand(e.getPoseStack(), e.getNodeCollector(), e.getPackedLight(), tex,
+                        mc.player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE));
+                } else {
+                    renderer.renderLeftHand(e.getPoseStack(), e.getNodeCollector(), e.getPackedLight(), tex,
+                        mc.player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE));
+                }
+            } finally {
+                desenhandoBraco = false;
             }
             return true;
         });
