@@ -1,0 +1,8 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.danrod.dcuniverse.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["EntityRendererMixin"],
+  "injectors": { "defaultRequire": 0 }
+}

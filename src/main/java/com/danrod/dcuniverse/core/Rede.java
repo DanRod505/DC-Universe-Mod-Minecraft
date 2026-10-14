@@ -239,6 +239,12 @@ public final class Rede {
         CANAL.send(montarAparencia(alvo), PacketDistributor.PLAYER.with(quemVe));
     }
 
+    /** Miolo padrão da cauda luminosa: a cor do brilho quase branca. */
+    private static int clarear(int c) {
+        int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+        return ((r + (255 - r) * 4 / 5) << 16) | ((g + (255 - g) * 4 / 5) << 8) | (b + (255 - b) * 4 / 5);
+    }
+
     public static Aparencia montarAparencia(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
@@ -247,7 +253,7 @@ public final class Rede {
         boolean voando = Voo.voando(player);
         Personagem.Tipo voo = p.passiva("flight");
         int rastro = voo == null ? 0 : voo.params().color("trail_color", p.cor());
-        int rastro2 = voo == null ? 0 : voo.params().color("trail_color2", rastro);
+        int rastro2 = voo == null ? 0 : voo.params().color("trail_color2", clarear(rastro));
         if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0, voando, rastro, rastro2);
         return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
             h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2);

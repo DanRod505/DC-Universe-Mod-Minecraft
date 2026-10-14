@@ -27,6 +27,7 @@ minecraft {
             workingDir = layout.projectDirectory.dir('run')
             systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
             systemProperty 'forge.enabledGameTestNamespaces', modId
+            args '--mixin.config', "${modId}.mixins.json"
         }
 
         register('client')
@@ -54,6 +55,11 @@ repositories {
 dependencies {
     implementation minecraft.dependency("net.minecraftforge:forge:${mcVersion}-${forgeVersion}")
     annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.5'
+}
+
+// Mixins do mod (só o rastro do voo, por enquanto): o Forge lê a lista no manifesto do jar.
+tasks.named('jar', Jar) {
+    manifest.attributes('MixinConfigs': "${modId}.mixins.json")
 }
 
 tasks.withType(JavaCompile).configureEach {

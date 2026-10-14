@@ -13,7 +13,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -37,7 +36,7 @@ import java.util.function.Predicate;
  * jogo (com a velocidade dele zerada pelo servidor) e aqui a velocidade é trocada a cada tick por uma com
  * aceleração, inércia e curvas abertas. Também cuida das manobras (toque duplo em A/D gira, S dá meia-volta,
  * W arranca), da câmera (inclinação, campo de visão, tremor e linhas de velocidade), do vento, da pose de voo
- * de todo jogador voando e dos rastros (faixas coloridas e vapor).
+ * de todo jogador voando e dos rastros (cauda luminosa em Cauda e vapor).
  */
 public final class Voador {
     /** Velocidade de cruzeiro (sem correr), em fração da máxima. */
@@ -76,7 +75,6 @@ public final class Voador {
         float deitado, inclinacao, ultimoYaw;
         double blocosPorSeg;
         int manobra = -1, manobraT;
-        Vec3 faixaA, faixaB;
     }
 
     /** Detecta o toque duplo de uma tecla. */
@@ -109,6 +107,7 @@ public final class Voador {
             if (e.getState() instanceof AvatarRenderState s) pose(s);
             return false;
         });
+        Cauda.registrar();
     }
 
     public static boolean voando(LocalPlayer p) {
@@ -278,9 +277,10 @@ public final class Voador {
             float inclinar = Mth.clamp(dYaw * 0.06f, -0.75f, 0.75f) * ps.deitado;
             ps.inclinacao += (inclinar - ps.inclinacao) * 0.2f;
             boolean visivel = !pl.isInvisible() && !(pl == mc.player && mc.options.getCameraType().isFirstPerson());
-            faixas(level, pl, ps, d, visivel);
-            if (ps.blocosPorSeg >= VAPOR && visivel) vapor(level, pl, d);
+            cauda(level, pl, ps, d);
+            if (ps.blocosPorSeg >= VAPOR && visivel && pl != mc.player) vapor(level, pl, d);
         }
+        Cauda.tick(level, POSES.keySet());
         LocalPlayer p = mc.player;
         if (p != null && vel != null && (som == null || som.isStopped()) && vel.length() * 20 > 6) {
             som = new SomVento(p);
@@ -294,45 +294,19 @@ public final class Voador {
         return a != null && a.voando();
     }
 
-    /**
-     * Duas faixas coloridas (as cores do rastro do personagem) saindo de trás do corpo, contínuas mesmo em alta
-     * velocidade: as partículas preenchem o caminho entre a posição do tick anterior e a atual.
-     */
-    private static void faixas(ClientLevel level, Player pl, Pose ps, Vec3 d, boolean visivel) {
-        Rede.Aparencia a = EstadoCliente.APARENCIAS.get(pl.getId());
-        if (a == null || a.rastro() == 0 || ps.blocosPorSeg < RASTRO || !visivel) {
-            ps.faixaA = ps.faixaB = null;
-            return;
-        }
-        Vec3 n = d.normalize();
-        Vec3 lado = n.cross(new Vec3(0, 1, 0));
-        lado = lado.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : lado.normalize();
-        // Os pés ficam atrás do centro quando o corpo está deitado.
-        Vec3 base = pl.position().add(0, 0.5 + 0.4 * (1 - ps.deitado), 0).subtract(n.scale(0.9 * ps.deitado));
-        Vec3 a1 = base.add(lado.scale(0.3)), b1 = base.subtract(lado.scale(0.3));
+    /** Base do rastro (atrás dos pés quando o corpo está deitado) e quanto ele brilha. */
+    private static void cauda(ClientLevel level, Player pl, Pose ps, Vec3 d) {
+        Vec3 n = d.lengthSqr() < 1e-8 ? pl.getLookAngle() : d.normalize();
+        Vec3 base = pl.position().add(0, 0.3 + 0.6 * (1 - ps.deitado), 0).subtract(n.scale(0.15 * ps.deitado));
         float forca = (float) Mth.clamp((ps.blocosPorSeg - RASTRO) / 20.0, 0, 1);
-        float tamanho = 1.0f + 0.8f * forca;
-        linha(level, ps.faixaA, a1, new DustParticleOptions(a.rastro(), tamanho));
-        linha(level, ps.faixaB, b1, new DustParticleOptions(a.rastro2(), tamanho));
-        ps.faixaA = a1;
-        ps.faixaB = b1;
-    }
-
-    private static void linha(ClientLevel level, Vec3 de, Vec3 ate, DustParticleOptions cor) {
-        if (de == null || de.distanceToSqr(ate) > 16) de = ate;
-        double dist = de.distanceTo(ate);
-        int passos = Math.max(1, (int) Math.ceil(dist / 0.2));
-        for (int i = 1; i <= passos; i++) {
-            Vec3 p = de.lerp(ate, i / (double) passos);
-            level.addParticle(cor, p.x, p.y, p.z, 0, 0, 0);
-        }
+        Cauda.ponto(level, pl, base, ps.blocosPorSeg >= RASTRO, forca);
     }
 
     /** Vapor branco perto da barreira do som. */
     private static void vapor(ClientLevel level, Player pl, Vec3 d) {
         RandomSource r = level.getRandom();
         Vec3 n = d.normalize();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1; i++) {
             Vec3 o = pl.position().add(0, 0.6, 0).subtract(n.scale(1.0 + r.nextDouble() * d.length()));
             level.addParticle(ParticleTypes.CLOUD, o.x + (r.nextDouble() - 0.5) * 0.5, o.y + (r.nextDouble() - 0.5) * 0.5,
                 o.z + (r.nextDouble() - 0.5) * 0.5, 0, 0, 0);
@@ -451,6 +425,7 @@ public final class Voador {
         soco = 0;
         manobra = -1;
         POSES.clear();
+        Cauda.limpar();
         if (som != null) som.parar();
         som = null;
     }
