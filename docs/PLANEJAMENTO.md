@@ -269,6 +269,8 @@ O roteiro completo, com personagens, locais, missões, bosses, NPCs, mobs e iten
 
 **Formato (decidido em 2026-10-13): qualidade acima de quantidade.** Cada versão entrega **uma coisa complexa completa e jogável**: um personagem com todas as habilidades, a skin final e a suprema; ou um local com suas missões e NPCs; ou um chefe com suas fases (e o vilão jogável, quando ele é um dos 100); ou um sistema grande. Junto vem **um lote de coisas simples** (minérios, blocos, itens de craft) e até 2 **variações**, personagens que reaproveitam quase todo o kit de outro já pronto (Supergirl depois do Superman, Robin depois do Batman). O gerador recusa uma versão com mais de um foco. Cada versão reaproveita os sistemas das anteriores e deixa os seus prontos para as próximas.
 
+**Etapas:** dentro de cada versão o trabalho anda uma coisa por vez, na ordem que o ROTEIRO.md lista: cada sistema novo é uma etapa própria (o voo e o HUD, por exemplo, são ajustados sozinhos até ficarem satisfatórios), depois a skin, as habilidades, a suprema e os efeitos; num local, primeiro a construção e depois os NPCs, os mobs e cada missão; o lote de itens é sempre uma etapa separada. Cada etapa termina com um build de teste (`0.N.0-alpha.K`) para jogar e aprovar antes da próxima, e a última é o teste em servidor com 2 jogadores.
+
 A numeração segue a campanha: a **v1.0** fecha o Ato 1, a **v2.0** o Ato 2, a **v3.0** o Ato 3 e a **v4.0** fecha o Ato 4 e todo o planejamento (100 personagens, todos os locais e missões). Entre elas, as versões menores (v0.1, v0.2, …, v1.13) entram uma a uma.
 
 | Faixa | O que entrega |

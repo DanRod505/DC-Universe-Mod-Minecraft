@@ -127,6 +127,38 @@ def preparar(v, personagens, mundo, itens, nomes):
     return saida
 
 
+def etapas(x):
+    """Ordem de trabalho da versão: uma coisa por etapa, cada uma com build de teste (0.N.0-alpha.K)."""
+    var = [n for n, c in zip(x["personagens_nomes"], x["personagens"]) if c in x["variacoes"]]
+    principal = [n for n, c in zip(x["personagens_nomes"], x["personagens"]) if c not in x["variacoes"]]
+    sistemas = [f"Sistema: {s}" for s in x["cria"]]
+    missoes = [f"Missão: {m}" for m in x["missoes_nomes"]]
+    # sistemas de terreno vêm antes da construção do local ou da arena; os demais, depois
+    base = ("Estrutura", "Cidade", "Dimensão", "Planetas", "Prédios", "Abismo", "Ruínas", "Pântano", "Regras", "Torre",
+            "Planeta", "Arena")
+    antes = [s for s in sistemas if s.removeprefix("Sistema: ").startswith(base)]
+    depois = [s for s in sistemas if s not in antes]
+    if x["tipo"] == "personagem":
+        e = sistemas + [f"Skin e modelo final de {x['foco']}", f"Habilidades do menu radial de {x['foco']}", f"Suprema de {x['foco']}",
+                        "Efeitos visuais e sons das habilidades"]
+    elif x["tipo"] == "local":
+        e = antes + [f"Construção de {x['locais_nomes'][0]}: estrutura, geração no mundo e decoração"] + depois
+        e += [f"NPCs: {', '.join(x['npcs_nomes'])}"] if x["npcs_nomes"] else []
+        e += [f"Mobs: {', '.join(x['mobs_nomes'])}"] if x["mobs_nomes"] else []
+        e += missoes + [f"Chefe: {b}" for b in x["bosses_nomes"] if not any(m for m in x["missoes"])]
+    elif x["tipo"] == "chefe":
+        e = antes + ([f"Arena: {x['locais_nomes'][0]}"] if x["locais_nomes"] else []) + depois
+        e += [f"Mobs: {', '.join(x['mobs_nomes'])}"] if x["mobs_nomes"] else []
+        e += [f"Chefe {b}: modelo, ataques e fases" for b in x["bosses_nomes"]] + ["Recompensas e troféu"]
+        e += [f"Vilão jogável: {n} (skin, habilidades e suprema)" for n in principal] + missoes
+    else:
+        e = sistemas
+    e += [f"Variação: {n}" for n in var]
+    if x["itens_nomes"]:
+        e.append(f"Lote de itens ({len(x['itens_nomes'])}): receitas, texturas e Guia")
+    return e + ["Teste final em servidor com 2 jogadores e build da versão"]
+
+
 TIPOS = {"personagem": "Personagem", "local": "Local", "chefe": "Chefe", "sistema": "Sistema"}
 
 
@@ -139,11 +171,16 @@ def gerar_md(info, destino):
            "**um lote de coisas simples** (minérios, blocos, itens de craft). Variações são personagens que "
            "reaproveitam quase todo o kit de outro já pronto e entram no lote, no máximo 2 por versão. "
            "A versão principal (v1.0, v2.0, v3.0) fecha um ato da campanha; a v4.0 conclui todo o planejamento.", "",
-           "| Versão | Foco | Tipo | Variações | Missões | Bosses | Itens novos |", "|---|---|---|---|---|---|---|"]
-    out += [f"| {x['id']} | {x['foco']} | {TIPOS[x['tipo']]} | {len(x['variacoes'])} | {len(x['missoes'])} | "
-            f"{len(x['bosses_nomes'])} | {len(x['itens_nomes'])} |" for x in info]
+           "**Etapas:** dentro de cada versão o trabalho anda **uma coisa por vez** (um sistema, a skin, as habilidades, "
+           "a construção do local, cada missão, o lote de itens), na ordem listada. Cada etapa termina com um build de "
+           "teste (`0.N.0-alpha.K`) para você jogar e aprovar antes da próxima. Sistemas como voo e HUD são etapas "
+           "próprias, ajustadas até ficarem satisfatórias; locais são construídos primeiro e as missões vêm depois.", "",
+           "| Versão | Foco | Tipo | Etapas | Variações | Missões | Itens novos |", "|---|---|---|---|---|---|---|"]
+    out += [f"| {x['id']} | {x['foco']} | {TIPOS[x['tipo']]} | {len(etapas(x))} | {len(x['variacoes'])} | "
+            f"{len(x['missoes'])} | {len(x['itens_nomes'])} |" for x in info]
     for x in info:
         out += ["", f"## {x['id']}: {x['nome']}", "", f"**{TIPOS[x['tipo']]}:** {x['foco']}", "", x["objetivo"], ""]
+        out += ["**Etapas:**", ""] + [f"{i}. {e}" for i, e in enumerate(etapas(x), 1)] + [""]
         out += ["**Cria (fica para as próximas):**", ""] + [f"- {s}" for s in x["cria"]]
         if x["reaproveita"]:
             out += ["", "**Reaproveita:**", ""] + [f"- {s}" for s in x["reaproveita"]]
