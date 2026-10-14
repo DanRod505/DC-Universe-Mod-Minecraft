@@ -1,0 +1,29 @@
+{
+  "_sobre": "Textos em inglês (en_us.json) do que vem de docs/dados: nomes dos itens e a experiência de cada personagem (por número). tools/gerar_conteudo.py exige o texto em inglês de tudo que já entrou no mod; o resto entra junto com a versão.",
+  "itens": {
+    "batarangue_simples": "Batarang",
+    "batcomputador": "Batcomputer",
+    "bloco_kryptonita": "Block of Kryptonite",
+    "cinto_batman": "Utility Belt",
+    "componente_tecnologico": "Tech Component",
+    "comunicador_liga": "League Communicator",
+    "cristal_kryptoniano": "Kryptonian Crystal",
+    "cristal_superman": "Crystal of the House of El",
+    "fragmento_alienigena": "Alien Fragment",
+    "fragmento_kryptonita": "Kryptonite Shard",
+    "guia_heroi": "Hero's Guide",
+    "minerio_kryptonita": "Kryptonite Ore",
+    "nucleo_meta_1": "Meta-Human Core I",
+    "nucleo_meta_2": "Meta-Human Core II",
+    "nucleo_meta_3": "Meta-Human Core III",
+    "nucleo_meta_4": "Meta-Human Core IV",
+    "placa_circuito": "Circuit Board",
+    "tecido_tatico": "Tactical Fabric",
+    "torta_martha": "Martha's Pie"
+  },
+  "personagens": {
+    "1": {
+      "exp": "Absolute strength and power: you are the strongest person in the world, and the world must be handled with care."
+    }
+  }
+}

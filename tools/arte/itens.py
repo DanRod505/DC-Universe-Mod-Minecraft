@@ -1,0 +1,409 @@
+#!/usr/bin/env python3
+"""Ícones dos itens (16x16) e texturas dos blocos do mod, desenhados em pixel art.
+
+Saída: src/main/resources/assets/dcuniverse/textures/{item,block}/<id>.png.
+Itens e blocos sem arte aqui continuam com o provisório de tools/recursos_provisorios.py.
+Com --previa <arquivo>, salva uma folha com todos os desenhos ampliados.
+Uso: python3 tools/arte/itens.py --raiz . [--previa /tmp/itens.png]
+"""
+import argparse
+import random
+from pathlib import Path
+
+from PIL import Image
+
+from pixel import Tela, clarear, escurecer, hexa
+
+# Cada ícone: (linhas 16x16, paleta). '.' = transparente.
+ITENS = {}
+BLOCOS = {}
+
+
+def item(nome, paleta, *linhas):
+    assert len(linhas) == 16 and all(len(l) == 16 for l in linhas), nome
+    ITENS[nome] = (linhas, {k: hexa(v) for k, v in paleta.items()})
+
+
+item("cristal_superman", {"o": "#0B2A4A", "a": "#3E8EDB", "b": "#8CC8F5", "w": "#E8F7FF", "r": "#C8202A", "y": "#F6C632"},
+     "......oo........",
+     ".....obwo.......",
+     ".....obwbo......",
+     "....oabwbo......",
+     "....oabwbao.....",
+     "...oaabbbao.....",
+     "...oayyyyyao....",
+     "...oayrrryao....",
+     "...oaryyyyao....",
+     "...oayrrryao....",
+     "....oayyyyao....",
+     "....oaayyaao....",
+     ".....oaaaao.....",
+     ".....oaaao......",
+     "......oao.......",
+     ".......o........")
+
+item("cinto_batman", {"o": "#1A1408", "y": "#D9A92E", "Y": "#F2CE5A", "d": "#8C6A1C", "k": "#202024", "g": "#6A6E78"},
+     "................",
+     "................",
+     "................",
+     "................",
+     "oooooooooooooooo",
+     "oYYYYYYYYYYYYYYo",
+     "oyyyyykkkkyyyyyo",
+     "oYyYyokgkgkoyYyo",
+     "oyyyyykkkkyyyyyo",
+     "oddddddddddddddo",
+     "oYYo.oYYo.oYYo..",
+     "oyyo.oyyo.oyyo..",
+     "oddo.oddo.oddo..",
+     ".oo...oo...oo...",
+     "................",
+     "................")
+
+item("batarangue_simples", {"o": "#050506", "k": "#1E1F24", "g": "#5A5F6B", "w": "#9AA0AC"},
+     "................",
+     "................",
+     "................",
+     "................",
+     "o......oo......o",
+     "oo....owgo....oo",
+     "owo..okwgko..owo",
+     "okgooookkooooggo",
+     "okkggkkkkkkggkko",
+     ".okkkkkkkkkkkko.",
+     "..okkkoookkkko..",
+     "...okko..okko...",
+     "....oo....oo....",
+     "................",
+     "................",
+     "................")
+
+item("fragmento_kryptonita", {"o": "#06300C", "g": "#2FBF3C", "G": "#7CF27A", "w": "#E2FFD8", "d": "#178A25"},
+     "................",
+     "..........o.....",
+     ".........oGo....",
+     "........oGwgo...",
+     "....o...oGgdo...",
+     "...oGo.oGwgdo...",
+     "...oGgooGggdo...",
+     "..oGwgdoGgddo...",
+     "..oGggdogGddoo..",
+     "..oGggddgGgdoGo.",
+     ".ooGgdddgGgdoGgo",
+     "oGGgddddggddoggo",
+     "oggddddddddoggdo",
+     ".ooooooooooooooo",
+     "................",
+     "................")
+
+item("fragmento_alienigena", {"o": "#120A1C", "p": "#4A3266", "P": "#6E5294", "t": "#2FE0C8", "T": "#A8FFF2", "d": "#2C1E40"},
+     "................",
+     "................",
+     "......ooo.......",
+     "....ooPPPoo.....",
+     "...oPPpppPPo....",
+     "..oPpptppppdo...",
+     "..oPppTtpppdo...",
+     ".oPpppptppppdo..",
+     ".oPppppptTppdo..",
+     ".opppdpppttpdo..",
+     ".oppdddppppddo..",
+     "..oddtddpppdo...",
+     "..odddTtdddo....",
+     "...ooddddoo.....",
+     ".....oooo.......",
+     "................")
+
+item("cristal_kryptoniano", {"o": "#1E3A4A", "c": "#9ED8F0", "C": "#D6F3FF", "w": "#FFFFFF", "b": "#5AA8CC"},
+     ".......oo.......",
+     "......oCwo......",
+     "......oCwco.....",
+     ".....oCwwco.....",
+     ".....oCwcbo.....",
+     ".....oCwcbo.....",
+     "....oCCwcbbo....",
+     "....oCwcccbo....",
+     "....oCwccbbo....",
+     "....oCwccbbo....",
+     ".....oCccbo.....",
+     ".....oCccbo.....",
+     "......oCcbo.....",
+     "......ocbo......",
+     ".......oo.......",
+     "................")
+
+item("placa_circuito", {"o": "#0A2410", "g": "#1E7A34", "G": "#2E9E48", "y": "#E8C048", "k": "#16161A", "s": "#8A8F99"},
+     "................",
+     "................",
+     ".oooooooooooooo.",
+     ".oGGGGGGGGGGGGo.",
+     ".oGyyyyGgggyGGo.",
+     ".oGgggyGkkkyGgo.",
+     ".oGgggyykkkyyyo.",
+     ".oGgggggkkkgGgo.",
+     ".oGyyyygkkkgGgo.",
+     ".oGgggygggggGgo.",
+     ".oGgsgyyyyyyyGo.",
+     ".oGgggggggggggo.",
+     ".oyGyGyGyGyGyGo.",
+     ".oooooooooooooo.",
+     "................",
+     "................")
+
+item("componente_tecnologico", {"o": "#141518", "m": "#7C828E", "M": "#B4BAC4", "d": "#4A4F58", "b": "#3AA8FF", "B": "#BFE6FF", "r": "#C83A30"},
+     "................",
+     "................",
+     "...oooooooooo...",
+     "..oMMMMMMMMMMo..",
+     "..oMmmmmmmmmdo..",
+     "..oMmoooooomdo..",
+     "..oMmobbBbomdo..",
+     "..oMmobBbbomdo..",
+     "..oMmoooooomdo..",
+     "..oMmmmmmrmmdo..",
+     "..oMmdmdmdmmdo..",
+     "..oddddddddddo..",
+     "...oooooooooo...",
+     "....o.o..o.o....",
+     "....o.o..o.o....",
+     "................")
+
+item("tecido_tatico", {"o": "#08090B", "k": "#2A2D34", "K": "#444954", "s": "#7A808C", "d": "#1A1C21"},
+     "................",
+     "................",
+     "................",
+     "...ooooooooooo..",
+     "..oKKKKKKKKKKKo.",
+     "..oKksksksksKdo.",
+     "..oKkkkkkkkkkdo.",
+     "..oKKKKKKKKKKdo.",
+     "..okkkkkkkkkkdo.",
+     "..okksksksksddo.",
+     "..okkkkkkkkkkdo.",
+     "..oKKKKKKKKKKdo.",
+     "..oddddddddddo..",
+     "...ooooooooooo..",
+     "................",
+     "................")
+
+
+def nucleo(nome, anel, anel_claro, centro, brilho, metal):
+    item(nome, {"o": "#101014", "m": metal, "M": clarear_hex(metal, 0.35), "a": anel, "A": anel_claro, "c": centro, "w": brilho},
+         "................",
+         ".....oooooo.....",
+         "....oMMMMMMo....",
+         "...oMmaAAammo...",
+         "..oMmAccccammo..",
+         "..oMacwwccamo...",
+         ".oMmAcwccccamo..",
+         ".oMmAccccccamo..",
+         ".oMmaccccccamo..",
+         ".oMmacccccaamo..",
+         "..omaacccaamo...",
+         "..ommaaaaammo...",
+         "...ommmmmmmo....",
+         "....ooommoo.....",
+         "......oooo......",
+         "................")
+
+
+def clarear_hex(c, t):
+    r, g, b, _ = clarear(hexa(c), t)
+    return f"#{r:02X}{g:02X}{b:02X}"
+
+
+nucleo("nucleo_meta_1", "#9A1E1E", "#E04040", "#FF6A4A", "#FFE0D0", "#8A8F99")
+nucleo("nucleo_meta_2", "#1E8A9A", "#46D8E8", "#7AF4FF", "#F0FFFF", "#A0A6B0")
+nucleo("nucleo_meta_3", "#6A2E9A", "#B06AE8", "#FFA040", "#FFF0C0", "#5A4A6A")
+nucleo("nucleo_meta_4", "#0E5A5E", "#22B8B0", "#3AF0E0", "#E0FFFC", "#3A3438")
+
+item("guia_heroi", {"o": "#0C1220", "b": "#1F3E8A", "B": "#3460C0", "y": "#E8B838", "p": "#F2EAD6", "P": "#C8BFA8", "r": "#B02A30"},
+     "................",
+     "..oooooooooooo..",
+     "..oBBBBBBBBBBpo.",
+     "..oBbbbbbbbbBpo.",
+     "..oBbbyyyybbBpo.",
+     "..oBbyybbyybBpo.",
+     "..oBbyyyyyybBpo.",
+     "..oBbbyyyybbBpo.",
+     "..oBbbbyybbbBpo.",
+     "..oBbbbbbbbbBpo.",
+     "..oBbbbbbbbbBPo.",
+     "..oBbbbbbbbbBpo.",
+     "..oBBBBBBBBBBPo.",
+     "..ooooorooooooo.",
+     "......rr........",
+     "................")
+
+item("comunicador_liga", {"o": "#141008", "y": "#D8B040", "Y": "#F6DE80", "d": "#8A6A20", "b": "#2A70D8", "B": "#9AD0FF", "k": "#202228"},
+     "................",
+     "................",
+     ".....oooooo.....",
+     "....oYYYYYYo....",
+     "...oYyyyyyydo...",
+     "..oYyoooooydo...",
+     "..oYyobBBoydo...",
+     "..oYyobbBoydo...",
+     "..oYyobbboydo...",
+     "..oYyoooooydo...",
+     "...oyyyyyyddo...",
+     "....odddddddo...",
+     ".....ookkoo.....",
+     "......okko......",
+     ".......oo.......",
+     "................")
+
+item("torta_martha", {"o": "#3A1E0A", "c": "#D99A48", "C": "#F2C474", "d": "#A8682A", "r": "#B02A2A", "R": "#E05040", "t": "#C0C4CC"},
+     "................",
+     "................",
+     "................",
+     "................",
+     "....oooooooo....",
+     "..ooCCcCCcCCoo..",
+     ".oCcRcCrcCcRcCo.",
+     ".oCCcCCcCCcCCco.",
+     ".ocRcCrcCcRcCdo.",
+     ".oCCcCCcCCcCCdo.",
+     ".oddddddddddddo.",
+     ".otddddddddddto.",
+     "..otttttttttto..",
+     "...oooooooooo...",
+     "................",
+     "................")
+
+TRAJE = {"o": "#0A0C14", "a": "#2A3A6A", "A": "#4A5E9A", "d": "#1A2444"}
+item("traje_cabeca", TRAJE,
+     "................", "................", "................", "....oooooooo....", "...oAAAAAAAAo...",
+     "..oAaaaaaaaado..", "..oAaaaaaaaado..", "..oAaooaaooado..", "..oAaaaaaaaado..", "..oAddo..oddao..",
+     "..oado....odao..", "...oo......oo...", "................", "................", "................", "................")
+item("traje_peito", TRAJE,
+     "................", "..ooo......ooo..", ".oAAAoooooaAAAo.", ".oAaaaAAAAaaaao.", ".oAaaaaaaaaaado.",
+     ".oooAaaaaaaaooo.", "...oAaaaaaado...", "...oAaaaaaado...", "...oAaaaaaado...", "...oAaaaaaado...",
+     "...oAaaaaaado...", "...oddddddddo...", "...oooooooooo...", "................", "................", "................")
+item("traje_pernas", TRAJE,
+     "................", "................", "...oooooooooo...", "...oAAAAAAAAo...", "...oAaaaaaado...",
+     "...oAaaoAaado...", "...oAado.Aado...", "...oAado.Aado...", "...oAado.Aado...", "...oAado.Aado...",
+     "...oAado.Aado...", "...oddoo.oddo...", "...ooo...ooo....", "................", "................", "................")
+item("traje_pes", TRAJE,
+     "................", "................", "................", "................", "................",
+     "...ooo....ooo...", "...oAo....oAo...", "...oao....oao...", "...oao....oao...", "..oAao...oAao...",
+     ".oAaao..oAaado..", ".oddddo.odddddo.", ".ooooooooooooo..", "................", "................", "................")
+
+
+# ---------------------------------------------------------------- blocos
+
+def bloco(nome):
+    def reg(f):
+        BLOCOS[nome] = f
+        return f
+    return reg
+
+
+def pedra(t, rnd, base, var=0.08):
+    for y in range(16):
+        for x in range(16):
+            r = rnd.uniform(-var, var)
+            c = clarear(base, r) if r > 0 else escurecer(base, -r)
+            t.p(x, y, c)
+    # veios horizontais típicos da ardósia
+    for y in (3, 8, 12):
+        for x in range(16):
+            if rnd.random() < 0.55:
+                t.p(x, y, escurecer(base, 0.18))
+
+
+CRISTAIS = [(3, 3), (10, 2), (6, 9), (12, 10), (2, 12)]
+
+
+@bloco("minerio_kryptonita")
+def _minerio(t):
+    rnd = random.Random(10)
+    pedra(t, rnd, hexa("#4A4A52"))
+    g, G, w, d = hexa("#2FBF3C"), hexa("#7CF27A"), hexa("#E2FFD8"), hexa("#106A1A")
+    for cx, cy in CRISTAIS:
+        t.bitmap(cx, cy, [".G.", "GwG", "dgd"][:3], {"G": G, "w": w, "g": g, "d": d})
+        t.p(cx + 1, cy + 3, d)
+
+
+@bloco("bloco_kryptonita")
+def _bloco(t):
+    rnd = random.Random(11)
+    g, G, w, d, o = hexa("#2FBF3C"), hexa("#7CF27A"), hexa("#E2FFD8"), hexa("#178A25"), hexa("#0A4A12")
+    for y in range(16):
+        for x in range(16):
+            # facetas diagonais
+            f = ((x + y) // 4) % 2
+            c = g if f else d
+            if (x - y) % 8 == 0:
+                c = G
+            if rnd.random() < 0.05:
+                c = w
+            t.p(x, y, c)
+    for i in range(16):
+        t.p(i, 0, G); t.p(0, i, G); t.p(i, 15, o); t.p(15, i, o)
+
+
+@bloco("batcomputador")
+def _batcomp(t):
+    k, m, M, b, B = hexa("#16171B"), hexa("#2E3138"), hexa("#4A4F5A"), hexa("#1E6AD0"), hexa("#8AC8FF")
+    t.ret(0, 0, 16, 16, m)
+    for i in range(16):
+        t.p(i, 0, M); t.p(0, i, M); t.p(i, 15, k); t.p(15, i, k)
+    t.ret(2, 2, 12, 8, k)
+    for y in range(3, 9):
+        for x in range(3, 13):
+            t.p(x, y, b if (x + y) % 3 else hexa("#164C9A"))
+    t.bitmap(5, 4, ["B....B", "BB..BB", "BBBBBB", ".B..B."], {"B": B})
+    for x in range(2, 14, 2):
+        t.p(x, 12, M); t.p(x + 1, 12, k)
+    t.p(13, 12, hexa("#D03030"))
+
+
+@bloco("batcomputador_lado")
+def _batcomp_lado(t):
+    k, m, M = hexa("#16171B"), hexa("#2E3138"), hexa("#4A4F5A")
+    t.ret(0, 0, 16, 16, m)
+    for i in range(16):
+        t.p(i, 0, M); t.p(0, i, M); t.p(i, 15, k); t.p(15, i, k)
+    for y in range(3, 13, 3):  # grelhas de ventilação
+        for x in range(3, 13):
+            t.p(x, y, k); t.p(x, y + 1, M if x % 2 else m)
+
+
+@bloco("batcomputador_topo")
+def _batcomp_topo(t):
+    k, m, M = hexa("#16171B"), hexa("#2E3138"), hexa("#4A4F5A")
+    t.ret(0, 0, 16, 16, m)
+    for i in range(16):
+        t.p(i, 0, M); t.p(0, i, M); t.p(i, 15, k); t.p(15, i, k)
+    t.ret(4, 4, 8, 8, k)
+    t.ret(5, 5, 6, 6, M)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--raiz", default=".")
+    ap.add_argument("--previa")
+    a = ap.parse_args()
+    raiz = Path(a.raiz).resolve() / "src/main/resources/assets/dcuniverse/textures"
+    desenhos = []
+    for nome, (linhas, pal) in ITENS.items():
+        t = Tela(16, 16)
+        t.bitmap(0, 0, linhas, pal)
+        t.salvar(raiz / f"item/{nome}.png")
+        desenhos.append(t.img)
+    for nome, f in BLOCOS.items():
+        t = Tela(16, 16)
+        f(t)
+        t.salvar(raiz / f"block/{nome}.png")
+        desenhos.append(t.img)
+    if a.previa:
+        folha = Image.new("RGBA", (len(desenhos) * 18, 18), (139, 139, 139, 255))
+        for i, img in enumerate(desenhos):
+            folha.alpha_composite(img, (i * 18 + 1, 1))
+        folha.resize((folha.width * 5, folha.height * 5), Image.NEAREST).save(a.previa)
+    print(f"arte: {len(ITENS)} itens, {len(BLOCOS)} blocos")
+
+
+if __name__ == "__main__":
+    main()

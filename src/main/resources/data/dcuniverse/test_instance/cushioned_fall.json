@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "dcuniverse:cushioned_fall",
+  "environment": "minecraft:default",
+  "structure": "minecraft:empty",
+  "max_ticks": 20
+}
