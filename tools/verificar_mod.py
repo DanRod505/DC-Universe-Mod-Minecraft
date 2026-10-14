@@ -155,7 +155,8 @@ def verificar_personagens(raiz, recursos, erros):
                 erros.append(f"{nome}: suprema {h.get('id')} com recarga {h.get('cooldown')} s, deve ser 60-180")
             if h.get("mode") == "hold":
                 erros.append(f"{nome}: suprema {h.get('id')} não pode ser canalizada")
-        textos = [f"personagem.dcuniverse.{nome}.exp"]
+        textos = [f"personagem.dcuniverse.{nome}.exp", f"personagem.dcuniverse.{nome}.lore"]
+        textos += [f"habilidade.dcuniverse.{h.get('id')}.desc" for h in c.get("abilities", [])]
         textos += [f"dcuniverse.guia.passiva.{p.get('type')}" for p in c.get("passives", [])]
         textos += [f"dcuniverse.guia.recarga.{r.get('type')}" for r in c.get("energy", {}).get("recharge", [])]
         for i in IDIOMAS:

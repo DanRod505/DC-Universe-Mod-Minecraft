@@ -12,7 +12,8 @@
   },
   "suit": [ "chest", "legs", "feet" ],
   "passives": [
-    { "type": "flight", "speed": 32, "drain": 0.5, "boost_drain": 3 },
+    { "type": "flight", "speed": 32, "drain": 0.5, "boost_drain": 3, "dash_cost": 15,
+      "trail_color": "#2F6BFF", "trail_color2": "#E3262E" },
     { "type": "fall_immunity" },
     { "type": "fire_immunity" }
   ],

@@ -1,6 +1,8 @@
 package com.danrod.dcuniverse.client.guia;
 
 import com.danrod.dcuniverse.DCUniverse;
+import com.danrod.dcuniverse.ability.Alvos;
+import com.danrod.dcuniverse.character.Params;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.client.Skins;
 import com.danrod.dcuniverse.core.EstadoCliente;
@@ -342,10 +344,10 @@ public final class GuiaScreen extends Screen {
         if (p == null) return out;
         String chave = "personagem." + p.id().getNamespace() + "." + p.id().getPath();
         if (!descoberto(p)) {
-            out.add(texto(Component.translatable("dcuniverse.guia.personagem.como_descobrir"), SUAVE, 4));
+            texto(out, Component.translatable("dcuniverse.guia.personagem.como_descobrir"), SUAVE, 4);
             return out;
         }
-        out.add(texto(Component.translatable(chave + ".exp").withStyle(ChatFormatting.ITALIC), SUAVE, 6));
+        texto(out, Component.translatable(chave + ".exp").withStyle(ChatFormatting.ITALIC), SUAVE, 6);
         out.add(secao("dcuniverse.guia.secao.ficha"));
         Personagem.Ficha f = p.ficha();
         out.add(atributo("vida", f.vida(), FichaEscala.VIDA, fmt(f.vida())));
@@ -353,6 +355,11 @@ public final class GuiaScreen extends Screen {
         out.add(atributo("dano", f.dano(), FichaEscala.DANO, fmt(f.dano())));
         out.add(atributo("energia", p.energia().max(), FichaEscala.ENERGIA, fmt(p.energia().max())));
         out.add(atributo("velocidade", f.terra(), FichaEscala.VELOCIDADE, fmt(f.terra())));
+        Personagem.Tipo voo = p.passiva("flight");
+        if (voo != null) out.add(atributo("voo", voo.params().d("speed", 12), FichaEscala.VOO, fmt(voo.params().d("speed", 12))));
+        Personagem.Tipo planar = p.passiva("glide");
+        if (planar != null) out.add(atributo("planar", planar.params().d("speed", 10), FichaEscala.PLANAR, fmt(planar.params().d("speed", 10))));
+        texto(out, Component.translatable("dcuniverse.guia.ficha.unidades"), SUAVE, 0);
         out.add(espaco(4));
         out.add(secao("dcuniverse.guia.secao.energia"));
         out.add(item(Component.translatable("dcuniverse.guia.recarga.base", fmt(p.energia().regen()))));
@@ -362,26 +369,56 @@ public final class GuiaScreen extends Screen {
         if (!p.passivas().isEmpty()) {
             out.add(espaco(4));
             out.add(secao("dcuniverse.guia.secao.passivas"));
-            for (Personagem.Tipo t : p.passivas()) out.add(item(Component.translatable("dcuniverse.guia.passiva." + t.tipo())));
+            for (Personagem.Tipo t : p.passivas()) {
+                out.add(item(Component.translatable("dcuniverse.guia.passiva." + t.tipo())));
+                if (t.tipo().equals("flight")) {
+                    double max = t.params().d("speed", 12);
+                    texto(out, Component.translatable("dcuniverse.guia.voo.detalhe", fmt(max * 0.45), fmt(max),
+                        fmt(t.params().d("dash_cost", 15))), SUAVE, 2);
+                }
+            }
         }
         List<Personagem.Habilidade> normais = p.habilidades().stream().filter(h -> !h.suprema()).toList();
         if (!normais.isEmpty()) {
             out.add(espaco(4));
             out.add(secao("dcuniverse.guia.secao.habilidades"));
-            for (Personagem.Habilidade h : normais) {
-                String custo = h.modo() == Personagem.Modo.HOLD ? fmt(h.custo()) + "/s" : fmt(h.custo());
-                out.add(item(Component.translatable("dcuniverse.guia.habilidade", Component.translatable("habilidade.dcuniverse." + h.id()), custo)));
-            }
+            for (Personagem.Habilidade h : normais) habilidade(out, p, h);
         }
         Personagem.Habilidade sup = p.suprema();
         if (sup != null) {
             out.add(espaco(4));
             out.add(secao("dcuniverse.guia.secao.suprema"));
             int pct = Math.round(sup.custo() * 100f / p.energia().max());
-            out.add(texto(Component.translatable("habilidade.dcuniverse." + sup.id()).withStyle(ChatFormatting.BOLD), TITULO, 0));
+            out.add(nome(Component.translatable("habilidade.dcuniverse." + sup.id())));
+            texto(out, Component.translatable("habilidade.dcuniverse." + sup.id() + ".desc"), TINTA, 1);
             out.add(item(Component.translatable("dcuniverse.guia.suprema.custo", pct, fmt(sup.recargaSeg()))));
         }
+        out.add(espaco(4));
+        out.add(secao("dcuniverse.guia.secao.historia"));
+        texto(out, Component.translatable(chave + ".lore"), TINTA, 0);
         return out;
+    }
+
+    /** Nome, o que faz e os números: como usar e quanto gasta, recarga, alcance e dano em corações. */
+    private void habilidade(List<Bloco> out, Personagem p, Personagem.Habilidade h) {
+        Params prm = h.params();
+        out.add(nome(Component.translatable("habilidade.dcuniverse." + h.id())));
+        texto(out, Component.translatable("habilidade.dcuniverse." + h.id() + ".desc"), TINTA, 1);
+        boolean segura = h.modo() == Personagem.Modo.HOLD;
+        out.add(item(Component.translatable(segura ? "dcuniverse.guia.hab.segurar" : "dcuniverse.guia.hab.apertar", fmt(h.custo()))));
+        Component recarga = Component.translatable("dcuniverse.guia.hab.recarga", fmt(h.recargaSeg()));
+        out.add(item(prm.json().has("range")
+            ? Component.translatable("dcuniverse.guia.hab.recarga_alcance", fmt(h.recargaSeg()), fmt(prm.d("range", 0)))
+            : recarga));
+        if (prm.json().has("damage_mult")) {
+            // Raio e cone acertam a cada 10 ticks com metade do dano: o dano cheio por segundo.
+            double coracoes = Alvos.dano(p, prm.d("damage_mult", 0.5)) / 2.0;
+            out.add(item(Component.translatable(segura ? "dcuniverse.guia.hab.dano_seg" : "dcuniverse.guia.hab.dano", fmt(coracoes))));
+        }
+        if (prm.d("impact_radius", 0) > 0) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.impacto", fmt(prm.d("impact_radius", 0)))));
+        }
+        out.add(espaco(3));
     }
 
     private List<List<Bloco>> paginasDireita() {
@@ -389,8 +426,14 @@ public final class GuiaScreen extends Screen {
         List<List<Bloco>> paginas = new ArrayList<>();
         List<Bloco> atual = new ArrayList<>();
         int livre = BASE - TOPO - 14, usado = 0;
-        for (Bloco b : blocos) {
-            if (usado + b.altura > livre && !atual.isEmpty()) {
+        for (int i = 0; i < blocos.size(); i++) {
+            Bloco b = blocos.get(i);
+            // Títulos seguidos levam junto o primeiro bloco depois deles.
+            int junto = b.altura;
+            for (int j = i; j < blocos.size() && blocos.get(j).preso() && j + 1 < blocos.size(); j++) {
+                junto += blocos.get(j + 1).altura;
+            }
+            if (usado + junto > livre && !atual.isEmpty()) {
                 paginas.add(atual);
                 atual = new ArrayList<>();
                 usado = 0;
@@ -408,16 +451,25 @@ public final class GuiaScreen extends Screen {
         void desenhar(GuiGraphicsExtractor g, int x, int y);
     }
 
-    record Bloco(int altura, Desenho desenho) {}
+    /** preso: título que não pode ficar sozinho no fim da página (vai junto com o bloco seguinte). */
+    record Bloco(int altura, Desenho desenho, boolean preso) {
+        Bloco(int altura, Desenho desenho) {
+            this(altura, desenho, false);
+        }
+    }
 
-    private Bloco texto(Component c, int cor, int depois) {
+    /** Parágrafo: uma linha por bloco, para textos longos (como a história) continuarem na página seguinte. */
+    private void texto(List<Bloco> out, Component c, int cor, int depois) {
         List<FormattedCharSequence> linhas = font.split(c, PAG_W);
-        return new Bloco(linhas.size() * 10 + depois, (g, x, y) -> {
-            for (FormattedCharSequence l : linhas) {
-                g.text(font, l, x, y, cor, false);
-                y += 10;
-            }
-        });
+        for (int i = 0; i < linhas.size(); i++) {
+            FormattedCharSequence l = linhas.get(i);
+            out.add(new Bloco(10 + (i == linhas.size() - 1 ? depois : 0), (g, x, y) -> g.text(font, l, x, y, cor, false)));
+        }
+    }
+
+    private Bloco nome(Component c) {
+        Component negrito = c.copy().withStyle(ChatFormatting.BOLD);
+        return new Bloco(10, (g, x, y) -> g.text(font, negrito, x, y, TITULO, false), true);
     }
 
     private Bloco secao(String chave) {
@@ -426,7 +478,7 @@ public final class GuiaScreen extends Screen {
             g.text(font, c, x, y, TITULO, false);
             int fim = x + font.width(c) + 4;
             g.fill(fim, y + 4, x + PAG_W, y + 5, 0x55B0841E);
-        });
+        }, true);
     }
 
     private Bloco item(Component c) {
@@ -530,7 +582,7 @@ public final class GuiaScreen extends Screen {
 
     /** Maiores valores da ficha entre os 100 personagens (docs/dados/personagens.json): a barra cheia. */
     static final class FichaEscala {
-        static final double VIDA = 40, ARMADURA = 24, DANO = 12, ENERGIA = 320, VELOCIDADE = 7.5;
+        static final double VIDA = 40, ARMADURA = 24, DANO = 12, ENERGIA = 320, VELOCIDADE = 7.5, VOO = 34, PLANAR = 14;
 
         private FichaEscala() {}
     }

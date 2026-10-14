@@ -32,8 +32,12 @@ public final class Cliente {
             e.register(Teclas.DESTRANSFORMAR);
             e.register(Teclas.GUIA);
         });
-        AddGuiOverlayLayersEvent.BUS.addListener(e -> e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
-            Identifier.fromNamespaceAndPath(DCUniverse.MODID, "hud"), Hud::desenhar));
+        AddGuiOverlayLayersEvent.BUS.addListener(e -> {
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "velocidade"), Voador::desenharLinhas);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "hud"), Hud::desenhar);
+        });
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new));
         TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
         ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> {

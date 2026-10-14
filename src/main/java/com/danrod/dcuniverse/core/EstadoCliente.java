@@ -22,6 +22,9 @@ public final class EstadoCliente {
     /** Jogadores que acabaram de transformar (o cliente toca o efeito de transformação e tira da fila). */
     public static final Map<Integer, Rede.Aparencia> TRANSFORMOU = new ConcurrentHashMap<>();
 
+    /** Manobras de voo de outros jogadores que o cliente ainda vai animar. */
+    public static final java.util.Queue<Rede.ManobraVista> MANOBRAS = new java.util.concurrent.ConcurrentLinkedQueue<>();
+
     private EstadoCliente() {}
 
     public static void aparencia(Rede.Aparencia a) {
@@ -53,5 +56,6 @@ public final class EstadoCliente {
         tarefaNova = "";
         APARENCIAS.clear();
         TRANSFORMOU.clear();
+        MANOBRAS.clear();
     }
 }

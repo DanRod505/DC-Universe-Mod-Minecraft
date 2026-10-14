@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 5;
+    private static final int VERSAO = 6;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -42,8 +42,8 @@ public final class Rede {
      */
     public record Sync(String personagem, float energia, float max, boolean esgotado, int selecionada,
                        String canalizando, List<HabInfo> habilidades, float planar, boolean amortecendo,
-                       float recarga, boolean solar, boolean sol, float voo) {
-        public static final Sync VAZIO = new Sync("", 0, 0, false, 0, "", List.of(), 0, false, 0, false, false, 0);
+                       float recarga, boolean solar, boolean sol, float voo, float arrancada) {
+        public static final Sync VAZIO = new Sync("", 0, 0, false, 0, "", List.of(), 0, false, 0, false, false, 0, 0);
 
         /** A habilidade pode ser usada agora: sem recarga pendente e com energia para o custo. */
         public boolean pronta(HabInfo h) {
@@ -72,6 +72,7 @@ public final class Rede {
             b.writeBoolean(m.solar);
             b.writeBoolean(m.sol);
             b.writeFloat(m.voo);
+            b.writeFloat(m.arrancada);
         }
 
         public static Sync decode(FriendlyByteBuf b) {
@@ -86,7 +87,7 @@ public final class Rede {
                 habs.add(new HabInfo(b.readUtf(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readVarInt(), b.readVarInt()));
             }
             return new Sync(p, e, max, esg, sel, can, List.copyOf(habs), b.readFloat(), b.readBoolean(),
-                b.readFloat(), b.readBoolean(), b.readBoolean(), b.readFloat());
+                b.readFloat(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readFloat());
         }
     }
 
@@ -95,7 +96,8 @@ public final class Rede {
      * efeito da habilidade canalizada agora (tipo, "" = nenhuma), com cor, alcance e ângulo, para todo mundo
      * ver o raio ou o sopro, e se ele está voando (para a pose de voo).
      */
-    public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo, boolean voando) {
+    public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo, boolean voando,
+                            int rastro, int rastro2) {
         public static void encode(Aparencia m, FriendlyByteBuf b) {
             b.writeVarInt(m.entidade);
             b.writeUtf(m.personagem);
@@ -105,10 +107,13 @@ public final class Rede {
             b.writeFloat(m.alcance);
             b.writeFloat(m.angulo);
             b.writeBoolean(m.voando);
+            b.writeInt(m.rastro);
+            b.writeInt(m.rastro2);
         }
 
         public static Aparencia decode(FriendlyByteBuf b) {
-            return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat(), b.readBoolean());
+            return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat(), b.readBoolean(),
+                b.readInt(), b.readInt());
         }
     }
 
@@ -146,6 +151,12 @@ public final class Rede {
 
     /** O cliente passou da barreira do som voando (o servidor confere e solta o estrondo). */
     public record Estrondo() {}
+
+    /** Manobra de voo feita pelo cliente (Voo.GIRO_ESQUERDA... ARRANCADA). */
+    public record Manobra(int tipo) {}
+
+    /** Outro jogador fez uma manobra: quem vê anima a pose dele. */
+    public record ManobraVista(int entidade, int tipo) {}
 
     public record Destransformar() {}
 
@@ -187,6 +198,17 @@ public final class Rede {
             .encoder((m, b) -> {}).decoder(b -> new Estrondo())
             .consumerMainThread((m, ctx) -> comJogador(ctx, Voo::estrondo))
             .add();
+        CANAL.messageBuilder(Manobra.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.tipo())).decoder(b -> new Manobra(b.readVarInt()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Voo.manobra(p, m.tipo())))
+            .add();
+        CANAL.messageBuilder(ManobraVista.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeVarInt(m.tipo()))
+            .decoder(b -> new ManobraVista(b.readVarInt(), b.readVarInt()))
+            .consumerMainThread((m, ctx) -> EstadoCliente.MANOBRAS.add(m))
+            .add();
         CANAL.messageBuilder(Destransformar.class)
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> {}).decoder(b -> new Destransformar())
@@ -205,6 +227,12 @@ public final class Rede {
         CANAL.send(montarAparencia(player), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(player));
     }
 
+    /** Avisa só quem está vendo o jogador (ele mesmo já animou a manobra). */
+    public static void manobraVista(ServerPlayer player, int tipo) {
+        if (player.connection == null) return;
+        CANAL.send(new ManobraVista(player.getId(), tipo), PacketDistributor.TRACKING_ENTITY.with(player));
+    }
+
     /** Manda a aparência de alvo só para quem começou a ver ele. */
     public static void aparenciaPara(ServerPlayer quemVe, ServerPlayer alvo) {
         if (quemVe.connection == null) return;
@@ -214,12 +242,15 @@ public final class Rede {
     public static Aparencia montarAparencia(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false);
+        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0);
         Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
         boolean voando = Voo.voando(player);
-        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0, voando);
+        Personagem.Tipo voo = p.passiva("flight");
+        int rastro = voo == null ? 0 : voo.params().color("trail_color", p.cor());
+        int rastro2 = voo == null ? 0 : voo.params().color("trail_color2", rastro);
+        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0, voando, rastro, rastro2);
         return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
-            h.params().f("range", 8), h.params().f("angle", 30), voando);
+            h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2);
     }
 
     /** Envia o estado completo ao próprio jogador. */
@@ -231,7 +262,7 @@ public final class Rede {
     public static Sync montar(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return e.amortecendo() ? new Sync("", 0, 0, false, 0, "", List.of(), 0, true, 0, false, false, 0) : Sync.VAZIO;
+        if (p == null) return e.amortecendo() ? new Sync("", 0, 0, false, 0, "", List.of(), 0, true, 0, false, false, 0, 0) : Sync.VAZIO;
         long agora = player.level().getGameTime();
         List<HabInfo> habs = new ArrayList<>();
         for (Personagem.Habilidade h : p.habilidades()) {
@@ -246,7 +277,8 @@ public final class Rede {
         boolean solar = p.energia().recargas().stream().anyMatch(r -> r.tipo().equals("sunlight"));
         return new Sync(p.id().toString(), e.energia(), p.energia().max(), e.esgotado(), selecionada,
             e.canalizando(), List.copyOf(habs), planar == null ? 0f : planar.params().f("speed", 10f), e.amortecendo(),
-            Recargas.porSegundo(player, p), solar, solar && Recargas.sobOSol(player), Voo.velocidade(p));
+            Recargas.porSegundo(player, p), solar, solar && Recargas.sobOSol(player), Voo.velocidade(p),
+            p.passiva("flight") == null ? 0f : p.passiva("flight").params().f("dash_cost", 15f));
     }
 
     public static void catalogo(ServerPlayer player) {

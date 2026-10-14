@@ -1,14 +1,19 @@
 package com.danrod.dcuniverse.client;
 
+import com.danrod.dcuniverse.ability.passive.Voo;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.core.Rede;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -30,33 +35,64 @@ import java.util.function.Predicate;
 /**
  * Física do voo (passiva flight), calculada no cliente como a do élitro: o pulo duplo liga o voo do próprio
  * jogo (com a velocidade dele zerada pelo servidor) e aqui a velocidade é trocada a cada tick por uma com
- * aceleração, inércia e curvas abertas. Também cuida da câmera (inclinação nas curvas, campo de visão que
- * abre com a velocidade e tremor no estrondo), do vento, da pose de voo de todo jogador voando e do rastro.
+ * aceleração, inércia e curvas abertas. Também cuida das manobras (toque duplo em A/D gira, S dá meia-volta,
+ * W arranca), da câmera (inclinação, campo de visão, tremor e linhas de velocidade), do vento, da pose de voo
+ * de todo jogador voando e dos rastros (faixas coloridas e vapor).
  */
 public final class Voador {
     /** Velocidade de cruzeiro (sem correr), em fração da máxima. */
     static final double CRUZEIRO = 0.45;
-    /** Ganho de velocidade por tick, em fração da máxima (0 até a máxima em ~1,4 s). */
-    static final double ACEL = 0.035;
+    /** Ganho de velocidade por tick, em fração da máxima (0 até a máxima em ~1 s). */
+    static final double ACEL = 0.05;
     /** Perda de velocidade por tick sem nenhuma tecla (a inércia leva ~1 s para parar). */
     static final double FREIO = 0.05;
     /** Quanto a curva (mudança de direção) é mais rápida que a aceleração em linha reta. */
     static final double CURVA = 2.2;
     /** Estrondo sônico ao passar desta fração da máxima; rearma abaixo de REARMA. */
     static final double BARREIRA = 0.95, REARMA = 0.7;
+    /** Arrancada: dispara acima da máxima e volta a ela pela própria aceleração. */
+    static final double ARRANCADA = 1.3;
+    /** Toque duplo: o segundo toque precisa vir até este número de ticks depois do primeiro. */
+    static final int TOQUE_DUPLO = 6;
+    /** Duração das manobras (ticks). */
+    static final int GIRO_TICKS = 12, MEIA_VOLTA_TICKS = 10, ARRANCADA_TICKS = 10;
+    /** Rastro colorido a partir desta velocidade (blocos/s); vapor branco a partir de VAPOR. */
+    static final double RASTRO = 10, VAPOR = 28;
 
     /** Velocidade atual do jogador local (blocos/tick), null quando não está voando. */
     private static Vec3 vel;
     private static boolean armado = true;
-    private static int tremor;
+    private static int tremor, ticks;
+    private static float soco;
     private static SomVento som;
+    /** Manobra do jogador local em andamento (-1 = nenhuma) e há quantos ticks começou. */
+    private static int manobra = -1, manobraT, ultimaManobra = -100;
+    private static final Toque ESQ = new Toque(), DIR = new Toque(), TRAS = new Toque(), FRENTE = new Toque();
     /** Pose de voo de cada jogador visível que está voando (id da entidade). */
     private static final Map<Integer, Pose> POSES = new HashMap<>();
 
-    /** Quanto o corpo deita (0 em pé, 1 deitado) e quanto inclina na curva (radianos), suavizados. */
+    /** Quanto o corpo deita (0 em pé, 1 deitado), quanto inclina na curva (radianos) e a manobra que anima. */
     private static final class Pose {
         float deitado, inclinacao, ultimoYaw;
         double blocosPorSeg;
+        int manobra = -1, manobraT;
+        Vec3 faixaA, faixaB;
+    }
+
+    /** Detecta o toque duplo de uma tecla. */
+    private static final class Toque {
+        boolean antes;
+        int ultimo = -100;
+
+        boolean duplo(KeyMapping k, boolean livre) {
+            boolean agora = livre && k.isDown();
+            boolean apertou = agora && !antes;
+            antes = agora;
+            if (!apertou) return false;
+            boolean dup = ticks - ultimo <= TOQUE_DUPLO;
+            ultimo = dup ? -100 : ticks;
+            return dup;
+        }
     }
 
     private Voador() {}
@@ -66,8 +102,8 @@ public final class Voador {
         ViewportEvent.ComputeCameraAngles.BUS.addListener(Voador::camera);
         ComputeFovModifierEvent.BUS.addListener(e -> {
             if (e.getPlayer() != Minecraft.getInstance().player || vel == null) return;
-            double frac = Math.min(1, vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo()));
-            e.setNewFovModifier(e.getNewFovModifier() * (float) (1 + 0.22 * frac * frac));
+            double frac = Math.min(1.3, vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo()));
+            e.setNewFovModifier(e.getNewFovModifier() * (float) (1 + 0.32 * frac * frac + soco));
         });
         RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
             if (e.getState() instanceof AvatarRenderState s) pose(s);
@@ -76,16 +112,20 @@ public final class Voador {
     }
 
     public static boolean voando(LocalPlayer p) {
-        return EstadoCliente.atual.voo() > 0 && p.getAbilities().flying && !p.isCreative() && !p.isSpectator() && !p.isPassenger();
+        return EstadoCliente.atual.voo() > 0 && p.getAbilities().flying && !p.isSpectator() && !p.isPassenger();
     }
 
     /** Antes do tick do jogador: troca a velocidade dele pela do voo. */
     private static void fisica(Minecraft mc) {
         LocalPlayer p = mc.player;
         if (p == null || mc.isPaused()) return;
+        ticks++;
+        boolean livre = mc.gui.screen() == null;
         if (!voando(p)) {
             vel = null;
             armado = true;
+            manobra = -1;
+            for (Toque t : new Toque[] {ESQ, DIR, TRAS, FRENTE}) t.antes = false;
             return;
         }
         double max = EstadoCliente.atual.voo() / 20.0;
@@ -94,15 +134,16 @@ public final class Voador {
         if (vel == null) vel = p.getDeltaMovement();
         else if (medida.lengthSqr() < max * max * 4) vel = medida;
 
-        boolean livre = mc.gui.screen() == null;
+        float yaw = p.getYRot() * Mth.DEG_TO_RAD;
+        Vec3 esquerda = new Vec3(Mth.cos(yaw), 0, Mth.sin(yaw));
+        manobras(mc, p, livre, max, esquerda);
+
         int frente = 0, lado = 0, vertical = 0;
         if (livre) {
             frente = (mc.options.keyUp.isDown() ? 1 : 0) - (mc.options.keyDown.isDown() ? 1 : 0);
             lado = (mc.options.keyLeft.isDown() ? 1 : 0) - (mc.options.keyRight.isDown() ? 1 : 0);
             vertical = (mc.options.keyJump.isDown() ? 1 : 0) - (mc.options.keyShift.isDown() ? 1 : 0);
         }
-        float yaw = p.getYRot() * Mth.DEG_TO_RAD;
-        Vec3 esquerda = new Vec3(Mth.cos(yaw), 0, Mth.sin(yaw));
         Vec3 dir = p.getLookAngle().scale(frente).add(esquerda.scale(lado)).add(0, vertical, 0);
         Vec3 alvo = Vec3.ZERO;
         if (dir.lengthSqr() > 1e-6) {
@@ -112,19 +153,22 @@ public final class Voador {
         }
         if (p.isInWater()) alvo = alvo.scale(0.3);
 
-        Vec3 dv = alvo.subtract(vel);
-        double v = vel.length();
-        boolean parando = alvo.lengthSqr() < 1e-6;
-        double acc = max * (parando ? FREIO : ACEL);
-        if (v > max * 0.1) {
-            // Separa a mudança na direção do movimento (acelera ou freia) da mudança de direção (curva).
-            Vec3 n = vel.scale(1 / v);
-            double ao = dv.dot(n);
-            Vec3 frenteDv = n.scale(ao);
-            Vec3 curva = dv.subtract(frenteDv);
-            vel = vel.add(limitar(frenteDv, ao < 0 ? Math.max(acc, max * FREIO) : acc)).add(limitar(curva, acc * CURVA));
-        } else {
-            vel = vel.add(limitar(dv, acc * 1.5));
+        if (manobra != Voo.MEIA_VOLTA) {
+            Vec3 dv = alvo.subtract(vel);
+            double v = vel.length();
+            boolean parando = alvo.lengthSqr() < 1e-6;
+            double acc = max * (parando ? FREIO : ACEL);
+            if (v > max * 0.1) {
+                // Separa a mudança na direção do movimento (acelera ou freia) da mudança de direção (curva).
+                Vec3 n = vel.scale(1 / v);
+                double ao = dv.dot(n);
+                Vec3 frenteDv = n.scale(ao);
+                Vec3 curva = dv.subtract(frenteDv);
+                double freio = manobra == Voo.ARRANCADA ? acc * 0.3 : Math.max(acc, max * FREIO);
+                vel = vel.add(limitar(frenteDv, ao < 0 ? freio : acc)).add(limitar(curva, acc * CURVA));
+            } else {
+                vel = vel.add(limitar(dv, acc * 1.5));
+            }
         }
         p.setDeltaMovement(vel);
 
@@ -137,16 +181,84 @@ public final class Voador {
         }
     }
 
+    /** Toque duplo em A/D gira de lado (esquiva), em S dá meia-volta mantendo a velocidade e em W arranca. */
+    private static void manobras(Minecraft mc, LocalPlayer p, boolean livre, double max, Vec3 esquerda) {
+        if (manobra >= 0) {
+            manobraT++;
+            if (manobra == Voo.MEIA_VOLTA) {
+                // Vira 180° em MEIA_VOLTA_TICKS, levando a velocidade junto (como um Immelmann).
+                float passo = 180f / MEIA_VOLTA_TICKS;
+                p.setYRot(p.getYRot() + passo);
+                p.setYHeadRot(p.getYRot());
+                vel = girar(vel, passo);
+            }
+            if (manobraT >= duracao(manobra)) manobra = -1;
+        }
+        boolean esq = ESQ.duplo(mc.options.keyLeft, livre), dir = DIR.duplo(mc.options.keyRight, livre);
+        boolean tras = TRAS.duplo(mc.options.keyDown, livre), frente = FRENTE.duplo(mc.options.keyUp, livre);
+        if (manobra >= 0 || ticks - ultimaManobra < Voo.MANOBRA_INTERVALO) return;
+        int tipo = esq ? Voo.GIRO_ESQUERDA : dir ? Voo.GIRO_DIREITA : tras ? Voo.MEIA_VOLTA : frente ? Voo.ARRANCADA : -1;
+        if (tipo < 0) return;
+        Rede.Sync s = EstadoCliente.atual;
+        if (tipo == Voo.MEIA_VOLTA && vel.length() < max * 0.25) return;
+        if (tipo == Voo.ARRANCADA && !p.isCreative() && (s.esgotado() || Hud.energia(s, 0) < s.arrancada())) return;
+        manobra = tipo;
+        manobraT = 0;
+        ultimaManobra = ticks;
+        switch (tipo) {
+            case Voo.GIRO_ESQUERDA, Voo.GIRO_DIREITA -> {
+                double sinal = tipo == Voo.GIRO_ESQUERDA ? 1 : -1;
+                vel = vel.add(esquerda.scale(sinal * max * 0.6));
+            }
+            case Voo.ARRANCADA -> {
+                vel = p.getLookAngle().scale(max * ARRANCADA);
+                soco = 0.25f;
+                tremor = Math.max(tremor, 8);
+            }
+            default -> {}
+        }
+        Pose ps = POSES.get(p.getId());
+        if (ps != null) {
+            ps.manobra = tipo;
+            ps.manobraT = 0;
+        }
+        Rede.CANAL.send(new Rede.Manobra(tipo), PacketDistributor.SERVER.noArg());
+    }
+
+    private static int duracao(int tipo) {
+        return switch (tipo) {
+            case Voo.MEIA_VOLTA -> MEIA_VOLTA_TICKS;
+            case Voo.ARRANCADA -> ARRANCADA_TICKS;
+            default -> GIRO_TICKS;
+        };
+    }
+
+    /** Gira o vetor em volta do eixo vertical, no mesmo sentido do yaw do jogo. */
+    private static Vec3 girar(Vec3 v, float graus) {
+        double a = graus * Mth.DEG_TO_RAD;
+        double c = Math.cos(a), s = Math.sin(a);
+        return new Vec3(v.x * c - v.z * s, v.y, v.x * s + v.z * c);
+    }
+
     private static Vec3 limitar(Vec3 v, double max) {
         double l = v.length();
         return l > max ? v.scale(max / l) : v;
     }
 
-    /** Depois do tick: atualiza as poses, o rastro e o vento. */
+    /** Depois do tick: atualiza as poses, os rastros e o vento. */
     public static void tick(Minecraft mc) {
         ClientLevel level = mc.level;
         if (level == null || mc.isPaused()) return;
         if (tremor > 0) tremor--;
+        soco *= 0.85f;
+        for (Rede.ManobraVista m; (m = EstadoCliente.MANOBRAS.poll()) != null; ) {
+            Pose ps = POSES.get(m.entidade());
+            if (ps != null) {
+                ps.manobra = m.tipo();
+                ps.manobraT = 0;
+                if (m.tipo() == Voo.ARRANCADA && level.getEntity(m.entidade()) instanceof Player pl) arrancada(level, pl);
+            }
+        }
         POSES.keySet().removeIf(id -> !(level.getEntity(id) instanceof Player pl) || !voandoVisto(mc, pl));
         for (Player pl : level.players()) {
             if (!voandoVisto(mc, pl)) continue;
@@ -155,18 +267,19 @@ public final class Voador {
                 n.ultimoYaw = pl.getYRot();
                 return n;
             });
+            if (ps.manobra >= 0 && ++ps.manobraT >= duracao(ps.manobra)) ps.manobra = -1;
             Vec3 d = new Vec3(pl.getX() - pl.xo, pl.getY() - pl.yo, pl.getZ() - pl.zo);
             ps.blocosPorSeg = d.length() * 20;
             // Deita a partir de 4 blocos/s e fica totalmente deitado a 14.
             float deitar = Mth.clamp((float) (ps.blocosPorSeg - 4) / 10f, 0f, 1f);
             ps.deitado += (deitar - ps.deitado) * 0.18f;
-            float dYaw = Mth.wrapDegrees(pl.getYRot() - ps.ultimoYaw);
+            float dYaw = ps.manobra == Voo.MEIA_VOLTA ? 0 : Mth.wrapDegrees(pl.getYRot() - ps.ultimoYaw);
             ps.ultimoYaw = pl.getYRot();
             float inclinar = Mth.clamp(dYaw * 0.06f, -0.75f, 0.75f) * ps.deitado;
             ps.inclinacao += (inclinar - ps.inclinacao) * 0.2f;
-            if (ps.blocosPorSeg >= 20 && !pl.isInvisible() && !(pl == mc.player && mc.options.getCameraType().isFirstPerson())) {
-                rastro(level, pl, d);
-            }
+            boolean visivel = !pl.isInvisible() && !(pl == mc.player && mc.options.getCameraType().isFirstPerson());
+            faixas(level, pl, ps, d, visivel);
+            if (ps.blocosPorSeg >= VAPOR && visivel) vapor(level, pl, d);
         }
         LocalPlayer p = mc.player;
         if (p != null && vel != null && (som == null || som.isStopped()) && vel.length() * 20 > 6) {
@@ -181,29 +294,123 @@ public final class Voador {
         return a != null && a.voando();
     }
 
-    /** Vapor deixado para trás em alta velocidade, mais denso perto da barreira do som. */
-    private static void rastro(ClientLevel level, Player pl, Vec3 d) {
-        RandomSource r = level.getRandom();
+    /**
+     * Duas faixas coloridas (as cores do rastro do personagem) saindo de trás do corpo, contínuas mesmo em alta
+     * velocidade: as partículas preenchem o caminho entre a posição do tick anterior e a atual.
+     */
+    private static void faixas(ClientLevel level, Player pl, Pose ps, Vec3 d, boolean visivel) {
+        Rede.Aparencia a = EstadoCliente.APARENCIAS.get(pl.getId());
+        if (a == null || a.rastro() == 0 || ps.blocosPorSeg < RASTRO || !visivel) {
+            ps.faixaA = ps.faixaB = null;
+            return;
+        }
         Vec3 n = d.normalize();
-        int qtd = d.length() * 20 >= 28 ? 3 : 1;
-        for (int i = 0; i < qtd; i++) {
-            Vec3 o = pl.position().add(0, 0.6, 0).subtract(n.scale(1.0 + r.nextDouble() * d.length()));
-            level.addParticle(ParticleTypes.CLOUD, o.x + (r.nextDouble() - 0.5) * 0.4, o.y + (r.nextDouble() - 0.5) * 0.4,
-                o.z + (r.nextDouble() - 0.5) * 0.4, 0, 0, 0);
+        Vec3 lado = n.cross(new Vec3(0, 1, 0));
+        lado = lado.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : lado.normalize();
+        // Os pés ficam atrás do centro quando o corpo está deitado.
+        Vec3 base = pl.position().add(0, 0.5 + 0.4 * (1 - ps.deitado), 0).subtract(n.scale(0.9 * ps.deitado));
+        Vec3 a1 = base.add(lado.scale(0.3)), b1 = base.subtract(lado.scale(0.3));
+        float forca = (float) Mth.clamp((ps.blocosPorSeg - RASTRO) / 20.0, 0, 1);
+        float tamanho = 1.0f + 0.8f * forca;
+        linha(level, ps.faixaA, a1, new DustParticleOptions(a.rastro(), tamanho));
+        linha(level, ps.faixaB, b1, new DustParticleOptions(a.rastro2(), tamanho));
+        ps.faixaA = a1;
+        ps.faixaB = b1;
+    }
+
+    private static void linha(ClientLevel level, Vec3 de, Vec3 ate, DustParticleOptions cor) {
+        if (de == null || de.distanceToSqr(ate) > 16) de = ate;
+        double dist = de.distanceTo(ate);
+        int passos = Math.max(1, (int) Math.ceil(dist / 0.2));
+        for (int i = 1; i <= passos; i++) {
+            Vec3 p = de.lerp(ate, i / (double) passos);
+            level.addParticle(cor, p.x, p.y, p.z, 0, 0, 0);
         }
     }
 
-    /** Câmera: inclina nas curvas e treme no estrondo. */
+    /** Vapor branco perto da barreira do som. */
+    private static void vapor(ClientLevel level, Player pl, Vec3 d) {
+        RandomSource r = level.getRandom();
+        Vec3 n = d.normalize();
+        for (int i = 0; i < 2; i++) {
+            Vec3 o = pl.position().add(0, 0.6, 0).subtract(n.scale(1.0 + r.nextDouble() * d.length()));
+            level.addParticle(ParticleTypes.CLOUD, o.x + (r.nextDouble() - 0.5) * 0.5, o.y + (r.nextDouble() - 0.5) * 0.5,
+                o.z + (r.nextDouble() - 0.5) * 0.5, 0, 0, 0);
+        }
+    }
+
+    /** Arrancada de outro jogador: um anel de ar se abrindo atrás dele. */
+    private static void arrancada(ClientLevel level, Player pl) {
+        Vec3 dir = pl.getLookAngle();
+        Vec3 u = dir.cross(new Vec3(0, 1, 0));
+        u = u.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : u.normalize();
+        Vec3 v = u.cross(dir).normalize();
+        Vec3 c = pl.position().add(0, 0.7, 0);
+        for (int i = 0; i < 16; i++) {
+            double ang = Math.PI * 2 * i / 16;
+            Vec3 raio = u.scale(Math.cos(ang)).add(v.scale(Math.sin(ang)));
+            Vec3 m = raio.scale(0.25).subtract(dir.scale(0.1));
+            level.addParticle(ParticleTypes.CLOUD, c.x + raio.x * 0.6, c.y + raio.y * 0.6, c.z + raio.z * 0.6, m.x, m.y, m.z);
+        }
+    }
+
+    /** Câmera: inclina nas curvas, gira nas manobras, treme no estrondo e vibra de leve na velocidade máxima. */
     private static void camera(ViewportEvent.ComputeCameraAngles e) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
+        float pt = (float) e.getPartialTick();
         Pose ps = POSES.get(mc.player.getId());
         if (ps != null) e.setRoll(e.getRoll() + ps.inclinacao * Mth.RAD_TO_DEG * 0.22f);
-        if (tremor > 0) {
-            float forca = (tremor - (float) e.getPartialTick()) / 14f * 1.6f;
-            RandomSource r = mc.player.getRandom();
+        if (manobra == Voo.GIRO_ESQUERDA || manobra == Voo.GIRO_DIREITA) {
+            float t = Mth.clamp((manobraT + pt) / GIRO_TICKS, 0, 1);
+            e.setRoll(e.getRoll() + (manobra == Voo.GIRO_ESQUERDA ? -360f : 360f) * suave(t));
+        } else if (manobra == Voo.MEIA_VOLTA) {
+            float t = Mth.clamp((manobraT + pt) / MEIA_VOLTA_TICKS, 0, 1);
+            e.setRoll(e.getRoll() + 30f * Mth.sin(t * Mth.PI));
+        }
+        RandomSource r = mc.player.getRandom();
+        float forca = tremor > 0 ? (tremor - pt) / 14f * 1.6f : 0f;
+        if (vel != null) {
+            double frac = vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo());
+            if (frac > 0.85) forca += (float) (frac - 0.85) * 1.2f;
+        }
+        if (forca > 0) {
             e.setPitch(e.getPitch() + (r.nextFloat() - 0.5f) * forca);
             e.setYaw(e.getYaw() + (r.nextFloat() - 0.5f) * forca);
+        }
+    }
+
+    private static float suave(float t) {
+        return t * t * (3 - 2 * t);
+    }
+
+    /**
+     * Linhas de velocidade nas bordas da tela, mais fortes quanto mais rápido. Mudam a cada tick, como em
+     * desenho animado; o centro fica livre para ver para onde se voa.
+     */
+    public static void desenharLinhas(GuiGraphicsExtractor g, DeltaTracker dt) {
+        Minecraft mc = Minecraft.getInstance();
+        if (vel == null || mc.player == null || mc.gui.hud.isHidden() || !mc.options.getCameraType().isFirstPerson()) return;
+        double frac = vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo());
+        float forca = (float) Mth.clamp((frac - 0.45) / 0.55, 0, 1.2);
+        if (forca <= 0) return;
+        int w = g.guiWidth(), h = g.guiHeight();
+        float cx = w / 2f, cy = h / 2f;
+        float raio = (float) Math.sqrt(cx * cx + cy * cy);
+        RandomSource r = RandomSource.create(ticks * 31L);
+        int qtd = 18 + Math.round(26 * forca);
+        for (int i = 0; i < qtd; i++) {
+            float ang = r.nextFloat() * Mth.TWO_PI;
+            // Não passa por cima da barra de itens (embaixo, no meio).
+            if (Math.abs(Mth.wrapDegrees(ang * Mth.RAD_TO_DEG - 90f)) < 28f) continue;
+            float ini = raio * (0.42f + 0.3f * r.nextFloat());
+            float comp = raio * (0.15f + 0.35f * r.nextFloat()) * (0.6f + 0.4f * forca);
+            int alfa = Math.round(Mth.clamp(forca * (40 + r.nextInt(70)), 0, 150));
+            g.pose().pushMatrix();
+            g.pose().translate(cx, cy);
+            g.pose().rotate(ang);
+            g.fill(Math.round(ini), 0, Math.round(ini + comp), 1, (alfa << 24) | 0xFFFFFF);
+            g.pose().popMatrix();
         }
     }
 
@@ -212,15 +419,26 @@ public final class Voador {
         Pose ps = POSES.get(s.id);
         if (ps == null) return;
         s.walkAnimationSpeed = 0;
-        if (ps.deitado < 0.08f) return;
+        float giro = 0;
+        if (ps.manobra == Voo.GIRO_ESQUERDA || ps.manobra == Voo.GIRO_DIREITA) {
+            float t = Mth.clamp(ps.manobraT / (float) GIRO_TICKS, 0, 1);
+            giro = (ps.manobra == Voo.GIRO_ESQUERDA ? -1 : 1) * Mth.TWO_PI * suave(t);
+        } else if (ps.manobra == Voo.MEIA_VOLTA) {
+            giro = 0.9f * Mth.sin(ps.manobraT / (float) MEIA_VOLTA_TICKS * Mth.PI);
+        }
+        if (ps.deitado < 0.08f && giro == 0) return;
         s.isFallFlying = true;
-        s.fallFlyingTimeInTicks = 10f * Mth.sqrt(ps.deitado);
+        float deitado = Math.max(ps.deitado, 0.08f);
+        s.fallFlyingTimeInTicks = 10f * Mth.sqrt(deitado);
         // Como no élitro: deitado, a capa fica estendida atrás do corpo em vez de levantar com o vento.
-        s.capeLean *= 1f - ps.deitado;
-        s.capeLean2 *= 1f - ps.deitado;
+        s.capeLean *= 1f - deitado;
+        s.capeLean2 *= 1f - deitado;
         s.shouldApplyFlyingYRot = true;
-        s.flyingYRot = ps.inclinacao;
-        if (ps.deitado > 0.55f) {
+        s.flyingYRot = ps.inclinacao + giro;
+        if (ps.manobra == Voo.ARRANCADA) {
+            s.rightArmPose = HumanoidModel.ArmPose.THROW_TRIDENT;
+            s.leftArmPose = HumanoidModel.ArmPose.THROW_TRIDENT;
+        } else if (ps.deitado > 0.55f) {
             if (s.mainArm == HumanoidArm.RIGHT) s.rightArmPose = HumanoidModel.ArmPose.THROW_TRIDENT;
             else s.leftArmPose = HumanoidModel.ArmPose.THROW_TRIDENT;
         }
@@ -230,6 +448,8 @@ public final class Voador {
         vel = null;
         armado = true;
         tremor = 0;
+        soco = 0;
+        manobra = -1;
         POSES.clear();
         if (som != null) som.parar();
         som = null;
@@ -256,10 +476,10 @@ public final class Voador {
             x = player.getX();
             y = player.getY();
             z = player.getZ();
-            float frac = (float) Mth.clamp(vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo()), 0, 1);
-            float alvo = Mth.clamp((frac - 0.15f) / 0.85f, 0f, 1f);
-            volume += (alvo * alvo * 0.9f - volume) * 0.15f;
-            pitch = 0.75f + 0.5f * frac;
+            float frac = (float) Mth.clamp(vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo()), 0, 1.3);
+            float alvo = Mth.clamp((frac - 0.1f) / 0.8f, 0f, 1.2f);
+            volume += (alvo * alvo - volume) * 0.2f;
+            pitch = 0.7f + 0.6f * frac;
         }
 
         void parar() {

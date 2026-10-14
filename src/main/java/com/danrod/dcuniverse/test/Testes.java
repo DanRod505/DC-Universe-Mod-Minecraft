@@ -123,7 +123,7 @@ public final class Testes {
         Rede.Sync s = Rede.Sync.decode(buf);
         h.assertValueEqual(s.personagem(), SUPERMAN.toString(), "personagem no sync");
         h.assertValueEqual(s.max(), 300f, "energia máxima no sync");
-        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false, 32f);
+        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false, 32f, 15f);
         Rede.Sync.encode(hab, buf);
         h.assertValueEqual(Rede.Sync.decode(buf), hab, "sync com suprema e queda amortecida");
         var guia = new Rede.GuiaSync(List.of("transformar"), List.of(SUPERMAN.toString()), "sol");
@@ -231,7 +231,7 @@ public final class Testes {
         h.assertTrue(s.pronta(suprema), "com energia cheia a suprema está pronta");
         e.setEnergia(suprema.custo() - 1);
         h.assertFalse(Rede.montar(p).pronta(suprema), "sem energia suficiente não está pronta");
-        h.assertFalse(new Rede.Sync("x", 300, 300, false, 0, "", List.of(), 0, false, 0, false, false, 0)
+        h.assertFalse(new Rede.Sync("x", 300, 300, false, 0, "", List.of(), 0, false, 0, false, false, 0, 0)
             .pronta(new Rede.HabInfo("a", false, true, 210, 20, 1800)), "em recarga não está pronta");
         Transformacao.destransformar(p);
         h.assertFalse(DemoHud.ativa(p), "destransformar encerra a demonstração");
@@ -302,6 +302,10 @@ public final class Testes {
         h.assertTrue(Rede.montarAparencia(p).voando(), "quem vê sabe que ele voa");
         Voo.estrondo(p);
         h.assertTrue(Guia.concluida(p, "estrondo"), "tarefa estrondo");
+        float antes = e.energia();
+        Voo.manobra(p, Voo.ARRANCADA);
+        h.assertValueEqual(e.energia(), antes - 15f, "a arrancada custa energia");
+        h.assertTrue(Guia.concluida(p, "manobra"), "tarefa manobra");
         // Esgota direto: o aviso de energia zerada precisa de conexão.
         e.setEnergia(0);
         e.setEsgotado(true);
@@ -311,6 +315,19 @@ public final class Testes {
         h.assertTrue(QuedaAmortecida.ativa(p), "desce amortecido");
         Transformacao.destransformar(p);
         h.assertFalse(p.getAbilities().mayfly, "normal não voa");
+        // No criativo vale o voo do mod; ao destransformar volta o voo do criativo.
+        ServerPlayer c = (ServerPlayer) h.makeMockServerPlayer(GameType.CREATIVE);
+        c.setPos(alto.x, alto.y, alto.z);
+        Transformacao.transformar(c, SUPERMAN, true);
+        h.assertValueEqual(c.getAbilities().getFlyingSpeed(), 0f, "criativo usa o voo do mod");
+        c.getAbilities().flying = true;
+        EstadoJogador.de(c).setEnergia(0);
+        EstadoJogador.de(c).setEsgotado(true);
+        voo.tick(c, prm);
+        h.assertTrue(c.getAbilities().flying, "no criativo a energia não derruba");
+        Transformacao.destransformar(c);
+        h.assertTrue(c.getAbilities().mayfly && c.getAbilities().flying, "continua voando no criativo");
+        h.assertValueEqual(c.getAbilities().getFlyingSpeed(), 0.05f, "com a velocidade do criativo");
         h.succeed();
     }
 }
