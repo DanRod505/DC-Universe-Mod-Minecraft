@@ -3,6 +3,7 @@
 
 Saídas (em src/main/resources/assets/dcuniverse/textures/gui/):
 - hud.png (256x128): peças desenhadas 1:1 na tela; as posições ficam em client/Hud.java.
+- radial.png (256x256): nós, centro, ponteiro e trilho do menu radial (client/RadialScreen.java).
 - emblema/<personagem>.png (48x48) e ability/<habilidade>.png (32x32): desenhados com escala 0,5,
   então cada pixel da textura vira meio pixel da interface e o desenho fica mais detalhado.
 Uso: python3 tools/arte/hud.py --raiz . [--previa /tmp/hud.png]
@@ -252,6 +253,122 @@ def gerar_hud():
     return t
 
 
+# ---------------------------------------------------------------- radial.png (menu radial)
+
+
+def no(t, x0, y0, tam, anel_claro, anel, anel_esc, vidro_a, vidro_b, gemas=False):
+    """Nó redondo do menu radial: anel com luz em cima à esquerda e vidro escuro por dentro."""
+    c = tam / 2
+    r = c - 0.5
+
+    def cor(x, y, d):
+        if d > r:
+            return None
+        if d > r - 1:
+            return CONTORNO
+        if d > r - 4:
+            ang = math.atan2(y + 0.5 - c, x + 0.5 - c)
+            luz = 0.5 - 0.5 * math.cos(ang + math.pi * 0.75)
+            if d > r - 2:
+                return mistura(anel_esc, anel_claro, luz)
+            return mistura(anel_esc, anel, 0.4 + luz * 0.6)
+        if d > r - 5:
+            return hexa("#0A0C16")
+        k = d / (r - 5)
+        return (*mistura(vidro_a, vidro_b, k)[:3], 225)
+
+    tela = Tela(tam, tam)
+    disco(tela, c, c, r, cor)
+    if gemas:
+        for gx, gy in ((c - 2, 0), (c - 2, tam - 4), (0, c - 2), (tam - 4, c - 2)):
+            gx, gy = int(gx), int(gy)
+            tela.bitmap(gx, gy, [".oo.", "o++o", "o+#o", ".oo."],
+                        {"o": CONTORNO, "+": hexa("#FF6A5A"), "#": hexa("#B8141E")})
+    t.img.alpha_composite(tela.img, (x0, y0))
+
+
+def brilho_redondo(t, x0, y0, tam, cor):
+    c = tam / 2
+    for y in range(tam):
+        for x in range(tam):
+            d = math.hypot(x + 0.5 - c, y + 0.5 - c) / c
+            a = max(0.0, 1 - d) ** 1.8
+            if a > 0.02:
+                t.p(x0 + x, y0 + y, (*cor[:3], round(240 * a)))
+
+
+def cubo(t, x0, y0):
+    """Centro do menu (96x96): vidro escuro com anéis finos, onde aparecem o nome e os números."""
+    tam = 96
+    c = tam / 2
+    r = c - 0.5
+
+    def cor(x, y, d):
+        if d > r:
+            return None
+        if d > r - 1:
+            return CONTORNO
+        if d > r - 5:
+            ang = math.atan2(y + 0.5 - c, x + 0.5 - c)
+            luz = 0.5 - 0.5 * math.cos(ang + math.pi * 0.75)
+            return mistura(ACO_ESC, ACO_CLARO, luz) if d > r - 3 else mistura(ACO_ESC, ACO, 0.3 + luz * 0.6)
+        if d > r - 6:
+            return OURO_ESC
+        if d > r - 7:
+            return OURO if (x * 7 + y * 3) % 9 else OURO_CLARO
+        if d > r - 8:
+            return hexa("#0A0C16")
+        k = d / (r - 8)
+        base = mistura(hexa("#1C2850"), hexa("#0B0F1E"), k ** 0.8)
+        if abs(d - (r - 18)) < 0.5:
+            base = mistura(base, hexa("#3A4C86"), 0.6)  # anel fino decorativo
+        return (*base[:3], 232)
+
+    tela = Tela(tam, tam)
+    disco(tela, c, c, r, cor)
+    t.img.alpha_composite(tela.img, (x0, y0))
+
+
+def ponteiro(t, x0, y0):
+    forma = ["....o....",
+             "...o+o...",
+             "..o+#+o..",
+             ".o+###+o.",
+             "o+#####+o",
+             "ooooooooo"]
+    t.bitmap(x0, y0, forma, {"o": CONTORNO, "+": OURO_CLARO, "#": OURO})
+
+
+def trilho(t, x0, y0):
+    """Anel fino (160x160, raio 78) que liga os nós, com pontinhos a cada 15 graus."""
+    tam = 160
+    c = tam / 2
+    for y in range(tam):
+        for x in range(tam):
+            d = math.hypot(x + 0.5 - c, y + 0.5 - c)
+            if abs(d - 78) < 1.0:
+                t.p(x0 + x, y0 + y, (*ACO_CLARO[:3], 120))
+            elif abs(d - 78) < 1.8:
+                t.p(x0 + x, y0 + y, (*CONTORNO[:3], 90))
+    for k in range(24):
+        ang = math.radians(k * 15)
+        px, py = c + 78 * math.cos(ang), c + 78 * math.sin(ang)
+        t.p(x0 + int(px), y0 + int(py), OURO_CLARO)
+
+
+def gerar_radial():
+    t = Tela(256, 256)
+    no(t, 0, 0, 40, ACO_CLARO, ACO, ACO_ESC, hexa("#1E2A4E"), hexa("#0D111F"))                      # normal
+    no(t, 40, 0, 40, OURO_CLARO, OURO, OURO_ESC, hexa("#2E4380"), hexa("#121A36"))                  # em foco
+    no(t, 80, 0, 40, OURO_CLARO, OURO, OURO_ESC, hexa("#3A2A10"), hexa("#140E05"), gemas=True)      # suprema
+    brilho_redondo(t, 120, 0, 56, OURO_CLARO)                                                        # brilho
+    no(t, 176, 0, 40, hexa("#E8F6FF"), hexa("#8FD0FF"), hexa("#3A6E9E"), hexa("#1E2A4E"), hexa("#0D111F"))  # equipada
+    cubo(t, 0, 64)
+    ponteiro(t, 96, 64)
+    trilho(t, 96, 96)
+    return t
+
+
 # ---------------------------------------------------------------- emblemas (48x48)
 
 
@@ -489,6 +606,7 @@ def main():
     gui = Path(a.raiz) / "src/main/resources/assets/dcuniverse/textures/gui"
     hud = gerar_hud()
     hud.salvar(gui / "hud.png")
+    gerar_radial().salvar(gui / "radial.png")
     emblemas = {k: f() for k, f in EMBLEMAS.items()}
     for k, t in emblemas.items():
         t.salvar(gui / "emblema" / f"{k}.png")

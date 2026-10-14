@@ -6,6 +6,7 @@ import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Personagens;
 import com.danrod.dcuniverse.character.Transformacao;
 import com.danrod.dcuniverse.ability.DemoHud;
+import com.danrod.dcuniverse.ability.Habilidades;
 import com.danrod.dcuniverse.energy.Recargas;
 import com.danrod.dcuniverse.guia.Guia;
 import net.minecraft.network.FriendlyByteBuf;
@@ -22,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/** Pacotes do mod. O servidor decide tudo; o cliente só pede (Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
+/** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 3;
+    private static final int VERSAO = 4;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -87,16 +88,24 @@ public final class Rede {
         }
     }
 
-    /** Aparência de um jogador para quem está vendo ele: personagem ("" = normal) e a cor do personagem. */
-    public record Aparencia(int entidade, String personagem, int cor) {
+    /**
+     * Aparência de um jogador para quem está vendo ele: personagem ("" = normal), a cor do personagem e o
+     * efeito da habilidade canalizada agora (tipo, "" = nenhuma), com cor, alcance e ângulo, para todo mundo
+     * ver o raio ou o sopro.
+     */
+    public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo) {
         public static void encode(Aparencia m, FriendlyByteBuf b) {
             b.writeVarInt(m.entidade);
             b.writeUtf(m.personagem);
             b.writeInt(m.cor);
+            b.writeUtf(m.efeito);
+            b.writeInt(m.efeitoCor);
+            b.writeFloat(m.alcance);
+            b.writeFloat(m.angulo);
         }
 
         public static Aparencia decode(FriendlyByteBuf b) {
-            return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt());
+            return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat());
         }
     }
 
@@ -126,6 +135,12 @@ public final class Rede {
         }
     }
 
+    /** Escolha no menu radial (índice na lista de habilidades). */
+    public record Selecionar(int indice) {}
+
+    /** Tecla de uso apertada (true) ou solta (false). */
+    public record Usar(boolean pressionado) {}
+
     public record Destransformar() {}
 
     private Rede() {}
@@ -150,6 +165,16 @@ public final class Rede {
             .direction(PacketFlow.CLIENTBOUND)
             .encoder(GuiaSync::encode).decoder(GuiaSync::decode)
             .consumerMainThread((m, ctx) -> EstadoCliente.guia(m))
+            .add();
+        CANAL.messageBuilder(Selecionar.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.indice())).decoder(b -> new Selecionar(b.readVarInt()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Habilidades.selecionar(p, m.indice())))
+            .add();
+        CANAL.messageBuilder(Usar.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeBoolean(m.pressionado())).decoder(b -> new Usar(b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Habilidades.usar(p, m.pressionado())))
             .add();
         CANAL.messageBuilder(Destransformar.class)
             .direction(PacketFlow.SERVERBOUND)
@@ -176,8 +201,13 @@ public final class Rede {
     }
 
     public static Aparencia montarAparencia(ServerPlayer player) {
-        Personagem p = EstadoJogador.de(player).personagem();
-        return p == null ? new Aparencia(player.getId(), "", 0) : new Aparencia(player.getId(), p.id().toString(), p.cor());
+        EstadoJogador e = EstadoJogador.de(player);
+        Personagem p = e.personagem();
+        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0);
+        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
+        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0);
+        return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
+            h.params().f("range", 8), h.params().f("angle", 30));
     }
 
     /** Envia o estado completo ao próprio jogador. */

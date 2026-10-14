@@ -15,5 +15,12 @@
     { "type": "fall_immunity" },
     { "type": "fire_immunity" }
   ],
-  "abilities": []
+  "abilities": [
+    { "id": "visao_de_calor", "type": "projectile_beam", "mode": "hold", "cost": 12, "cooldown": 2,
+      "range": 24, "damage_mult": 0.4, "color": "#FF2A1A", "sets_fire": true, "melts": true },
+    { "id": "sopro_congelante", "type": "area_cone", "mode": "hold", "cost": 10, "cooldown": 3,
+      "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze" },
+    { "id": "soco_sonico", "type": "projectile", "cost": 40, "cooldown": 8, "visual": "sonic",
+      "speed": 1.6, "range": 28, "damage_mult": 2.0, "knockback": 1.6, "impact_radius": 4 }
+  ]
 }

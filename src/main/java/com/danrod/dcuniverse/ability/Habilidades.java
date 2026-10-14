@@ -5,6 +5,7 @@ import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Transformacao;
 import com.danrod.dcuniverse.core.Rede;
 import com.danrod.dcuniverse.energy.Energia;
+import com.danrod.dcuniverse.guia.Guia;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -16,9 +17,12 @@ public final class Habilidades {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
         if (p == null || indice < 0 || indice >= p.habilidades().size()) return;
+        boolean canalizava = !e.canalizando().isEmpty();
         e.setCanalizando("");
         e.setSelecionada(indice);
+        Guia.concluir(player, "radial");
         Rede.sincronizar(player);
+        if (canalizava) Rede.aparencia(player);
     }
 
     /** Tecla de uso apertada (true) ou solta (false). */
@@ -39,8 +43,10 @@ public final class Habilidades {
                 return;
             }
             e.setCanalizando(h.id());
-        } else {
-            executar(player, p, h);
+            Guia.concluir(player, "habilidade");
+            Rede.aparencia(player);
+        } else if (executar(player, p, h)) {
+            Guia.concluir(player, "habilidade");
         }
         Rede.sincronizar(player);
     }
@@ -84,5 +90,6 @@ public final class Habilidades {
         Personagem.Habilidade h = p == null ? null : p.habilidade(id);
         if (h != null) e.setProntaEm(id, player.level().getGameTime() + Math.round(h.recargaSeg() * 20));
         Rede.sincronizar(player);
+        Rede.aparencia(player);
     }
 }

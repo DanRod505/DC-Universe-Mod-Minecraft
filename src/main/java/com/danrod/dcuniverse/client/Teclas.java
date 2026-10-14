@@ -9,6 +9,8 @@ import net.minecraft.resources.Identifier;
 public final class Teclas {
     public static final KeyMapping.Category CATEGORIA = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"));
 
+    public static final KeyMapping RADIAL = new KeyMapping("key.dcuniverse.radial", InputConstants.KEY_R, CATEGORIA);
+    public static final KeyMapping USAR = new KeyMapping("key.dcuniverse.usar", InputConstants.KEY_V, CATEGORIA);
     public static final KeyMapping DESTRANSFORMAR = new KeyMapping("key.dcuniverse.destransformar", InputConstants.KEY_H, CATEGORIA);
     public static final KeyMapping GUIA = new KeyMapping("key.dcuniverse.guia", InputConstants.KEY_G, CATEGORIA);
 

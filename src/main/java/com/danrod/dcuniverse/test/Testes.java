@@ -11,6 +11,7 @@ import com.danrod.dcuniverse.character.EstadoJogador;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Transformacao;
 import com.danrod.dcuniverse.content.Itens;
+import com.danrod.dcuniverse.content.ProjetilEntidade;
 import com.danrod.dcuniverse.core.Rede;
 import com.danrod.dcuniverse.energy.Energia;
 import com.danrod.dcuniverse.guia.Guia;
@@ -48,6 +49,7 @@ public final class Testes {
         FUNCOES.register("cushioned_fall", () -> Testes::quedaAmortecida);
         FUNCOES.register("guide", () -> Testes::guia);
         FUNCOES.register("hud", () -> Testes::hud);
+        FUNCOES.register("abilities", () -> Testes::habilidades);
     }
 
     private Testes() {}
@@ -216,11 +218,11 @@ public final class Testes {
         Rede.Sync s = Rede.montar(p);
         h.assertTrue(s.solar(), "Superman recarrega no sol");
         h.assertTrue(s.recarga() >= sup.energia().regen(), "recarga inclui a regeneração da ficha");
-        h.assertTrue(s.habilidades().isEmpty(), "sem habilidades fora da demonstração");
+        h.assertValueEqual(s.habilidades().size(), sup.habilidades().size(), "só as habilidades do personagem fora da demonstração");
         DemoHud.iniciar(p);
         e.setEnergia(sup.energia().max());
         s = Rede.montar(p);
-        h.assertValueEqual(s.habilidades().size(), 4, "quatro habilidades de exemplo");
+        h.assertValueEqual(s.habilidades().size(), sup.habilidades().size() + 1, "a demonstração acrescenta a suprema de exemplo");
         Rede.HabInfo suprema = s.habilidades().stream().filter(Rede.HabInfo::suprema).findFirst().orElseThrow();
         h.assertValueEqual(suprema.custo(), sup.energia().max() * 0.7f, "suprema custa 70%");
         h.assertTrue(s.pronta(suprema), "com energia cheia a suprema está pronta");
@@ -230,6 +232,42 @@ public final class Testes {
             .pronta(new Rede.HabInfo("a", false, true, 210, 20, 1800)), "em recarga não está pronta");
         Transformacao.destransformar(p);
         h.assertFalse(DemoHud.ativa(p), "destransformar encerra a demonstração");
+        h.succeed();
+    }
+
+    /** Menu radial e tipos: escolher, canalizar o raio (gasta por tick, recarga ao soltar) e disparar o soco sônico. */
+    static void habilidades(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem sup = e.personagem();
+        e.setEnergia(sup.energia().max());
+        h.assertValueEqual(sup.habilidade("visao_de_calor").tipo(), "projectile_beam", "visão de calor é um raio");
+        h.assertValueEqual(sup.habilidade("sopro_congelante").tipo(), "area_cone", "sopro congelante é um cone");
+        h.assertValueEqual(sup.habilidade("soco_sonico").tipo(), "projectile", "soco sônico é um projétil");
+
+        Habilidades.selecionar(p, 0);
+        h.assertTrue(Guia.concluida(p, "radial"), "escolher no menu conclui a tarefa");
+        Habilidades.usar(p, true);
+        h.assertValueEqual(e.canalizando(), "visao_de_calor", "segurar V canaliza o raio");
+        h.assertValueEqual(Rede.montarAparencia(p).efeito(), "projectile_beam", "quem vê recebe o efeito do raio");
+        float antes = e.energia();
+        Habilidades.tick(p, sup);
+        h.assertTrue(e.energia() < antes, "o raio gasta energia enquanto canaliza");
+        Habilidades.usar(p, false);
+        h.assertValueEqual(e.canalizando(), "", "soltar V para o raio");
+        h.assertTrue(e.prontaEm("visao_de_calor") > p.level().getGameTime(), "o raio entra em recarga ao soltar");
+        h.assertTrue(Guia.concluida(p, "habilidade"), "usar conclui a tarefa");
+
+        int soco = sup.habilidades().indexOf(sup.habilidade("soco_sonico"));
+        Habilidades.selecionar(p, soco);
+        float energia = e.energia();
+        Habilidades.usar(p, true);
+        h.assertValueEqual(e.energia(), energia - 40f, "soco sônico custa 40");
+        h.assertFalse(p.level().getEntitiesOfClass(ProjetilEntidade.class, p.getBoundingBox().inflate(4)).isEmpty(), "a onda sônica sai");
+        Habilidades.usar(p, false);
+        Habilidades.usar(p, true);
+        h.assertValueEqual(e.energia(), energia - 40f, "em recarga não dispara de novo");
         h.succeed();
     }
 }
