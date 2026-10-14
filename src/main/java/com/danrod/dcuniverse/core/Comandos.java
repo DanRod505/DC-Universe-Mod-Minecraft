@@ -1,5 +1,6 @@
 package com.danrod.dcuniverse.core;
 
+import com.danrod.dcuniverse.ability.DemoHud;
 import com.danrod.dcuniverse.character.EstadoJogador;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Personagens;
@@ -17,7 +18,7 @@ import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/** /dcu transform|untransform|energy|status|guide: comandos de admin para testes (seção 2.4). */
+/** /dcu transform|untransform|energy|status|guide|hud: comandos de admin para testes (seção 2.4). */
 public final class Comandos {
     private Comandos() {}
 
@@ -82,6 +83,24 @@ public final class Comandos {
                             ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
                             Guia.resetar(alvo);
                             c.getSource().sendSuccess(() -> Component.translatable("dcuniverse.cmd.guia_resetado", alvo.getDisplayName()), true);
+                            return 1;
+                        }))))
+            .then(Commands.literal("hud")
+                .then(Commands.literal("demo")
+                    .then(Commands.argument("jogador", EntityArgument.player())
+                        .executes(c -> {
+                            ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                            if (!EstadoJogador.de(alvo).transformado()) {
+                                c.getSource().sendFailure(Component.translatable("dcuniverse.cmd.precisa_transformar", alvo.getDisplayName()));
+                                return 0;
+                            }
+                            DemoHud.iniciar(alvo);
+                            return 1;
+                        })))
+                .then(Commands.literal("stop")
+                    .then(Commands.argument("jogador", EntityArgument.player())
+                        .executes(c -> {
+                            DemoHud.parar(EntityArgument.getPlayer(c, "jogador"));
                             return 1;
                         })))));
     }

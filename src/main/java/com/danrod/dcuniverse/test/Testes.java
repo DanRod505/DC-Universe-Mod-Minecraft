@@ -1,6 +1,7 @@
 package com.danrod.dcuniverse.test;
 
 import com.danrod.dcuniverse.DCUniverse;
+import com.danrod.dcuniverse.ability.DemoHud;
 import com.danrod.dcuniverse.ability.Habilidades;
 import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.ability.QuedaAmortecida;
@@ -46,6 +47,7 @@ public final class Testes {
         FUNCOES.register("supreme", () -> Testes::suprema);
         FUNCOES.register("cushioned_fall", () -> Testes::quedaAmortecida);
         FUNCOES.register("guide", () -> Testes::guia);
+        FUNCOES.register("hud", () -> Testes::hud);
     }
 
     private Testes() {}
@@ -116,7 +118,7 @@ public final class Testes {
         Rede.Sync s = Rede.Sync.decode(buf);
         h.assertValueEqual(s.personagem(), SUPERMAN.toString(), "personagem no sync");
         h.assertValueEqual(s.max(), 300f, "energia máxima no sync");
-        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true);
+        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false);
         Rede.Sync.encode(hab, buf);
         h.assertValueEqual(Rede.Sync.decode(buf), hab, "sync com suprema e queda amortecida");
         var guia = new Rede.GuiaSync(List.of("transformar"), List.of(SUPERMAN.toString()), "sol");
@@ -202,6 +204,32 @@ public final class Testes {
         Guia.resetar(p);
         h.assertFalse(Guia.concluida(p, "transformar"), "reset limpa as tarefas");
         h.assertFalse(Guia.darGuia(p), "reset não dá outro livro");
+        h.succeed();
+    }
+
+    /** HUD: recarga e sol no sync, quando a suprema está pronta e a demonstração com as habilidades de exemplo. */
+    static void hud(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem sup = e.personagem();
+        Rede.Sync s = Rede.montar(p);
+        h.assertTrue(s.solar(), "Superman recarrega no sol");
+        h.assertTrue(s.recarga() >= sup.energia().regen(), "recarga inclui a regeneração da ficha");
+        h.assertTrue(s.habilidades().isEmpty(), "sem habilidades fora da demonstração");
+        DemoHud.iniciar(p);
+        e.setEnergia(sup.energia().max());
+        s = Rede.montar(p);
+        h.assertValueEqual(s.habilidades().size(), 4, "quatro habilidades de exemplo");
+        Rede.HabInfo suprema = s.habilidades().stream().filter(Rede.HabInfo::suprema).findFirst().orElseThrow();
+        h.assertValueEqual(suprema.custo(), sup.energia().max() * 0.7f, "suprema custa 70%");
+        h.assertTrue(s.pronta(suprema), "com energia cheia a suprema está pronta");
+        e.setEnergia(suprema.custo() - 1);
+        h.assertFalse(Rede.montar(p).pronta(suprema), "sem energia suficiente não está pronta");
+        h.assertFalse(new Rede.Sync("x", 300, 300, false, 0, "", List.of(), 0, false, 0, false, false)
+            .pronta(new Rede.HabInfo("a", false, true, 210, 20, 1800)), "em recarga não está pronta");
+        Transformacao.destransformar(p);
+        h.assertFalse(DemoHud.ativa(p), "destransformar encerra a demonstração");
         h.succeed();
     }
 }

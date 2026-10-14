@@ -6,6 +6,7 @@ Verificações:
 - mod id: o modId do mods.toml e a constante MODID do código batem;
 - personagens: ficha igual à de docs/dados/personagens.json, tipos de habilidade/passiva/recarga
   existentes no código, nome traduzido de cada personagem e habilidade e skin 128x128;
+- HUD: emblema 48x48 de cada personagem e ícone 32x32 de cada habilidade (também as do /dcu hud demo);
 - suprema: no máximo uma por personagem, custo de 60-80% da energia (cost_pct), recarga de 60-180 s, instantânea;
 - Guia do Herói: texto de cada tarefa de Primeiros Passos, da experiência de cada personagem e de cada
   passiva e recarga que algum personagem usa, nos dois idiomas;
@@ -162,6 +163,7 @@ def verificar_personagens(raiz, recursos, erros):
         for h in c.get("abilities", []):
             if h.get("type") not in habs:
                 erros.append(f"{nome}: tipo de habilidade inexistente {h.get('type')}")
+            verificar_icone(recursos, h.get("id"), nome, erros)
             for i in IDIOMAS:
                 if f"habilidade.dcuniverse.{h.get('id')}" not in lang[i]:
                     erros.append(f"{nome}: falta habilidade.dcuniverse.{h.get('id')} em {i}.json")
@@ -176,9 +178,33 @@ def verificar_personagens(raiz, recursos, erros):
             erros.append(f"{nome}: falta a skin textures/skin/{nome}.png")
         elif tamanho_png(skin) != (128, 128):
             erros.append(f"{nome}: skin com {tamanho_png(skin)}, deve ser 128x128")
+        emblema = recursos / f"assets/dcuniverse/textures/gui/emblema/{nome}.png"
+        if not emblema.exists():
+            erros.append(f"{nome}: falta o emblema do HUD textures/gui/emblema/{nome}.png")
+        elif tamanho_png(emblema) != (48, 48):
+            erros.append(f"{nome}: emblema com {tamanho_png(emblema)}, deve ser 48x48")
         for i in IDIOMAS:
             if f"personagem.dcuniverse.{nome}" not in lang[i]:
                 erros.append(f"{nome}: falta personagem.dcuniverse.{nome} em {i}.json")
+
+
+def verificar_icone(recursos, hab, dono, erros):
+    icone = recursos / f"assets/dcuniverse/textures/gui/ability/{hab}.png"
+    if not icone.exists():
+        erros.append(f"{dono}: falta o ícone textures/gui/ability/{hab}.png")
+    elif tamanho_png(icone) != (32, 32):
+        erros.append(f"{dono}: ícone {hab} com {tamanho_png(icone)}, deve ser 32x32")
+
+
+def verificar_demo_hud(raiz, recursos, erros):
+    """As habilidades de exemplo do /dcu hud demo também precisam de ícone e nome."""
+    java = (raiz / JAVA / "ability/DemoHud.java").read_text(encoding="utf-8")
+    for hab in re.findall(r'new Hab\("([a-z_]+)"', java):
+        verificar_icone(recursos, hab, "DemoHud", erros)
+        for i in IDIOMAS:
+            lang = ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {}
+            if f"habilidade.dcuniverse.{hab}" not in lang:
+                erros.append(f"DemoHud: falta habilidade.dcuniverse.{hab} em {i}.json")
 
 
 def verificar_guia(raiz, recursos, erros):
@@ -243,6 +269,7 @@ def main():
     verificar_mod_id(raiz, erros)
     verificar_personagens(raiz, recursos, erros)
     verificar_guia(raiz, recursos, erros)
+    verificar_demo_hud(raiz, recursos, erros)
     verificar_teclas(raiz, erros)
     verificar_testes(raiz, recursos, erros)
     verificar_registro(raiz, pastas, erros)

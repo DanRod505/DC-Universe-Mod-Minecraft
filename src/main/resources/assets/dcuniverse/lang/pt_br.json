@@ -60,5 +60,14 @@
   "item.dcuniverse.cristal_superman": "Cristal da Casa de El",
   "item.dcuniverse.guia_heroi": "Guia do Herói",
   "personagem.dcuniverse.superman.exp": "Força e poder absolutos: você é a pessoa mais forte do mundo e o mundo precisa ser tratado com cuidado.",
-  "dcuniverse.guia.passos.fim": "Você concluiu os Primeiros Passos! Novas tarefas aparecem aqui conforme o mod cresce."
+  "dcuniverse.guia.passos.fim": "Você concluiu os Primeiros Passos! Novas tarefas aparecem aqui conforme o mod cresce.",
+  "habilidade.dcuniverse.visao_de_calor": "Visão de Calor",
+  "habilidade.dcuniverse.sopro_congelante": "Sopro Congelante",
+  "habilidade.dcuniverse.soco_sonico": "Soco Sônico",
+  "habilidade.dcuniverse.fortaleza_da_solidao": "Fortaleza da Solidão",
+  "dcuniverse.hud.sem_energia": "SEM ENERGIA",
+  "dcuniverse.hud.suprema_pronta": "SUPREMA PRONTA",
+  "dcuniverse.hud.demo.inicio": "Demonstração do HUD: por 90 segundos o HUD mostra 4 habilidades de exemplo e as usa sozinho. Fique no sol para ver a recarga solar.",
+  "dcuniverse.hud.demo.fim": "Demonstração do HUD encerrada.",
+  "dcuniverse.cmd.precisa_transformar": "%s precisa estar transformado."
 }

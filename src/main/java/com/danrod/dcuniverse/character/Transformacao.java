@@ -1,5 +1,6 @@
 package com.danrod.dcuniverse.character;
 
+import com.danrod.dcuniverse.ability.DemoHud;
 import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.ability.QuedaAmortecida;
 import com.danrod.dcuniverse.guia.Guia;
@@ -87,6 +88,7 @@ public final class Transformacao {
         EstadoJogador estado = EstadoJogador.de(player);
         Personagem p = estado.personagem();
         Passivas.aoDestransformar(player, p);
+        DemoHud.parar(player);
         Traje.remover(player);
         Atributos.remover(player);
         estado.limparTransformacao();

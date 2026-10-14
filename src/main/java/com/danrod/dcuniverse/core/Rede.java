@@ -5,6 +5,8 @@ import com.danrod.dcuniverse.character.EstadoJogador;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Personagens;
 import com.danrod.dcuniverse.character.Transformacao;
+import com.danrod.dcuniverse.ability.DemoHud;
+import com.danrod.dcuniverse.energy.Recargas;
 import com.danrod.dcuniverse.guia.Guia;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.PacketFlow;
@@ -22,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 2;
+    private static final int VERSAO = 3;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -33,11 +35,18 @@ public final class Rede {
 
     /**
      * Estado do próprio jogador. amortecendo vale também fora da transformação (queda amortecida depois de
-     * destransformar no ar); planar é a velocidade do planar do personagem (0 = não plana).
+     * destransformar no ar); planar é a velocidade do planar do personagem (0 = não plana). recarga é quanto
+     * a energia sobe por segundo agora; solar diz se o personagem recarrega no sol e sol se ele está no sol.
      */
     public record Sync(String personagem, float energia, float max, boolean esgotado, int selecionada,
-                       String canalizando, List<HabInfo> habilidades, float planar, boolean amortecendo) {
-        public static final Sync VAZIO = new Sync("", 0, 0, false, 0, "", List.of(), 0, false);
+                       String canalizando, List<HabInfo> habilidades, float planar, boolean amortecendo,
+                       float recarga, boolean solar, boolean sol) {
+        public static final Sync VAZIO = new Sync("", 0, 0, false, 0, "", List.of(), 0, false, 0, false, false);
+
+        /** A habilidade pode ser usada agora: sem recarga pendente e com energia para o custo. */
+        public boolean pronta(HabInfo h) {
+            return h.restante() <= 0 && !esgotado && energia >= h.custo();
+        }
 
         public static void encode(Sync m, FriendlyByteBuf b) {
             b.writeUtf(m.personagem);
@@ -57,6 +66,9 @@ public final class Rede {
             }
             b.writeFloat(m.planar);
             b.writeBoolean(m.amortecendo);
+            b.writeFloat(m.recarga);
+            b.writeBoolean(m.solar);
+            b.writeBoolean(m.sol);
         }
 
         public static Sync decode(FriendlyByteBuf b) {
@@ -70,7 +82,8 @@ public final class Rede {
             for (int i = 0; i < n; i++) {
                 habs.add(new HabInfo(b.readUtf(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readVarInt(), b.readVarInt()));
             }
-            return new Sync(p, e, max, esg, sel, can, List.copyOf(habs), b.readFloat(), b.readBoolean());
+            return new Sync(p, e, max, esg, sel, can, List.copyOf(habs), b.readFloat(), b.readBoolean(),
+                b.readFloat(), b.readBoolean(), b.readBoolean());
         }
     }
 
@@ -176,16 +189,22 @@ public final class Rede {
     public static Sync montar(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return e.amortecendo() ? new Sync("", 0, 0, false, 0, "", List.of(), 0, true) : Sync.VAZIO;
+        if (p == null) return e.amortecendo() ? new Sync("", 0, 0, false, 0, "", List.of(), 0, true, 0, false, false) : Sync.VAZIO;
         long agora = player.level().getGameTime();
         List<HabInfo> habs = new ArrayList<>();
         for (Personagem.Habilidade h : p.habilidades()) {
             int restante = (int) Math.max(0, e.prontaEm(h.id()) - agora);
             habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD, h.suprema(), h.custo(), restante, Math.round(h.recargaSeg() * 20)));
         }
+        int selecionada = e.selecionada();
+        if (DemoHud.ativa(player)) {
+            selecionada = DemoHud.adicionar(player, p, habs);
+        }
         Personagem.Tipo planar = p.passiva("glide");
-        return new Sync(p.id().toString(), e.energia(), p.energia().max(), e.esgotado(), e.selecionada(),
-            e.canalizando(), List.copyOf(habs), planar == null ? 0f : planar.params().f("speed", 10f), e.amortecendo());
+        boolean solar = p.energia().recargas().stream().anyMatch(r -> r.tipo().equals("sunlight"));
+        return new Sync(p.id().toString(), e.energia(), p.energia().max(), e.esgotado(), selecionada,
+            e.canalizando(), List.copyOf(habs), planar == null ? 0f : planar.params().f("speed", 10f), e.amortecendo(),
+            Recargas.porSegundo(player, p), solar, solar && Recargas.sobOSol(player));
     }
 
     public static void catalogo(ServerPlayer player) {

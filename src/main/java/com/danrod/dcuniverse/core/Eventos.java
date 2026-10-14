@@ -1,5 +1,6 @@
 package com.danrod.dcuniverse.core;
 
+import com.danrod.dcuniverse.ability.DemoHud;
 import com.danrod.dcuniverse.ability.Habilidades;
 import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.ability.QuedaAmortecida;
@@ -56,6 +57,9 @@ public final class Eventos {
             sync(e.getEntity());
         });
         PlayerEvent.PlayerRespawnEvent.BUS.addListener(e -> sync(e.getEntity()));
+        PlayerEvent.PlayerLoggedOutEvent.BUS.addListener(e -> {
+            if (e.getEntity() instanceof ServerPlayer sp) DemoHud.parar(sp);
+        });
         PlayerEvent.StartTracking.BUS.addListener(e -> {
             if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof ServerPlayer alvo) {
                 Rede.aparenciaPara(quem, alvo);
@@ -81,6 +85,7 @@ public final class Eventos {
         Energia.tick(player, p);
         Passivas.tick(player, p);
         Habilidades.tick(player, p);
+        DemoHud.tick(player, p);
         if (player.tickCount % SYNC_TICKS == 0) Rede.sincronizar(player);
     }
 

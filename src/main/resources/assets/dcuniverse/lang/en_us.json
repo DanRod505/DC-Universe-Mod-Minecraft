@@ -60,5 +60,14 @@
   "item.dcuniverse.cristal_superman": "Crystal of the House of El",
   "item.dcuniverse.guia_heroi": "Hero's Guide",
   "personagem.dcuniverse.superman.exp": "Absolute strength and power: you are the strongest person in the world, and the world must be handled with care.",
-  "dcuniverse.guia.passos.fim": "You finished the First Steps! New tasks show up here as the mod grows."
+  "dcuniverse.guia.passos.fim": "You finished the First Steps! New tasks show up here as the mod grows.",
+  "habilidade.dcuniverse.visao_de_calor": "Heat Vision",
+  "habilidade.dcuniverse.sopro_congelante": "Freeze Breath",
+  "habilidade.dcuniverse.soco_sonico": "Sonic Punch",
+  "habilidade.dcuniverse.fortaleza_da_solidao": "Fortress of Solitude",
+  "dcuniverse.hud.sem_energia": "NO ENERGY",
+  "dcuniverse.hud.suprema_pronta": "SUPREME READY",
+  "dcuniverse.hud.demo.inicio": "HUD demo: for 90 seconds the HUD shows 4 sample abilities and uses them by itself. Stay in the sun to see solar recharge.",
+  "dcuniverse.hud.demo.fim": "HUD demo finished.",
+  "dcuniverse.cmd.precisa_transformar": "%s must be transformed."
 }
