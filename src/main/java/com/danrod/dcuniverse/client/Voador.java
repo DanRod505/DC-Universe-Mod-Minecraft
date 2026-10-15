@@ -294,10 +294,9 @@ public final class Voador {
             if (d.lengthSqr() > 1e-6) ps.dir = ps.dir.lerp(d.normalize(), 0.3).normalize();
             float alvoCone = (float) Mth.clamp((ps.blocosPorSeg - VAPOR) / 8, 0, 1);
             ps.cone += (alvoCone - ps.cone) * (alvoCone > ps.cone ? 0.15f : 0.08f);
-            // Deita a partir de 4 blocos/s e fica totalmente deitado a 14. Só conta o movimento na horizontal ou
-            // na direção do olhar: subindo ou descendo parado, o corpo fica em pé.
-            Vec3 olhar = pl.getLookAngle();
-            double util = Math.max(d.horizontalDistance(), Math.abs(d.dot(olhar))) * 20;
+            // Deita a partir de 4 blocos/s e fica totalmente deitado a 14. Só conta o movimento para a frente (na
+            // direção do olhar): subindo, descendo, de lado ou de ré, o corpo fica em pé.
+            double util = Math.max(0, d.dot(pl.getLookAngle())) * 20;
             float deitar = Mth.clamp((float) (util - 4) / 10f, 0f, 1f);
             ps.deitado += (deitar - ps.deitado) * 0.18f;
             float dYaw = ps.manobra == Voo.MEIA_VOLTA ? 0 : Mth.wrapDegrees(pl.getYRot() - ps.ultimoYaw);
@@ -396,12 +395,14 @@ public final class Voador {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         float pt = (float) e.getPartialTick();
+        // A câmera só inclina e gira junto em primeira pessoa; em terceira pessoa quem gira é o corpo.
+        boolean primeira = mc.options.getCameraType().isFirstPerson();
         Pose ps = POSES.get(mc.player.getId());
-        if (ps != null) e.setRoll(e.getRoll() + ps.inclinacao * Mth.RAD_TO_DEG * 0.22f);
-        if (manobra == Voo.GIRO_ESQUERDA || manobra == Voo.GIRO_DIREITA) {
+        if (ps != null && primeira) e.setRoll(e.getRoll() + ps.inclinacao * Mth.RAD_TO_DEG * 0.22f);
+        if (primeira && (manobra == Voo.GIRO_ESQUERDA || manobra == Voo.GIRO_DIREITA)) {
             float t = Mth.clamp((manobraT + pt) / GIRO_TICKS, 0, 1);
             e.setRoll(e.getRoll() + (manobra == Voo.GIRO_ESQUERDA ? -360f : 360f) * suave(t));
-        } else if (manobra == Voo.MEIA_VOLTA) {
+        } else if (primeira && manobra == Voo.MEIA_VOLTA) {
             float t = Mth.clamp((manobraT + pt) / MEIA_VOLTA_TICKS, 0, 1);
             e.setRoll(e.getRoll() + 30f * Mth.sin(t * Mth.PI));
         }

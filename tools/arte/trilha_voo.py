@@ -264,6 +264,19 @@ def bumbo(forca=1.0):
     return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 9) * 0.45 * forca
 
 
+def caixa(forca=1.0):
+    t = tempo(0.5)
+    corpo = np.sin(2 * np.pi * (185 + 60 * np.exp(-t * 50)) * t) * np.exp(-t * 22)
+    esteira = filtro(RNG.standard_normal(len(t)), "band", [1500, 7500]) * np.exp(-t * 13)
+    return np.tanh((corpo * 0.7 + esteira) * 1.4) * 0.4 * forca
+
+
+def chimbal(forca=1.0, aberto=False):
+    t = tempo(0.5 if aberto else 0.12)
+    x = filtro(RNG.standard_normal(len(t)), "high", 7000)
+    return x * np.exp(-t * (7 if aberto else 45)) * 0.16 * forca
+
+
 def prato(dur=4.0):
     t = tempo(dur)
     x = filtro(RNG.standard_normal(len(t)), "high", 3500)
@@ -339,6 +352,8 @@ def camada_crescendo():
         # Cordas sustentadas entram com o boost.
         for i, m in enumerate(a["voz"]):
             p.som(t0, cordas(m, CICLO - 0.1, ataque=0.9), (i - 1.5) * 0.4, 0.7)
+        for k in range(16):  # chimbal suave em colcheias
+            p.som(t0 + k * BATIDA / 2, chimbal(0.7 if k % 2 == 0 else 0.45), 0.35)
         for b in range(8):
             p.som(t0 + b * BATIDA, bumbo(0.75 if b % 2 else 1.0), 0)
     st = p.estereo()
@@ -369,11 +384,26 @@ def camada_epica():
         raiz = RAIZES[c]  # fundamental do acorde (no Sol/Si e no Dó/Mi não é o baixo)
         p.som(t0, guitarra([raiz, raiz + 7, raiz + 12], CICLO - 0.15), -0.7, 0.9)
         p.som(t0, guitarra([raiz, raiz + 7, raiz + 12], CICLO - 0.15), 0.7, 0.9)
-        # Tambores: taikos marcando o compasso, pratos na virada de cada acorde.
+        # Piano em destaque: o tema em oitavas, forte, e acordes em colcheias no meio.
+        b = 0
+        for m, d in TEMA[c]:
+            p.som(t0 + b * BATIDA, piano(m, d * BATIDA * 1.1, 0.95), -0.1, 1.5)
+            p.som(t0 + b * BATIDA, piano(m - 12, d * BATIDA * 1.1, 0.8), 0.1, 1.1)
+            b += d
+        for k in range(16):
+            for m in voz[1:]:
+                p.som(t0 + k * BATIDA / 2, piano(m, BATIDA * 0.5, 0.6 if k % 4 == 0 else 0.42), -0.3, 0.55)
+        # Bateria (bumbo, caixa no 2 e no 4, chimbal em colcheias) com taikos por baixo; pratos na virada.
         for comp in range(2):
             tc = t0 + comp * 4 * BATIDA
             for bt, fz in ((0, 1.0), (1.5, 0.6), (2, 0.8), (3, 0.7), (3.5, 0.55)):
-                p.som(tc + bt * BATIDA, taiko(fz), RNG.uniform(-0.25, 0.25))
+                p.som(tc + bt * BATIDA, taiko(fz), RNG.uniform(-0.25, 0.25), 0.6)
+            for bt in (0, 1.5, 2, 2.5):
+                p.som(tc + bt * BATIDA, bumbo(1.0), 0, 1.1)
+            for bt in (1, 3):
+                p.som(tc + bt * BATIDA, caixa(), 0.05, 1.0)
+            for k in range(8):
+                p.som(tc + k * BATIDA / 2, chimbal(1.0 if k % 2 == 0 else 0.6, aberto=k == 7), 0.4)
         p.som(t0, prato(), 0.3, 1.0)
         if c % 4 == 3:
             p.som(t0 + CICLO - 2.0, prato_reverso(), -0.3, 1.0)
