@@ -402,7 +402,7 @@ public final class Testes {
     }
 
     /**
-     * Efeitos secundários: a visão de calor derrete gelo compactado e põe fogo; o sopro prende o mob no gelo
+     * Efeitos secundários: a visão de calor derrete gelo compactado, põe fogo e acende a fornalha com algo para assar; o sopro prende o mob no gelo
      * (parado e sem IA) depois de 1 s, e o calor o solta na hora.
      */
     static void elementos(GameTestHelper h) {
@@ -419,6 +419,13 @@ public final class Testes {
         com.danrod.dcuniverse.ability.active.Raio.esquentar(level, p,
             new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(madeira), net.minecraft.core.Direction.UP, madeira, false), true, true);
         h.assertTrue(level.getBlockState(madeira.above()).is(net.minecraft.world.level.block.Blocks.FIRE), "calor põe fogo");
+
+        var forno = h.absolutePos(new net.minecraft.core.BlockPos(1, 2, 0));
+        level.setBlockAndUpdate(forno, net.minecraft.world.level.block.Blocks.FURNACE.defaultBlockState());
+        ((net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity) level.getBlockEntity(forno)).setItem(0, new ItemStack(Items.BEEF));
+        com.danrod.dcuniverse.ability.active.Raio.esquentar(level, p,
+            new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(forno), net.minecraft.core.Direction.SOUTH, forno, false), true, false);
+        h.assertTrue(level.getBlockState(forno).getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT), "calor acende a fornalha sem combustível");
 
         var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 2, 3));
         com.danrod.dcuniverse.ability.Congelamento.expor(zumbi);
