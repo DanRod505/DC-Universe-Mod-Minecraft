@@ -542,10 +542,76 @@ def icone_fortaleza_da_solidao():
     return t
 
 
+def icone_pisao_sismico():
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # Chão rachando a partir do ponto do pisão.
+    d.rectangle([0, 24, 31, 31], fill=hexa("#6B4A2E"))
+    d.rectangle([0, 24, 31, 25], fill=hexa("#5E9C3A"))
+    for pts in (((16, 25), (12, 27), (8, 26), (3, 30)), ((16, 25), (20, 28), (25, 27), (30, 31)),
+                ((16, 25), (15, 28), (17, 31))):
+        d.line(pts, fill=hexa("#1E120A"), width=1)
+    # Onda de choque: arcos claros dos dois lados, rente ao chão.
+    for r, cor, w in ((10, "#FFF6DA", 2), (14, "#E8C890", 1)):
+        d.arc([16 - r, 24 - r * 0.7, 16 + r, 24 + r * 0.7], start=195, end=255, fill=hexa(cor), width=w)
+        d.arc([16 - r, 24 - r * 0.7, 16 + r, 24 + r * 0.7], start=285, end=345, fill=hexa(cor), width=w)
+    # Poeira e pedrinhas.
+    for x, y, r in ((4, 21, 2), (27, 21, 2), (7, 19, 1), (24, 18, 1)):
+        d.ellipse([x - r, y - r, x + r, y + r], fill=hexa("#C9B392"))
+    for x, y in ((3, 14), (28, 13), (6, 10), (25, 9)):
+        d.rectangle([x, y, x + 1, y + 1], fill=hexa("#8C6A44"))
+    # Bota vermelha do Superman (cano com o corte em V) batendo no chão.
+    d.polygon([(11, 4), (20, 4), (20, 17), (25, 18), (26, 23), (9, 23), (9, 17), (11, 15)], fill=hexa("#C81E26"))
+    d.polygon([(11, 4), (14, 4), (14, 21), (9, 22), (9, 17), (11, 15)], fill=hexa("#F0444A"))
+    d.polygon([(11, 4), (20, 4), (15.5, 8)], fill=hexa("#2C55C8"))  # calça azul no corte em V
+    d.line([(9, 22), (26, 22)], fill=hexa("#7A0E14"), width=1)
+    d.line([(12, 6), (12, 14)], fill=hexa("#FF9A9A"), width=1)
+    contornar(t)
+    # Linhas de movimento acima da bota.
+    for x in (6, 25):
+        d.line([(x, 2), (x, 7)], fill=hexa("#DDE6F4"), width=1)
+    return t
+
+
+def icone_visao_raio_x():
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # Parede de pedra que fica translúcida no meio, com um diamante aparecendo atrás.
+    d.rectangle([2, 2, 29, 29], fill=hexa("#5A5F6E"))
+    for y in range(2, 30, 6):
+        d.line([(2, y), (29, y)], fill=hexa("#3E4250"), width=1)
+        off = 0 if (y // 6) % 2 == 0 else 5
+        for x in range(2 + off, 30, 10):
+            d.line([(x, y), (x, min(29, y + 6))], fill=hexa("#3E4250"), width=1)
+    janela = Tela(32, 32)
+    disco(janela, 16, 16, 10.5, lambda x, y, dd: (*mistura(hexa("#0E2A44"), hexa("#1F5E8C"), dd / 10.5)[:3], 235))
+    img.alpha_composite(janela.img)
+    # Grade azul do raio X dentro do círculo.
+    for k in range(8, 25, 4):
+        for a in range(0, 32):
+            for x, y in ((k, a), (a, k)):
+                if math.hypot(x + 0.5 - 16, y + 0.5 - 16) < 10:
+                    t.p(x, y, hexa("#3F8CC8"))
+    # Diamante brilhando atrás da parede.
+    d.polygon([(16, 10), (21, 15), (16, 22), (11, 15)], fill=hexa("#4FF2FF"))
+    d.polygon([(16, 10), (16, 22), (11, 15)], fill=hexa("#B8FBFF"))
+    d.line([(11, 15), (21, 15)], fill=hexa("#2BB8D0"), width=1)
+    brilho(t, 16, 16, 9, hexa("#8FD8FF"), 0.5)
+    # Anel de lente.
+    d.ellipse([5, 5, 26, 26], outline=hexa("#BFE6FF"), width=1)
+    contornar(t)
+    t.p(14, 12, hexa("#FFFFFF"))
+    return t
+
+
 ICONES = {
     "visao_de_calor": icone_visao_de_calor,
     "sopro_congelante": icone_sopro_congelante,
     "soco_sonico": icone_soco_sonico,
+    "pisao_sismico": icone_pisao_sismico,
+    "visao_raio_x": icone_visao_raio_x,
     "fortaleza_da_solidao": icone_fortaleza_da_solidao,
 }
 
@@ -588,7 +654,7 @@ def previa(hud, emblemas, icones, arq):
     ceu.alpha_composite(icones["fortaleza_da_solidao"].img.resize((16, 16), Image.NEAREST), (x + 5, 47))
     fundo = ceu.resize((W * 2 * E, H * 2 * E), Image.NEAREST)
     # ícones e emblema em tamanho grande ao lado, para ver o detalhe
-    grande = Image.new("RGBA", (6 * 32 * 4, 48 * 4), (40, 44, 60, 255))
+    grande = Image.new("RGBA", (8 * 32 * 4 + 48, 48 * 4), (40, 44, 60, 255))
     grande.alpha_composite(emblemas["superman"].img.resize((48 * 4, 48 * 4), Image.NEAREST), (0, 0))
     for i, nome in enumerate(icones):
         grande.alpha_composite(icones[nome].img.resize((32 * 4, 32 * 4), Image.NEAREST), (48 * 4 + 8 + i * 136, 20))

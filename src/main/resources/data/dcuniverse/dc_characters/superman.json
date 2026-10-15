@@ -16,7 +16,10 @@
     { "type": "flight", "speed": 56, "drain": 0.5, "boost_drain": 3, "dash_cost": 15,
       "trail_color": "#2F6BFF", "trail_color2": "#E3262E", "trail_color3": "#F7C531" },
     { "type": "fall_immunity" },
-    { "type": "fire_immunity" }
+    { "type": "fire_immunity" },
+    { "type": "super_strength", "speed": 9, "max_hardness": 30 },
+    { "type": "projectile_resistance", "max_damage": 10 },
+    { "type": "super_jump", "power": 2.0, "charge": 1.0 }
   ],
   "abilities": [
     { "id": "visao_de_calor", "type": "projectile_beam", "mode": "hold", "cost": 12, "cooldown": 2,
@@ -24,6 +27,12 @@
     { "id": "sopro_congelante", "type": "area_cone", "mode": "hold", "cost": 10, "cooldown": 3,
       "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze" },
     { "id": "soco_sonico", "type": "projectile", "cost": 40, "cooldown": 8, "visual": "sonic",
-      "speed": 1.6, "range": 28, "damage_mult": 2.0, "knockback": 1.6, "impact_radius": 4 }
+      "speed": 1.6, "range": 28, "damage_mult": 2.0, "knockback": 1.6, "impact_radius": 4 },
+    { "id": "pisao_sismico", "type": "area_blast", "cost": 30, "cooldown": 6,
+      "radius": 7, "damage_mult": 0.75, "knockback": 1.2, "launch": 0.7, "stun": 1.5, "spread_ticks": 10 },
+    { "id": "visao_raio_x", "type": "vision", "mode": "xray", "cost": 20, "cooldown": 12,
+      "duration": 12, "range": 28, "color": "#8FD8FF" },
+    { "id": "fortaleza_da_solidao", "type": "structure", "supreme": true, "cost_pct": 70, "cooldown": 150,
+      "range": 24, "radius": 6, "duration": 120, "regen_level": 2, "energy_per_second": 8 }
   ]
 }

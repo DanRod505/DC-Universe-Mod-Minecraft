@@ -21,7 +21,11 @@ public final class TiposPassiva {
             }
         },
         "night_vision", new Efeito(MobEffects.NIGHT_VISION),
-        "fire_immunity", new Efeito(MobEffects.FIRE_RESISTANCE)
+        "fire_immunity", new Efeito(MobEffects.FIRE_RESISTANCE),
+        // Estas três agem pelos eventos do jogo (passive/Naturais) e pelo cliente (client/Saltador).
+        "super_strength", new Passiva() {},
+        "projectile_resistance", new Passiva() {},
+        "super_jump", new Passiva() {}
     );
 
     private TiposPassiva() {}

@@ -1,6 +1,8 @@
 package com.danrod.dcuniverse;
 
+import com.danrod.dcuniverse.content.Blocos;
 import com.danrod.dcuniverse.content.Entidades;
+import com.danrod.dcuniverse.content.Sons;
 import com.danrod.dcuniverse.content.Itens;
 import com.danrod.dcuniverse.core.Config;
 import com.danrod.dcuniverse.core.Eventos;
@@ -25,6 +27,8 @@ public final class DCUniverse {
         Itens.ITEMS.register(bus);
         Itens.ABAS.register(bus);
         Entidades.TIPOS.register(bus);
+        Sons.SONS.register(bus);
+        Blocos.BLOCOS.register(bus);
         Testes.FUNCOES.register(bus);
         context.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
         FMLCommonSetupEvent.getBus(bus).addListener(e -> Rede.registrar());

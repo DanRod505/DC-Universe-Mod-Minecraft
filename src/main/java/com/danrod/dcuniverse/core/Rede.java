@@ -7,12 +7,14 @@ import com.danrod.dcuniverse.character.Personagens;
 import com.danrod.dcuniverse.character.Transformacao;
 import com.danrod.dcuniverse.ability.DemoHud;
 import com.danrod.dcuniverse.ability.Habilidades;
+import com.danrod.dcuniverse.ability.passive.SuperSalto;
 import com.danrod.dcuniverse.ability.passive.Voo;
 import com.danrod.dcuniverse.energy.Recargas;
 import com.danrod.dcuniverse.guia.Guia;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.network.ChannelBuilder;
@@ -26,7 +28,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 7;
+    private static final int VERSAO = 8;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -161,6 +163,29 @@ public final class Rede {
 
     public record Destransformar() {}
 
+    /**
+     * Efeito pontual no mundo para o cliente desenhar (onda do pisão, raio X, fortaleza, super-salto...):
+     * tipo, posição e dois valores e uma cor livres, que cada tipo interpreta (client/Mundo).
+     */
+    public record Efeito(String tipo, double x, double y, double z, float a, float b, int cor) {
+        public static void encode(Efeito m, FriendlyByteBuf b) {
+            b.writeUtf(m.tipo);
+            b.writeDouble(m.x);
+            b.writeDouble(m.y);
+            b.writeDouble(m.z);
+            b.writeFloat(m.a);
+            b.writeFloat(m.b);
+            b.writeInt(m.cor);
+        }
+
+        public static Efeito decode(FriendlyByteBuf b) {
+            return new Efeito(b.readUtf(), b.readDouble(), b.readDouble(), b.readDouble(), b.readFloat(), b.readFloat(), b.readInt());
+        }
+    }
+
+    /** O cliente soltou um super-salto carregado (força de 0 a 1); o servidor confere e mostra para todos. */
+    public record Salto(float forca) {}
+
     private Rede() {}
 
     public static void registrar() {
@@ -215,6 +240,28 @@ public final class Rede {
             .encoder((m, b) -> {}).decoder(b -> new Destransformar())
             .consumerMainThread((m, ctx) -> comJogador(ctx, Transformacao::pedirDestransformar))
             .add();
+        CANAL.messageBuilder(Efeito.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(Efeito::encode).decoder(Efeito::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.EFEITOS.add(m))
+            .add();
+        CANAL.messageBuilder(Salto.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeFloat(m.forca())).decoder(b -> new Salto(b.readFloat()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> SuperSalto.saltar(p, m.forca())))
+            .add();
+    }
+
+    /** Mostra um efeito para todos perto do ponto (até 96 blocos). */
+    public static void efeito(ServerLevel level, double x, double y, double z, String tipo, float a, float b, int cor) {
+        CANAL.send(new Efeito(tipo, x, y, z, a, b, cor),
+            PacketDistributor.NEAR.with(new PacketDistributor.TargetPoint(x, y, z, 96 * 96, level.dimension())));
+    }
+
+    /** Mostra um efeito só para um jogador (ex.: raio X, que só quem usa enxerga). */
+    public static void efeitoPara(ServerPlayer player, String tipo, double x, double y, double z, float a, float b, int cor) {
+        if (player.connection == null) return;
+        CANAL.send(new Efeito(tipo, x, y, z, a, b, cor), PacketDistributor.PLAYER.with(player));
     }
 
     private static void comJogador(CustomPayloadEvent.Context ctx, Consumer<ServerPlayer> acao) {

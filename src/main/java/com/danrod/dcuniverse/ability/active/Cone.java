@@ -7,8 +7,6 @@ import com.danrod.dcuniverse.character.Params;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,9 +31,6 @@ public final class Cone implements TipoHabilidade {
         Vec3 dir = player.getLookAngle();
         boolean congela = "freeze".equals(prm.s("effect", "freeze"));
 
-        if (tick % 8 == 0) {
-            level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.POWDER_SNOW_BREAK, SoundSource.PLAYERS, 0.9f, 0.6f);
-        }
         if (tick % 10 != 0) return;
 
         AABB area = player.getBoundingBox().expandTowards(dir.scale(alcance)).inflate(alcance * 0.5);

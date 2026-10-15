@@ -37,6 +37,10 @@ public final class Cliente {
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "velocidade"), Voador::desenharLinhas);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "hud"), Hud::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "raio_x"), RaioX::desenharTela);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "salto"), Saltador::desenhar);
         });
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new));
         TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
@@ -46,6 +50,9 @@ public final class Cliente {
             Pecas.limpar();
             Hud.limpar();
             Voador.limpar();
+            Mundo.limpar();
+            SomCanal.limpar();
+            Saltador.limpar();
             usando = false;
         });
         GuiaItem.abrir = GuiaScreen::abrir;
@@ -53,6 +60,8 @@ public final class Cliente {
         Pecas.registrar();
         Voador.registrar();
         Efeitos.registrarFeixe();
+        RaioX.registrar();
+        Saltador.registrar();
     }
 
     private static void tick() {
@@ -87,5 +96,7 @@ public final class Cliente {
         Planador.tick(mc);
         Voador.tick(mc);
         Efeitos.tick(mc);
+        Mundo.tick(mc);
+        if (mc.level != null) SomCanal.tick(mc, mc.level);
     }
 }

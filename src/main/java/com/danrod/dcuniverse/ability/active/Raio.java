@@ -40,8 +40,7 @@ public final class Raio implements TipoHabilidade {
         HitResult alvo = Alvos.mirar(player, prm.d("range", 24));
         if (!(player.level() instanceof ServerLevel level)) return;
         if (tick % 10 == 0) {
-            // Zumbido do feixe em quem usa e chiado de queimado onde bate.
-            level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.8f, 1.9f);
+            // O zumbido do feixe é contínuo no cliente (client/SomCanal); aqui só o chiado de queimado onde bate.
             var onde = alvo.getLocation();
             level.playSound(null, onde.x, onde.y, onde.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.25f, 1.6f);
         }

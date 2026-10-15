@@ -36,8 +36,8 @@ public final class Projetil implements TipoHabilidade {
         proj.shootFromRotation(player, player.getXRot(), player.getYRot(), 0f, vel, sonico ? 0f : 0.5f);
         player.level().addFreshEntity(proj);
         if (sonico) {
-            player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM,
-                SoundSource.PLAYERS, 0.9f, 1.5f);
+            player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), com.danrod.dcuniverse.content.Sons.SOCO_SONICO.get(),
+                SoundSource.PLAYERS, 1.2f, 1f);
             player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
         } else {
             player.level().playSound(null, player.blockPosition(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.6f, 0.8f);

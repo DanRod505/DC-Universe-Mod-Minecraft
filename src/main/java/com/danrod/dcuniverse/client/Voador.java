@@ -126,6 +126,11 @@ public final class Voador {
         Cauda.registrar();
     }
 
+    /** Faz a câmera tremer por alguns ticks (até 14 = o tremor mais forte). */
+    public static void tremer(int ticks) {
+        tremor = Math.max(tremor, Math.min(14, ticks));
+    }
+
     public static boolean voando(LocalPlayer p) {
         return EstadoCliente.atual.voo() > 0 && p.getAbilities().flying && !p.isSpectator() && !p.isPassenger();
     }

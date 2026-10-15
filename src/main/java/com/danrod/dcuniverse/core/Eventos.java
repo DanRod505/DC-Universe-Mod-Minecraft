@@ -4,6 +4,9 @@ import com.danrod.dcuniverse.ability.DemoHud;
 import com.danrod.dcuniverse.ability.Habilidades;
 import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.ability.QuedaAmortecida;
+import com.danrod.dcuniverse.ability.active.Fortaleza;
+import com.danrod.dcuniverse.ability.active.Onda;
+import com.danrod.dcuniverse.ability.passive.Naturais;
 import com.danrod.dcuniverse.character.EstadoJogador;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.character.Personagens;
@@ -22,6 +25,7 @@ import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.listener.Priority;
 
 import java.util.function.Predicate;
@@ -69,6 +73,15 @@ public final class Eventos {
             }
         });
         PlayerEvent.PlayerChangedDimensionEvent.BUS.addListener(e -> sync(e.getEntity()));
+        TickEvent.ServerTickEvent.Post.BUS.addListener(e -> {
+            Onda.tick();
+            Fortaleza.tick();
+        });
+        ServerStoppingEvent.BUS.addListener(e -> {
+            Onda.limpar();
+            Fortaleza.limpar();
+        });
+        Naturais.registrar();
     }
 
     static void tick(ServerPlayer player) {

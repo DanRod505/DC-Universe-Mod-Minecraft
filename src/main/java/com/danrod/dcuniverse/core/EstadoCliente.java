@@ -25,6 +25,9 @@ public final class EstadoCliente {
     /** Manobras de voo de outros jogadores que o cliente ainda vai animar. */
     public static final java.util.Queue<Rede.ManobraVista> MANOBRAS = new java.util.concurrent.ConcurrentLinkedQueue<>();
 
+    /** Efeitos pontuais no mundo que o cliente ainda vai começar a desenhar. */
+    public static final java.util.Queue<Rede.Efeito> EFEITOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
+
     private EstadoCliente() {}
 
     public static void aparencia(Rede.Aparencia a) {
@@ -34,6 +37,7 @@ public final class EstadoCliente {
 
     public static void catalogo(Rede.Catalogo c) {
         catalogo = c.personagens();
+        passivasDe = "";
     }
 
     public static void guia(Rede.GuiaSync g) {
@@ -45,6 +49,32 @@ public final class EstadoCliente {
         return !atual.personagem().isEmpty();
     }
 
+    private static String passivasDe = "";
+    private static Map<String, com.danrod.dcuniverse.character.Params> passivas = Map.of();
+
+    /** Parâmetros de uma passiva do personagem do jogador local (lidos do catálogo), ou null se não tiver. */
+    public static synchronized com.danrod.dcuniverse.character.Params passiva(String tipo) {
+        String id = atual.personagem();
+        if (id.isEmpty()) return null;
+        if (!id.equals(passivasDe)) {
+            passivasDe = id;
+            Map<String, com.danrod.dcuniverse.character.Params> m = new java.util.HashMap<>();
+            try {
+                var json = com.google.gson.JsonParser.parseString(catalogo.getOrDefault(id, "{}")).getAsJsonObject();
+                if (json.has("passives")) {
+                    for (var e : json.getAsJsonArray("passives")) {
+                        var o = e.getAsJsonObject();
+                        m.put(o.get("type").getAsString(), new com.danrod.dcuniverse.character.Params(o));
+                    }
+                }
+            } catch (RuntimeException ex) {
+                passivasDe = "";
+            }
+            passivas = m;
+        }
+        return passivas.get(tipo);
+    }
+
     public static List<Rede.HabInfo> habilidades() {
         return atual.habilidades();
     }
@@ -52,10 +82,12 @@ public final class EstadoCliente {
     public static void limpar() {
         atual = Rede.Sync.VAZIO;
         catalogo = Map.of();
+        passivasDe = "";
         guia = Rede.GuiaSync.VAZIO;
         tarefaNova = "";
         APARENCIAS.clear();
         TRANSFORMOU.clear();
         MANOBRAS.clear();
+        EFEITOS.clear();
     }
 }

@@ -13,7 +13,10 @@ Verificações:
 - teclas: duas ações do mod na mesma tecla padrão;
 - GameTests: cada test_instance aponta para uma função registrada e vice-versa;
 - registro: todo item/bloco com nome no lang está registrado no Java e todo item dcuniverse: usado em
-  receita, loot table ou tag tem nome no lang.
+  receita, loot table ou tag tem nome no lang;
+- sons: todo som de content/Sons.java está no sounds.json, com o .ogg existindo (os das habilidades mono,
+  para tocar no lugar certo do mundo; a trilha do voo é estéreo de propósito) e a legenda traduzida nos dois idiomas;
+- blocos: todo bloco de content/Blocos.java tem blockstate, modelo e textura.
 Lê src/main/resources e src/generated/resources (receitas geradas por tools/gerar_conteudo.py).
 
 Novas verificações (teclas, modelos, texturas) entram junto com o sistema que precisa delas.
@@ -293,6 +296,57 @@ def verificar_registro(raiz, pastas, erros):
                     erros.append(f"{arq.relative_to(raiz)}: item dcuniverse:{i} inexistente")
 
 
+def verificar_sons(raiz, recursos, erros):
+    java = (raiz / JAVA / "content/Sons.java").read_text(encoding="utf-8")
+    sons = ler_json(recursos / "assets/dcuniverse/sounds.json", erros) or {}
+    lang = {i: ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {} for i in IDIOMAS}
+    for nome in re.findall(r'som\("([a-z0-9_.]+)"\)', java):
+        if nome not in sons:
+            erros.append(f"sons: {nome} registrado em Sons.java mas fora do sounds.json")
+    for nome, e in sons.items():
+        for s in e.get("sounds", []):
+            arq = s if isinstance(s, str) else s.get("name", "")
+            ns, caminho = arq.split(":", 1) if ":" in arq else ("minecraft", arq)
+            ogg = recursos / f"assets/{ns}/sounds/{caminho}.ogg"
+            if ns != "dcuniverse":
+                continue
+            if not ogg.exists():
+                erros.append(f"sons: {nome} aponta para {ogg.relative_to(recursos)}, que não existe")
+            elif caminho.startswith("habilidade/") and canais_ogg(ogg) != 1:
+                erros.append(f"sons: {ogg.name} não é mono (efeito estéreo não tem posição no mundo)")
+        legenda = e.get("subtitle")
+        for i in IDIOMAS:
+            if legenda and legenda not in lang[i]:
+                erros.append(f"sons: falta a legenda {legenda} em {i}.json")
+
+
+def canais_ogg(arq):
+    """Número de canais do cabeçalho Vorbis (byte 11 do pacote de identificação)."""
+    dados = arq.read_bytes()[:200]
+    i = dados.find(b"\x01vorbis")
+    return dados[i + 11] if i >= 0 else 0
+
+
+def verificar_blocos(raiz, recursos, erros):
+    java = (raiz / JAVA / "content/Blocos.java").read_text(encoding="utf-8")
+    for bloco in re.findall(r'bloco\("([a-z0-9_]+)"', java):
+        estado = ler_json(recursos / f"assets/dcuniverse/blockstates/{bloco}.json", erros) if (
+            recursos / f"assets/dcuniverse/blockstates/{bloco}.json").exists() else None
+        if estado is None:
+            erros.append(f"blocos: {bloco} sem blockstates/{bloco}.json")
+            continue
+        for v in estado.get("variants", {}).values():
+            modelo = (v[0] if isinstance(v, list) else v).get("model", "").split(":", 1)[-1]
+            m = recursos / f"assets/dcuniverse/models/{modelo}.json"
+            if not m.exists():
+                erros.append(f"blocos: {bloco} usa o modelo {modelo}, que não existe")
+                continue
+            for tex in (ler_json(m, erros) or {}).get("textures", {}).values():
+                ns, caminho = tex.split(":", 1) if ":" in tex else ("minecraft", tex)
+                if ns == "dcuniverse" and not (recursos / f"assets/dcuniverse/textures/{caminho}.png").exists():
+                    erros.append(f"blocos: {bloco} usa a textura {caminho}, que não existe")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--raiz", default=".")
@@ -309,6 +363,8 @@ def main():
     verificar_teclas(raiz, erros)
     verificar_testes(raiz, recursos, erros)
     verificar_registro(raiz, pastas, erros)
+    verificar_sons(raiz, recursos, erros)
+    verificar_blocos(raiz, recursos, erros)
     if erros:
         print("\n".join(erros))
         sys.exit(1)

@@ -8,6 +8,8 @@ import com.danrod.dcuniverse.ability.QuedaAmortecida;
 import com.danrod.dcuniverse.ability.TipoHabilidade;
 import com.danrod.dcuniverse.ability.TiposHabilidade;
 import com.danrod.dcuniverse.ability.TiposPassiva;
+import com.danrod.dcuniverse.ability.active.Fortaleza;
+import com.danrod.dcuniverse.ability.passive.Naturais;
 import com.danrod.dcuniverse.ability.passive.Voo;
 import com.danrod.dcuniverse.character.EstadoJogador;
 import com.danrod.dcuniverse.character.Personagem;
@@ -53,6 +55,8 @@ public final class Testes {
         FUNCOES.register("hud", () -> Testes::hud);
         FUNCOES.register("abilities", () -> Testes::habilidades);
         FUNCOES.register("flight", () -> Testes::voo);
+        FUNCOES.register("powers", () -> Testes::poderes);
+        FUNCOES.register("fortress", () -> Testes::fortaleza);
     }
 
     private Testes() {}
@@ -329,5 +333,120 @@ public final class Testes {
         h.assertTrue(c.getAbilities().mayfly && c.getAbilities().flying, "continua voando no criativo");
         h.assertValueEqual(c.getAbilities().getFlyingSpeed(), 0.05f, "com a velocidade do criativo");
         h.succeed();
+    }
+
+    /** Piso de pedra em volta do ponto relativo (x, y, z), com raio r, para as habilidades que precisam de chão. */
+    private static void piso(GameTestHelper h, int x, int y, int z, int r) {
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                h.getLevel().setBlockAndUpdate(h.absolutePos(new net.minecraft.core.BlockPos(x + dx, y, z + dz)),
+                    net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            }
+        }
+    }
+
+    /**
+     * Pisão sísmico (precisa de chão, atinge e deixa lento quem a onda alcança), visão de raio X (só cobra:
+     * o desenho é do cliente) e as passivas naturais: superforça (pedra sim, obsidiana nunca, só de mão
+     * vazia) e ricochete de projéteis fracos.
+     */
+    static void poderes(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        piso(h, 1, 1, 1, 6);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem sup = e.personagem();
+        e.setEnergia(sup.energia().max());
+        var alvo = h.spawn(net.minecraft.world.entity.EntityTypes.PIG, new net.minecraft.core.BlockPos(4, 2, 1));
+        Personagem.Habilidade pisao = sup.habilidade("pisao_sismico");
+        h.assertValueEqual(pisao.tipo(), "area_blast", "pisão sísmico é uma onda");
+        float antes = e.energia();
+        h.assertTrue(Habilidades.executar(p, sup, pisao), "pisão no chão funciona");
+        h.assertValueEqual(e.energia(), antes - 30f, "pisão custa 30");
+
+        ServerPlayer noAr = jogador(h);
+        var alto = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 12, 1.5));
+        noAr.setPos(alto.x, alto.y, alto.z);
+        Transformacao.transformar(noAr, SUPERMAN, true);
+        EstadoJogador.de(noAr).setEnergia(sup.energia().max());
+        h.assertFalse(Habilidades.executar(noAr, sup, pisao), "longe do chão o pisão não sai");
+        h.assertValueEqual(EstadoJogador.de(noAr).energia(), sup.energia().max(), "e não gasta energia");
+
+        Personagem.Habilidade raioX = sup.habilidade("visao_raio_x");
+        antes = e.energia();
+        h.assertTrue(Habilidades.executar(p, sup, raioX), "visão de raio X liga");
+        h.assertValueEqual(e.energia(), antes - 20f, "raio X custa 20");
+
+        var pedra = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+        h.assertTrue(Naturais.velocidadeMao(p, pedra) > 1, "superforça quebra pedra com a mão");
+        h.assertTrue(Naturais.velocidadeMao(p, net.minecraft.world.level.block.Blocks.OBSIDIAN.defaultBlockState()) == 0, "obsidiana nunca");
+        h.assertTrue(Naturais.velocidadeMao(p, net.minecraft.world.level.block.Blocks.BEDROCK.defaultBlockState()) == 0, "bedrock nunca");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.STICK));
+        h.assertTrue(Naturais.velocidadeMao(p, pedra) == 0, "só com a mão vazia");
+        h.assertTrue(Naturais.ricocheteia(p, true, 6, null), "flecha fraca ricocheteia");
+        h.assertFalse(Naturais.ricocheteia(p, true, 30, null), "projétil forte passa");
+        h.assertFalse(Naturais.ricocheteia(p, false, 2, null), "golpe corpo a corpo não ricocheteia");
+        ServerPlayer normal = jogador(h);
+        h.assertFalse(Naturais.ricocheteia(normal, true, 2, null), "sem transformar não ricocheteia");
+        h.assertTrue(Naturais.velocidadeMao(normal, pedra) == 0, "sem transformar não tem superforça");
+
+        // A onda leva 10 ticks para chegar na borda: o porco a 3 blocos já foi atingido.
+        h.runAfterDelay(12, () -> {
+            h.assertTrue(alvo.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "a onda deixa lento");
+            h.assertTrue(alvo.getHealth() < alvo.getMaxHealth(), "a onda fere");
+            h.succeed();
+        });
+    }
+
+    /**
+     * Fortaleza da Solidão: a forma tem porta para quem usou e torres em volta; a suprema cresce o cristal
+     * do chão (nunca em cima de alguém), agenda o fim de cada bloco e recarrega quem está dentro.
+     */
+    static void fortaleza(GameTestHelper h) {
+        var forma = Fortaleza.forma(6, net.minecraft.core.Direction.NORTH, net.minecraft.util.RandomSource.create(1));
+        h.assertTrue(forma.size() > 150, "fortaleza com cúpula e torres (" + forma.size() + " blocos)");
+        h.assertTrue(forma.stream().allMatch(b -> b.getY() >= 0), "nada abaixo do chão");
+        h.assertTrue(forma.stream().mapToInt(net.minecraft.core.BlockPos::getY).max().orElse(0) >= 9, "torres mais altas que a cúpula");
+        h.assertFalse(forma.contains(new net.minecraft.core.BlockPos(0, 1, -6)), "porta aberta para o norte");
+        h.assertTrue(forma.contains(new net.minecraft.core.BlockPos(0, 1, 6)), "parede fechada atrás");
+
+        ServerPlayer p = jogador(h);
+        piso(h, 1, 1, 1, 8);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        p.setXRot(90);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem sup = e.personagem();
+        e.setEnergia(sup.energia().max());
+        Personagem.Habilidade h2 = sup.suprema();
+        h.assertValueEqual(h2.id(), "fortaleza_da_solidao", "a suprema é a Fortaleza da Solidão");
+        h.assertTrue(Habilidades.executar(p, sup, h2), "a fortaleza nasce onde ele olha (o chão)");
+        h.assertValueEqual(e.energia(), sup.energia().max() * 0.3f, "custa 70% da energia");
+        // Um porco em cima de onde seria a parede de trás: o cristal não nasce em cima dele.
+        h.spawn(net.minecraft.world.entity.EntityTypes.PIG, new net.minecraft.core.BlockPos(1, 2, 7));
+        var base = h.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1));
+        var cristal = com.danrod.dcuniverse.content.Blocos.CRISTAL_FORTALEZA.get();
+        h.runAfterDelay(Fortaleza.CRESCE + 5, () -> {
+            var level = h.getLevel();
+            long cristais = forma.stream().filter(b -> level.getBlockState(base.offset(b)).is(cristal)).count();
+            h.assertTrue(cristais > 100, "o cristal cresceu (" + cristais + " blocos)");
+            h.assertFalse(level.getBlockState(base.offset(0, 0, 6)).is(cristal), "não cresce onde há alguém");
+            h.assertTrue(level.getBlockState(base.offset(-1, 0, 6)).is(cristal), "mas cresce do lado");
+            var parede = forma.stream().map(base::offset).filter(b -> level.getBlockState(b).is(cristal)).findFirst().orElseThrow();
+            h.assertTrue(level.getBlockTicks().hasScheduledTick(parede, cristal), "cada cristal tem hora para sumir");
+            // A câmara solar dá 8 de energia por segundo (o jogador de teste não recarrega sozinho).
+            h.assertTrue(e.energia() > sup.energia().max() * 0.3f + 10, "a câmara solar recarrega quem está dentro");
+            // Limpa para não sobrar cristal perto dos outros testes.
+            Fortaleza.limpar();
+            for (var b : forma) {
+                for (int dy = 0; dy <= 2; dy++) {
+                    if (level.getBlockState(base.offset(b).above(dy - 1)).is(cristal)) level.removeBlock(base.offset(b).above(dy - 1), false);
+                }
+            }
+            h.succeed();
+        });
     }
 }

@@ -376,6 +376,11 @@ public final class GuiaScreen extends Screen {
                     double max = t.params().d("speed", 12);
                     texto(out, Component.translatable("dcuniverse.guia.voo.detalhe", fmt(max * Voador.CRUZEIRO), fmt(max),
                         fmt(t.params().d("dash_cost", 15))), SUAVE, 2);
+                } else if (t.tipo().equals("super_jump")) {
+                    texto(out, Component.translatable("dcuniverse.guia.salto.detalhe", fmt(alturaSalto(t.params().d("power", 2))),
+                        fmt(t.params().d("charge", 1))), SUAVE, 2);
+                } else if (t.tipo().equals("projectile_resistance")) {
+                    texto(out, Component.translatable("dcuniverse.guia.ricochete.detalhe", fmt(t.params().d("max_damage", 10) / 2)), SUAVE, 2);
                 }
             }
         }
@@ -393,6 +398,7 @@ public final class GuiaScreen extends Screen {
             out.add(nome(Component.translatable("habilidade.dcuniverse." + sup.id())));
             texto(out, Component.translatable("habilidade.dcuniverse." + sup.id() + ".desc"), TINTA, 1);
             out.add(item(Component.translatable("dcuniverse.guia.suprema.custo", pct, fmt(sup.recargaSeg()))));
+            detalhes(out, sup.params());
         }
         out.add(espaco(4));
         out.add(secao("dcuniverse.guia.secao.historia"));
@@ -419,7 +425,28 @@ public final class GuiaScreen extends Screen {
         if (prm.d("impact_radius", 0) > 0) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.impacto", fmt(prm.d("impact_radius", 0)))));
         }
+        detalhes(out, prm);
         out.add(espaco(3));
+    }
+
+    /** Raio, duração e efeitos de controle, quando a habilidade tem. */
+    private void detalhes(List<Bloco> out, Params prm) {
+        if (prm.json().has("radius")) out.add(item(Component.translatable("dcuniverse.guia.hab.raio", fmt(prm.d("radius", 0)))));
+        if (prm.json().has("duration")) out.add(item(Component.translatable("dcuniverse.guia.hab.duracao", fmt(prm.d("duration", 0)))));
+        if (prm.d("stun", 0) > 0) out.add(item(Component.translatable("dcuniverse.guia.hab.lento", fmt(Math.min(4, prm.d("stun", 0))))));
+        if (prm.d("regen_level", 0) > 0) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.cura", (int) prm.d("regen_level", 0), fmt(prm.d("energy_per_second", 0)))));
+        }
+    }
+
+    /** Altura aproximada do super-salto com a carga cheia (mesma física do pulo: gravidade 0,08 e arrasto 0,98). */
+    static double alturaSalto(double vel) {
+        double y = 0;
+        for (int i = 0; i < 200 && vel > 0; i++) {
+            y += vel;
+            vel = (vel - 0.08) * 0.98;
+        }
+        return Math.round(y);
     }
 
     private List<List<Bloco>> paginasDireita() {
