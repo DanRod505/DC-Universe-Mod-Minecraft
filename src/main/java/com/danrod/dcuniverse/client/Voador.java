@@ -25,6 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.ComputeFovModifierEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.network.PacketDistributor;
 import org.joml.Matrix4fc;
@@ -293,8 +294,11 @@ public final class Voador {
             if (d.lengthSqr() > 1e-6) ps.dir = ps.dir.lerp(d.normalize(), 0.3).normalize();
             float alvoCone = (float) Mth.clamp((ps.blocosPorSeg - VAPOR) / 8, 0, 1);
             ps.cone += (alvoCone - ps.cone) * (alvoCone > ps.cone ? 0.15f : 0.08f);
-            // Deita a partir de 4 blocos/s e fica totalmente deitado a 14.
-            float deitar = Mth.clamp((float) (ps.blocosPorSeg - 4) / 10f, 0f, 1f);
+            // Deita a partir de 4 blocos/s e fica totalmente deitado a 14. Só conta o movimento na horizontal ou
+            // na direção do olhar: subindo ou descendo parado, o corpo fica em pé.
+            Vec3 olhar = pl.getLookAngle();
+            double util = Math.max(d.horizontalDistance(), Math.abs(d.dot(olhar))) * 20;
+            float deitar = Mth.clamp((float) (util - 4) / 10f, 0f, 1f);
             ps.deitado += (deitar - ps.deitado) * 0.18f;
             float dYaw = ps.manobra == Voo.MEIA_VOLTA ? 0 : Mth.wrapDegrees(pl.getYRot() - ps.ultimoYaw);
             ps.ultimoYaw = pl.getYRot();
@@ -411,6 +415,16 @@ public final class Voador {
         if (forca > 0) {
             e.setPitch(e.getPitch() + (r.nextFloat() - 0.5f) * forca);
             e.setYaw(e.getYaw() + (r.nextFloat() - 0.5f) * forca);
+        }
+        // No Forge 26.2 o evento chega depois de a câmera já ter sido copiada para o estado de desenho, então o
+        // giro e o tremor não apareceriam: aplica aqui na câmera e atualiza a cópia.
+        if (e.getRoll() != 0 || forca > 0) {
+            e.getCamera().setRotation(e.getYaw(), e.getPitch(), e.getRoll());
+            CameraRenderState cs = mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
+            cs.orientation.set(e.getCamera().rotation());
+            e.getCamera().getViewRotationMatrix(cs.viewRotationMatrix);
+            cs.xRot = e.getPitch();
+            cs.yRot = e.getYaw();
         }
     }
 

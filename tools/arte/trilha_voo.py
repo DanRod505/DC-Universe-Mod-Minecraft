@@ -9,8 +9,8 @@ começo do loop).
 
 Saídas (em src/main/resources/assets/dcuniverse/sounds/musica/):
 - voo_0.ogg  calma: piano espaçado com eco, graves que ecoam e um colchão bem baixo (sempre que voa).
-- voo_1.ogg  movimento: cordas sustentadas e ostinato de piano em colcheias (cruzeiro).
-- voo_2.ogg  crescendo: arpejo de sintetizador, cordas graves pulsando e um bumbo suave (boost).
+- voo_1.ogg  movimento: só piano, baixo e arpejo calmo em colcheias (cruzeiro).
+- voo_2.ogg  crescendo: cordas, arpejo de sintetizador, cordas graves pulsando e um bumbo suave (boost).
 - voo_3.ogg  épico: tema nas cordas agudas, metais sintetizados, tambores, pratos e guitarras (perto da máxima).
 - voo_estrondo.ogg  impacto ao quebrar a barreira do som.
 Quem toca as camadas e decide o volume de cada uma é client/TrilhaVoo.java.
@@ -291,7 +291,7 @@ def camada_calma():
         for b, m, v in notas:
             p.som(t0 + b * BATIDA, piano(m, 1.6, v), RNG.uniform(-0.3, 0.3), 1.4)
         for m in a["voz"][:3]:
-            p.som(t0, colchao(m - 12, CICLO), RNG.uniform(-0.5, 0.5), 0.12)
+            p.som(t0, colchao(m - 12, CICLO), RNG.uniform(-0.5, 0.5), 0.05)
     st = p.estereo()
     st = eco(st, BATIDA * 0.75, 0.38)
     st = molhar(st, SALA_GRANDE, 0.9)
@@ -302,20 +302,20 @@ def camada_movimento():
     p = Pista()
     for c, a in enumerate(ACORDES):
         t0 = c * CICLO
-        voz = a["voz"]
-        for i, m in enumerate(voz):
-            p.som(t0, cordas(m, CICLO - 0.1, ataque=0.9), (i - 1.5) * 0.4, 0.8)
-        p.som(t0, cordas(a["baixo"] + 12, CICLO - 0.1, ataque=0.7, brilho=1800), 0, 0.9)
-        # Ostinato de piano em colcheias.
-        padrao = [a["baixo"] + 24, voz[0], voz[1], voz[2], voz[1], voz[0], voz[2], voz[1]]
+        voz = sorted(a["voz"])
+        # Só piano, suave: o baixo da mão esquerda e um arpejo calmo em colcheias.
+        p.som(t0, piano(a["baixo"], CICLO * 0.9, 0.42), -0.1, 1.0)
+        p.som(t0 + 4 * BATIDA, piano(a["baixo"] + 12, CICLO * 0.45, 0.3), -0.1, 0.8)
+        padrao = [voz[0], voz[1], voz[2], voz[3], voz[2], voz[1], voz[2], voz[1]]
         for k in range(16):
-            v = 0.5 if k % 4 == 0 else 0.36
+            v = 0.34 if k % 4 == 0 else 0.24
             m = padrao[k % 8]
             if "resolve" in a and k >= 8:
-                m = {60: 59}.get(m, m)
-            p.som(t0 + k * BATIDA / 2, piano(m, BATIDA / 2 * 1.4, v), -0.25 + 0.5 * (k % 2))
+                m = {60: 59, 72: 71}.get(m, m)
+            p.som(t0 + k * BATIDA / 2, piano(m, BATIDA * 1.2, v), -0.2 + 0.4 * (k % 2))
     st = p.estereo()
-    st = molhar(st, SALA, 0.55)
+    st = eco(st, BATIDA * 0.75, 0.25, 4)
+    st = molhar(st, SALA_GRANDE, 0.7)
     return st
 
 
@@ -336,6 +336,9 @@ def camada_crescendo():
             acento = 1.0 if k % 2 == 0 else 0.65
             p.som(t0 + k * BATIDA / 2, cordas(a["baixo"] + 12, BATIDA / 2 * 0.8, ataque=0.02, solta=0.15,
                                                brilho=1500, vozes=3), 0, 0.9 * acento)
+        # Cordas sustentadas entram com o boost.
+        for i, m in enumerate(a["voz"]):
+            p.som(t0, cordas(m, CICLO - 0.1, ataque=0.9), (i - 1.5) * 0.4, 0.7)
         for b in range(8):
             p.som(t0 + b * BATIDA, bumbo(0.75 if b % 2 else 1.0), 0)
     st = p.estereo()
@@ -451,7 +454,7 @@ def main():
         camadas.append(fechar_loop(fazer()))
     # Equilíbrio entre as camadas (picos) e o volume geral: no ápice (todas juntas, a calma a 65%) o pico fica
     # em 0,9.
-    alvo = [0.32, 0.42, 0.42, 0.62]
+    alvo = [0.32, 0.3, 0.45, 0.62]
     camadas = [c / np.max(np.abs(c)) * a for c, a in zip(camadas, alvo)]
     juntas = camadas[0] * 0.65 + camadas[1] + camadas[2] + camadas[3]
     escala = 0.9 / np.max(np.abs(juntas))

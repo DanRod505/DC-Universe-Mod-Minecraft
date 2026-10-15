@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 /**
  * Trilha do voo (música original, gerada por tools/arte/trilha_voo.py): quatro camadas do mesmo tamanho tocam
  * juntas em loop, em sincronia, e cada uma sobe ou desce de volume conforme a velocidade. Calma e espaçada devagar,
- * ganha cordas e piano no cruzeiro, arpejo e tambor no boost e o tema épico com guitarras perto da máxima; ao
+ * ganha um piano suave no cruzeiro, cordas, arpejo e tambor no boost e o tema épico com guitarras perto da máxima; ao
  * quebrar a barreira do som toca um impacto. Usa o volume de Música do jogo e cala a música normal enquanto toca.
  */
 public final class TrilhaVoo {
@@ -40,7 +40,8 @@ public final class TrilhaVoo {
         float[] alvo = new float[CAMADAS.length];
         if (voando) {
             alvo[0] = 1f - 0.35f * suave(0.6, 1.0, frac);
-            alvo[1] = suave(0.08, 0.26, frac);
+            // No cruzeiro o piano entra baixinho; ele só cresce de vez junto com o boost.
+            alvo[1] = 0.6f * suave(0.08, 0.26, frac) + 0.4f * suave(0.4, 0.66, frac);
             alvo[2] = suave(0.4, 0.66, frac);
             alvo[3] = suave(0.74, 0.93, frac);
         }
