@@ -1,5 +1,14 @@
 package com.danrod.dcuniverse.ability.active;
 
+import com.danrod.dcuniverse.ability.Congelamento;
+import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.CandleCakeBlock;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.BaseFireBlock;
 import com.danrod.dcuniverse.ability.Alvos;
 import com.danrod.dcuniverse.ability.TipoHabilidade;
 import com.danrod.dcuniverse.character.Personagem;
@@ -23,15 +32,19 @@ import java.util.Map;
  * color, sets_fire, melts (derrete e funde blocos atingidos). O feixe é desenhado no cliente (client/Efeitos).
  */
 public final class Raio implements TipoHabilidade {
-    /** O que o raio de calor transforma depois de 1 s no mesmo bloco. */
-    private static final Map<Block, Block> FUNDE = Map.of(
-        Blocks.SAND, Blocks.GLASS,
-        Blocks.RED_SAND, Blocks.GLASS,
-        Blocks.ICE, Blocks.WATER,
-        Blocks.SNOW_BLOCK, Blocks.AIR,
-        Blocks.SNOW, Blocks.AIR,
-        Blocks.COBBLESTONE, Blocks.STONE,
-        Blocks.CLAY, Blocks.TERRACOTTA
+    /** O que o raio de calor funde a cada meio segundo no bloco atingido (gelo e neve viram água ou somem). */
+    private static final Map<Block, Block> FUNDE = Map.ofEntries(
+        Map.entry(Blocks.SAND, Blocks.GLASS),
+        Map.entry(Blocks.RED_SAND, Blocks.GLASS),
+        Map.entry(Blocks.ICE, Blocks.WATER),
+        Map.entry(Blocks.FROSTED_ICE, Blocks.WATER),
+        Map.entry(Blocks.PACKED_ICE, Blocks.WATER),
+        Map.entry(Blocks.BLUE_ICE, Blocks.WATER),
+        Map.entry(Blocks.SNOW_BLOCK, Blocks.AIR),
+        Map.entry(Blocks.SNOW, Blocks.AIR),
+        Map.entry(Blocks.POWDER_SNOW, Blocks.AIR),
+        Map.entry(Blocks.COBBLESTONE, Blocks.STONE),
+        Map.entry(Blocks.CLAY, Blocks.TERRACOTTA)
     );
 
     @Override
@@ -48,12 +61,41 @@ public final class Raio implements TipoHabilidade {
         if (alvo instanceof EntityHitResult eh && tick % 10 == 0) {
             Entity e = eh.getEntity();
             Alvos.ferir(player, e, level.damageSources().playerAttack(player), Alvos.dano(p, prm.d("damage_mult", 0.4)) / 2);
-            if (prm.b("sets_fire", false) && Alvos.podeAtingir(player, e)) e.igniteForSeconds(3);
-        } else if (alvo instanceof BlockHitResult bh && alvo.getType() == HitResult.Type.BLOCK && prm.b("melts", false) && tick % 20 == 19) {
-            BlockPos pos = bh.getBlockPos();
-            Block novo = FUNDE.get(level.getBlockState(pos).getBlock());
-            if (novo != null && player.mayBuild() && level.mayInteract(player, pos)) {
-                level.setBlockAndUpdate(pos, novo.defaultBlockState());
+            if (prm.b("sets_fire", false) && Alvos.podeAtingir(player, e)) e.igniteForSeconds(4);
+            if (e instanceof net.minecraft.world.entity.LivingEntity vivo) Congelamento.derreter(vivo);
+        } else if (alvo instanceof BlockHitResult bh && alvo.getType() == HitResult.Type.BLOCK && tick % 10 == 9
+            && player.mayBuild() && level.mayInteract(player, bh.getBlockPos())) {
+            esquentar(level, player, bh, prm.b("melts", false), prm.b("sets_fire", false) && tick % 20 == 19);
+        }
+    }
+
+    /** Funde o bloco atingido (e a neve em cima dele); com fogo, acende fogueiras, velas e TNT ou põe fogo na face. */
+    public static void esquentar(ServerLevel level, ServerPlayer player, BlockHitResult bh, boolean funde, boolean fogo) {
+        BlockPos pos = bh.getBlockPos();
+        BlockState st = level.getBlockState(pos);
+        if (funde) {
+            BlockPos cima = pos.above();
+            if (FUNDE.get(level.getBlockState(cima).getBlock()) == Blocks.AIR) level.removeBlock(cima, false);
+            Block novo = FUNDE.get(st.getBlock());
+            if (novo != null) {
+                boolean evapora = novo == Blocks.WATER && level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos);
+                level.setBlockAndUpdate(pos, (evapora ? Blocks.AIR : novo).defaultBlockState());
+                level.levelEvent(1501, pos, 0);
+                return;
+            }
+        }
+        if (!fogo) return;
+        if (CampfireBlock.canLight(st) || CandleBlock.canLight(st) || CandleCakeBlock.canLight(st)) {
+            level.setBlock(pos, st.setValue(BlockStateProperties.LIT, true), 11);
+            level.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.8f, 1.2f);
+        } else if (st.getBlock() instanceof TntBlock) {
+            st.onCaughtFire(level, pos, bh.getDirection(), player);
+            level.removeBlock(pos, false);
+        } else {
+            BlockPos face = pos.relative(bh.getDirection());
+            if (BaseFireBlock.canBePlacedAt(level, face, bh.getDirection().getOpposite())) {
+                level.setBlockAndUpdate(face, BaseFireBlock.getState(level, face));
+                level.playSound(null, face, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.8f, 1.2f);
             }
         }
     }

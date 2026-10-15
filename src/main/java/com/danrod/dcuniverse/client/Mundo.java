@@ -52,6 +52,7 @@ public final class Mundo {
             ATIVOS.clear();
         }
         RaioX.limpar();
+        Gelo.limpar();
     }
 
     public static void tick(Minecraft mc) {
@@ -76,6 +77,8 @@ public final class Mundo {
             case "fortress_end" -> fortalezaFim(level, e);
             case "jump" -> salto(level, e);
             case "xray" -> RaioX.ligar(mc, e);
+            case "freeze" -> Gelo.ligar(mc, e);
+            case "thaw" -> Gelo.soltar(e);
             default -> {}
         }
     }
@@ -231,6 +234,7 @@ public final class Mundo {
         }
         RaioX.desenhar(ps, col, cam, pt);
         Efeitos.feixePrimeiraPessoa(ps, col, cam, pt);
+        Gelo.desenhar(ps, col, cam, pt);
     }
 
     /** Anel claro que corre pelo chão, com um segundo anel mais fraco atrás. */

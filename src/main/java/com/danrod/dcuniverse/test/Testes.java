@@ -57,6 +57,7 @@ public final class Testes {
         FUNCOES.register("flight", () -> Testes::voo);
         FUNCOES.register("powers", () -> Testes::poderes);
         FUNCOES.register("fortress", () -> Testes::fortaleza);
+        FUNCOES.register("elements", () -> Testes::elementos);
     }
 
     private Testes() {}
@@ -398,6 +399,35 @@ public final class Testes {
             h.assertTrue(alvo.getHealth() < alvo.getMaxHealth(), "a onda fere");
             h.succeed();
         });
+    }
+
+    /**
+     * Efeitos secundários: a visão de calor derrete gelo compactado e põe fogo; o sopro prende o mob no gelo
+     * (parado e sem IA) depois de 1 s, e o calor o solta na hora.
+     */
+    static void elementos(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        piso(h, 1, 1, 1, 4);
+        var level = h.getLevel();
+        var gelo = h.absolutePos(new net.minecraft.core.BlockPos(2, 2, 1));
+        level.setBlockAndUpdate(gelo, net.minecraft.world.level.block.Blocks.PACKED_ICE.defaultBlockState());
+        com.danrod.dcuniverse.ability.active.Raio.esquentar(level, p,
+            new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(gelo), net.minecraft.core.Direction.UP, gelo, false), true, false);
+        h.assertTrue(level.getBlockState(gelo).is(net.minecraft.world.level.block.Blocks.WATER), "calor derrete gelo compactado");
+        var madeira = h.absolutePos(new net.minecraft.core.BlockPos(4, 2, 1));
+        level.setBlockAndUpdate(madeira, net.minecraft.world.level.block.Blocks.OAK_PLANKS.defaultBlockState());
+        com.danrod.dcuniverse.ability.active.Raio.esquentar(level, p,
+            new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(madeira), net.minecraft.core.Direction.UP, madeira, false), true, true);
+        h.assertTrue(level.getBlockState(madeira.above()).is(net.minecraft.world.level.block.Blocks.FIRE), "calor põe fogo");
+
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 2, 3));
+        com.danrod.dcuniverse.ability.Congelamento.expor(zumbi);
+        h.assertFalse(com.danrod.dcuniverse.ability.Congelamento.congelado(zumbi), "meio segundo de sopro só deixa lento");
+        com.danrod.dcuniverse.ability.Congelamento.expor(zumbi);
+        h.assertTrue(com.danrod.dcuniverse.ability.Congelamento.congelado(zumbi) && zumbi.isNoAi(), "1 s de sopro prende no gelo");
+        com.danrod.dcuniverse.ability.Congelamento.derreter(zumbi);
+        h.assertFalse(com.danrod.dcuniverse.ability.Congelamento.congelado(zumbi) || zumbi.isNoAi(), "o calor solta o gelo");
+        h.succeed();
     }
 
     /**

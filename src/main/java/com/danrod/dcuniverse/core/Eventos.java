@@ -75,13 +75,16 @@ public final class Eventos {
         PlayerEvent.PlayerChangedDimensionEvent.BUS.addListener(e -> sync(e.getEntity()));
         TickEvent.ServerTickEvent.Post.BUS.addListener(e -> {
             Onda.tick();
+            com.danrod.dcuniverse.ability.Congelamento.tick();
             Fortaleza.tick();
         });
         ServerStoppingEvent.BUS.addListener(e -> {
             Onda.limpar();
+            com.danrod.dcuniverse.ability.Congelamento.limpar();
             Fortaleza.limpar();
         });
         Naturais.registrar();
+        com.danrod.dcuniverse.ability.Congelamento.registrar();
     }
 
     static void tick(ServerPlayer player) {

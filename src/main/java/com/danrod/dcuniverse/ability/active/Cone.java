@@ -1,5 +1,6 @@
 package com.danrod.dcuniverse.ability.active;
 
+import com.danrod.dcuniverse.ability.Congelamento;
 import com.danrod.dcuniverse.ability.Alvos;
 import com.danrod.dcuniverse.ability.TipoHabilidade;
 import com.danrod.dcuniverse.character.Personagem;
@@ -18,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * area_cone: sopro em cone (sopro congelante). Parâmetros: range, angle (graus), damage_mult (por segundo),
- * effect ("freeze"): deixa lentos e congela mobs, vira água em gelo e apaga fogo. O jato é desenhado no cliente.
+ * effect ("freeze"): deixa lentos e, com 1 s de sopro, prende mobs no gelo (ability/Congelamento), vira água em gelo, lava em obsidiana e apaga fogo. O jato é desenhado no cliente.
  */
 public final class Cone implements TipoHabilidade {
     @Override
@@ -39,12 +40,7 @@ public final class Cone implements TipoHabilidade {
             double dist = para.length();
             if (dist > alcance || para.normalize().dot(dir) < cosMax) continue;
             Alvos.ferir(player, e, level.damageSources().freeze(), Alvos.dano(p, prm.d("damage_mult", 0.2)) / 2);
-            if (congela) {
-                // Controle limitado a 4 s em mobs comuns (BALANCEAMENTO.md).
-                e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 80, 2), player);
-                e.setTicksFrozen(Math.min(e.getTicksRequiredToFreeze() + 80, e.getTicksFrozen() + 40));
-                e.clearFire();
-            }
+            if (congela) Congelamento.expor(e);
         }
         if (congela && player.mayBuild()) congelarBlocos(level, player, olhos, dir, alcance);
     }
@@ -58,6 +54,10 @@ public final class Cone implements TipoHabilidade {
                 BlockState st = level.getBlockState(pos);
                 if (st.is(Blocks.FIRE) || st.is(Blocks.SOUL_FIRE)) {
                     level.removeBlock(pos, false);
+                } else if (st.is(Blocks.LAVA)) {
+                    // Lava parada vira obsidiana; correnteza vira pedregulho (como água em cima de lava).
+                    level.setBlockAndUpdate(pos, (st.getFluidState().isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE).defaultBlockState());
+                    level.levelEvent(1501, pos, 0);
                 } else if (st.getFluidState().is(Fluids.WATER) && st.is(Blocks.WATER) && level.getBlockState(pos.above()).isAir()) {
                     level.setBlockAndUpdate(pos, Blocks.FROSTED_ICE.defaultBlockState());
                     level.scheduleTick(pos, Blocks.FROSTED_ICE, 200 + level.getRandom().nextInt(100));
