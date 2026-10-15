@@ -73,7 +73,7 @@ def main():
     ids = {i for x in incluidas for i in x["itens_ids"]}
     ids |= {pers[n]["transformacao"]["id"] for x in incluidas for n in x["personagens"]}
     java = "".join(a.read_text(encoding="utf-8") for a in (raiz / "src/main/java").rglob("*.java"))
-    registrados = set(re.findall(r'(?:item|bloco|traje)\("([a-z0-9_]+)"', java))
+    registrados = set(re.findall(r'(?:item|bloco|blocoComItem|traje)\("([a-z0-9_]+)"', java))
     ids &= registrados
     cat = {i["id"]: i["cat"] for i in itens}
     en_pers = ler(dados / "traducoes_en.json").get("personagens", {})

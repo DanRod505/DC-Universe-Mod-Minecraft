@@ -41,7 +41,7 @@ public final class Naturais {
     public static float velocidadeMao(Player player, BlockState st) {
         if (!player.getMainHandItem().isEmpty()) return 0;
         Params prm = Passivas.params(player, "super_strength");
-        if (prm == null) return 0;
+        if (prm == null || com.danrod.dcuniverse.energy.Kryptonita.exposto(player, 6, 10)) return 0;
         float dureza = st.getBlock().defaultDestroyTime();
         // Obsidiana (50) e bedrock (-1) nunca: BALANCEAMENTO.md.
         if (dureza < 0 || dureza >= Math.min(prm.f("max_hardness", 30), 49)) return 0;
@@ -52,7 +52,7 @@ public final class Naturais {
     public static boolean ricocheteia(ServerPlayer player, boolean projetil, float dano, Entity projetilEnt) {
         if (!projetil) return false;
         Params prm = Passivas.params(player, "projectile_resistance");
-        if (prm == null || dano > prm.f("max_damage", 10)) return false;
+        if (prm == null || dano > prm.f("max_damage", 10) || com.danrod.dcuniverse.energy.Kryptonita.exposto(player, 6, 10)) return false;
         if (player.level() instanceof ServerLevel level) {
             Vec3 onde = projetilEnt != null ? projetilEnt.position() : player.getEyePosition();
             level.playSound(null, onde.x, onde.y, onde.z, Sons.RICOCHETE.get(), SoundSource.PLAYERS, 1f, 0.9f + level.getRandom().nextFloat() * 0.3f);

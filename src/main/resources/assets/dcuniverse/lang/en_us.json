@@ -56,7 +56,7 @@
   "dcuniverse.guia.atributo.energia": "Energy",
   "dcuniverse.guia.atributo.velocidade": "Running",
   "dcuniverse.guia.recarga.base": "Recovers %s per second, always",
-  "dcuniverse.guia.recarga.sunlight": "+%s per second in sunlight",
+  "dcuniverse.guia.recarga.sunlight": "+%s per second in sunlight or near a Solar Chamber",
   "dcuniverse.guia.passiva.flight": "Flies: jump twice in the air; Ctrl speeds up; double-tap A/D to roll, S to turn around, W to dash",
   "dcuniverse.guia.passiva.fall_immunity": "Immune to fall damage",
   "dcuniverse.guia.passiva.fire_immunity": "Immune to fire and lava",
@@ -134,5 +134,11 @@
   "subtitles.dcuniverse.habilidade.fortaleza_quebra": "Crystals shatter",
   "subtitles.dcuniverse.habilidade.salto_carga": "Jump charging",
   "subtitles.dcuniverse.habilidade.salto": "Super jump",
-  "subtitles.dcuniverse.habilidade.ricochete": "Projectile ricochets"
+  "subtitles.dcuniverse.habilidade.ricochete": "Projectile ricochets",
+  "item.dcuniverse.cristal_kryptoniano": "Kryptonian Crystal",
+  "item.dcuniverse.fragmento_kryptonita": "Kryptonite Shard",
+  "block.dcuniverse.bloco_kryptonita": "Block of Kryptonite",
+  "block.dcuniverse.camara_solar": "Solar Chamber",
+  "block.dcuniverse.minerio_kryptonita": "Kryptonite Ore",
+  "dcuniverse.guia.recarga.kryptonite": "%s per second near kryptonite or carrying it, and loses super strength and ricochet"
 }

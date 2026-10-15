@@ -284,7 +284,7 @@ def verificar_registro(raiz, pastas, erros):
     lang = ler_json(pastas[0] / "assets/dcuniverse/lang/en_us.json", erros) or {}
     nomes = {k.split(".", 2)[2] for k in lang if k.startswith(("item.dcuniverse.", "block.dcuniverse."))}
     java = "".join(a.read_text(encoding="utf-8") for a in (raiz / JAVA).rglob("*.java"))
-    registrados = set(re.findall(r'(?:item|bloco|traje)\("([a-z0-9_]+)"', java))
+    registrados = set(re.findall(r'(?:item|bloco|blocoComItem|traje)\("([a-z0-9_]+)"', java))
     erros.extend(f"lang: {i} tem nome mas não está registrado no Java" for i in sorted(nomes - registrados))
     erros.extend(f"Java: {i} registrado sem nome no lang" for i in sorted(registrados - nomes))
     for recursos in pastas:

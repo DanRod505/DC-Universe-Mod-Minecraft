@@ -30,6 +30,10 @@ public final class Itens {
     public static final RegistryObject<Item> CRISTAL_SUPERMAN = item("cristal_superman",
         p -> new TransformacaoItem("superman", p.rarity(Rarity.EPIC)));
 
+    // Lote da v0.1: kryptonita e Krypton
+    public static final RegistryObject<Item> FRAGMENTO_KRYPTONITA = item("fragmento_kryptonita", p -> new Item(p.rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> CRISTAL_KRYPTONIANO = item("cristal_kryptoniano", p -> new Item(p.rarity(Rarity.RARE)));
+
     // Utilidades
     public static final RegistryObject<Item> GUIA_HEROI = item("guia_heroi", p -> new GuiaItem(p.stacksTo(1)));
 

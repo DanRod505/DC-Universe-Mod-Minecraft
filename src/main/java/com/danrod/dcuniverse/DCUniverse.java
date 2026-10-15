@@ -29,6 +29,7 @@ public final class DCUniverse {
         Entidades.TIPOS.register(bus);
         Sons.SONS.register(bus);
         Blocos.BLOCOS.register(bus);
+        com.danrod.dcuniverse.world.Mundo.FEATURES.register(bus);
         Testes.FUNCOES.register(bus);
         context.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
         FMLCommonSetupEvent.getBus(bus).addListener(e -> Rede.registrar());

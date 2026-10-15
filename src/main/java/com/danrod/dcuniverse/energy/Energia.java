@@ -19,6 +19,10 @@ public final class Energia {
     /** Chamado a cada tick do servidor para jogadores transformados. */
     public static void tick(Player player, Personagem p) {
         adicionar(player, p, Recargas.porSegundo(player, p) / 20f);
+        // Kryptonita: além de drenar, deixa fraco (sem superforça nem ricochete, ver Naturais).
+        if (player.tickCount % 20 == 0 && player instanceof ServerPlayer sp && sp.connection != null && Recargas.naKryptonita(player, p)) {
+            player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, 40, 0, true, false, true));
+        }
     }
 
     public static void adicionar(Player player, Personagem p, float qtd) {

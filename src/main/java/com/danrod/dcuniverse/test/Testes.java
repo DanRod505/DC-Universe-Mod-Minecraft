@@ -58,6 +58,7 @@ public final class Testes {
         FUNCOES.register("powers", () -> Testes::poderes);
         FUNCOES.register("fortress", () -> Testes::fortaleza);
         FUNCOES.register("elements", () -> Testes::elementos);
+        FUNCOES.register("kryptonite", () -> Testes::kryptonita);
     }
 
     private Testes() {}
@@ -435,6 +436,35 @@ public final class Testes {
         com.danrod.dcuniverse.ability.Congelamento.derreter(zumbi);
         h.assertFalse(com.danrod.dcuniverse.ability.Congelamento.congelado(zumbi) || zumbi.isNoAi(), "o calor solta o gelo");
         h.succeed();
+    }
+
+    /**
+     * Lote da v0.1: kryptonita drena o kryptoniano e tira a superforça; a Câmara Solar conta como sol mesmo coberta.
+     */
+    static void kryptonita(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, SUPERMAN, true);
+        Personagem sup = EstadoJogador.de(p).personagem();
+        var pedra = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+        h.assertTrue(com.danrod.dcuniverse.energy.Recargas.porSegundo(p, sup) >= 0, "sem kryptonita a recarga não é negativa");
+        h.assertTrue(Naturais.velocidadeMao(p, pedra) > 1, "superforça normal");
+        // Fragmento no inventário (um bloco no chão afetaria os testes vizinhos, que rodam a poucos blocos).
+        p.getInventory().add(new ItemStack(com.danrod.dcuniverse.content.Itens.FRAGMENTO_KRYPTONITA.get()));
+        // A busca guarda o resultado por 1 s: espera passar para ver a mudança.
+        h.runAfterDelay(21, () -> {
+            h.assertTrue(com.danrod.dcuniverse.energy.Recargas.porSegundo(p, sup) < 0, "kryptonita no inventário drena energia");
+            h.assertTrue(Naturais.velocidadeMao(p, pedra) == 0, "com kryptonita perde a superforça");
+            p.getInventory().clearContent();
+            h.setBlock(new net.minecraft.core.BlockPos(1, 5, 1), net.minecraft.world.level.block.Blocks.STONE);
+            h.setBlock(new net.minecraft.core.BlockPos(3, 2, 3), com.danrod.dcuniverse.content.Blocos.CAMARA_SOLAR.get());
+            h.runAfterDelay(21, () -> {
+                h.assertTrue(com.danrod.dcuniverse.energy.Recargas.sobOSol(p), "a Câmara Solar conta como sol, mesmo coberta");
+                h.assertTrue(com.danrod.dcuniverse.energy.Recargas.porSegundo(p, sup) > sup.energia().regen(), "e soma a recarga solar");
+                h.succeed();
+            });
+        });
     }
 
     /**

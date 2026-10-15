@@ -1,0 +1,87 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/deepslate",
+    "pedra": "minecraft:block/deepslate",
+    "cristais": "dcuniverse:block/minerio_kryptonita_cristais"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pedra",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#pedra",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#pedra",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#pedra",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#pedra",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#pedra",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "light_emission": 15,
+      "faces": {
+        "north": {
+          "texture": "#cristais",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#cristais",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#cristais",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#cristais",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#cristais",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#cristais",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

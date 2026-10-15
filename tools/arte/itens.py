@@ -2,7 +2,7 @@
 """Ícones dos itens (16x16) e texturas dos blocos do mod, desenhados em pixel art.
 
 Saída: src/main/resources/assets/dcuniverse/textures/{item,block}/<id>.png.
-Itens e blocos sem arte aqui continuam com o provisório de tools/recursos_provisorios.py.
+A kryptonita e os cristais de Krypton ficam em kryptonita.py. Itens e blocos sem arte aqui continuam com o provisório de tools/recursos_provisorios.py.
 Com --previa <arquivo>, salva uma folha com todos os desenhos ampliados.
 Uso: python3 tools/arte/itens.py --raiz . [--previa /tmp/itens.png]
 """
@@ -78,24 +78,6 @@ item("batarangue_simples", {"o": "#050506", "k": "#1E1F24", "g": "#5A5F6B", "w":
      "................",
      "................")
 
-item("fragmento_kryptonita", {"o": "#06300C", "g": "#2FBF3C", "G": "#7CF27A", "w": "#E2FFD8", "d": "#178A25"},
-     "................",
-     "..........o.....",
-     ".........oGo....",
-     "........oGwgo...",
-     "....o...oGgdo...",
-     "...oGo.oGwgdo...",
-     "...oGgooGggdo...",
-     "..oGwgdoGgddo...",
-     "..oGggdogGddoo..",
-     "..oGggddgGgdoGo.",
-     ".ooGgdddgGgdoGgo",
-     "oGGgddddggddoggo",
-     "oggddddddddoggdo",
-     ".ooooooooooooooo",
-     "................",
-     "................")
-
 item("fragmento_alienigena", {"o": "#120A1C", "p": "#4A3266", "P": "#6E5294", "t": "#2FE0C8", "T": "#A8FFF2", "d": "#2C1E40"},
      "................",
      "................",
@@ -112,24 +94,6 @@ item("fragmento_alienigena", {"o": "#120A1C", "p": "#4A3266", "P": "#6E5294", "t
      "..odddTtdddo....",
      "...ooddddoo.....",
      ".....oooo.......",
-     "................")
-
-item("cristal_kryptoniano", {"o": "#1E3A4A", "c": "#9ED8F0", "C": "#D6F3FF", "w": "#FFFFFF", "b": "#5AA8CC"},
-     ".......oo.......",
-     "......oCwo......",
-     "......oCwco.....",
-     ".....oCwwco.....",
-     ".....oCwcbo.....",
-     ".....oCwcbo.....",
-     "....oCCwcbbo....",
-     "....oCwcccbo....",
-     "....oCwccbbo....",
-     "....oCwccbbo....",
-     ".....oCccbo.....",
-     ".....oCccbo.....",
-     "......oCcbo.....",
-     "......ocbo......",
-     ".......oo.......",
      "................")
 
 item("placa_circuito", {"o": "#0A2410", "g": "#1E7A34", "G": "#2E9E48", "y": "#E8C048", "k": "#16161A", "s": "#8A8F99"},
@@ -310,37 +274,6 @@ def pedra(t, rnd, base, var=0.08):
         for x in range(16):
             if rnd.random() < 0.55:
                 t.p(x, y, escurecer(base, 0.18))
-
-
-CRISTAIS = [(3, 3), (10, 2), (6, 9), (12, 10), (2, 12)]
-
-
-@bloco("minerio_kryptonita")
-def _minerio(t):
-    rnd = random.Random(10)
-    pedra(t, rnd, hexa("#4A4A52"))
-    g, G, w, d = hexa("#2FBF3C"), hexa("#7CF27A"), hexa("#E2FFD8"), hexa("#106A1A")
-    for cx, cy in CRISTAIS:
-        t.bitmap(cx, cy, [".G.", "GwG", "dgd"][:3], {"G": G, "w": w, "g": g, "d": d})
-        t.p(cx + 1, cy + 3, d)
-
-
-@bloco("bloco_kryptonita")
-def _bloco(t):
-    rnd = random.Random(11)
-    g, G, w, d, o = hexa("#2FBF3C"), hexa("#7CF27A"), hexa("#E2FFD8"), hexa("#178A25"), hexa("#0A4A12")
-    for y in range(16):
-        for x in range(16):
-            # facetas diagonais
-            f = ((x + y) // 4) % 2
-            c = g if f else d
-            if (x - y) % 8 == 0:
-                c = G
-            if rnd.random() < 0.05:
-                c = w
-            t.p(x, y, c)
-    for i in range(16):
-        t.p(i, 0, G); t.p(0, i, G); t.p(i, 15, o); t.p(15, i, o)
 
 
 @bloco("batcomputador")

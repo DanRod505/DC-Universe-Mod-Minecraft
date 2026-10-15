@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "D": "minecraft:daylight_detector",
+    "G": "minecraft:glass",
+    "K": "dcuniverse:cristal_kryptoniano",
+    "Q": "minecraft:quartz_block"
+  },
+  "pattern": [
+    "GGG",
+    "GKG",
+    "QDQ"
+  ],
+  "result": {
+    "id": "dcuniverse:camara_solar"
+  }
+}

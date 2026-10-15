@@ -101,6 +101,7 @@ public final class Hud {
         float pt = dt.getGameTimeDeltaPartialTick(false);
         float tempo = mc.player.tickCount + pt;
         int cor = cor(mc);
+        if (s.recarga() < 0) kryptonita(g, tempo);
         medalhao(g, mc, s, cor);
         barra(g, mc.font, s, cor, pt, tempo);
         espacos(g, mc.font, s, tempo);
@@ -207,8 +208,19 @@ public final class Hud {
         }
         String taxa = String.format(Locale.ROOT, "%+.1f/s", s.recarga());
         int tx = BX + 124 - font.width(taxa);
-        g.text(font, taxa, tx, ty, s.sol() ? 0xFFFFD84A : 0xFFB8C0D0, true);
+        int verde = 0xFF000000 | (Math.round(150 + 105 * (0.5f + 0.5f * Mth.sin(tempo * 0.3f))) << 8) | 0x40;
+        g.text(font, taxa, tx, ty, s.recarga() < 0 ? verde : s.sol() ? 0xFFFFD84A : 0xFFB8C0D0, true);
         if (s.solar()) g.blit(RenderPipelines.GUI_TEXTURED, TEX, tx - 13, ty - 2, s.sol() ? 120 : 132, 32, 11, 11, TW, TH);
+    }
+
+    /** Kryptonita por perto (a recarga fica negativa): bordas da tela num verde doente que pulsa devagar. */
+    private static void kryptonita(GuiGraphicsExtractor g, float tempo) {
+        int w = g.guiWidth(), h = g.guiHeight(), b = Math.max(24, h / 5);
+        int a = Math.round(70 + 40 * Mth.sin(tempo * 0.12f));
+        int forte = (a << 24) | 0x2EE04A, fraco = ((a / 4) << 24) | 0x2EE04A;
+        g.fill(0, 0, w, h, fraco);
+        g.fillGradient(0, 0, w, b, forte, 0);
+        g.fillGradient(0, h - b, w, h, 0, forte);
     }
 
     private static Component nomeCurto(Rede.Sync s) {
