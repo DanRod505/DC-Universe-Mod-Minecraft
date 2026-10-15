@@ -11,6 +11,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.particles.ParticleTypes;
@@ -26,6 +27,7 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.network.PacketDistributor;
+import org.joml.Matrix4fc;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,9 +47,9 @@ public final class Voador {
     static final double ACEL = 0.03;
     /**
      * Ganho por tick no boost, em fração da máxima, no começo; cai conforme a velocidade sobe, então o boost vai
-     * acelerando aos poucos (do cruzeiro a ~90% da máxima em ~3 s).
+     * acelerando aos poucos (do cruzeiro à barreira do som em ~4 s), e o fim da subida é o mais lento.
      */
-    static final double ACEL_BOOST = 0.022;
+    static final double ACEL_BOOST = 0.017;
     /** Perda de velocidade por tick sem nenhuma tecla (a inércia leva ~1 s para parar). */
     static final double FREIO = 0.04;
     /** Quanto a curva (mudança de direção) é mais rápida que a aceleração em linha reta. */
@@ -61,13 +63,15 @@ public final class Voador {
     /** Duração das manobras (ticks). */
     static final int GIRO_TICKS = 12, MEIA_VOLTA_TICKS = 10, ARRANCADA_TICKS = 10;
     /** O rastro acende no boost acima desta velocidade (blocos/s); vapor branco a partir de VAPOR. */
-    static final double RASTRO = 18, VAPOR = 40;
+    static final double RASTRO = 18, VAPOR = 44;
 
     /** Velocidade atual do jogador local (blocos/tick), null quando não está voando. */
     private static Vec3 vel;
     private static boolean armado = true;
     private static int tremor, ticks;
     private static float soco;
+    /** Clarão branco na tela ao quebrar a barreira do som (1 a 0). */
+    private static float clarao;
     private static SomVento som;
     /** Manobra do jogador local em andamento (-1 = nenhuma) e há quantos ticks começou. */
     private static int manobra = -1, manobraT, ultimaManobra = -100;
@@ -80,6 +84,9 @@ public final class Voador {
         float deitado, inclinacao, ultimoYaw;
         double blocosPorSeg;
         int manobra = -1, manobraT;
+        /** Força do cone de vapor (0 a 1) e a direção do voo, suavizadas (a posição de outro jogador chega aos solavancos). */
+        float cone;
+        Vec3 dir = new Vec3(1, 0, 0);
     }
 
     /** Detecta o toque duplo de uma tecla. */
@@ -111,6 +118,9 @@ public final class Voador {
         RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
             if (e.getState() instanceof AvatarRenderState s) pose(s);
             return false;
+        });
+        RenderLivingEvent.Post.BUS.addListener(e -> {
+            if (e.getState() instanceof AvatarRenderState s) cone(e, s);
         });
         Cauda.registrar();
     }
@@ -163,7 +173,7 @@ public final class Voador {
             boolean parando = alvo.lengthSqr() < 1e-6;
             boolean boost = alvo.length() > max * CRUZEIRO * 1.01 && v > max * CRUZEIRO * 0.9;
             double acc = parando ? max * FREIO
-                : boost ? max * ACEL_BOOST * (1 - 0.65 * Math.min(1, v / max)) : max * ACEL;
+                : boost ? max * ACEL_BOOST * (1 - 0.7 * Math.min(1, v / max)) : max * ACEL;
             if (v > max * 0.1) {
                 // Separa a mudança na direção do movimento (acelera ou freia) da mudança de direção (curva).
                 Vec3 n = vel.scale(1 / v);
@@ -183,6 +193,9 @@ public final class Voador {
         if (armado && frac >= BARREIRA && EstadoCliente.atual.voo() >= 20) {
             armado = false;
             tremor = 14;
+            soco = 0.3f;
+            clarao = 1f;
+            TrilhaVoo.estrondo(mc);
             Rede.CANAL.send(new Rede.Estrondo(), PacketDistributor.SERVER.noArg());
         }
     }
@@ -257,6 +270,7 @@ public final class Voador {
         if (level == null || mc.isPaused()) return;
         if (tremor > 0) tremor--;
         soco *= 0.85f;
+        clarao *= 0.8f;
         for (Rede.ManobraVista m; (m = EstadoCliente.MANOBRAS.poll()) != null; ) {
             Pose ps = POSES.get(m.entidade());
             if (ps != null) {
@@ -276,6 +290,9 @@ public final class Voador {
             if (ps.manobra >= 0 && ++ps.manobraT >= duracao(ps.manobra)) ps.manobra = -1;
             Vec3 d = new Vec3(pl.getX() - pl.xo, pl.getY() - pl.yo, pl.getZ() - pl.zo);
             ps.blocosPorSeg = d.length() * 20;
+            if (d.lengthSqr() > 1e-6) ps.dir = ps.dir.lerp(d.normalize(), 0.3).normalize();
+            float alvoCone = (float) Mth.clamp((ps.blocosPorSeg - VAPOR) / 8, 0, 1);
+            ps.cone += (alvoCone - ps.cone) * (alvoCone > ps.cone ? 0.15f : 0.08f);
             // Deita a partir de 4 blocos/s e fica totalmente deitado a 14.
             float deitar = Mth.clamp((float) (ps.blocosPorSeg - 4) / 10f, 0f, 1f);
             ps.deitado += (deitar - ps.deitado) * 0.18f;
@@ -285,10 +302,11 @@ public final class Voador {
             ps.inclinacao += (inclinar - ps.inclinacao) * 0.2f;
             boolean visivel = !pl.isInvisible() && !(pl == mc.player && mc.options.getCameraType().isFirstPerson());
             cauda(level, pl, ps, d, visivel);
-            if (ps.blocosPorSeg >= VAPOR && visivel && pl != mc.player) vapor(level, pl, d);
         }
         Cauda.tick(level, POSES.keySet());
         LocalPlayer p = mc.player;
+        boolean voa = p != null && voando(p) && vel != null;
+        TrilhaVoo.tick(mc, voa, voa ? vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo()) : 0);
         if (p != null && vel != null && (som == null || som.isStopped()) && vel.length() * 20 > 6) {
             som = new SomVento(p);
             mc.getSoundManager().play(som);
@@ -310,15 +328,48 @@ public final class Voador {
         Cauda.ponto(level, pl, base, boost && ps.blocosPorSeg >= RASTRO, forca, visivel);
     }
 
-    /** Vapor branco perto da barreira do som. */
-    private static void vapor(ClientLevel level, Player pl, Vec3 d) {
-        RandomSource r = level.getRandom();
-        Vec3 n = d.normalize();
-        for (int i = 0; i < 1; i++) {
-            Vec3 o = pl.position().add(0, 0.6, 0).subtract(n.scale(1.0 + r.nextDouble() * d.length()));
-            level.addParticle(ParticleTypes.CLOUD, o.x + (r.nextDouble() - 0.5) * 0.5, o.y + (r.nextDouble() - 0.5) * 0.5,
-                o.z + (r.nextDouble() - 0.5) * 0.5, 0, 0, 0);
-        }
+    /**
+     * Cone de vapor perto da barreira do som e acima dela: um sino de névoa branca em volta do corpo, mais forte na
+     * borda da frente e sumindo para trás, tremulando um pouco.
+     */
+    private static void cone(RenderLivingEvent.Post<?, ?, ?> e, AvatarRenderState s) {
+        Pose ps = POSES.get(s.id);
+        Minecraft mc = Minecraft.getInstance();
+        if (ps == null || ps.cone < 0.02f || s.isInvisible || mc.level == null) return;
+        float t = mc.level.getGameTime() + mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        Vec3 n = ps.dir;
+        Vec3 lado = n.cross(new Vec3(0, 1, 0));
+        Vec3 u = lado.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : lado.normalize();
+        Vec3 v = u.cross(n).normalize();
+        Vec3 centro = new Vec3(0, 0.35 + 0.5 * (1 - ps.deitado), 0);
+        // Anéis do sino: (distância à frente dos pés, raio, opacidade).
+        float[][] aneis = {{1.7f, 0.45f, 0.0f}, {1.35f, 0.75f, 0.42f}, {0.75f, 1.05f, 0.26f}, {-0.2f, 1.35f, 0.08f},
+            {-1.0f, 1.55f, 0.0f}};
+        int lados = 28;
+        float forca = ps.cone;
+        e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.debugQuads(), (pose, buf) -> {
+            Matrix4fc m = pose.pose();
+            for (int a = 0; a < aneis.length - 1; a++) {
+                for (int k = 0; k < lados; k++) {
+                    float[] r0 = aneis[a], r1 = aneis[a + 1];
+                    float g0 = Mth.TWO_PI * k / lados, g1 = Mth.TWO_PI * (k + 1) / lados;
+                    Vec3[] p = {ponto(centro, n, u, v, r0, g0), ponto(centro, n, u, v, r0, g1),
+                        ponto(centro, n, u, v, r1, g1), ponto(centro, n, u, v, r1, g0)};
+                    float[] al = {r0[2] * tremula(g0, t), r0[2] * tremula(g1, t), r1[2] * tremula(g1, t), r1[2] * tremula(g0, t)};
+                    for (int i = 0; i < 4; i++) {
+                        buf.addVertex(m, (float) p[i].x, (float) p[i].y, (float) p[i].z).setColor(1f, 1f, 1f, al[i] * forca);
+                    }
+                }
+            }
+        });
+    }
+
+    private static Vec3 ponto(Vec3 centro, Vec3 n, Vec3 u, Vec3 v, float[] anel, float ang) {
+        return centro.add(n.scale(anel[0])).add(u.scale(Mth.cos(ang) * anel[1])).add(v.scale(Mth.sin(ang) * anel[1]));
+    }
+
+    private static float tremula(float ang, float t) {
+        return 0.7f + 0.3f * Mth.sin(ang * 5 + t * 0.9f) * Mth.sin(ang * 3 - t * 1.3f);
     }
 
     /** Arrancada de outro jogador: um anel de ar se abrindo atrás dele. */
@@ -354,7 +405,8 @@ public final class Voador {
         float forca = tremor > 0 ? (tremor - pt) / 14f * 1.6f : 0f;
         if (vel != null) {
             double frac = vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo());
-            if (frac > 0.85) forca += (float) (frac - 0.85) * 1.2f;
+            // Treme cada vez mais chegando na barreira do som; depois dela o voo fica liso.
+            if (frac > 0.8) forca += armado ? (float) (frac - 0.8) * 3f : 0.1f;
         }
         if (forca > 0) {
             e.setPitch(e.getPitch() + (r.nextFloat() - 0.5f) * forca);
@@ -372,6 +424,10 @@ public final class Voador {
      */
     public static void desenharLinhas(GuiGraphicsExtractor g, DeltaTracker dt) {
         Minecraft mc = Minecraft.getInstance();
+        if (clarao > 0.02f && !mc.gui.hud.isHidden()) {
+            // Clarão ao quebrar a barreira do som.
+            g.fill(0, 0, g.guiWidth(), g.guiHeight(), (Math.round(clarao * 110) << 24) | 0xFFFFFF);
+        }
         if (vel == null || mc.player == null || mc.gui.hud.isHidden() || !mc.options.getCameraType().isFirstPerson()) return;
         double frac = vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo());
         float forca = (float) Mth.clamp((frac - 0.45) / 0.55, 0, 1.2);
@@ -434,6 +490,8 @@ public final class Voador {
         manobra = -1;
         POSES.clear();
         Cauda.limpar();
+        TrilhaVoo.limpar();
+        clarao = 0;
         if (som != null) som.parar();
         som = null;
     }
@@ -460,7 +518,7 @@ public final class Voador {
             y = player.getY();
             z = player.getZ();
             float frac = (float) Mth.clamp(vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo()), 0, 1.3);
-            float alvo = Mth.clamp((frac - 0.1f) / 0.8f, 0f, 1.2f);
+            float alvo = Mth.clamp((frac - 0.1f) / 0.8f, 0f, 1f);
             volume += (alvo * alvo - volume) * 0.2f;
             pitch = 0.7f + 0.6f * frac;
         }

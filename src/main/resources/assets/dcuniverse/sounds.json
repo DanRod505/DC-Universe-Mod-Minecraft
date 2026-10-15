@@ -1,0 +1,7 @@
+{
+  "musica.voo_0": { "sounds": [ { "name": "dcuniverse:musica/voo_0", "stream": true } ] },
+  "musica.voo_1": { "sounds": [ { "name": "dcuniverse:musica/voo_1", "stream": true } ] },
+  "musica.voo_2": { "sounds": [ { "name": "dcuniverse:musica/voo_2", "stream": true } ] },
+  "musica.voo_3": { "sounds": [ { "name": "dcuniverse:musica/voo_3", "stream": true } ] },
+  "musica.voo_estrondo": { "sounds": [ { "name": "dcuniverse:musica/voo_estrondo" } ] }
+}
