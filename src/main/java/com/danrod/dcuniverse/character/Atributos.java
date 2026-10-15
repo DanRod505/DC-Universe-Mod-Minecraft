@@ -19,7 +19,8 @@ public final class Atributos {
     public static final Identifier ID = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "personagem");
     /** Corrida comum do jogador, em blocos por segundo. */
     public static final double CORRIDA_VANILLA = 5.612;
-    private static final List<Holder<Attribute>> USADOS = List.of(Attributes.MAX_HEALTH, Attributes.ARMOR, Attributes.ATTACK_DAMAGE, Attributes.MOVEMENT_SPEED);
+    private static final List<Holder<Attribute>> USADOS = List.of(Attributes.MAX_HEALTH, Attributes.ARMOR, Attributes.ATTACK_DAMAGE, Attributes.MOVEMENT_SPEED,
+        Attributes.SCALE);
 
     private Atributos() {}
 
@@ -30,6 +31,8 @@ public final class Atributos {
         set(player, Attributes.ARMOR, f.armadura(), AttributeModifier.Operation.ADD_VALUE);
         set(player, Attributes.ATTACK_DAMAGE, f.dano() * 2 - 1, AttributeModifier.Operation.ADD_VALUE);
         set(player, Attributes.MOVEMENT_SPEED, f.terra() / CORRIDA_VANILLA - 1, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+        // Altura do personagem (docs/SKINS.md: altura / 1,85): muda o visual e a hitbox.
+        set(player, Attributes.SCALE, p.escala() - 1, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         if (curar) player.setHealth(player.getMaxHealth());
     }
 

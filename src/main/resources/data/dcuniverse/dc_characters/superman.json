@@ -2,6 +2,7 @@
   "n": 1,
   "level": 4,
   "color": "#3A7BFF",
+  "scale": 1.03,
   "stats": { "vida": 40, "armadura": 22, "dano": 12, "terra": 6.5 },
   "energy": {
     "max": 300,

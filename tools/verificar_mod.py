@@ -124,6 +124,7 @@ def tamanho_png(arq):
 
 def verificar_personagens(raiz, recursos, erros):
     docs = {p["n"]: p for p in json.loads((raiz / "docs/dados/personagens.json").read_text(encoding="utf-8"))}
+    skins_doc = {s["n"]: s for s in json.loads((raiz / "docs/dados/skins.json").read_text(encoding="utf-8"))["skins"]}
     habs = tipos_java(raiz, "ability/TiposHabilidade.java")
     passivas = tipos_java(raiz, "ability/TiposPassiva.java")
     recargas = tipos_java(raiz, "energy/Recargas.java")
@@ -145,6 +146,12 @@ def verificar_personagens(raiz, recursos, erros):
             for k, v in esperado.items():
                 if real.get(k) != v:
                     erros.append(f"{nome}: {k} = {real.get(k)}, mas a ficha diz {v}")
+        corpo = skins_doc.get(c.get("n"))
+        if corpo is not None:
+            escala = round(corpo["altura"] / 1.85, 2)
+            if abs(c.get("scale", 1.0) - escala) > 0.001:
+                erros.append(f"{nome}: scale = {c.get('scale', 1.0)}, mas a altura de {corpo['altura']} m pede {escala}")
+            verificar_pecas(recursos, nome, corpo, erros)
         supremas = [h for h in c.get("abilities", []) if h.get("supreme")]
         if len(supremas) > 1:
             erros.append(f"{nome}: mais de uma suprema")
@@ -187,6 +194,34 @@ def verificar_personagens(raiz, recursos, erros):
         for i in IDIOMAS:
             if f"personagem.dcuniverse.{nome}" not in lang[i]:
                 erros.append(f"{nome}: falta personagem.dcuniverse.{nome} em {i}.json")
+
+
+# Peças 3D já feitas em client/Pecas.java (as outras de docs/SKINS.md entram com os personagens que as usam).
+PECAS_PRONTAS = {"capa", "musculoso", "brilho"}
+
+
+def verificar_pecas(recursos, nome, corpo, erros):
+    """assets/dcuniverse/skins/<personagem>.json lista as peças de docs/dados/skins.json que já existem."""
+    arq = recursos / f"assets/dcuniverse/skins/{nome}.json"
+    esperado = set(corpo.get("extras", [])) | ({corpo["constituicao"]} if corpo.get("constituicao") == "musculoso" else set())
+    esperado &= PECAS_PRONTAS
+    if not arq.exists():
+        if esperado:
+            erros.append(f"{nome}: falta assets/dcuniverse/skins/{nome}.json com as peças {sorted(esperado)}")
+        return
+    d = ler_json(arq, erros) or {}
+    pecas = set(d.get("pieces", []))
+    if pecas - PECAS_PRONTAS:
+        erros.append(f"{nome}: peças inexistentes {sorted(pecas - PECAS_PRONTAS)} em skins/{nome}.json")
+    if esperado - pecas:
+        erros.append(f"{nome}: faltam as peças {sorted(esperado - pecas)} em skins/{nome}.json (docs/dados/skins.json)")
+    capa = recursos / f"assets/dcuniverse/textures/skin/{nome}_capa.png"
+    if "capa" in pecas and (not capa.exists() or tamanho_png(capa) != (128, 64)):
+        erros.append(f"{nome}: a peça capa precisa de textures/skin/{nome}_capa.png 128x64")
+    for efeito, textura in d.get("glow", {}).items():
+        png = recursos / f"assets/dcuniverse/textures/skin/{textura}.png"
+        if not png.exists():
+            erros.append(f"{nome}: falta a textura de brilho {textura}.png ({efeito})")
 
 
 def verificar_icone(recursos, hab, dono, erros):

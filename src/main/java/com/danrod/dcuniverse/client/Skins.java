@@ -97,7 +97,9 @@ public final class Skins {
         Identifier capa = id.withPath("skin/" + id.getPath() + "_capa");
         var recursos = Minecraft.getInstance().getResourceManager();
         if (recursos.getResource(corpo.withPath(p -> "textures/" + p + ".png")).isEmpty()) return null;
-        boolean temCapa = recursos.getResource(capa.withPath(p -> "textures/" + p + ".png")).isPresent();
+        // Com a peça capa (client/Pecas) a capa comum do jogo não aparece.
+        boolean temCapa = recursos.getResource(capa.withPath(p -> "textures/" + p + ".png")).isPresent()
+            && !Pecas.temCapa(personagem);
         return PlayerSkin.insecure(new ClientAsset.ResourceTexture(corpo), temCapa ? new ClientAsset.ResourceTexture(capa) : null,
             null, PlayerModelType.WIDE);
     }

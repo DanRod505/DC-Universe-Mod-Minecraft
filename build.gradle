@@ -89,6 +89,7 @@ def dcuVerify = tasks.register('dcuVerify', Exec) {
     inputs.dir('src/main/resources')
     inputs.dir('src/main/java')
     inputs.file('tools/verificar_mod.py')
+    inputs.file('docs/dados/skins.json')
     commandLine 'python3', '-I', 'tools/verificar_mod.py', '--raiz', '.'
 }
 tasks.named('check') { dependsOn dcuVerify }

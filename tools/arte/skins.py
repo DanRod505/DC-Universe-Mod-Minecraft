@@ -203,90 +203,9 @@ S_ESCUDO = [
 ]
 
 
-def superman(t, capa):
-    rnd = random.Random(1)
-    azul = hexa("#1E4FBF")
-    vermelho = hexa("#C8202A")
-    amarelo = hexa("#F6C632")
-    escuro = hexa("#3A0D10")
-    rosto(t, rnd, PELE, hexa("#16161D"), hexa("#3A7BD5"), cachinho=True)
-
-    def escamas(p):
-        for j in range(p.h):
-            for i in range(p.w):
-                if (i + (j // 2) * 2) % 4 == 0 and j % 2 == 0:
-                    p.p(i, j, clarear(p.get(i, j), 0.05))
-
-    for parte in ("corpo", "braco_d", "braco_e", "perna_d", "perna_e"):
-        for face in ("frente", "tras", "dir", "esq", "cima", "baixo"):
-            p = Pincel(t, parte, face)
-            p.tecido(azul, rnd)
-            escamas(p)
-    c = Pincel(t, "corpo", "frente")
-    # músculos: peitoral, esterno, abdômen
-    for i in list(range(1, 7)) + list(range(9, 15)):
-        c.p(i, 10, escurecer(azul, 0.22))
-        c.p(i, 9, clarear(azul, 0.08))
-    for j in range(3, 18):
-        c.p(7, j, escurecer(c.get(7, j), 0.10)); c.p(8, j, escurecer(c.get(8, j), 0.14))
-    for j in (13, 16):
-        for i in range(4, 12):
-            if i not in (7, 8):
-                c.p(i, j, escurecer(azul, 0.14))
-    # brasão em relevo (também na jaqueta)
-    pal = {"Y": amarelo, "R": vermelho}
-    emblema(c, 2, 2, S_ESCUDO, pal, vermelho, escuro)
-    emblema(Pincel(t, "jaqueta", "frente"), 2, 2, S_ESCUDO, pal, vermelho, escuro)
-    # cinto
-    for face in ("frente", "tras", "dir", "esq"):
-        p = Pincel(t, "corpo", face)
-        for i in range(p.w):
-            p.p(i, 19, amarelo)
-            p.p(i, 20, escurecer(amarelo, 0.25))
-            p.p(i, 18, escurecer(azul, 0.25))
-    c.ret(6, 18, 4, 4, escurecer(amarelo, 0.3))
-    c.ret(7, 19, 2, 2, clarear(amarelo, 0.3))
-    # braços: ombro claro, mãos de pele
-    for parte in ("braco_d", "braco_e"):
-        for face in ("frente", "tras", "dir", "esq"):
-            p = Pincel(t, parte, face)
-            for i in range(p.w):
-                p.p(i, 0, clarear(azul, 0.18)); p.p(i, 1, clarear(azul, 0.10))
-                p.p(i, 8, escurecer(p.get(i, 8), 0.12))
-            for j in range(19, 24):
-                for i in range(p.w):
-                    p.p(i, j, PELE if j > 19 else escurecer(PELE, 0.10))
-            p.p(2, 22, escurecer(PELE, 0.12)); p.p(5, 22, escurecer(PELE, 0.12))
-            p.p(2, 23, escurecer(PELE, 0.18)); p.p(5, 23, escurecer(PELE, 0.18))
-        Pincel(t, parte, "baixo").ret(0, 0, 8, 8, escurecer(PELE, 0.08))
-    # pernas: botas vermelhas com recorte em V
-    for parte in ("perna_d", "perna_e"):
-        for face in ("frente", "tras", "dir", "esq"):
-            p = Pincel(t, parte, face)
-            for j in range(13, 24):
-                for i in range(p.w):
-                    cor = vermelho if j < 22 else escurecer(vermelho, 0.35)
-                    p.p(i, j, clarear(cor, rnd.uniform(0, 0.06)))
-            if face == "frente":
-                for i, j in ((3, 13), (4, 13)):
-                    p.p(i, j, escurecer(azul, 0.1))
-                for i, j in ((2, 13), (5, 13), (3, 14), (4, 14)):
-                    p.p(i, j, escurecer(vermelho, 0.35))
-            for i in range(p.w):
-                p.p(i, 8, clarear(p.get(i, 8), 0.10))
-        Pincel(t, parte, "baixo").ret(0, 0, 8, 8, hexa("#4A1014"))
-
-    # capa: 64x32 comum -> 128x64 (caixa 10x16x1)
-    for x, y, w, h, cor in ((2, 2, 20, 32, vermelho), (24, 2, 20, 32, escurecer(vermelho, 0.25)),
-                            (0, 2, 2, 32, escurecer(vermelho, 0.2)), (22, 2, 2, 32, escurecer(vermelho, 0.2)),
-                            (2, 0, 20, 2, vermelho), (22, 0, 20, 2, vermelho)):
-        for j in range(h):
-            for i in range(w):
-                dobra = 0.10 if (i % 5 == 0) else 0.0
-                capa.p(x + i, y + j, escurecer(clarear(cor, 0.08 * (1 - j / h)), dobra + 0.12 * (j / h)))
-    pc = Pincel(capa, "corpo", "frente")
-    pc.x, pc.y, pc.w, pc.h = 2, 2, 20, 32
-    emblema(pc, 6, 8, S_ESCUDO, {"Y": amarelo, "R": escurecer(vermelho, 0.05)}, amarelo, escuro)
+def superman(t, capa, glow):
+    import skin_superman
+    skin_superman.superman(t, capa, glow, Pincel)
 
 
 # ---------------------------------------------------------------- Batman
@@ -302,7 +221,7 @@ MORCEGO = [
 ]
 
 
-def batman(t, capa):
+def batman(t, capa, glow):
     rnd = random.Random(2)
     preto = hexa("#141519")
     grafite = hexa("#5A606C")
@@ -414,9 +333,11 @@ def batman(t, capa):
 
 
 PERSONAGENS = {"superman": superman, "batman": batman}
+# Capa da peça 3D (client/Pecas: fora em 0,0,40,64); as outras usam a capa comum do jogo (caixa 10x16x1).
+CAPA_3D = {"superman"}
 
 
-def previa(skin, capa, destino):
+def previa(skin, capa, destino, capa3d=False):
     """Monta frente e costas (como num boneco de papel) ampliadas 6x."""
     s = skin.img
     out = Image.new("RGBA", (16 * 2 * 2 + 8, 32 * 2), (90, 140, 90, 255))
@@ -433,7 +354,9 @@ def previa(skin, capa, destino):
         colar(ordem[0], lado, ox + 0, 16); colar(ordem[1], lado, ox + 24, 16)
         colar("manga_" + ordem[0][-1], lado, ox + 0, 16); colar("manga_" + ordem[1][-1], lado, ox + 24, 16)
         colar(pernas[0], lado, ox + 8, 40); colar(pernas[1], lado, ox + 16, 40)
-    if capa is not None:
+    if capa is not None and capa3d:
+        out.alpha_composite(capa.img.crop((0, 0, 40, 64)).resize((20, 32), Image.LANCZOS), (48, 17))
+    elif capa is not None:
         out.alpha_composite(capa.img.crop((2, 2, 22, 34)), (48, 18))
     out = out.resize((out.width * 6, out.height * 6), Image.NEAREST)
     out.save(destino)
@@ -446,13 +369,15 @@ def main():
     a = ap.parse_args()
     pasta = Path(a.raiz).resolve() / "src/main/resources/assets/dcuniverse/textures/skin"
     for nome, desenhar in PERSONAGENS.items():
-        t, capa = Tela(128, 128), Tela(128, 64)
-        desenhar(t, capa)
+        t, capa, glow = Tela(128, 128), Tela(128, 64), Tela(128, 128)
+        desenhar(t, capa, glow)
         t.salvar(pasta / f"{nome}.png")
         capa.salvar(pasta / f"{nome}_capa.png")
+        if glow.img.getbbox():
+            glow.salvar(pasta / f"{nome}_olhos.png")
         if a.previa:
             Path(a.previa).mkdir(parents=True, exist_ok=True)
-            previa(t, capa, Path(a.previa) / f"{nome}.png")
+            previa(t, capa, Path(a.previa) / f"{nome}.png", nome in CAPA_3D)
     print(f"skins: {', '.join(PERSONAGENS)}")
 
 

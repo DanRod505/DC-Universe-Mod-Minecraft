@@ -43,12 +43,14 @@ public final class Cliente {
         ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> {
             EstadoCliente.limpar();
             Skins.limpar();
+            Pecas.limpar();
             Hud.limpar();
             Voador.limpar();
             usando = false;
         });
         GuiaItem.abrir = GuiaScreen::abrir;
         Skins.registrar();
+        Pecas.registrar();
         Voador.registrar();
         Efeitos.registrarFeixe();
     }
