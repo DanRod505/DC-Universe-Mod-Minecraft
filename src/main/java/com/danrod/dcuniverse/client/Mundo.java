@@ -230,6 +230,7 @@ public final class Mundo {
             }
         }
         RaioX.desenhar(ps, col, cam, pt);
+        Efeitos.feixePrimeiraPessoa(ps, col, cam, pt);
     }
 
     /** Anel claro que corre pelo chão, com um segundo anel mais fraco atrás. */
@@ -240,7 +241,7 @@ public final class Mundo {
         float some = u < 1 ? 1 : Mth.clamp(1 - (u - 1) * 2, 0, 1);
         double r = e.a() * frente(u);
         Vec3 c = new Vec3(e.x(), e.y() + 0.06, e.z()).subtract(cam);
-        col.submitCustomGeometry(ps, RenderTypes.lightning(), (pose, buf) -> {
+        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             faixa(m, buf, c, r - 1.6, r, 0xFFE2B0, 0f, 0.9f * some);
             faixa(m, buf, c, r, r + 0.5, 0xFFFFFF, 0.95f * some, 0f);
@@ -277,7 +278,7 @@ public final class Mundo {
         if (forca <= 0) return;
         double alto = Math.max(4, e.cor()) * 1.05;
         Vec3 de = new Vec3(e.x(), e.y() + 1, e.z()).subtract(cam), ate = de.add(0, alto - 1, 0);
-        col.submitCustomGeometry(ps, RenderTypes.lightning(), (pose, buf) -> {
+        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             coluna(m, buf, de, ate, 0.9f, 0xFFE7A0, 0.10f * forca);
             coluna(m, buf, de, ate, 0.45f, 0xFFF1C8, 0.22f * forca);

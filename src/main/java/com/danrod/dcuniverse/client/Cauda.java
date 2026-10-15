@@ -225,7 +225,7 @@ public final class Cauda {
             fita(m, buf, rel, lado, paraCam, 0.02f, larg, 0.3f, 0.2f, r.cor, brilho, 0.75f, false);
             fita(m, buf, rel, lado, paraCam, 0.03f, larg, -0.3f, 0.2f, r.cor2, brilho, 0.75f, false);
         });
-        e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.lightning(), (pose, buf) -> {
+        e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> {
             Matrix4fc m = pose.pose();
             // Cada camada um pouco mais perto da câmera, para não brigar com a de baixo no teste de profundidade.
             fita(m, buf, rel, lado, paraCam, 0.04f, larg, 0.3f, 0.3f, r.cor, brilho, 0.3f, true);

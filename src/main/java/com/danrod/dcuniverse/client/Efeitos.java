@@ -2,6 +2,9 @@ package com.danrod.dcuniverse.client;
 
 import com.danrod.dcuniverse.core.EstadoCliente;
 import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.util.Mth;
 import com.danrod.dcuniverse.core.Rede;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -57,21 +60,13 @@ public final class Efeitos {
         lado = lado.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : lado.normalize();
         DustParticleOptions fora = new DustParticleOptions(a.efeitoCor(), 1.1f);
         DustParticleOptions nucleo = new DustParticleOptions(misturar(a.efeitoCor(), 0xFFF2C0, 0.6f), 0.55f);
-        double inicio = primeiraPessoa ? 1.3 : 0.3;
-        for (int s = -1; s <= 1 && primeiraPessoa; s += 2) {
-            Vec3 de = olhos.add(lado.scale(0.13 * s)).add(dir.scale(inicio)).add(0, -0.04, 0);
-            Vec3 d = fim.subtract(de);
-            double comp = d.length();
-            Vec3 u = d.normalize();
-            for (double t = 0; t <= comp; t += 0.22) {
-                Vec3 p = de.add(u.scale(t));
-                level.addParticle(nucleo, p.x, p.y, p.z, 0, 0, 0);
-                if (rnd.nextFloat() < 0.45f) {
-                    level.addParticle(fora, p.x + (rnd.nextDouble() - 0.5) * 0.06, p.y + (rnd.nextDouble() - 0.5) * 0.06,
-                        p.z + (rnd.nextDouble() - 0.5) * 0.06, 0, 0, 0);
-                }
-            }
+        // Em primeira pessoa o feixe é desenhado no mundo (feixePrimeiraPessoa); aqui só um calor tremulando em volta.
+        if (primeiraPessoa && rnd.nextFloat() < 0.5f) {
+            double t = 1.5 + rnd.nextDouble() * Math.max(0, fim.distanceTo(olhos) - 1.5);
+            Vec3 p = olhos.add(dir.scale(t)).add(lado.scale((rnd.nextDouble() - 0.5) * 0.3));
+            level.addParticle(fora, p.x, p.y - 0.1, p.z, 0, 0.01, 0);
         }
+        if (rnd.nextFloat() < 0.5f) level.addParticle(nucleo, fim.x, fim.y, fim.z, 0, 0, 0);
         for (int i = 0; i < 3; i++) {
             level.addParticle(ParticleTypes.SMALL_FLAME, fim.x, fim.y, fim.z,
                 (rnd.nextDouble() - 0.5) * 0.12, rnd.nextDouble() * 0.1, (rnd.nextDouble() - 0.5) * 0.12);
@@ -148,13 +143,42 @@ public final class Efeitos {
             int claro = misturar(cor, 0xFFF4D0, 0.75f);
             for (int s = -1; s <= 1; s += 2) {
                 Vec3 de = base.add(lado.scale(0.125 * s));
-                e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.lightning(), (pose, buf) -> {
+                e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> {
                     feixe(pose.pose(), buf, de, fim, 0.16f, cor, 0.18f);
                     feixe(pose.pose(), buf, de, fim, 0.07f, cor, 0.55f);
                     feixe(pose.pose(), buf, de, fim, 0.03f, claro, 0.95f);
                 });
             }
         });
+    }
+
+    /**
+     * O próprio feixe visto em primeira pessoa: sai logo abaixo e ao lado dos olhos e converge na mira,
+     * mais fino que o de terceira pessoa para não tapar o alvo. Chamado pelo Mundo.desenhar.
+     */
+    static void feixePrimeiraPessoa(PoseStack ps, SubmitNodeCollector col, Vec3 cam, float pt) {
+        Minecraft mc = Minecraft.getInstance();
+        Player pl = mc.player;
+        if (pl == null || mc.level == null || !mc.options.getCameraType().isFirstPerson()) return;
+        Rede.Aparencia a = EstadoCliente.APARENCIAS.get(pl.getId());
+        if (a == null || !a.efeito().equals("projectile_beam")) return;
+        Vec3 dir = pl.getViewVector(pt);
+        Vec3 olhos = pl.getEyePosition(pt);
+        Vec3 fim = alvo(mc.level, pl, olhos, dir, a.alcance()).subtract(cam);
+        Vec3 lado = dir.cross(new Vec3(0, 1, 0));
+        lado = lado.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : lado.normalize();
+        Vec3 baixo = dir.cross(lado).normalize();
+        int cor = a.efeitoCor();
+        int claro = misturar(cor, 0xFFF4D0, 0.75f);
+        float tremor = 0.9f + 0.1f * Mth.sin((mc.level.getGameTime() + pt) * 1.7f);
+        for (int s = -1; s <= 1; s += 2) {
+            Vec3 de = olhos.subtract(cam).add(dir.scale(0.4)).add(lado.scale(0.09 * s)).add(baixo.scale(0.13));
+            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+                feixe(pose.pose(), buf, de, fim, 0.09f, cor, 0.22f * tremor);
+                feixe(pose.pose(), buf, de, fim, 0.04f, cor, 0.6f * tremor);
+                feixe(pose.pose(), buf, de, fim, 0.016f, claro, 0.95f);
+            });
+        }
     }
 
     /** Dois planos cruzados ao longo do segmento, visíveis dos dois lados. */

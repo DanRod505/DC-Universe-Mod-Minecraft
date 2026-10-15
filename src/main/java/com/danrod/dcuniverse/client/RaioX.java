@@ -1,5 +1,7 @@
 package com.danrod.dcuniverse.client;
 
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import com.danrod.dcuniverse.core.Rede;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -161,6 +163,8 @@ public final class RaioX {
         double dx = s.x - mc.player.getX(), dy = s.y - mc.player.getY(), dz = s.z - mc.player.getZ();
         double d2 = dx * dx + dy * dy + dz * dz;
         if (d2 > alcance * alcance || (s.entityType == EntityTypes.PLAYER && d2 < 1)) return;
+        Vec3 cam = mc.gameRenderer.mainCamera().position();
+        if (escondido(corpos(mc), cam, new Vec3(s.x, s.y + s.boundingBoxHeight / 2, s.z), s.boundingBoxWidth / 2)) return;
         int cor = s.entityType == EntityTypes.PLAYER ? 0x6FB7FF : s.entityType.getCategory() == MobCategory.MONSTER ? 0xFF4A3A : 0x5DFF84;
         s.outlineColor = ARGB.opaque(cor);
     }
@@ -175,6 +179,7 @@ public final class RaioX {
         float pulso = 0.85f + 0.15f * Mth.sin(t * 0.25f);
         List<Alvo> lista = alvos;
         Vec3 c = Vec3.atCenterOf(centro);
+        List<AABB> corpos = corpos(mc);
         col.submitCustomGeometry(ps, RenderTypes.textBackgroundSeeThrough(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             for (Alvo a : lista) {
@@ -185,11 +190,34 @@ public final class RaioX {
                 float brilho = 1.6f - acende * 0.6f;
                 float perto = 1 - (float) d / alcance;
                 float alfa = (0.30f + 0.18f * perto) * brilho * pulso * some;
+                if (escondido(corpos, cam, Vec3.atCenterOf(a.pos()), 0.3)) continue;
                 double x = a.pos().getX() - cam.x, y = a.pos().getY() - cam.y, z = a.pos().getZ() - cam.z;
                 caixa(m, buf, x, y, z, 0.08f, a.cor(), alfa);
                 arestas(m, buf, x, y, z, 0.04f, Efeitos.misturar(a.cor(), 0xFFFFFF, 0.55f), Math.min(1, (0.75f + 0.25f * perto) * brilho * some));
             }
         });
+    }
+
+    /**
+     * Corpos dos jogadores visíveis (o próprio só fora da primeira pessoa). O que o raio X revela atrás deles
+     * não é desenhado, senão as caixas e contornos, que ignoram a profundidade, apareceriam por cima do corpo.
+     */
+    private static List<AABB> corpos(Minecraft mc) {
+        List<AABB> r = new ArrayList<>();
+        boolean primeira = mc.options.getCameraType().isFirstPerson();
+        for (Player p : mc.level.players()) {
+            if (p.isInvisible() || (p == mc.player && primeira)) continue;
+            r.add(p.getBoundingBox().inflate(0.1, 0.05, 0.1));
+        }
+        return r;
+    }
+
+    private static boolean escondido(List<AABB> corpos, Vec3 cam, Vec3 alvo, double folga) {
+        for (AABB b : corpos) {
+            AABB g = b.inflate(folga);
+            if (!g.contains(cam) && !g.contains(alvo) && g.clip(cam, alvo).isPresent()) return true;
+        }
+        return false;
     }
 
     private static void caixa(Matrix4f m, VertexConsumer buf, double x, double y, double z, float folga, int cor, float alfa) {
