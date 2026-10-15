@@ -33,6 +33,14 @@ public final class Itens {
     // Lote da v0.1: kryptonita e Krypton
     public static final RegistryObject<Item> FRAGMENTO_KRYPTONITA = item("fragmento_kryptonita", p -> new Item(p.rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> CRISTAL_KRYPTONIANO = item("cristal_kryptoniano", p -> new Item(p.rarity(Rarity.RARE)));
+    public static final RegistryObject<Item> FRAGMENTO_ALIENIGENA = item("fragmento_alienigena", p -> new Item(p.rarity(Rarity.UNCOMMON)));
+
+    // Componentes: base das receitas dos itens de transformação e dos trajes
+    public static final RegistryObject<Item> TECIDO_TATICO = item("tecido_tatico", Item::new);
+    public static final RegistryObject<Item> NUCLEO_META_1 = item("nucleo_meta_1", Item::new);
+    public static final RegistryObject<Item> NUCLEO_META_2 = item("nucleo_meta_2", p -> new Item(p.rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> NUCLEO_META_3 = item("nucleo_meta_3", p -> new Item(p.rarity(Rarity.RARE)));
+    public static final RegistryObject<Item> NUCLEO_META_4 = item("nucleo_meta_4", p -> new Item(p.rarity(Rarity.EPIC).fireResistant()));
 
     // Utilidades
     public static final RegistryObject<Item> GUIA_HEROI = item("guia_heroi", p -> new GuiaItem(p.stacksTo(1)));

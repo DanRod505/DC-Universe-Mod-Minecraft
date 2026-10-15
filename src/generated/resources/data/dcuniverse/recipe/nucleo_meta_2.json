@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "D": "minecraft:diamond",
+    "L": "minecraft:glowstone_dust",
+    "N": "dcuniverse:nucleo_meta_1"
+  },
+  "pattern": [
+    "DLD",
+    "LNL",
+    "DLD"
+  ],
+  "result": {
+    "id": "dcuniverse:nucleo_meta_2"
+  }
+}

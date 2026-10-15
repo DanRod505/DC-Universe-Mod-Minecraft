@@ -140,5 +140,11 @@
   "block.dcuniverse.bloco_kryptonita": "Block of Kryptonite",
   "block.dcuniverse.camara_solar": "Solar Chamber",
   "block.dcuniverse.minerio_kryptonita": "Kryptonite Ore",
-  "dcuniverse.guia.recarga.kryptonite": "%s per second near kryptonite or carrying it, and loses super strength and ricochet"
+  "dcuniverse.guia.recarga.kryptonite": "%s per second near kryptonite or carrying it, and loses super strength and ricochet",
+  "item.dcuniverse.fragmento_alienigena": "Alien Fragment",
+  "item.dcuniverse.nucleo_meta_1": "Meta-Human Core I",
+  "item.dcuniverse.nucleo_meta_2": "Meta-Human Core II",
+  "item.dcuniverse.nucleo_meta_3": "Meta-Human Core III",
+  "item.dcuniverse.nucleo_meta_4": "Meta-Human Core IV",
+  "item.dcuniverse.tecido_tatico": "Tactical Fabric"
 }

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "K": "minecraft:netherite_scrap",
+    "N": "dcuniverse:nucleo_meta_3",
+    "S": "minecraft:echo_shard"
+  },
+  "pattern": [
+    "SKS",
+    "KNK",
+    "SKS"
+  ],
+  "result": {
+    "id": "dcuniverse:nucleo_meta_4"
+  }
+}

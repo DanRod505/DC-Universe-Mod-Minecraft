@@ -140,5 +140,11 @@
   "block.dcuniverse.bloco_kryptonita": "Bloco de Kryptonita",
   "block.dcuniverse.camara_solar": "Câmara Solar",
   "block.dcuniverse.minerio_kryptonita": "Minério de Kryptonita",
-  "dcuniverse.guia.recarga.kryptonite": "%s por segundo perto de kryptonita ou com ela no inventário, e perde a superforça e o ricochete"
+  "dcuniverse.guia.recarga.kryptonite": "%s por segundo perto de kryptonita ou com ela no inventário, e perde a superforça e o ricochete",
+  "item.dcuniverse.fragmento_alienigena": "Fragmento Alienígena",
+  "item.dcuniverse.nucleo_meta_1": "Núcleo Meta-Humano I",
+  "item.dcuniverse.nucleo_meta_2": "Núcleo Meta-Humano II",
+  "item.dcuniverse.nucleo_meta_3": "Núcleo Meta-Humano III",
+  "item.dcuniverse.nucleo_meta_4": "Núcleo Meta-Humano IV",
+  "item.dcuniverse.tecido_tatico": "Tecido Tático"
 }

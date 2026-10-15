@@ -2,7 +2,7 @@
 """Ícones dos itens (16x16) e texturas dos blocos do mod, desenhados em pixel art.
 
 Saída: src/main/resources/assets/dcuniverse/textures/{item,block}/<id>.png.
-A kryptonita e os cristais de Krypton ficam em kryptonita.py. Itens e blocos sem arte aqui continuam com o provisório de tools/recursos_provisorios.py.
+A kryptonita e os cristais de Krypton ficam em kryptonita.py; núcleos, fragmento alienígena e tecido em componentes.py. Itens e blocos sem arte aqui continuam com o provisório de tools/recursos_provisorios.py.
 Com --previa <arquivo>, salva uma folha com todos os desenhos ampliados.
 Uso: python3 tools/arte/itens.py --raiz . [--previa /tmp/itens.png]
 """
@@ -78,24 +78,6 @@ item("batarangue_simples", {"o": "#050506", "k": "#1E1F24", "g": "#5A5F6B", "w":
      "................",
      "................")
 
-item("fragmento_alienigena", {"o": "#120A1C", "p": "#4A3266", "P": "#6E5294", "t": "#2FE0C8", "T": "#A8FFF2", "d": "#2C1E40"},
-     "................",
-     "................",
-     "......ooo.......",
-     "....ooPPPoo.....",
-     "...oPPpppPPo....",
-     "..oPpptppppdo...",
-     "..oPppTtpppdo...",
-     ".oPpppptppppdo..",
-     ".oPppppptTppdo..",
-     ".opppdpppttpdo..",
-     ".oppdddppppddo..",
-     "..oddtddpppdo...",
-     "..odddTtdddo....",
-     "...ooddddoo.....",
-     ".....oooo.......",
-     "................")
-
 item("placa_circuito", {"o": "#0A2410", "g": "#1E7A34", "G": "#2E9E48", "y": "#E8C048", "k": "#16161A", "s": "#8A8F99"},
      "................",
      "................",
@@ -132,54 +114,12 @@ item("componente_tecnologico", {"o": "#141518", "m": "#7C828E", "M": "#B4BAC4", 
      "....o.o..o.o....",
      "................")
 
-item("tecido_tatico", {"o": "#08090B", "k": "#2A2D34", "K": "#444954", "s": "#7A808C", "d": "#1A1C21"},
-     "................",
-     "................",
-     "................",
-     "...ooooooooooo..",
-     "..oKKKKKKKKKKKo.",
-     "..oKksksksksKdo.",
-     "..oKkkkkkkkkkdo.",
-     "..oKKKKKKKKKKdo.",
-     "..okkkkkkkkkkdo.",
-     "..okksksksksddo.",
-     "..okkkkkkkkkkdo.",
-     "..oKKKKKKKKKKdo.",
-     "..oddddddddddo..",
-     "...ooooooooooo..",
-     "................",
-     "................")
-
-
-def nucleo(nome, anel, anel_claro, centro, brilho, metal):
-    item(nome, {"o": "#101014", "m": metal, "M": clarear_hex(metal, 0.35), "a": anel, "A": anel_claro, "c": centro, "w": brilho},
-         "................",
-         ".....oooooo.....",
-         "....oMMMMMMo....",
-         "...oMmaAAammo...",
-         "..oMmAccccammo..",
-         "..oMacwwccamo...",
-         ".oMmAcwccccamo..",
-         ".oMmAccccccamo..",
-         ".oMmaccccccamo..",
-         ".oMmacccccaamo..",
-         "..omaacccaamo...",
-         "..ommaaaaammo...",
-         "...ommmmmmmo....",
-         "....ooommoo.....",
-         "......oooo......",
-         "................")
-
 
 def clarear_hex(c, t):
     r, g, b, _ = clarear(hexa(c), t)
     return f"#{r:02X}{g:02X}{b:02X}"
 
 
-nucleo("nucleo_meta_1", "#9A1E1E", "#E04040", "#FF6A4A", "#FFE0D0", "#8A8F99")
-nucleo("nucleo_meta_2", "#1E8A9A", "#46D8E8", "#7AF4FF", "#F0FFFF", "#A0A6B0")
-nucleo("nucleo_meta_3", "#6A2E9A", "#B06AE8", "#FFA040", "#FFF0C0", "#5A4A6A")
-nucleo("nucleo_meta_4", "#0E5A5E", "#22B8B0", "#3AF0E0", "#E0FFFC", "#3A3438")
 
 item("guia_heroi", {"o": "#0C1220", "b": "#1F3E8A", "B": "#3460C0", "y": "#E8B838", "p": "#F2EAD6", "P": "#C8BFA8", "r": "#B02A30"},
      "................",

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_nugget",
+    "L": "minecraft:leather",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    "SLS",
+    "LIL",
+    "SLS"
+  ],
+  "result": {
+    "id": "dcuniverse:tecido_tatico",
+    "count": 4
+  }
+}
