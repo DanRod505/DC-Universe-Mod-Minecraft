@@ -1,0 +1,222 @@
+{
+ "itens": [
+  {
+   "id": "minerio_kryptonita",
+   "cat": "minerio",
+   "obter": true
+  },
+  {
+   "id": "fragmento_kryptonita",
+   "cat": "recurso",
+   "obter": true
+  },
+  {
+   "id": "bloco_kryptonita",
+   "cat": "bloco",
+   "obter": false
+  },
+  {
+   "id": "cristal_kryptoniano",
+   "cat": "recurso",
+   "obter": true
+  },
+  {
+   "id": "fragmento_alienigena",
+   "cat": "recurso",
+   "obter": true
+  },
+  {
+   "id": "tecido_tatico",
+   "cat": "componente",
+   "obter": false
+  },
+  {
+   "id": "nucleo_meta_1",
+   "cat": "componente",
+   "obter": false
+  },
+  {
+   "id": "nucleo_meta_2",
+   "cat": "componente",
+   "obter": false
+  },
+  {
+   "id": "nucleo_meta_3",
+   "cat": "componente",
+   "obter": false
+  },
+  {
+   "id": "nucleo_meta_4",
+   "cat": "componente",
+   "obter": false
+  },
+  {
+   "id": "camara_solar",
+   "cat": "bloco",
+   "obter": false
+  },
+  {
+   "id": "guia_heroi",
+   "cat": "utilidade",
+   "obter": true
+  },
+  {
+   "id": "cristal_superman",
+   "cat": "transformacao",
+   "obter": false
+  }
+ ],
+ "receitas": [
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "F": "dcuniverse:fragmento_kryptonita"
+   },
+   "pattern": [
+    "FFF",
+    "FFF",
+    "FFF"
+   ],
+   "result": {
+    "id": "dcuniverse:bloco_kryptonita"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "D": "minecraft:daylight_detector",
+    "G": "minecraft:glass",
+    "K": "dcuniverse:cristal_kryptoniano",
+    "Q": "minecraft:quartz_block"
+   },
+   "pattern": [
+    "GGG",
+    "GKG",
+    "QDQ"
+   ],
+   "result": {
+    "id": "dcuniverse:camara_solar"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "A": "dcuniverse:cristal_kryptoniano",
+    "B": "dcuniverse:tecido_tatico",
+    "C": "minecraft:sunflower",
+    "N": "dcuniverse:nucleo_meta_4"
+   },
+   "pattern": [
+    "BCB",
+    "ANA",
+    "BAB"
+   ],
+   "result": {
+    "id": "dcuniverse:cristal_superman"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shapeless",
+   "category": "misc",
+   "ingredients": [
+    "dcuniverse:bloco_kryptonita"
+   ],
+   "result": {
+    "id": "dcuniverse:fragmento_kryptonita",
+    "count": 9
+   }
+  },
+  {
+   "type": "minecraft:crafting_shapeless",
+   "ingredients": [
+    "minecraft:book",
+    "dcuniverse:fragmento_alienigena"
+   ],
+   "result": {
+    "id": "dcuniverse:guia_heroi"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "G": "minecraft:gold_ingot",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone"
+   },
+   "pattern": [
+    "IRI",
+    "RGR",
+    "IRI"
+   ],
+   "result": {
+    "id": "dcuniverse:nucleo_meta_1"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "D": "minecraft:diamond",
+    "L": "minecraft:glowstone_dust",
+    "N": "dcuniverse:nucleo_meta_1"
+   },
+   "pattern": [
+    "DLD",
+    "LNL",
+    "DLD"
+   ],
+   "result": {
+    "id": "dcuniverse:nucleo_meta_2"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:blaze_rod",
+    "N": "dcuniverse:nucleo_meta_2",
+    "P": "minecraft:ender_pearl"
+   },
+   "pattern": [
+    "BPB",
+    "ANA",
+    "BPB"
+   ],
+   "result": {
+    "id": "dcuniverse:nucleo_meta_3"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "K": "minecraft:netherite_scrap",
+    "N": "dcuniverse:nucleo_meta_3",
+    "S": "minecraft:echo_shard"
+   },
+   "pattern": [
+    "SKS",
+    "KNK",
+    "SKS"
+   ],
+   "result": {
+    "id": "dcuniverse:nucleo_meta_4"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "I": "minecraft:iron_nugget",
+    "L": "minecraft:leather",
+    "S": "minecraft:string"
+   },
+   "pattern": [
+    "SLS",
+    "LIL",
+    "SLS"
+   ],
+   "result": {
+    "id": "dcuniverse:tecido_tatico",
+    "count": 4
+   }
+  }
+ ]
+}

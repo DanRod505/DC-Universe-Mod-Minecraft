@@ -1,5 +1,5 @@
 {
-  "_sobre": "Textos em inglês (en_us.json) do que vem de docs/dados: nomes dos itens e a experiência de cada personagem (por número). tools/gerar_conteudo.py exige o texto em inglês de tudo que já entrou no mod; o resto entra junto com a versão.",
+  "_sobre": "Textos em inglês (en_us.json) do que vem de docs/dados: nomes dos itens, os textos do capítulo Itens do Guia (guia) e a experiência de cada personagem (por número). tools/gerar_conteudo.py exige o texto em inglês de tudo que já entrou no mod; o resto entra junto com a versão.",
   "itens": {
     "batarangue_simples": "Batarang",
     "batcomputador": "Batcomputer",
@@ -25,6 +25,52 @@
   "personagens": {
     "1": {
       "exp": "Absolute strength and power: you are the strongest person in the world, and the world must be handled with care."
+    }
+  },
+  "guia": {
+    "bloco_kryptonita": {
+      "desc": "Nine shards packed together. Its aura weakens Kryptonians within 10 blocks: a good base defense in multiplayer."
+    },
+    "camara_solar": {
+      "desc": "Focuses sunlight into a crystal. Kryptonians within 6 blocks recharge as if under the sun, even at night or underground."
+    },
+    "cristal_kryptoniano": {
+      "desc": "A crystal from Krypton that came inside the meteor. Ingredient of the Crystal of the House of El and the Solar Chamber.",
+      "obter": "One per Meteor Crater, in the chest hidden inside the meteor at the bottom of the crater."
+    },
+    "cristal_superman": {
+      "desc": "Right-click to put on Superman's suit and gain his powers. Press H to turn back to normal."
+    },
+    "fragmento_alienigena": {
+      "desc": "A piece of the meteor veined with energy. Used to craft another Hero's Guide and, in future versions, alien technology.",
+      "obter": "In the meteor chest at the bottom of Meteor Craters (2 to 4 per chest)."
+    },
+    "fragmento_kryptonita": {
+      "desc": "A shard of kryptonite. Carrying one drains Superman's energy, gives Weakness and removes super strength.",
+      "obter": "Mine Kryptonite Ore (Fortune increases the amount) or break a Block of Kryptonite back into 9."
+    },
+    "guia_heroi": {
+      "desc": "This book. Right-click it or press G to open the tasks, the characters and every mod item with its recipe.",
+      "obter": "Every player gets one when joining the world for the first time."
+    },
+    "minerio_kryptonita": {
+      "desc": "Green alien rock that glows in the dark. A transformed Superman loses energy and super strength within 6 blocks of it.",
+      "obter": "Underground from Y -60 to 0, and exposed in Meteor Craters. Needs a diamond pickaxe or better; Silk Touch drops the ore itself."
+    },
+    "nucleo_meta_1": {
+      "desc": "An energy core that awakens powers. Tier I: base of early-game transformation items and of Core II."
+    },
+    "nucleo_meta_2": {
+      "desc": "Tier II, with diamond and glowstone dust: base of tier 2 transformation items and of Core III."
+    },
+    "nucleo_meta_3": {
+      "desc": "Tier III, with blaze rod, ender pearl and amethyst: base of tier 3 transformation items and of Core IV."
+    },
+    "nucleo_meta_4": {
+      "desc": "Tier IV, the strongest, with netherite and echo from the Ancient City: base of end-game transformation items such as Superman's. Does not burn in lava."
+    },
+    "tecido_tatico": {
+      "desc": "Tough fabric with a kevlar weave. The base of every hero suit."
     }
   }
 }

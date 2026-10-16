@@ -255,6 +255,18 @@ def verificar_guia(raiz, recursos, erros):
             for k in (f"dcuniverse.guia.tarefa.{t}", f"dcuniverse.guia.tarefa.{t}.desc"):
                 if k not in lang:
                     erros.append(f"Guia: falta {k} em {i}.json")
+    # Capítulo Itens: todo item registrado (menos as peças do traje) tem página, com texto nos dois idiomas.
+    dados = ler_json(raiz / "src/generated/resources/assets/dcuniverse/guia/itens.json", erros) or {"itens": []}
+    java_todo = "".join(a.read_text(encoding="utf-8") for a in (raiz / JAVA).rglob("*.java"))
+    registrados = set(re.findall(r'(?:item|blocoComItem)\("([a-z0-9_]+)"', java_todo))  # bloco() sozinho não tem item
+    no_guia = {x["id"] for x in dados["itens"]}
+    erros.extend(f"Guia: {x} registrado sem página no capítulo Itens" for x in sorted(registrados - no_guia))
+    for i in IDIOMAS:
+        lang = ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {}
+        for x in dados["itens"]:
+            for k in [f"dcuniverse.guia.item.{x['id']}"] + ([f"dcuniverse.guia.item.{x['id']}.obter"] if x["obter"] else []):
+                if k not in lang:
+                    erros.append(f"Guia: falta {k} em {i}.json")
 
 
 def verificar_teclas(raiz, erros):

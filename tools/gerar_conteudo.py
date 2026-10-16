@@ -7,7 +7,10 @@ registrado no Java (os itens de uma versão entram aos poucos, etapa por etapa):
   em src/generated/resources/data/dcuniverse/recipe/ (a pasta é recriada a cada execução);
 - nomes dos itens em pt_br (itens.json/personagens.json) e en_us (traducoes_en.json) dentro dos
   arquivos de lang de src/main/resources; o resto das chaves de lang é mantido;
-- a experiência de cada personagem do datapack (campo exp), lida pelo Guia do Herói.
+- a experiência de cada personagem do datapack (campo exp), lida pelo Guia do Herói;
+- o capítulo Itens do Guia do Herói: textos (campos guia e guia_obter, em inglês na seção guia de
+  traducoes_en.json) no lang e src/generated/resources/assets/dcuniverse/guia/itens.json com a lista de
+  itens por categoria e todas as receitas do mod (as geradas e as escritas à mão), lidas pelo cliente.
 Blocos (categorias minerio, bloco e decoracao) usam a chave block.dcuniverse.<id>.
 O CI roda este script e falha se o resultado não estiver commitado.
 Uso: python3 -I tools/gerar_conteudo.py --raiz .
@@ -79,7 +82,13 @@ def main():
     en_pers = ler(dados / "traducoes_en.json").get("personagens", {})
     no_pack = {ler(a)["n"]: a.stem for a in (raiz / f"src/main/resources/data/{NS}/dc_characters").glob("*.json")}
 
+    texto_guia = {i["id"]: i for i in itens}
+    texto_guia |= {p["transformacao"]["id"]: {"guia": p["transformacao"].get("guia"), "cat": "transformacao"} for p in personagens}
+    en_guia = ler(dados / "traducoes_en.json").get("guia", {})
     erros = [f"traducoes_en.json: falta o nome em inglês de {i}" for i in sorted(ids) if i not in en]
+    erros += [f"falta o texto do Guia (campo guia) de {i}" for i in sorted(ids) if not texto_guia[i].get("guia")]
+    erros += [f"traducoes_en.json: falta o texto do Guia em inglês de {i}" for i in sorted(ids)
+              if "desc" not in en_guia.get(i, {}) or (texto_guia[i].get("guia_obter") and "obter" not in en_guia[i])]
     erros += [f"traducoes_en.json: falta a experiência em inglês do personagem {n}" for n in sorted(no_pack)
               if "exp" not in en_pers.get(str(n), {})]
     if erros:
@@ -105,7 +114,22 @@ def main():
         lang = ler(arq)
         lang.update({chave(i): nome(i) for i in sorted(ids)})
         lang.update({f"personagem.{NS}.{slug}.exp": exp(n) for n, slug in sorted(no_pack.items())})
+        for i in sorted(ids):
+            pt = idioma == "pt_br"
+            lang[f"{NS}.guia.item.{i}"] = texto_guia[i]["guia"] if pt else en_guia[i]["desc"]
+            obter = texto_guia[i].get("guia_obter")
+            if obter:
+                lang[f"{NS}.guia.item.{i}.obter"] = obter if pt else en_guia[i]["obter"]
         arq.write_text(json.dumps(lang, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    # Capítulo Itens do Guia: itens na ordem de docs/dados (transformação por último) e as receitas do mod.
+    ordem = [i["id"] for i in itens] + [p["transformacao"]["id"] for p in personagens]
+    lista = [{"id": i, "cat": texto_guia[i]["cat"], "obter": bool(texto_guia[i].get("guia_obter"))}
+             for i in sorted(ids, key=ordem.index)]
+    todas = sorted([*pasta.glob("*.json"), *(raiz / f"src/main/resources/data/{NS}/recipe").glob("*.json")], key=lambda a: a.stem)
+    guia = raiz / f"src/generated/resources/assets/{NS}/guia/itens.json"
+    guia.parent.mkdir(parents=True, exist_ok=True)
+    guia.write_text(json.dumps({"itens": lista, "receitas": [ler(a) for a in todas]}, indent=1, ensure_ascii=False) + "\n",
+                    encoding="utf-8")
     print(f"conteúdo {atual}: {len(ids)} itens, {feitas} receitas")
 
 

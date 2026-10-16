@@ -154,6 +154,19 @@ ICONES = {
                "...o#++#o...",
                "....o##o....",
                ".....oo....."],
+    # Itens e Receitas: grade da bancada 3x3
+    "itens": ["oooooooooooo",
+              "o##o##o##o.",
+              "o#+o#+o#+o.",
+              "oooooooooooo",
+              "o##o##o##o.",
+              "o#+o#+o#+o.",
+              "oooooooooooo",
+              "o##o##o##o.",
+              "o#+o#+o#+o.",
+              "oooooooooooo",
+              "............",
+              "............"],
 }
 
 
@@ -174,6 +187,59 @@ def caixa(t, x, y, marcada):
         visto = [(2, 5), (3, 6), (4, 7), (5, 6), (6, 5), (7, 4), (8, 3), (9, 2), (10, 1)]
         for vx, vy in visto:
             t.p(x + vx, y + vy, verde); t.p(x + vx, y + vy + 1, verde); t.p(x + vx - 1, y + vy, claro)
+
+
+def encaixe(t, x, y, ativo):
+    """Encaixe de item 18x18 afundado no papel (sombra em cima à esquerda, luz embaixo à direita).
+    Ativo (o item escolhido) ganha moldura dourada."""
+    fundo = mistura(PAPEL_ESC, PAPEL, 0.35)
+    for j in range(18):
+        for i in range(18):
+            c = fundo
+            if i == 0 or j == 0:
+                c = escurecer(PAPEL_ESC, 0.35)
+            elif i == 17 or j == 17:
+                c = clarear(PAPEL, 0.5)
+            elif i == 1 or j == 1:
+                c = escurecer(fundo, 0.08)
+            t.p(x + i, y + j, c)
+    if ativo:
+        for i in range(18):
+            for a, b in ((i, 0), (i, 17), (0, i), (17, i)):
+                t.p(x + a, y + b, OURO_ESC)
+            for a, b in ((i, 1), (i, 16), (1, i), (16, i)):
+                if 1 <= i <= 16:
+                    t.p(x + a, y + b, OURO_CLARO if (a + b) % 3 else OURO)
+
+
+def seta(t, x, y):
+    """Seta da receita (22x15), desenhada a tinta como num livro."""
+    for j in range(15):
+        for i in range(22):
+            dentro = (3 <= j <= 11 and i <= 13) or (i > 13 and abs(j - 7) <= 21 - i)
+            borda = dentro and not ((4 <= j <= 10 and 1 <= i <= 13) or (i > 13 and abs(j - 7) <= 19 - i))
+            if dentro:
+                t.p(x + i, y + j, TINTA if borda else mistura(PAPEL_ESC, OURO, 0.35))
+
+
+def chama(t, x, y):
+    """Chama da fornalha (13x14)."""
+    linhas = ["......o......",
+              ".....o#o.....",
+              ".....o#o.....",
+              "....o##+o....",
+              "...o#+#+#o...",
+              "...o#++##o...",
+              "..o##+y+##o..",
+              "..o#+yyy+#o..",
+              ".o#+yywyy+#o.",
+              ".o#+ywwwy+#o.",
+              ".o#+yywyy+#o.",
+              "..o#+yyy+#o..",
+              "...oo###oo...",
+              ".....ooo....."]
+    t.bitmap(x, y, linhas, {"o": hexa("#7A2A0C"), "#": hexa("#D8541C"), "+": hexa("#F28C28"),
+                            "y": hexa("#FFC83A"), "w": hexa("#FFF4C0")})
 
 
 def enfeite(t, x, y):
@@ -216,6 +282,14 @@ def main():
     caixa(t, 316, 100, True)
     enfeite(t, 304, 116)
     pedestal(t, 304, 124)
+    verde = hexa("#2E8B4A")
+    marcador(t, 360, 0, verde, False)
+    marcador(t, 360, 24, verde, True)
+    icone(t, 336, 32, "itens", hexa("#E8C88A"))
+    encaixe(t, 304, 140, False)
+    encaixe(t, 324, 140, True)
+    seta(t, 344, 141)
+    chama(t, 368, 141)
     destino = Path(args.raiz) / "src/main/resources/assets/dcuniverse/textures/gui/guia.png"
     t.salvar(destino)
     # Silhueta: textura de skin lisa cor de tinta, para o personagem ainda não descoberto.
