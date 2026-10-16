@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:blaze_rod",
+    "N": "dcuniverse:nucleo_meta_2",
+    "P": "minecraft:ender_pearl"
+  },
+  "pattern": [
+    "BPB",
+    "ANA",
+    "BPB"
+  ],
+  "result": {
+    "id": "dcuniverse:nucleo_meta_3"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "musica.voo_0": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/voo_0",
+        "stream": true
+      }
+    ]
+  },
+  "musica.voo_1": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/voo_1",
+        "stream": true
+      }
+    ]
+  },
+  "musica.voo_2": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/voo_2",
+        "stream": true
+      }
+    ]
+  },
+  "musica.voo_3": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/voo_3",
+        "stream": true
+      }
+    ]
+  },
+  "musica.voo_estrondo": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/voo_estrondo"
+      }
+    ]
+  },
+  "habilidade.visao_calor": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/visao_calor"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.visao_calor"
+  },
+  "habilidade.sopro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/sopro"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.sopro"
+  },
+  "habilidade.soco_sonico": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/soco_sonico",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.soco_sonico"
+  },
+  "habilidade.pisao": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/pisao",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.pisao"
+  },
+  "habilidade.raio_x": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/raio_x"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.raio_x"
+  },
+  "habilidade.fortaleza_cresce": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/fortaleza_cresce",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.fortaleza_cresce"
+  },
+  "habilidade.fortaleza_quebra": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/fortaleza_quebra",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.fortaleza_quebra"
+  },
+  "habilidade.salto_carga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/salto_carga"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.salto_carga"
+  },
+  "habilidade.salto": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/salto"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.salto"
+  },
+  "habilidade.ricochete": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/ricochete"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.ricochete"
+  }
+}

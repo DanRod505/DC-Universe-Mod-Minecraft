@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:book",
+    "dcuniverse:fragmento_alienigena"
+  ],
+  "result": {
+    "id": "dcuniverse:guia_heroi"
+  }
+}

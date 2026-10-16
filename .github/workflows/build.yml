@@ -1,0 +1,64 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Documentação em dia com docs/dados
+        run: |
+          python3 tools/gerar_docs.py
+          python3 -I tools/gerar_conteudo.py --raiz .
+          git add -N src
+          git diff --exit-code -- docs src || (echo "Rode tools/gerar_docs.py e tools/gerar_conteudo.py e faça commit do resultado." && exit 1)
+
+      - name: Build (dcuVerify, .jar e perfil .zip)
+        run: ./gradlew build --console=plain
+
+      - name: Testes num servidor dedicado
+        run: ./gradlew runGameTestServer --console=plain
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dcuniverse
+          path: |
+            build/libs/*.jar
+            build/distributions/*.zip
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dcuniverse
+      - uses: softprops/action-gh-release@v2
+        with:
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            libs/*.jar
+            distributions/*.zip

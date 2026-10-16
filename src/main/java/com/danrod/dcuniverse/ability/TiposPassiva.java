@@ -1,0 +1,32 @@
+package com.danrod.dcuniverse.ability;
+
+import com.danrod.dcuniverse.ability.passive.Efeito;
+import com.danrod.dcuniverse.ability.passive.Planar;
+import com.danrod.dcuniverse.ability.passive.Voo;
+import com.danrod.dcuniverse.character.Params;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffects;
+
+import java.util.Map;
+
+/** Tipos de passiva disponíveis para os JSONs. O dcuVerify lê os nomes daqui. */
+public final class TiposPassiva {
+    public static final Map<String, Passiva> TIPOS = Map.of(
+        "flight", new Voo(),
+        "glide", new Planar(),
+        "fall_immunity", new Passiva() {
+            @Override
+            public boolean semQueda(ServerPlayer player, Params p) {
+                return true;
+            }
+        },
+        "night_vision", new Efeito(MobEffects.NIGHT_VISION),
+        "fire_immunity", new Efeito(MobEffects.FIRE_RESISTANCE),
+        // Estas três agem pelos eventos do jogo (passive/Naturais) e pelo cliente (client/Saltador).
+        "super_strength", new Passiva() {},
+        "projectile_resistance", new Passiva() {},
+        "super_jump", new Passiva() {}
+    );
+
+    private TiposPassiva() {}
+}

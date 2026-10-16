@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "F": "dcuniverse:fragmento_kryptonita"
+  },
+  "pattern": [
+    "FFF",
+    "FFF",
+    "FFF"
+  ],
+  "result": {
+    "id": "dcuniverse:bloco_kryptonita"
+  }
+}
