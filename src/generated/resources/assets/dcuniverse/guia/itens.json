@@ -64,6 +64,11 @@
    "id": "cristal_superman",
    "cat": "transformacao",
    "obter": false
+  },
+  {
+   "id": "cinto_batman",
+   "cat": "transformacao",
+   "obter": false
   }
  ],
  "receitas": [

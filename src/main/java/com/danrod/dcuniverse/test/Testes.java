@@ -43,6 +43,7 @@ public final class Testes {
     public static final DeferredRegister<Consumer<GameTestHelper>> FUNCOES = DeferredRegister.create(Registries.TEST_FUNCTION, DCUniverse.MODID);
 
     private static final Identifier SUPERMAN = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "superman");
+    private static final Identifier BATMAN = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batman");
 
     static {
         FUNCOES.register("transform", () -> Testes::transforma);
@@ -59,6 +60,9 @@ public final class Testes {
         FUNCOES.register("fortress", () -> Testes::fortaleza);
         FUNCOES.register("elements", () -> Testes::elementos);
         FUNCOES.register("kryptonite", () -> Testes::kryptonita);
+        FUNCOES.register("gadgets", () -> Testes::gadgets);
+        FUNCOES.register("grapple", () -> Testes::gancho);
+        FUNCOES.register("batwing", () -> Testes::batwing);
     }
 
     private Testes() {}
@@ -129,7 +133,7 @@ public final class Testes {
         Rede.Sync s = Rede.Sync.decode(buf);
         h.assertValueEqual(s.personagem(), SUPERMAN.toString(), "personagem no sync");
         h.assertValueEqual(s.max(), 300f, "energia máxima no sync");
-        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false, 32f, 15f);
+        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false, 32f, 15f, true, false);
         Rede.Sync.encode(hab, buf);
         h.assertValueEqual(Rede.Sync.decode(buf), hab, "sync com suprema e queda amortecida");
         var guia = new Rede.GuiaSync(List.of("transformar"), List.of(SUPERMAN.toString()), "sol");
@@ -237,7 +241,7 @@ public final class Testes {
         h.assertTrue(s.pronta(suprema), "com energia cheia a suprema está pronta");
         e.setEnergia(suprema.custo() - 1);
         h.assertFalse(Rede.montar(p).pronta(suprema), "sem energia suficiente não está pronta");
-        h.assertFalse(new Rede.Sync("x", 300, 300, false, 0, "", List.of(), 0, false, 0, false, false, 0, 0)
+        h.assertFalse(new Rede.Sync("x", 300, 300, false, 0, "", List.of(), 0, false, 0, false, false, 0, 0, false, false)
             .pronta(new Rede.HabInfo("a", false, true, 210, 20, 1800)), "em recarga não está pronta");
         Transformacao.destransformar(p);
         h.assertFalse(DemoHud.ativa(p), "destransformar encerra a demonstração");
@@ -515,5 +519,96 @@ public final class Testes {
             }
             h.succeed();
         });
+    }
+
+    /** Gadgets: cada uso gasta uma carga, sem cargas não usa, o cinto fabrica gastando energia; no criativo é livre. */
+    static void gadgets(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        h.assertTrue(Transformacao.transformar(p, BATMAN, true), "transformar no Batman");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        Personagem.Habilidade b = bat.habilidade("batarangue");
+        int max = com.danrod.dcuniverse.ability.Cargas.max(b);
+        h.assertValueEqual(max, 6, "batarangue com 6 cargas");
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(p, b), max, "começa cheio");
+        e.setEnergia(bat.energia().max());
+        for (int i = 0; i < max; i++) {
+            e.setProntaEm(b.id(), 0);
+            h.assertTrue(Habilidades.executar(p, bat, b), "arremesso " + (i + 1));
+        }
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(p, b), 0, "cargas acabaram");
+        e.setProntaEm(b.id(), 0);
+        h.assertFalse(Habilidades.executar(p, bat, b), "sem cargas não arremessa");
+        // Fabricação: a próxima carga sai na hora marcada, gastando reload_cost de energia.
+        com.danrod.dcuniverse.ability.Cargas.tick(p, bat);
+        h.assertTrue(com.danrod.dcuniverse.ability.Cargas.faltam(p, b) > 0, "o cinto começou a fabricar");
+        e.setProximaCarga(b.id(), p.level().getGameTime());
+        float antes = e.energia();
+        com.danrod.dcuniverse.ability.Cargas.tick(p, bat);
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(p, b), 1, "uma carga fabricada");
+        h.assertValueEqual(e.energia(), antes - 2f, "custou 2 de energia");
+        // Criativo: não gasta carga nem energia.
+        ServerPlayer c = (ServerPlayer) h.makeMockServerPlayer(GameType.CREATIVE);
+        Transformacao.transformar(c, BATMAN, true);
+        EstadoJogador ec = EstadoJogador.de(c);
+        ec.setCargas(b.id(), 1);
+        h.assertTrue(Habilidades.executar(c, bat, b), "arremessa no criativo");
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(c, b), 1, "criativo não gasta carga");
+        Personagem.Habilidade g = bat.habilidade("gancho");
+        float energia = ec.energia();
+        com.danrod.dcuniverse.ability.active.Gancho.limpar();
+        h.assertTrue(Habilidades.executar(c, bat, g), "gancho no criativo");
+        h.assertValueEqual(ec.energia(), energia, "criativo não gasta energia");
+        com.danrod.dcuniverse.ability.active.Gancho.limpar();
+        h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.BatarangueEntidade.class, p.getBoundingBox().inflate(64)).forEach(x -> x.discard());
+        h.succeed();
+    }
+
+    /** Gancho: crava no bloco mirado e solta ao usar de novo; o batarangue sai voando. */
+    static void gancho(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        h.setBlock(1, 8, 1, net.minecraft.world.level.block.Blocks.STONE);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        p.setXRot(-90);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("gancho")), "dispara o gancho para cima");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Gancho.ativo(p), "cabo preso no bloco");
+        h.assertTrue(Guia.concluida(p, "gancho"), "tarefa do gancho");
+        com.danrod.dcuniverse.ability.active.Gancho.soltar(p);
+        h.assertFalse(com.danrod.dcuniverse.ability.active.Gancho.ativo(p), "soltou o cabo");
+        p.setXRot(0);
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("batarangue")), "arremessa o batarangue");
+        var lista = h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.BatarangueEntidade.class, p.getBoundingBox().inflate(8));
+        h.assertValueEqual(lista.size(), 1, "um batarangue no ar");
+        h.assertTrue(Guia.concluida(p, "batarangue"), "tarefa do batarangue");
+        lista.forEach(x -> x.discard());
+        h.succeed();
+    }
+
+    /** Batwing: a suprema invoca o jato do dono, ele embarca e o jato vai embora quando o Batman destransforma. */
+    static void batwing(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        Personagem.Habilidade sup = bat.suprema();
+        h.assertValueEqual(sup.id(), "batwing", "a suprema é o Batwing");
+        h.assertTrue(Habilidades.executar(p, bat, sup), "invoca o Batwing");
+        h.assertValueEqual(e.energia(), bat.energia().max() * 0.25f, "custa 75% da energia");
+        var bw = com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+        h.assertTrue(bw != null && bw.isAlive(), "Batwing no mundo");
+        // (Embarcar teleporta o jogador, o que o jogador de teste não suporta: testado no jogo.)
+        Transformacao.destransformar(p);
+        h.assertValueEqual(bw.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "o Batwing vai embora");
+        bw.discard();
+        com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        h.succeed();
     }
 }

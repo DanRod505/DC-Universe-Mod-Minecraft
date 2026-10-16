@@ -121,7 +121,17 @@ public final class Hud {
     }
 
     static boolean pronta(Rede.Sync s, Rede.HabInfo h) {
-        return restante(h) <= 0 && !s.esgotado() && energia(s, 0) >= h.custo();
+        return restante(h) <= 0 && !s.esgotado() && energia(s, 0) >= h.custo() && h.cargas() != 0;
+    }
+
+    /** Ticks até o cinto fabricar a próxima carga (previsto desde o último pacote). */
+    static int faltaCarga(Rede.HabInfo h) {
+        return Math.max(0, h.cargaFalta() - ticksDesdeSync);
+    }
+
+    /** Fração já fabricada da próxima carga (0 a 1). */
+    static float progressoCarga(Rede.HabInfo h) {
+        return h.cargaTotal() <= 0 ? 0f : Mth.clamp(1f - faltaCarga(h) / (float) h.cargaTotal(), 0f, 1f);
     }
 
     static Rede.HabInfo suprema(Rede.Sync s) {
@@ -211,6 +221,7 @@ public final class Hud {
         int verde = 0xFF000000 | (Math.round(150 + 105 * (0.5f + 0.5f * Mth.sin(tempo * 0.3f))) << 8) | 0x40;
         g.text(font, taxa, tx, ty, s.recarga() < 0 ? verde : s.sol() ? 0xFFFFD84A : 0xFFB8C0D0, true);
         if (s.solar()) g.blit(RenderPipelines.GUI_TEXTURED, TEX, tx - 13, ty - 2, s.sol() ? 120 : 132, 32, 11, 11, TW, TH);
+        else if (s.tecnologica()) g.blit(RenderPipelines.GUI_TEXTURED, TEX, tx - 13, ty - 2, s.estacao() ? 176 : 188, 32, 11, 11, TW, TH);
     }
 
     /** Kryptonita por perto (a recarga fica negativa): bordas da tela num verde doente que pulsa devagar. */
@@ -268,11 +279,26 @@ public final class Hud {
                 String seg = Integer.toString((rest + 19) / 20);
                 g.text(font, seg, ix + 8 - font.width(seg) / 2 + 1, iy + 4, 0xFFFFFFFF, true);
             }
+            if (h.cargas() >= 0) cargas(g, font, h, ix, iy);
             x += tam + 2;
         }
         Rede.HabInfo h = habs.get(sel);
         int cor = h.suprema() ? 0xFFFFD84A : 0xFFE8ECF4;
         g.text(font, nome(h).copy().withStyle(h.suprema() ? ChatFormatting.BOLD : ChatFormatting.RESET), x + 2, y + 7, cor, true);
+    }
+
+    /** Gadget: cargas no canto do ícone e, enquanto o cinto fabrica, um filete âmbar que enche embaixo. */
+    private static void cargas(GuiGraphicsExtractor g, Font font, Rede.HabInfo h, int ix, int iy) {
+        if (h.cargas() < h.cargasMax()) {
+            g.fill(ix, iy + 17, ix + 16, iy + 18, 0xC0101218);
+            g.fill(ix, iy + 17, ix + Math.round(16 * progressoCarga(h)), iy + 18, 0xFFFFB23A);
+        }
+        String n = Integer.toString(h.cargas());
+        g.pose().pushMatrix();
+        g.pose().translate(ix + 17 - font.width(n) * 0.75f, iy + 10);
+        g.pose().scale(0.75f, 0.75f);
+        g.text(font, n, 0, 0, h.cargas() == 0 ? 0xFFFF6A5A : 0xFFFFE08A, true);
+        g.pose().popMatrix();
     }
 
     private static void aviso(GuiGraphicsExtractor g, Font font, float pt) {

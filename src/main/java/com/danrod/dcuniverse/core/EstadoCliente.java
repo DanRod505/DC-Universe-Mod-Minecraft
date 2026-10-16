@@ -28,6 +28,9 @@ public final class EstadoCliente {
     /** Efeitos pontuais no mundo que o cliente ainda vai começar a desenhar. */
     public static final java.util.Queue<Rede.Efeito> EFEITOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
 
+    /** Cabos de gancho que mudaram e o cliente ainda vai aplicar (client/Gancheador). */
+    public static final java.util.Queue<Rede.GanchoVisto> GANCHOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
+
     private EstadoCliente() {}
 
     public static void aparencia(Rede.Aparencia a) {
@@ -88,6 +91,7 @@ public final class EstadoCliente {
         APARENCIAS.clear();
         TRANSFORMOU.clear();
         MANOBRAS.clear();
+        GANCHOS.clear();
         EFEITOS.clear();
     }
 }

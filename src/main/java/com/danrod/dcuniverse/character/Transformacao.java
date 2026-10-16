@@ -88,6 +88,8 @@ public final class Transformacao {
         EstadoJogador estado = EstadoJogador.de(player);
         Personagem p = estado.personagem();
         Passivas.aoDestransformar(player, p);
+        com.danrod.dcuniverse.ability.active.Gancho.aoDestransformar(player);
+        com.danrod.dcuniverse.ability.active.Veiculo.aoDestransformar(player);
         DemoHud.parar(player);
         Traje.remover(player);
         Atributos.remover(player);

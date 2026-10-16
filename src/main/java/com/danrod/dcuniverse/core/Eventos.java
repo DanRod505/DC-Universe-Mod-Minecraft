@@ -77,11 +77,14 @@ public final class Eventos {
             Onda.tick();
             com.danrod.dcuniverse.ability.Congelamento.tick();
             Fortaleza.tick();
+            com.danrod.dcuniverse.ability.active.Gancho.tick();
         });
         ServerStoppingEvent.BUS.addListener(e -> {
             Onda.limpar();
             com.danrod.dcuniverse.ability.Congelamento.limpar();
             Fortaleza.limpar();
+            com.danrod.dcuniverse.ability.active.Gancho.limpar();
+            com.danrod.dcuniverse.ability.active.Veiculo.limpar();
         });
         Naturais.registrar();
         com.danrod.dcuniverse.ability.Congelamento.registrar();
@@ -101,6 +104,7 @@ public final class Eventos {
         Energia.tick(player, p);
         Passivas.tick(player, p);
         Habilidades.tick(player, p);
+        com.danrod.dcuniverse.ability.Cargas.tick(player, p);
         DemoHud.tick(player, p);
         if (player.tickCount % SYNC_TICKS == 0) Rede.sincronizar(player);
     }

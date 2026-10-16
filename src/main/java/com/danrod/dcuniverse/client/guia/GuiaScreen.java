@@ -478,6 +478,13 @@ public final class GuiaScreen extends Screen {
         if (prm.d("impact_radius", 0) > 0) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.impacto", fmt(prm.d("impact_radius", 0)))));
         }
+        if (h.tipo().equals("grapple")) out.add(item(Component.translatable("dcuniverse.guia.hab.gancho", fmt(prm.d("speed", 30)))));
+        if (prm.i("ricochet", 0) > 0) out.add(item(Component.translatable("dcuniverse.guia.hab.ricochete", prm.i("ricochet", 0))));
+        if (prm.s("variant", "").equals("electric")) out.add(item(Component.translatable("dcuniverse.guia.hab.choque")));
+        Params ammo = com.danrod.dcuniverse.ability.Cargas.ammo(h);
+        if (ammo != null) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.cargas", ammo.i("max", 1), fmt(ammo.d("reload", 5)), fmt(ammo.d("reload_cost", 0)))));
+        }
         detalhes(out, prm);
         out.add(espaco(3));
     }
@@ -486,6 +493,11 @@ public final class GuiaScreen extends Screen {
     private void detalhes(List<Bloco> out, Params prm) {
         if (prm.json().has("radius")) out.add(item(Component.translatable("dcuniverse.guia.hab.raio", fmt(prm.d("radius", 0)))));
         if (prm.json().has("duration")) out.add(item(Component.translatable("dcuniverse.guia.hab.duracao", fmt(prm.d("duration", 0)))));
+        if (prm.json().has("missiles")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.voo", fmt(prm.d("speed", 30)), fmt(prm.d("boost_speed", 60)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.armas", fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 64)),
+                prm.i("missiles", 4), fmt(prm.d("missile_damage", 7)), fmt(prm.d("missile_radius", 3.5)), fmt(prm.d("missile_reload", 5)))));
+        }
         if (prm.d("stun", 0) > 0) out.add(item(Component.translatable("dcuniverse.guia.hab.lento", fmt(Math.min(4, prm.d("stun", 0))))));
         if (prm.d("regen_level", 0) > 0) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.cura", (int) prm.d("regen_level", 0), fmt(prm.d("energy_per_second", 0)))));

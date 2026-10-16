@@ -18,7 +18,10 @@ public final class TiposHabilidade {
         "area_cone", new Cone(),
         "area_blast", new Onda(),
         "vision", new Visao(),
-        "structure", new Fortaleza()
+        "structure", new Fortaleza(),
+        "grapple", new com.danrod.dcuniverse.ability.active.Gancho(),
+        "throwable", new com.danrod.dcuniverse.ability.active.Arremesso(),
+        "vehicle", new com.danrod.dcuniverse.ability.active.Veiculo()
     ));
 
     private TiposHabilidade() {}

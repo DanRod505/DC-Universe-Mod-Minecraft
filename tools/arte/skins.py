@@ -321,20 +321,40 @@ def batman(t, capa, glow):
             for jj in range(16, 24):
                 for i in range(p.w):
                     p.p(i, jj, clarear(preto, 0.08 if jj == 16 else 0.0) if jj < 22 else hexa("#09090B"))
-    # capa preta pesada
-    for x, y, w, h, cor in ((2, 2, 20, 32, preto), (24, 2, 20, 32, hexa("#22232A")),
-                            (0, 2, 2, 32, preto), (22, 2, 2, 32, preto), (2, 0, 20, 2, preto), (22, 0, 20, 2, preto)):
-        for jj in range(h):
-            for i in range(w):
-                dobra = 0.06 if i % 4 == 0 else 0.0
-                capa.p(x + i, y + jj, clarear(escurecer(cor, dobra), 0.10 * (1 - jj / h)))
-    for i in range(0, 20, 4):  # pontas recortadas na barra
-        capa.p(2 + i, 33, (0, 0, 0, 0)); capa.p(2 + i + 1, 33, (0, 0, 0, 0))
+    capa_batman(capa, rnd)
+
+
+def capa_batman(capa, rnd):
+    """Capa da peça 3D (client/Pecas): fora em (0,0,40,64), dentro em (40,0,40,64), bordas em (80,0,4,64).
+    Preta e pesada, com dobras verticais e a barra recortada em pontas de asa de morcego."""
+    import math
+    preto, dentro = hexa("#16171C"), hexa("#24252C")
+    for y in range(64):
+        t = y / 63
+        for x in range(40):
+            # Barra em três recortes de asa: a borda sobe entre as pontas.
+            u = (x + 0.5) / 40
+            recorte = 6 * abs(math.sin(u * math.pi * 3)) ** 0.7
+            if y > 63 - recorte:
+                capa.p(x, y, (0, 0, 0, 0))
+                capa.p(40 + x, y, (0, 0, 0, 0))
+                continue
+            dobra = 0.10 * math.sin(x / 40 * math.pi * 6 + 0.4) * (0.3 + 0.7 * t)
+            luz = 0.08 * (1 - t) - 0.06 * t + dobra + rnd.uniform(-0.012, 0.012)
+            if x in (0, 39):
+                luz -= 0.08
+            c = clarear(preto, luz) if luz > 0 else escurecer(preto, -luz)
+            if y > 60 - recorte:
+                c = escurecer(c, 0.3)
+            capa.p(x, y, c)
+            capa.p(40 + x, y, clarear(dentro, max(0, luz * 0.5)) if luz > 0 else escurecer(dentro, -luz * 0.5))
+        for x in range(4):
+            capa.p(80 + x, y, escurecer(preto, 0.2))
 
 
 PERSONAGENS = {"superman": superman, "batman": batman}
 # Capa da peça 3D (client/Pecas: fora em 0,0,40,64); as outras usam a capa comum do jogo (caixa 10x16x1).
-CAPA_3D = {"superman"}
+CAPA_3D = {"superman", "batman"}
 
 
 def previa(skin, capa, destino, capa3d=False):

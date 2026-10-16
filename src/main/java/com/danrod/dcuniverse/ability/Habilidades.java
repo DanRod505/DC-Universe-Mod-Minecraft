@@ -30,6 +30,11 @@ public final class Habilidades {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
         if (p == null || player.isSpectator()) return;
+        // Pilotando o veículo da suprema, a tecla de uso é dele (modo furtivo do Batwing).
+        if (com.danrod.dcuniverse.content.BatwingEntidade.pilotando(player) != null) {
+            if (pressionado) com.danrod.dcuniverse.content.BatwingEntidade.pilotando(player).comando(player, com.danrod.dcuniverse.content.BatwingEntidade.FURTIVO);
+            return;
+        }
         if (!pressionado) {
             parar(player, e);
             return;
@@ -38,7 +43,7 @@ public final class Habilidades {
         Personagem.Habilidade h = p.habilidades().get(Math.min(e.selecionada(), p.habilidades().size() - 1));
         if (h.modo() == Personagem.Modo.HOLD) {
             if (e.prontaEm(h.id()) > player.level().getGameTime()) return;
-            if (e.esgotado()) {
+            if (e.esgotado() && !player.isCreative()) {
                 Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
                 return;
             }
@@ -52,19 +57,26 @@ public final class Habilidades {
     }
 
     /**
-     * Usa uma habilidade INSTANT (inclusive a suprema): confere recarga e energia, executa e só então cobra.
+     * Usa uma habilidade INSTANT (inclusive a suprema): confere recarga, munição e energia, executa e só então
+     * cobra. No criativo não gasta energia nem munição (a recarga vale igual).
      * @return true se a habilidade foi usada
      */
     public static boolean executar(ServerPlayer player, Personagem p, Personagem.Habilidade h) {
         EstadoJogador e = EstadoJogador.de(player);
         long agora = player.level().getGameTime();
         if (e.prontaEm(h.id()) > agora) return false;
-        if (e.esgotado() || e.energia() < h.custo()) {
+        boolean criativo = player.isCreative();
+        if (!criativo && (e.esgotado() || e.energia() < h.custo())) {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
             return false;
         }
+        if (!Cargas.tem(player, h)) {
+            Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_cargas", Component.translatable("habilidade.dcuniverse." + h.id())));
+            return false;
+        }
         if (!TiposHabilidade.TIPOS.get(h.tipo()).usar(player, p, h)) return false;
-        Energia.gastar(player, p, h.custo());
+        if (!criativo) Energia.gastar(player, p, h.custo());
+        Cargas.gastar(player, h);
         e.setProntaEm(h.id(), agora + Math.round(h.recargaSeg() * 20));
         return true;
     }
@@ -75,7 +87,7 @@ public final class Habilidades {
         String id = e.canalizando();
         if (id.isEmpty()) return;
         Personagem.Habilidade h = p.habilidade(id);
-        if (h == null || !Energia.gastar(player, p, h.custo() / 20f)) {
+        if (h == null || !player.isCreative() && !Energia.gastar(player, p, h.custo() / 20f)) {
             parar(player, e);
             return;
         }

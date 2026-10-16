@@ -99,6 +99,28 @@ public final class EstadoJogador {
         tag.put("recargas", r);
     }
 
+    /** Cargas do gadget (Cargas); sem registro ainda = cheio (def). */
+    public int cargas(String habilidade, int def) {
+        return tag.getCompoundOrEmpty("cargas").getIntOr(habilidade, def);
+    }
+
+    public void setCargas(String habilidade, int n) {
+        CompoundTag c = tag.getCompoundOrEmpty("cargas");
+        c.putInt(habilidade, n);
+        tag.put("cargas", c);
+    }
+
+    /** Tick em que a próxima carga fica pronta (0 = nenhuma sendo fabricada). */
+    public long proximaCarga(String habilidade) {
+        return tag.getCompoundOrEmpty("prox_carga").getLongOr(habilidade, 0L);
+    }
+
+    public void setProximaCarga(String habilidade, long tick) {
+        CompoundTag c = tag.getCompoundOrEmpty("prox_carga");
+        c.putLong(habilidade, tick);
+        tag.put("prox_carga", c);
+    }
+
     public long ultimaTransformacao() {
         return tag.getLongOr("ultima_transformacao", Long.MIN_VALUE / 2);
     }
@@ -145,5 +167,7 @@ public final class EstadoJogador {
         setEsgotado(false);
         setDestransformarEm(0L);
         tag.remove("recargas");
+        tag.remove("cargas");
+        tag.remove("prox_carga");
     }
 }

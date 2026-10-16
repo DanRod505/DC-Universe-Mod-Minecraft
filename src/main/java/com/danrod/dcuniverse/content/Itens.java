@@ -29,6 +29,8 @@ public final class Itens {
     // Itens de transformação (ids de docs/dados/personagens.json)
     public static final RegistryObject<Item> CRISTAL_SUPERMAN = item("cristal_superman",
         p -> new TransformacaoItem("superman", p.rarity(Rarity.EPIC)));
+    public static final RegistryObject<Item> CINTO_BATMAN = item("cinto_batman",
+        p -> new TransformacaoItem("batman", p.rarity(Rarity.EPIC)));
 
     // Lote da v0.1: kryptonita e Krypton
     public static final RegistryObject<Item> FRAGMENTO_KRYPTONITA = item("fragmento_kryptonita", p -> new Item(p.rarity(Rarity.UNCOMMON)));

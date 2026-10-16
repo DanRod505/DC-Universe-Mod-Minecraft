@@ -25,6 +25,9 @@
   "personagens": {
     "1": {
       "exp": "Absolute strength and power: you are the strongest person in the world, and the world must be handled with care."
+    },
+    "2": {
+      "exp": "Preparation, gear and strategy: you win because you planned, not because you are stronger."
     }
   },
   "guia": {
@@ -71,6 +74,9 @@
     },
     "tecido_tatico": {
       "desc": "Tough fabric with a kevlar weave. The base of every hero suit."
+    },
+    "cinto_batman": {
+      "desc": "Right-click to put on Batman's suit and carry his gadgets. Press H to turn back to normal."
     }
   }
 }

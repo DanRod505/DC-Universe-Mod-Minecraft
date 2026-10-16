@@ -28,14 +28,22 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 8;
+    private static final int VERSAO = 9;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
         .simpleChannel();
 
-    /** Uma habilidade como o cliente precisa ver: menu radial e HUD. */
-    public record HabInfo(String id, boolean hold, boolean suprema, float custo, int restante, int recargaTotal) {}
+    /**
+     * Uma habilidade como o cliente precisa ver: menu radial e HUD. Gadgets com munição mandam as cargas
+     * (cargas = -1 sem munição), o máximo e quantos ticks faltam para a próxima de um total de cargaTotal.
+     */
+    public record HabInfo(String id, boolean hold, boolean suprema, float custo, int restante, int recargaTotal,
+                          int cargas, int cargasMax, int cargaFalta, int cargaTotal) {
+        public HabInfo(String id, boolean hold, boolean suprema, float custo, int restante, int recargaTotal) {
+            this(id, hold, suprema, custo, restante, recargaTotal, -1, 0, 0, 0);
+        }
+    }
 
     /**
      * Estado do próprio jogador. amortecendo vale também fora da transformação (queda amortecida depois de
@@ -44,12 +52,12 @@ public final class Rede {
      */
     public record Sync(String personagem, float energia, float max, boolean esgotado, int selecionada,
                        String canalizando, List<HabInfo> habilidades, float planar, boolean amortecendo,
-                       float recarga, boolean solar, boolean sol, float voo, float arrancada) {
-        public static final Sync VAZIO = new Sync("", 0, 0, false, 0, "", List.of(), 0, false, 0, false, false, 0, 0);
+                       float recarga, boolean solar, boolean sol, float voo, float arrancada, boolean tecnologica, boolean estacao) {
+        public static final Sync VAZIO = new Sync("", 0, 0, false, 0, "", List.of(), 0, false, 0, false, false, 0, 0, false, false);
 
-        /** A habilidade pode ser usada agora: sem recarga pendente e com energia para o custo. */
+        /** A habilidade pode ser usada agora: sem recarga pendente, com energia para o custo e munição. */
         public boolean pronta(HabInfo h) {
-            return h.restante() <= 0 && !esgotado && energia >= h.custo();
+            return h.restante() <= 0 && !esgotado && energia >= h.custo() && h.cargas() != 0;
         }
 
         public static void encode(Sync m, FriendlyByteBuf b) {
@@ -67,6 +75,10 @@ public final class Rede {
                 b.writeFloat(h.custo);
                 b.writeVarInt(h.restante);
                 b.writeVarInt(h.recargaTotal);
+                b.writeVarInt(h.cargas + 1);
+                b.writeVarInt(h.cargasMax);
+                b.writeVarInt(h.cargaFalta);
+                b.writeVarInt(h.cargaTotal);
             }
             b.writeFloat(m.planar);
             b.writeBoolean(m.amortecendo);
@@ -75,6 +87,8 @@ public final class Rede {
             b.writeBoolean(m.sol);
             b.writeFloat(m.voo);
             b.writeFloat(m.arrancada);
+            b.writeBoolean(m.tecnologica);
+            b.writeBoolean(m.estacao);
         }
 
         public static Sync decode(FriendlyByteBuf b) {
@@ -86,10 +100,11 @@ public final class Rede {
             int n = b.readVarInt();
             List<HabInfo> habs = new ArrayList<>(n);
             for (int i = 0; i < n; i++) {
-                habs.add(new HabInfo(b.readUtf(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readVarInt(), b.readVarInt()));
+                habs.add(new HabInfo(b.readUtf(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readVarInt(), b.readVarInt(),
+                    b.readVarInt() - 1, b.readVarInt(), b.readVarInt(), b.readVarInt()));
             }
             return new Sync(p, e, max, esg, sel, can, List.copyOf(habs), b.readFloat(), b.readBoolean(),
-                b.readFloat(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readFloat());
+                b.readFloat(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readFloat(), b.readBoolean(), b.readBoolean());
         }
     }
 
@@ -183,6 +198,32 @@ public final class Rede {
         }
     }
 
+    /**
+     * Cabo do gancho de um jogador (dono = id da entidade): modo (ability/active/Gancho: 0 solto, 1 bloco,
+     * 2 entidade, 3 puxando mob, 4 errou), ponto de ancoragem, entidade presa (-1 = nenhuma) e velocidade da puxada.
+     */
+    public record GanchoVisto(int dono, int modo, double x, double y, double z, int alvo, float vel) {
+        public static void encode(GanchoVisto m, FriendlyByteBuf b) {
+            b.writeVarInt(m.dono);
+            b.writeVarInt(m.modo);
+            b.writeDouble(m.x);
+            b.writeDouble(m.y);
+            b.writeDouble(m.z);
+            b.writeVarInt(m.alvo + 1);
+            b.writeFloat(m.vel);
+        }
+
+        public static GanchoVisto decode(FriendlyByteBuf b) {
+            return new GanchoVisto(b.readVarInt(), b.readVarInt(), b.readDouble(), b.readDouble(), b.readDouble(), b.readVarInt() - 1, b.readFloat());
+        }
+    }
+
+    /** O dono do gancho chegou ao ponto ou soltou o cabo. */
+    public record GanchoFim() {}
+
+    /** Comando do piloto do veículo (content/BatwingEntidade: metralhadora, míssil, furtivo). */
+    public record Veiculo(int acao) {}
+
     /** O cliente soltou um super-salto carregado (força de 0 a 1); o servidor confere e mostra para todos. */
     public record Salto(float forca) {}
 
@@ -245,6 +286,24 @@ public final class Rede {
             .encoder(Efeito::encode).decoder(Efeito::decode)
             .consumerMainThread((m, ctx) -> EstadoCliente.EFEITOS.add(m))
             .add();
+        CANAL.messageBuilder(GanchoVisto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(GanchoVisto::encode).decoder(GanchoVisto::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.GANCHOS.add(m))
+            .add();
+        CANAL.messageBuilder(GanchoFim.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> {}).decoder(b -> new GanchoFim())
+            .consumerMainThread((m, ctx) -> comJogador(ctx, com.danrod.dcuniverse.ability.active.Gancho::soltar))
+            .add();
+        CANAL.messageBuilder(Veiculo.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.acao())).decoder(b -> new Veiculo(b.readVarInt()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> {
+                var bw = com.danrod.dcuniverse.content.BatwingEntidade.pilotando(p);
+                if (bw != null) bw.comando(p, m.acao());
+            }))
+            .add();
         CANAL.messageBuilder(Salto.class)
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> b.writeFloat(m.forca())).decoder(b -> new Salto(b.readFloat()))
@@ -256,6 +315,12 @@ public final class Rede {
     public static void efeito(ServerLevel level, double x, double y, double z, String tipo, float a, float b, int cor) {
         CANAL.send(new Efeito(tipo, x, y, z, a, b, cor),
             PacketDistributor.NEAR.with(new PacketDistributor.TargetPoint(x, y, z, 96 * 96, level.dimension())));
+    }
+
+    /** Cabo do gancho do jogador, para ele e para quem está vendo. */
+    public static void gancho(ServerPlayer player, int modo, net.minecraft.world.phys.Vec3 ancora, int alvo, float vel) {
+        if (player.connection == null) return;
+        CANAL.send(new GanchoVisto(player.getId(), modo, ancora.x, ancora.y, ancora.z, alvo, vel), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(player));
     }
 
     /** Mostra um efeito só para um jogador (ex.: raio X, que só quem usa enxerga). */
@@ -317,12 +382,16 @@ public final class Rede {
     public static Sync montar(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return e.amortecendo() ? new Sync("", 0, 0, false, 0, "", List.of(), 0, true, 0, false, false, 0, 0) : Sync.VAZIO;
+        if (p == null) return e.amortecendo() ? new Sync("", 0, 0, false, 0, "", List.of(), 0, true, 0, false, false, 0, 0, false, false) : Sync.VAZIO;
         long agora = player.level().getGameTime();
         List<HabInfo> habs = new ArrayList<>();
         for (Personagem.Habilidade h : p.habilidades()) {
             int restante = (int) Math.max(0, e.prontaEm(h.id()) - agora);
-            habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD, h.suprema(), h.custo(), restante, Math.round(h.recargaSeg() * 20)));
+            int max = com.danrod.dcuniverse.ability.Cargas.max(h);
+            habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD, h.suprema(), player.isCreative() ? 0 : h.custo(), restante,
+                Math.round(h.recargaSeg() * 20), max == 0 ? -1 : player.isCreative() ? max : com.danrod.dcuniverse.ability.Cargas.atuais(player, h), max,
+                max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.faltam(player, h),
+                max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.ticksPorCarga(player, p, h)));
         }
         int selecionada = e.selecionada();
         if (DemoHud.ativa(player)) {
@@ -333,7 +402,8 @@ public final class Rede {
         return new Sync(p.id().toString(), e.energia(), p.energia().max(), e.esgotado(), selecionada,
             e.canalizando(), List.copyOf(habs), planar == null ? 0f : planar.params().f("speed", 10f), e.amortecendo(),
             Recargas.porSegundo(player, p), solar, solar && Recargas.sobOSol(player), Voo.velocidade(p),
-            p.passiva("flight") == null ? 0f : p.passiva("flight").params().f("dash_cost", 15f));
+            p.passiva("flight") == null ? 0f : p.passiva("flight").params().f("dash_cost", 15f),
+            Recargas.tecnologica(p), Recargas.tecnologica(p) && Recargas.naEstacao(player, p));
     }
 
     public static void catalogo(ServerPlayer player) {

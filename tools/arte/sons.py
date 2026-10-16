@@ -11,6 +11,22 @@ Gera em src/main/resources/assets/dcuniverse/sounds/habilidade/ (mono, para o so
 - salto_carga.ogg       carga do super-salto: vento subindo
 - salto.ogg             impulso do super-salto: pancada e o ar passando
 - ricochete.ogg         projétil batendo no aço e ricocheteando
+Batman (v0.2):
+- gancho_disparo.ogg    disparo pneumático do gancho e o cabo correndo
+- gancho_puxa.ogg       guincho do cabo puxando
+- gancho_impulso.ogg    o cabo solta e o impulso joga para o alto (pano da capa batendo)
+- batarangue_arremesso.ogg  lâmina cortando o ar ao sair da mão
+- batarangue_giro.ogg   zunido curto da lâmina girando (toca a cada 1/4 s enquanto voa)
+- batarangue_acerta.ogg lâmina batendo
+- batarangue_pega.ogg   o batarangue volta e encaixa na luva
+- choque.ogg            descarga elétrica estalando
+- batwing_chega.ogg     o jato passando e freando
+- batwing_motor.ogg     turbina do jato (laço sem emenda; o tom sobe com a velocidade)
+- batwing_tiro.ogg      rajada curta das metralhadoras
+- batwing_missil.ogg    míssil saindo do trilho e acendendo
+- batwing_furtivo.ogg   camuflagem ligando: zumbido que some
+- batwing_revela.ogg    camuflagem desligando
+- batwing_superaquece.ogg  metralhadoras superaquecidas: chiado e alarme
 
 Uso: python3 tools/arte/sons.py --raiz .  (precisa de numpy, scipy e ffmpeg)
 """
@@ -256,10 +272,183 @@ def ricochete():
     return finalizar(normalizar(eco(x, 0.6, 0.2)[: int(seg * SR)], 0.8), 0.1)
 
 
+# ---------------------------------------------------------------- Batman (v0.2)
+
+def gancho_disparo():
+    seg = 0.9
+    tiro = filtro(ruido(0.06), "bandpass", [300, 3000]) * env(int(0.06 * SR), 0.001, 0.015)
+    baque = varredura(180, 60, 0.15, 0.5) * env(int(0.15 * SR), 0.001, 0.03)
+    t = t_(0.7)
+    cabo = filtro(ruido(0.7), "bandpass", [1800, 5200]) * env(len(t), 0.01, 0.25) * (0.6 + 0.4 * np.sin(2 * np.pi * 38 * t))
+    mola = np.sin(2 * np.pi * 820 * t) * np.exp(-t / 0.08) * 0.3
+    x = misturar((0, tiro * 1.2), (0, baque * 0.8), (0.02, cabo * 0.5), (0.0, mola))
+    return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.9), 0.15)
+
+
+def gancho_puxa():
+    seg = 0.5
+    t = t_(seg)
+    guincho = np.sign(np.sin(2 * np.pi * 95 * t)) * 0.3 + np.sin(2 * np.pi * 190 * t) * 0.4
+    guincho = filtro(guincho, "lowpass", 1500) * (0.7 + 0.3 * np.sin(2 * np.pi * 12 * t))
+    roca = filtro(ruido(seg), "bandpass", [2000, 6000]) * 0.25
+    x = (guincho + roca) * env(len(t), 0.03, 0.3)
+    return finalizar(normalizar(x, 0.7), 0.1)
+
+
+def gancho_impulso():
+    seg = 1.0
+    solta = filtro(ruido(0.02), "highpass", 1500) * 1.5
+    t = t_(0.9)
+    ar = filtro(ruido(0.9), "bandpass", [300, 2400]) * env(len(t), 0.04, 0.3)
+    capa = filtro(ruido(0.9), "bandpass", [150, 900]) * np.abs(np.sin(2 * np.pi * 9 * t)) ** 3 * np.exp(-t / 0.35)
+    x = misturar((0, solta), (0.01, ar * 0.8), (0.05, capa * 0.9))
+    return finalizar(normalizar(eco(x, 0.5, 0.12)[: int(seg * SR)], 0.85), 0.2)
+
+
+def batarangue_arremesso():
+    seg = 0.55
+    t = t_(seg)
+    sopro = filtro(ruido(seg), "bandpass", [700, 4500]) * env(len(t), 0.02, 0.12)
+    lamina = varredura(3200, 1900, seg, 0.7) * env(len(t), 0.01, 0.08) * 0.25
+    x = sopro + lamina
+    return finalizar(normalizar(x, 0.8), 0.1)
+
+
+def batarangue_giro():
+    seg = 0.3
+    t = t_(seg)
+    pulso = np.abs(np.sin(2 * np.pi * 26 * t)) ** 4
+    x = filtro(ruido(seg), "bandpass", [900, 3600]) * pulso * np.sin(np.pi * t / seg)
+    return finalizar(normalizar(x, 0.7), 0.03)
+
+
+def batarangue_acerta():
+    seg = 0.5
+    batida = filtro(ruido(0.015), "bandpass", [800, 6000]) * 1.4
+    tink = sum(g * np.sin(2 * np.pi * f * t_(0.4)) * np.exp(-t_(0.4) / q)
+               for f, g, q in ((1650, 1, 0.07), (3900, 0.5, 0.04), (6100, 0.3, 0.03)))
+    soco = varredura(160, 70, 0.12, 0.5) * env(int(0.12 * SR), 0.001, 0.03)
+    x = misturar((0, batida), (0, tink * 0.5), (0, soco * 0.8))
+    return finalizar(normalizar(eco(x, 0.4, 0.15)[: int(seg * SR)], 0.85), 0.1)
+
+
+def batarangue_pega():
+    seg = 0.4
+    t = t_(0.3)
+    couro = filtro(ruido(0.3), "lowpass", 1200) * env(len(t), 0.001, 0.02)
+    clique = np.sin(2 * np.pi * 2900 * t) * np.exp(-t / 0.02) * 0.4
+    x = misturar((0, couro), (0.008, clique))
+    return finalizar(normalizar(x, 0.8), 0.1)
+
+
+def choque():
+    seg = 0.8
+    t = t_(seg)
+    estalos = np.zeros_like(t)
+    for _ in range(40):
+        i = int(RNG.random() ** 1.6 * len(t) * 0.8)
+        n = int(0.004 * SR)
+        estalos[i:i + n] += RNG.standard_normal(n) * np.exp(-np.arange(n) / (0.001 * SR)) * (1 - i / len(t))
+    zumbido = (np.sign(np.sin(2 * np.pi * 120 * t)) * 0.3 + np.sin(2 * np.pi * 240 * t) * 0.3) * env(len(t), 0.005, 0.18)
+    chiado = filtro(ruido(seg), "highpass", 3000) * env(len(t), 0.005, 0.15) * 0.4
+    x = filtro(estalos, "highpass", 600) + filtro(zumbido, "lowpass", 2500) + chiado
+    return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.85), 0.1)
+
+
+def turbina(t, base, rug=1.0):
+    """Jato: chiado de ar filtrado, o assobio da turbina e o ronco grave."""
+    ar = filtro(ruido(len(t) / SR), "bandpass", [500, 5000]) * 0.5
+    assobio = sum(g * np.sin(2 * np.pi * base * m * t) for m, g in ((1, 0.18), (1.5, 0.08), (2.02, 0.06)))
+    ronco = filtro(ruido(len(t) / SR), "lowpass", 160) * 1.6 * rug
+    return ar + assobio + ronco
+
+
+def batwing_chega():
+    seg = 3.2
+    t = t_(seg)
+    # Passagem: aproxima, passa forte (Doppler) e freia pairando.
+    perto = np.exp(-((t - 1.1) / 0.55) ** 2)
+    base = 1900 - 900 * np.clip((t - 0.9) / 0.6, 0, 1)
+    fase = np.cumsum(base) / SR
+    assobio = np.sin(2 * np.pi * fase) * 0.2 + np.sin(2 * np.pi * fase * 1.5) * 0.08
+    ar = filtro(ruido(seg), "bandpass", [400, 6000]) * 0.6
+    ronco = filtro(ruido(seg), "lowpass", 140) * 2.0
+    volume = 0.25 + 0.75 * perto + 0.3 * np.clip((t - 1.6) / 0.5, 0, 1) * np.exp(-np.maximum(t - 2.2, 0) / 0.6)
+    freio = filtro(ruido(seg), "bandpass", [200, 1200]) * np.exp(-((t - 1.8) / 0.35) ** 2) * 0.8
+    x = (assobio + ar + ronco) * volume + freio
+    x *= np.clip(t / 0.4, 0, 1)
+    return finalizar(normalizar(eco(x, 1.2, 0.2)[: int(seg * SR)], 0.9), 0.4)
+
+
+def batwing_motor():
+    seg = 3.25
+    t = t_(seg)
+    x = turbina(t, 1450) * (0.9 + 0.1 * np.sin(2 * np.pi * 0.5 * t))
+    return normalizar(laco(x, 0.25), 0.75)
+
+
+def batwing_tiro():
+    seg = 0.3
+    out = np.zeros(int(seg * SR))
+    for k in range(2):
+        i = int(k * 0.1 * SR)
+        n = int(0.09 * SR)
+        tt = np.arange(n) / SR
+        estouro = filtro(RNG.standard_normal(n), "bandpass", [200, 4000]) * np.exp(-tt / 0.012)
+        soco = np.sin(2 * np.pi * (140 - 400 * tt) * tt) * np.exp(-tt / 0.02)
+        out[i:i + n] += estouro * 1.2 + soco
+    return finalizar(normalizar(eco(out, 0.4, 0.2)[: len(out)], 0.9), 0.05)
+
+
+def batwing_missil():
+    seg = 1.6
+    trava = filtro(ruido(0.03), "bandpass", [500, 3000]) * 1.2
+    t = t_(1.5)
+    queima = filtro(ruido(1.5), "bandpass", [150, 3500]) * env(len(t), 0.06, 0.6)
+    assobio = varredura(600, 1400, 1.5, 0.5) * env(len(t), 0.1, 0.5) * 0.15
+    x = misturar((0, trava), (0.05, queima), (0.1, assobio))
+    return finalizar(normalizar(eco(x, 0.8, 0.2)[: int(seg * SR)], 0.9), 0.3)
+
+
+def batwing_furtivo():
+    seg = 1.4
+    t = t_(seg)
+    zum = np.sin(2 * np.pi * np.cumsum(420 - 300 * t / seg) / SR) * 0.4
+    brilho = np.sin(2 * np.pi * np.cumsum(1700 - 1200 * t / seg) / SR) * 0.15
+    ar = filtro(ruido(seg), "bandpass", [1500, 6000]) * 0.15
+    x = (zum + brilho + ar) * env(len(t), 0.05, 0.45)
+    return finalizar(normalizar(eco(x, 1.0, 0.3)[: int(seg * SR)], 0.8), 0.2)
+
+
+def batwing_revela():
+    seg = 1.0
+    t = t_(seg)
+    zum = np.sin(2 * np.pi * np.cumsum(140 + 380 * t / seg) / SR) * 0.4
+    brilho = np.sin(2 * np.pi * np.cumsum(600 + 1300 * t / seg) / SR) * 0.15
+    x = (zum + brilho) * np.clip(t / 0.6, 0, 1) * np.exp(-np.maximum(t - 0.6, 0) / 0.1)
+    return finalizar(normalizar(eco(x, 0.6, 0.25)[: int(seg * SR)], 0.8), 0.1)
+
+
+def batwing_superaquece():
+    seg = 1.4
+    t = t_(seg)
+    chiado = filtro(ruido(seg), "highpass", 2500) * env(len(t), 0.01, 0.5) * 0.5
+    alarme = np.sin(2 * np.pi * 980 * t) * (np.sin(2 * np.pi * 5 * t) > 0) * np.clip(1 - t / seg, 0, 1) * 0.35
+    metal = sum(g * np.sin(2 * np.pi * f * t) * np.exp(-t / q) for f, g, q in ((310, 0.4, 0.4), (743, 0.25, 0.25)))
+    x = chiado + alarme + metal
+    return finalizar(normalizar(eco(x, 0.6, 0.15)[: int(seg * SR)], 0.85), 0.2)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
     "salto": salto, "ricochete": ricochete,
+    "gancho_disparo": gancho_disparo, "gancho_puxa": gancho_puxa, "gancho_impulso": gancho_impulso,
+    "batarangue_arremesso": batarangue_arremesso, "batarangue_giro": batarangue_giro,
+    "batarangue_acerta": batarangue_acerta, "batarangue_pega": batarangue_pega, "choque": choque,
+    "batwing_chega": batwing_chega, "batwing_motor": batwing_motor, "batwing_tiro": batwing_tiro,
+    "batwing_missil": batwing_missil, "batwing_furtivo": batwing_furtivo, "batwing_revela": batwing_revela,
+    "batwing_superaquece": batwing_superaquece,
 }
 
 
