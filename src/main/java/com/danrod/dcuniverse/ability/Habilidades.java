@@ -16,7 +16,7 @@ public final class Habilidades {
     public static void selecionar(ServerPlayer player, int indice) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null || indice < 0 || indice >= p.habilidades().size()) return;
+        if (p == null || indice < 0 || indice >= com.danrod.dcuniverse.character.Cinto.equipadas(player, p).size()) return;
         boolean canalizava = !e.canalizando().isEmpty();
         e.setCanalizando("");
         e.setSelecionada(indice);
@@ -39,8 +39,9 @@ public final class Habilidades {
             parar(player, e);
             return;
         }
-        if (e.destransformarEm() != 0L || p.habilidades().isEmpty()) return;
-        Personagem.Habilidade h = p.habilidades().get(Math.min(e.selecionada(), p.habilidades().size() - 1));
+        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(player, p);
+        if (e.destransformarEm() != 0L || habs.isEmpty()) return;
+        Personagem.Habilidade h = habs.get(Math.min(e.selecionada(), habs.size() - 1));
         if (h.modo() == Personagem.Modo.HOLD) {
             if (e.prontaEm(h.id()) > player.level().getGameTime()) return;
             if (e.esgotado() && !player.isCreative()) {

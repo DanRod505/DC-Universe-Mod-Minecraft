@@ -22,7 +22,8 @@ public record Personagem(
     List<Tipo> passivas,
     List<Habilidade> habilidades,
     int cor,
-    float escala
+    float escala,
+    Cinto.Config cinto
 ) {
     /** Números da ficha, nas unidades de docs/BALANCEAMENTO.md (vida e dano em corações, velocidade em blocos/s). */
     public record Ficha(double vida, double armadura, double dano, double terra) {}
@@ -43,7 +44,9 @@ public record Personagem(
     /** Limites da suprema (docs/BALANCEAMENTO.md): custo em % da energia máxima e recarga em segundos. */
     public static final int SUPREMA_CUSTO_MIN = 60, SUPREMA_CUSTO_MAX = 80, SUPREMA_RECARGA_MIN = 60, SUPREMA_RECARGA_MAX = 180;
 
+    /** A suprema padrão (com cinto e vários veículos, a escolhida por jogador está em {@link Cinto#suprema}). */
     public Habilidade suprema() {
+        if (cinto != null && !cinto.veiculo().isEmpty() && habilidade(cinto.veiculo()) != null) return habilidade(cinto.veiculo());
         for (Habilidade h : habilidades) {
             if (h.suprema()) return h;
         }
@@ -81,6 +84,7 @@ public record Personagem(
             traje.add(EquipmentSlot.byName(s.getAsString()));
         }
 
+        Cinto.Config cinto = j.has("belt") ? Cinto.Config.parse(j.getAsJsonObject("belt")) : null;
         List<Habilidade> habs = new ArrayList<>();
         JsonArray arr = j.getAsJsonArray("abilities");
         if (arr != null) {
@@ -104,13 +108,23 @@ public record Personagem(
                         throw new IllegalArgumentException("suprema " + hid + " com recarga " + recarga + " s, fora de 60-180 s");
                     }
                     if (modo != Modo.INSTANT) throw new IllegalArgumentException("suprema " + hid + " não pode ser canalizada");
-                    if (habs.stream().anyMatch(Habilidade::suprema)) throw new IllegalArgumentException("mais de uma suprema");
+                    // Mais de uma só com cinto: aí o jogador escolhe qual leva (os veículos do Batman).
+                    if (cinto == null && habs.stream().anyMatch(Habilidade::suprema)) throw new IllegalArgumentException("mais de uma suprema");
                     custo = energia.max() * pct / 100f;
                 } else {
                     custo = h.get("cost").getAsFloat();
                 }
                 habs.add(new Habilidade(hid, tipo, modo, custo, recarga, suprema, new Params(h)));
             }
+        }
+
+        if (cinto != null) {
+            for (String g : cinto.padrao()) {
+                if (habs.stream().noneMatch(h -> h.id().equals(g) && h.params().b("gadget", false))) {
+                    throw new IllegalArgumentException("cinto: " + g + " não é um gadget do personagem");
+                }
+            }
+            if (cinto.padrao().size() > cinto.slots()) throw new IllegalArgumentException("cinto: mais gadgets padrão que espaços");
         }
 
         List<Tipo> passivas = tipos(j.getAsJsonArray("passives"));
@@ -125,7 +139,7 @@ public record Personagem(
             }
         }
         return new Personagem(id, j.get("level").getAsInt(), ficha, energia, List.copyOf(traje), passivas, List.copyOf(habs),
-            new Params(j).color("color", 0xFFFFFF), j.has("scale") ? j.get("scale").getAsFloat() : 1f);
+            new Params(j).color("color", 0xFFFFFF), j.has("scale") ? j.get("scale").getAsFloat() : 1f, cinto);
     }
 
     private static List<Tipo> tipos(JsonArray arr) {

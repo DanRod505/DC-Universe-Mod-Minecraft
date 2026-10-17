@@ -59,6 +59,7 @@ public final class Cliente {
             e.registerEntityRenderer(Entidades.BATWING.get(), BatwingRenderer::new);
             e.registerEntityRenderer(Entidades.MISSIL.get(), MissilRenderer::new);
             e.registerEntityRenderer(Entidades.GEL.get(), com.danrod.dcuniverse.client.render.GelRenderer::new);
+            e.registerEntityRenderer(Entidades.REDE.get(), com.danrod.dcuniverse.client.render.RedeRenderer::new);
         });
         TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
         ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> {

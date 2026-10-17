@@ -12,8 +12,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 
 /**
- * throwable: arremessável que volta (batarangue). Parâmetros: variant (normal, explosive, electric), range
+ * throwable: arremessável que volta (batarangue). Parâmetros: variant (normal, explosive, electric, freeze, sonic), range
  * (blocos até começar a voltar), speed (blocos/tick), damage_mult, stun (s), ricochet (quantos mobs a mais),
+ * stun (no congelante: quanto tempo o alvo fica no gelo; no sônico: o atordoamento do pulso),
  * radius (raio da explosão) e guided (segue a mira do dono enquanto vai). Gadgets: com "ammo" gasta cargas.
  */
 public final class Arremesso implements TipoHabilidade {
@@ -23,6 +24,8 @@ public final class Arremesso implements TipoHabilidade {
         int variante = switch (prm.s("variant", "normal")) {
             case "explosive" -> BatarangueEntidade.EXPLOSIVO;
             case "electric" -> BatarangueEntidade.ELETRICO;
+            case "freeze" -> BatarangueEntidade.CONGELANTE;
+            case "sonic" -> BatarangueEntidade.SONICO;
             default -> BatarangueEntidade.NORMAL;
         };
         BatarangueEntidade b = new BatarangueEntidade(player, variante, Alvos.dano(p, prm.d("damage_mult", 1.0)),

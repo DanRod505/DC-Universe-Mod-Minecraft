@@ -68,6 +68,9 @@ public final class Testes {
         FUNCOES.register("explosive_gel", () -> Testes::gel);
         FUNCOES.register("counter", () -> Testes::contraAtaque);
         FUNCOES.register("batch_items", () -> Testes::loteItens);
+        FUNCOES.register("utility_belt", () -> Testes::cinto);
+        FUNCOES.register("new_gadgets", () -> Testes::gadgetsNovos);
+        FUNCOES.register("freeze_sonic", () -> Testes::batarangues);
     }
 
     private Testes() {}
@@ -571,6 +574,142 @@ public final class Testes {
         com.danrod.dcuniverse.ability.active.Gancho.limpar();
         h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.BatarangueEntidade.class, p.getBoundingBox().inflate(64)).forEach(x -> x.discard());
         h.succeed();
+    }
+
+    /** Vira o jogador de teste para o ponto (lookAt manda pacote, e o jogador de teste não tem conexão). */
+    private static void mirar(ServerPlayer p, net.minecraft.world.phys.Vec3 alvo) {
+        net.minecraft.world.phys.Vec3 d = alvo.subtract(p.getEyePosition());
+        p.setYRot((float) (Math.atan2(-d.x, d.z) * 180 / Math.PI));
+        p.setXRot((float) (-Math.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)) * 180 / Math.PI));
+        p.setYHeadRot(p.getYRot());
+    }
+
+    private static List<String> ids(List<Personagem.Habilidade> habs) {
+        return habs.stream().map(Personagem.Habilidade::id).toList();
+    }
+
+    /**
+     * Cinto: só os gadgets dos espaços vão para o menu (e para o HUD); trocar no Batcomputador troca de lugar, tira e
+     * mantém a habilidade escolhida; a escolha sobrevive à destransformação; só o que está no cinto é fabricado.
+     */
+    static void cinto(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        h.assertTrue(Transformacao.transformar(p, BATMAN, true), "transformar no Batman");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        var pos = h.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1));
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.gadgets(bat).size(), 9, "9 gadgets no arsenal");
+        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), List.of("gancho", "modo_detetive", "batarangue",
+            "batarangue_explosivo", "batarangue_eletrico", "bomba_fumaca", "gel_explosivo", "batwing"), "cinto padrão");
+        h.assertValueEqual(Rede.montar(p).habilidades().stream().map(Rede.HabInfo::id).toList(),
+            ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), "o HUD recebe só o que está equipado");
+        // Escolhe a fumaça e troca o espaço 1: a escolha continua na fumaça.
+        Habilidades.selecionar(p, 5);
+        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 0, "lancador_rede");
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(0), "lancador_rede", "rede no espaço 1");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "batarangue"), "batarangue foi para o Batcomputador");
+        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(p, bat);
+        h.assertValueEqual(habs.get(e.selecionada()).id(), "bomba_fumaca", "continua escolhida a fumaça");
+        h.assertTrue(Guia.concluida(p, "cinto"), "tarefa do cinto");
+        // Pôr a rede no espaço 2 troca os dois de lugar; "" esvazia; o que não é gadget não entra.
+        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "lancador_rede");
+        var slots = com.danrod.dcuniverse.character.Cinto.slots(p, bat);
+        h.assertValueEqual(slots.subList(0, 2), List.of("batarangue_explosivo", "lancador_rede"), "trocaram de lugar");
+        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "");
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat).size(), 7, "espaço vazio sai do menu");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 1, "batwing"), "a suprema não vai no cinto");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 1, "gancho"), "o gancho é fixo");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 9, "disruptor"), "espaço que não existe");
+        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "disruptor");
+        // Sobrevive à destransformação.
+        Transformacao.destransformar(p);
+        Transformacao.transformar(p, BATMAN, true);
+        bat = EstadoJogador.de(p).personagem();
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(1), "disruptor", "cinto guardado");
+        // Só o que está no cinto é fabricado.
+        e = EstadoJogador.de(p);
+        e.setCargas("batarangue", 0);
+        e.setCargas("disruptor", 0);
+        com.danrod.dcuniverse.ability.Cargas.tick(p, bat);
+        h.assertValueEqual(e.proximaCarga("batarangue"), 0L, "fora do cinto não fabrica");
+        h.assertTrue(e.proximaCarga("disruptor") > 0, "no cinto fabrica");
+        com.danrod.dcuniverse.character.Cinto.resetar(p);
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(0), "batarangue", "resetar volta ao padrão");
+        h.succeed();
+    }
+
+    /**
+     * Gadgets novos: o disruptor desarma o esqueleto e tira o pavio do creeper na hora; a rede prende o mob em teias
+     * (que somem sem deixar linha); o congelante e o sônico ficam em Testes#batarangues.
+     */
+    static void gadgetsNovos(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        p.setYRot(0);
+        p.setXRot(0);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        // Disruptor no esqueleto: o arco queima.
+        var esq = h.spawn(net.minecraft.world.entity.EntityTypes.SKELETON, new net.minecraft.core.BlockPos(1, 1, 6));
+        esq.setNoAi(true);
+        esq.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+        mirar(p, esq.getBoundingBox().getCenter());
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("disruptor")), "disruptor dispara");
+        h.assertTrue(esq.getMainHandItem().isEmpty(), "esqueleto desarmado");
+        esq.discard();
+        // Disruptor no creeper: sem pavio.
+        var creeper = h.spawn(net.minecraft.world.entity.EntityTypes.CREEPER, new net.minecraft.core.BlockPos(1, 1, 6));
+        creeper.setNoAi(true);
+        mirar(p, creeper.getBoundingBox().getCenter());
+        e.setProntaEm("disruptor", 0);
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("disruptor")), "disruptor no creeper");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Disruptor.semPavio(creeper), "creeper sem pavio");
+        creeper.discard();
+        e.setProntaEm("disruptor", 0);
+        h.assertFalse(Habilidades.executar(p, bat, bat.habilidade("disruptor")), "sem alvo não gasta");
+        // Rede no vindicador parado.
+        var alvo = h.spawn(net.minecraft.world.entity.EntityTypes.VINDICATOR, new net.minecraft.core.BlockPos(1, 1, 5));
+        alvo.setNoAi(true);
+        mirar(p, alvo.getBoundingBox().getCenter());
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("lancador_rede")), "lança a rede");
+        h.succeedWhen(() -> {
+            var pe = alvo.blockPosition();
+            h.assertTrue(h.getLevel().getBlockState(pe).is(net.minecraft.world.level.block.Blocks.COBWEB), "mob preso na teia");
+            h.assertTrue(com.danrod.dcuniverse.content.Teias.temporaria(h.getLevel(), pe), "teia temporária");
+            com.danrod.dcuniverse.content.Teias.tirar(h.getLevel(), pe);
+            h.assertTrue(h.getLevel().getBlockState(pe).isAir(), "teia saiu sem deixar nada");
+            alvo.discard();
+        });
+    }
+
+    /** Congelante e sônico, separados para não cruzar com a rede. */
+    static void batarangues(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        var alvo = h.spawn(net.minecraft.world.entity.EntityTypes.VINDICATOR, new net.minecraft.core.BlockPos(1, 1, 5));
+        alvo.setNoAi(true);
+        mirar(p, alvo.getBoundingBox().getCenter());
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("batarangue_congelante")), "arremessa o congelante");
+        h.setBlock(1, 2, 9, net.minecraft.world.level.block.Blocks.GLASS);
+        boolean[] sonico = {false};
+        h.succeedWhen(() -> {
+            if (!sonico[0]) {
+                h.assertTrue(com.danrod.dcuniverse.ability.Congelamento.congelado(alvo), "mob no gelo");
+                sonico[0] = true;
+                alvo.discard();
+                mirar(p, h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2.5, 9.5)));
+                h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("batarangue_sonico")), "arremessa o sônico");
+            }
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.AIR, 1, 2, 9);
+        });
     }
 
     /** Gancho: crava no bloco mirado e solta ao usar de novo; o batarangue sai voando. */

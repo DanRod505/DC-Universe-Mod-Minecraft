@@ -7,7 +7,8 @@ Saídas (src/main/resources/assets/dcuniverse/textures/entity/):
   u = (x + 3,6) / 7,2 e v = (2,45 - z) / 4,6 (x e z em blocos, nariz em +z); na faixa de baixo (y 92-128):
   derivas 0-40, metal dos bocais/armas 64-96, vidro 96-128, míssil 128-192, fundo dos bocais 192-224,
   luzes 224-256 (y 92-100) e chama 224-240 (y 100-124); painel da cabine em (40,0)-(56,8), orelhas em (56,0)-(64,8).
-- batarangue.png, batarangue_explosivo.png, batarangue_eletrico.png (32x32, vistos de cima; o alfa vira a
+- batarangue.png, batarangue_explosivo.png, batarangue_eletrico.png, batarangue_congelante.png,
+  batarangue_sonico.png (32x32, vistos de cima; o alfa vira a
   peça 3D) e os _brilho das variações.
 - cabo.png (16x16): trança do cabo do gancho (duas metades iguais, uma por fita).
 Uso: python3 tools/arte/batwing.py --raiz . [--previa arquivo.png]
@@ -242,7 +243,9 @@ def batarangue(variante):
     px = m.load()
     aco = {"normal": (hexa("#2E323C"), hexa("#9AA4B8"), hexa("#121318")),
            "explosivo": (hexa("#2E323C"), hexa("#9AA4B8"), hexa("#121318")),
-           "eletrico": (hexa("#24324E"), hexa("#8CC4F4"), hexa("#0E1424"))}[variante]
+           "eletrico": (hexa("#24324E"), hexa("#8CC4F4"), hexa("#0E1424")),
+           "congelante": (hexa("#35546E"), hexa("#DDF6FF"), hexa("#12263A")),
+           "sonico": (hexa("#302C44"), hexa("#BEB2EE"), hexa("#12101C"))}[variante]
     for y in range(w):
         for x in range(w):
             if not px[x, y]:
@@ -252,6 +255,8 @@ def batarangue(variante):
             c = aco[1] if borda else mistura(aco[0], aco[2], abs(x - 15.5) / 16)
             if borda and variante == "eletrico":
                 g.p(x, y, hexa("#6AB8FF"))
+            elif borda and variante == "congelante" and (x + y) % 3 == 0:
+                g.p(x, y, hexa("#A8ECFF"))
             if not borda and abs(x - 15.5) < 1 and y > 10:
                 c = aco[2]
             t.p(x, y, ruido(c, 2))
@@ -266,6 +271,18 @@ def batarangue(variante):
         # Bobina no centro e filetes azuis acesos na borda.
         ImageDraw.Draw(t.img).ellipse([12, 12, 19, 19], fill=hexa("#2A3448"))
         ImageDraw.Draw(g.img).ellipse([13, 13, 18, 18], outline=hexa("#9AD8FF"))
+    elif variante == "congelante":
+        # Cápsula de nitrogênio azul-gelo, acesa, com cristais de geada no corpo.
+        ImageDraw.Draw(t.img).ellipse([12, 12, 19, 19], fill=hexa("#2C4A66"))
+        ImageDraw.Draw(g.img).ellipse([13, 13, 18, 18], fill=hexa("#7FD8FF"))
+        g.p(14, 14, hexa("#E8FAFF"))
+        for xx, yy in ((7, 13), (24, 13), (10, 18), (21, 18), (15, 8)):
+            t.p(xx, yy, hexa("#E8FAFF"))
+    elif variante == "sonico":
+        # Emissor: alto-falante com anéis lilás acesos.
+        ImageDraw.Draw(t.img).ellipse([11, 11, 20, 20], fill=hexa("#24203A"))
+        ImageDraw.Draw(g.img).ellipse([11, 11, 20, 20], outline=hexa("#A894FF"))
+        ImageDraw.Draw(g.img).ellipse([14, 14, 17, 17], outline=hexa("#E2DCFF"))
     return t, g
 
 
@@ -294,7 +311,8 @@ def main():
     t.salvar(pasta / "batwing.png")
     g.salvar(pasta / "batwing_brilho.png")
     folhas = [t, g]
-    for nome, var in (("batarangue", "normal"), ("batarangue_explosivo", "explosivo"), ("batarangue_eletrico", "eletrico")):
+    for nome, var in (("batarangue", "normal"), ("batarangue_explosivo", "explosivo"), ("batarangue_eletrico", "eletrico"),
+                     ("batarangue_congelante", "congelante"), ("batarangue_sonico", "sonico")):
         bt, bg = batarangue(var)
         bt.salvar(pasta / f"{nome}.png")
         if var != "normal":

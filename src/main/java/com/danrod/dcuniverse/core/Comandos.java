@@ -52,7 +52,7 @@ public final class Comandos {
                             ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
                             Personagem p = EstadoJogador.de(alvo).personagem();
                             String id = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "habilidade");
-                            int i = p == null ? -1 : p.habilidades().indexOf(p.habilidade(id));
+                            int i = p == null ? -1 : com.danrod.dcuniverse.character.Cinto.equipadas(alvo, p).indexOf(p.habilidade(id));
                             if (i < 0) return 0;
                             com.danrod.dcuniverse.ability.Habilidades.selecionar(alvo, i);
                             c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + ": " + id), false);

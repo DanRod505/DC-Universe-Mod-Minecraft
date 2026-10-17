@@ -97,6 +97,10 @@ public final class Mundo {
                 tiroInicio(level, e);
                 adicionar(e, agora);
             }
+            case "sonico" -> {
+                sonicoInicio(mc, level, e);
+                adicionar(e, agora);
+            }
             default -> {}
         }
     }
@@ -114,6 +118,7 @@ public final class Mundo {
             case "fortress" -> fortalezaTick(level, a, t);
             case "arco" -> t > 6;
             case "tiro" -> t > 2;
+            case "sonico" -> t > SONICO_TICKS + 8;
             case "smoke" -> Fumaca.tick(level, a.e, t);
             default -> true;
         };
@@ -252,6 +257,7 @@ public final class Mundo {
                 case "fortress" -> pilar(ps, col, cam, a.e, t);
                 case "arco" -> arco(ps, col, cam, a.e, t);
                 case "tiro" -> tiro(ps, col, cam, a.e, t);
+                case "sonico" -> sonico(ps, col, cam, a.e, t);
                 case "smoke" -> Fumaca.desenhar(ps, col, cam, a.e, t);
                 default -> {}
             }
@@ -397,6 +403,62 @@ public final class Mundo {
         });
     }
 
+    // ------------------------------------------------------------------ batarangue sônico
+
+    private static final int SONICO_TICKS = 12;
+
+    /** Estalo do pulso: um clarão violeta, poeira saltando do chão e um tremor curto em quem está perto. */
+    private static void sonicoInicio(Minecraft mc, ClientLevel level, Rede.Efeito e) {
+        RandomSource rnd = level.getRandom();
+        level.addParticle(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFC9B8FF), e.x(), e.y(), e.z(), 0, 0, 0);
+        for (int i = 0; i < 36; i++) {
+            double ang = i * Math.PI * 2 / 36, v = 0.35 + rnd.nextDouble() * 0.15;
+            level.addParticle(new DustParticleOptions(i % 2 == 0 ? 0xC9B8FF : 0xFFFFFF, 0.9f), e.x(), e.y(), e.z(),
+                Math.cos(ang) * v, (rnd.nextDouble() - 0.5) * 0.15, Math.sin(ang) * v);
+        }
+        if (mc.player != null) {
+            double d = mc.player.position().distanceTo(new Vec3(e.x(), e.y(), e.z()));
+            if (d < e.a() * 1.5) Voador.tremer(Math.round(8 * (float) (1 - d / (e.a() * 1.5))) + 2);
+        }
+    }
+
+    /**
+     * Ondas do pulso: três anéis cruzados (um deitado e dois em pé) que crescem até o raio e apagam, e uma segunda
+     * onda mais fraca logo atrás; luz aditiva lilás com miolo branco, como o som visto pelo visor.
+     */
+    private static void sonico(PoseStack ps, SubmitNodeCollector col, Vec3 cam, Rede.Efeito e, float t) {
+        Vec3 c = new Vec3(e.x(), e.y(), e.z()).subtract(cam);
+        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Matrix4f m = pose.pose();
+            for (int onda = 0; onda < 2; onda++) {
+                float u = (t - onda * 4) / SONICO_TICKS;
+                if (u <= 0 || u > 1) continue;
+                double r = e.a() * frente(u);
+                float alfa = (1 - u) * (onda == 0 ? 1f : 0.5f);
+                for (int k = 0; k < 3; k++) {
+                    anelSonico(m, buf, c, r, k, 0.5f, 0x8A6BFF, 0.35f * alfa);
+                    anelSonico(m, buf, c, r, k, 0.14f, 0xF2EEFF, 0.9f * alfa);
+                }
+            }
+        });
+    }
+
+    /** Anel de raio r em volta de c: plano 0 deitado, 1 e 2 em pé e cruzados. */
+    private static void anelSonico(Matrix4f m, VertexConsumer buf, Vec3 c, double r, int plano, float largura, int cor, float alfa) {
+        int n = 40;
+        Vec3 ant = null;
+        for (int i = 0; i <= n; i++) {
+            double a = i * Math.PI * 2 / n, x = Math.cos(a) * r, y = Math.sin(a) * r;
+            Vec3 p = switch (plano) {
+                case 0 -> c.add(x, 0, y);
+                case 1 -> c.add(x * 0.7071, y, x * 0.7071);
+                default -> c.add(x * 0.7071, y, -x * 0.7071);
+            };
+            if (ant != null) fita(m, buf, ant, p, largura, cor, alfa);
+            ant = p;
+        }
+    }
+
     /** Fita virada para a câmera entre dois pontos (relativos à câmera). */
     private static void fita(Matrix4f m, VertexConsumer buf, Vec3 a, Vec3 b, float largura, int cor, float alfa) {
         Vec3 dir = b.subtract(a);
@@ -404,9 +466,10 @@ public final class Mundo {
         if (lado.lengthSqr() < 1e-8) return;
         lado = lado.normalize().scale(largura / 2);
         float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, bl = (cor & 255) / 255f;
+        // Ordem dos vértices virada para a câmera: o pipeline do Luz descarta a face de trás.
         buf.addVertex(m, (float) (a.x - lado.x), (float) (a.y - lado.y), (float) (a.z - lado.z)).setColor(r, g, bl, alfa);
-        buf.addVertex(m, (float) (a.x + lado.x), (float) (a.y + lado.y), (float) (a.z + lado.z)).setColor(r, g, bl, alfa);
-        buf.addVertex(m, (float) (b.x + lado.x), (float) (b.y + lado.y), (float) (b.z + lado.z)).setColor(r, g, bl, alfa);
         buf.addVertex(m, (float) (b.x - lado.x), (float) (b.y - lado.y), (float) (b.z - lado.z)).setColor(r, g, bl, alfa);
+        buf.addVertex(m, (float) (b.x + lado.x), (float) (b.y + lado.y), (float) (b.z + lado.z)).setColor(r, g, bl, alfa);
+        buf.addVertex(m, (float) (a.x + lado.x), (float) (a.y + lado.y), (float) (a.z + lado.z)).setColor(r, g, bl, alfa);
     }
 }

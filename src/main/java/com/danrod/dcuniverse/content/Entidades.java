@@ -35,5 +35,10 @@ public final class Entidades {
             .noLootTable().sized(0.5f, 0.5f).clientTrackingRange(8).updateInterval(20)
             .build(TIPOS.key("gel")));
 
+    public static final RegistryObject<EntityType<RedeEntidade>> REDE = TIPOS.register("rede",
+        () -> EntityType.Builder.<RedeEntidade>of(RedeEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.6f, 0.4f).clientTrackingRange(6).updateInterval(1)
+            .build(TIPOS.key("rede")));
+
     private Entidades() {}
 }

@@ -23,10 +23,12 @@ import java.io.InputStream;
 /**
  * Batarangue voando: a figura de morcego da textura (32x32) vira uma peça de metal com espessura (as bordas de
  * cada pixel opaco viram paredes, como os itens do jogo), deitada e girando rápido. As variações têm textura
- * própria e uma camada que brilha (luz vermelha do explosivo, faíscas azuis do elétrico).
+ * própria e uma camada que brilha (luz vermelha do explosivo, faíscas azuis do elétrico,
+ * gelo do congelante, emissor do sônico).
  */
 public final class BatarangueRenderer extends EntityRenderer<BatarangueEntidade, BatarangueRenderer.Estado> {
-    private static final String[] NOMES = {"batarangue", "batarangue_explosivo", "batarangue_eletrico"};
+    private static final String[] NOMES = {"batarangue", "batarangue_explosivo", "batarangue_eletrico",
+        "batarangue_congelante", "batarangue_sonico"};
     private static final float TAM = 0.8f, ESP = 0.05f;
     private static Malha malha;
 
@@ -55,7 +57,7 @@ public final class BatarangueRenderer extends EntityRenderer<BatarangueEntidade,
     }
 
     private static Identifier tex(int v, String sufixo) {
-        return Identifier.fromNamespaceAndPath(DCUniverse.MODID, "textures/entity/" + NOMES[Math.max(0, Math.min(2, v))] + sufixo + ".png");
+        return Identifier.fromNamespaceAndPath(DCUniverse.MODID, "textures/entity/" + NOMES[Math.max(0, Math.min(NOMES.length - 1, v))] + sufixo + ".png");
     }
 
     @Override

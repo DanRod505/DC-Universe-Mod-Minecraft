@@ -45,11 +45,17 @@ import java.util.Set;
  * a mão como bumerangue, acertando quem estiver no caminho. Corta teias, cordas, folhas e trepadeiras sem
  * parar e aciona botões e alavancas à distância. Variações (campo variant):
  * - explosivo: explode no primeiro impacto (fere e empurra em volta, sem quebrar blocos) e não volta;
- * - elétrico: dá um choque que paralisa e salta para os mobs próximos.
+ * - elétrico: dá um choque que paralisa e salta para os mobs próximos;
+ * - congelante: prende o alvo num bloco de gelo, apaga o fogo e congela a água em volta do impacto (e a que ele
+ *   sobrevoa, como gelo que derrete sozinho);
+ * - sônico: no impacto (ou no fim do alcance) solta um pulso que atordoa e desorienta quem está em volta, espanta
+ *   morcegos e traças, estilhaça vidro perto e não volta.
  * A física roda só no servidor; o cliente interpola a posição e desenha o giro (client/BatarangueRenderer).
  */
 public class BatarangueEntidade extends Projectile {
-    public static final int NORMAL = 0, EXPLOSIVO = 1, ELETRICO = 2;
+    public static final int NORMAL = 0, EXPLOSIVO = 1, ELETRICO = 2, CONGELANTE = 3, SONICO = 4;
+    /** Raio (blocos) em que o pulso sônico estilhaça vidro, menor que o do atordoamento. */
+    private static final int VIDRO_RAIO = 3;
     private static final EntityDataAccessor<Integer> VARIANTE = SynchedEntityData.defineId(BatarangueEntidade.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> VOLTANDO = SynchedEntityData.defineId(BatarangueEntidade.class, EntityDataSerializers.BOOLEAN);
 
@@ -145,6 +151,13 @@ public class BatarangueEntidade extends Projectile {
                 level().addParticle(ParticleTypes.ELECTRIC_SPARK, getX(), getY(), getZ(), 0, 0, 0);
             } else if (variante() == EXPLOSIVO && tickCount % 2 == 0) {
                 level().addParticle(ParticleTypes.SMOKE, getX(), getY(), getZ(), 0, 0.01, 0);
+            } else if (variante() == CONGELANTE) {
+                if (random.nextInt(2) == 0) level().addParticle(ParticleTypes.SNOWFLAKE, getX(), getY(), getZ(), 0, -0.02, 0);
+                if (random.nextInt(3) == 0) {
+                    level().addParticle(new net.minecraft.core.particles.DustParticleOptions(0xBFF0FF, 0.7f), getX(), getY(), getZ(), 0, 0, 0);
+                }
+            } else if (variante() == SONICO && tickCount % 2 == 0) {
+                level().addParticle(new net.minecraft.core.particles.DustParticleOptions(0xC9B8FF, 0.6f), getX(), getY(), getZ(), 0, 0, 0);
             }
             return;
         }
@@ -158,8 +171,10 @@ public class BatarangueEntidade extends Projectile {
             voltar(dono);
             return;
         }
+        if (variante() == CONGELANTE) congelarAgua(BlockPos.containing(position()), 1);
         if (tickCount > ida) {
             if (variante() == EXPLOSIVO) explodir(position());
+            else if (variante() == SONICO) pulso(position());
             else comecarVolta();
             return;
         }
@@ -213,7 +228,15 @@ public class BatarangueEntidade extends Projectile {
             explodir(position());
             return;
         }
+        if (variante() == SONICO) {
+            pulso(position());
+            return;
+        }
         ferir(alvo, dano);
+        if (variante() == CONGELANTE && alvo instanceof LivingEntity vivo) {
+            com.danrod.dcuniverse.ability.Congelamento.congelarJa(vivo, Math.round(atordoaSeg * 20));
+            geada(alvo.blockPosition());
+        }
         level.playSound(null, getX(), getY(), getZ(), Sons.BATARANGUE_ACERTA.get(), SoundSource.PLAYERS, 0.9f, 1f);
         if (variante() == ELETRICO) choque(alvo);
         level.sendParticles(ParticleTypes.CRIT, getX(), getY(), getZ(), 8, 0.2, 0.2, 0.2, 0.3);
@@ -232,7 +255,8 @@ public class BatarangueEntidade extends Projectile {
         Entity dono = getOwner();
         if (dono instanceof ServerPlayer sp) Alvos.ferir(sp, alvo, damageSources().thrown(this, sp), quanto);
         else if (alvo instanceof LivingEntity vivo && level() instanceof ServerLevel l) vivo.hurtServer(l, damageSources().thrown(this, dono), quanto);
-        if (alvo instanceof LivingEntity vivo && atordoaSeg > 0) {
+        // O congelante prende no gelo (Congelamento); o sônico atordoa no pulso.
+        if (alvo instanceof LivingEntity vivo && atordoaSeg > 0 && variante() != CONGELANTE && variante() != SONICO) {
             vivo.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, Math.round(atordoaSeg * 20), 3), dono);
         }
     }
@@ -296,6 +320,89 @@ public class BatarangueEntidade extends Projectile {
         discard();
     }
 
+    /** Impacto do congelante: congela a água e apaga o fogo em volta, com estalo de gelo e flocos. */
+    private void geada(BlockPos centro) {
+        ServerLevel level = (ServerLevel) level();
+        congelarAgua(centro, Math.max(1, Math.round(raio)));
+        int r = Math.max(1, Math.round(raio));
+        if (!(getOwner() instanceof ServerPlayer sp) || sp.mayBuild()) {
+            for (BlockPos p : BlockPos.betweenClosed(centro.offset(-r, -1, -r), centro.offset(r, 1, r))) {
+                if (p.distSqr(centro) <= r * r && level.getBlockState(p).is(BlockTags.FIRE) && podeMexer(level, p)) level.removeBlock(p, false);
+            }
+        }
+        Vec3 c = Vec3.atCenterOf(centro);
+        level.sendParticles(ParticleTypes.SNOWFLAKE, c.x, c.y, c.z, 40, r * 0.5, 0.5, r * 0.5, 0.05);
+        level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, Blocks.ICE.defaultBlockState()),
+            c.x, c.y, c.z, 16, 0.4, 0.4, 0.4, 0.1);
+        level.playSound(null, c.x, c.y, c.z, SoundEvents.GLASS_PLACE, SoundSource.PLAYERS, 0.9f, 0.6f);
+        level.playSound(null, c.x, c.y, c.z, SoundEvents.POWDER_SNOW_PLACE, SoundSource.PLAYERS, 1f, 0.8f);
+    }
+
+    /**
+     * Água parada no raio vira gelo que derrete sozinho (o mesmo do Passos Gelados), só na superfície: dá para
+     * atravessar um rio correndo atrás do batarangue.
+     */
+    private void congelarAgua(BlockPos centro, int r) {
+        ServerLevel level = (ServerLevel) level();
+        if (getOwner() instanceof ServerPlayer sp && !sp.mayBuild()) return;
+        for (BlockPos p : BlockPos.betweenClosed(centro.offset(-r, -2, -r), centro.offset(r, 0, r))) {
+            if (p.distSqr(centro) > (r + 0.5) * (r + 0.5)) continue;
+            BlockState st = level.getBlockState(p);
+            if (!st.is(Blocks.WATER) || st.getFluidState().getAmount() < 8 || !level.getBlockState(p.above()).isAir()) continue;
+            if (!podeMexer(level, p)) continue;
+            BlockPos fixo = p.immutable();
+            level.setBlockAndUpdate(fixo, Blocks.FROSTED_ICE.defaultBlockState());
+            level.scheduleTick(fixo, Blocks.FROSTED_ICE, net.minecraft.util.Mth.nextInt(random, 60, 120));
+        }
+    }
+
+    private boolean podeMexer(ServerLevel level, BlockPos p) {
+        return !(getOwner() instanceof ServerPlayer sp) || level.mayInteract(sp, p);
+    }
+
+    /**
+     * Pulso do sônico: atordoa (lento e sem alvo) e desorienta quem está no raio, com mais dano em morcegos, traças e
+     * endermites (sensíveis ao som); estilhaça o vidro perto. Não volta.
+     */
+    private void pulso(Vec3 onde) {
+        ServerLevel level = (ServerLevel) level();
+        int lento = Math.round(Math.min(4f, Math.max(1f, atordoaSeg)) * 20);
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(onde, onde).inflate(raio), this::podeAtingirExplosao)) {
+            double d = Math.sqrt(e.distanceToSqr(onde));
+            if (d > raio) continue;
+            boolean sensivel = e instanceof net.minecraft.world.entity.ambient.Bat || e instanceof net.minecraft.world.entity.monster.Silverfish
+                || e instanceof net.minecraft.world.entity.monster.Endermite;
+            ferir(e, sensivel ? Math.max(8, dano * 4) : dano);
+            e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, lento, 4), getOwner());
+            e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, lento, 1), getOwner());
+            if (e instanceof Player) e.addEffect(new MobEffectInstance(MobEffects.NAUSEA, lento + 40, 0), getOwner());
+            if (e instanceof net.minecraft.world.entity.Mob m) {
+                m.setTarget(null);
+                m.getNavigation().stop();
+            }
+            Vec3 fora = e.position().subtract(onde);
+            fora = fora.lengthSqr() < 1e-4 ? Vec3.ZERO : fora.normalize();
+            e.push(fora.x * 0.4, 0.15, fora.z * 0.4);
+            e.hurtMarked = true;
+        }
+        if (!(getOwner() instanceof ServerPlayer sp) || sp.mayBuild()) {
+            BlockPos c = BlockPos.containing(onde);
+            for (BlockPos p : BlockPos.betweenClosed(c.offset(-VIDRO_RAIO, -VIDRO_RAIO, -VIDRO_RAIO), c.offset(VIDRO_RAIO, VIDRO_RAIO, VIDRO_RAIO))) {
+                if (p.distSqr(c) > VIDRO_RAIO * VIDRO_RAIO) continue;
+                BlockState st = level.getBlockState(p);
+                if ((st.is(net.minecraftforge.common.Tags.Blocks.GLASS_BLOCKS) || st.is(net.minecraftforge.common.Tags.Blocks.GLASS_PANES))
+                    && podeMexer(level, p)) {
+                    level.destroyBlock(p, false, getOwner());
+                }
+            }
+        }
+        Rede.efeito(level, onde.x, onde.y, onde.z, "sonico", raio, 0, 0);
+        level.sendParticles(ParticleTypes.SONIC_BOOM, onde.x, onde.y, onde.z, 1, 0, 0, 0, 0);
+        level.playSound(null, onde.x, onde.y, onde.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.4f, 1.7f);
+        level.playSound(null, onde.x, onde.y, onde.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.5f, 0.6f);
+        cair();
+    }
+
     private boolean podeAtingirExplosao(Entity e) {
         Entity dono = getOwner();
         if (!(e instanceof LivingEntity) || !e.isAlive() || e == dono) return false;
@@ -316,6 +423,11 @@ public class BatarangueEntidade extends Projectile {
             explodir(position());
             return;
         }
+        if (variante() == SONICO) {
+            pulso(position());
+            return;
+        }
+        if (variante() == CONGELANTE) geada(pos.relative(hit.getDirection()));
         level.playSound(null, getX(), getY(), getZ(), Sons.RICOCHETE.get(), SoundSource.PLAYERS, 0.6f, 1.3f);
         level.sendParticles(ParticleTypes.CRIT, getX(), getY(), getZ(), 6, 0.1, 0.1, 0.1, 0.2);
         comecarVolta();
@@ -329,7 +441,8 @@ public class BatarangueEntidade extends Projectile {
         for (int i = 0; i <= passos; i++) {
             BlockPos pos = BlockPos.containing(de.lerp(ate, i / (double) Math.max(1, passos)));
             BlockState st = level.getBlockState(pos);
-            if (cortavel(st)) {
+            // As teias da rede do próprio Batman ficam: elas seguram quem ele prendeu.
+            if (cortavel(st) && !Teias.temporaria(level, pos)) {
                 level.destroyBlock(pos, true, getOwner());
                 level.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.6f, 1.4f);
             }

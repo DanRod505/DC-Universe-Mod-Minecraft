@@ -2,6 +2,7 @@ package com.danrod.dcuniverse.content;
 
 import com.danrod.dcuniverse.DCUniverse;
 import com.danrod.dcuniverse.ability.Cargas;
+import com.danrod.dcuniverse.character.Cinto;
 import com.danrod.dcuniverse.character.EstadoJogador;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.core.Rede;
@@ -52,7 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class Batcomputador {
     public static final int RECARGA_SEG = 60, BONUS_PCT = 15, ALCANCE_USO = 8, MAPA_RAIO = 36;
-    public static final int RECARREGAR = 0, FABRICAR = 1, ANALISAR = 2;
+    public static final int RECARREGAR = 0, FABRICAR = 1, ANALISAR = 2, EQUIPAR = 3, VEICULO = 4;
     private static final String RAIZ = "dcuniverse_batcomputador";
     private static final Map<UUID, Long> RECARREGOU = new ConcurrentHashMap<>();
     private static Map<Item, EntityType<?>> amostras;
@@ -113,7 +114,7 @@ public final class Batcomputador {
     public static Rede.BatAbrir montar(ServerPlayer player, BlockPos pos) {
         Personagem p = EstadoJogador.de(player).personagem();
         boolean heroi = p != null && Recargas.tecnologica(p);
-        return new Rede.BatAbrir(pos, heroi, recargaFalta(player), fabricaveis(player), List.copyOf(analisados(player)));
+        return new Rede.BatAbrir(pos, heroi, recargaFalta(player), fabricaveis(player), List.copyOf(analisados(player)), cinto(player));
     }
 
     public static void acao(ServerPlayer player, Rede.BatAcao a) {
@@ -123,6 +124,17 @@ public final class Batcomputador {
             case RECARREGAR -> recarregar(player, a.pos());
             case FABRICAR -> fabricar(player, a.pos(), a.arg());
             case ANALISAR -> analisar(player, a.pos(), a.arg());
+            case EQUIPAR -> {
+                int i = a.arg().indexOf(':');
+                if (i > 0) {
+                    try {
+                        equipar(player, a.pos(), Integer.parseInt(a.arg().substring(0, i)), a.arg().substring(i + 1));
+                    } catch (NumberFormatException ignorado) {
+                        // pedido malformado: ignora
+                    }
+                }
+            }
+            case VEICULO -> escolherVeiculo(player, a.pos(), a.arg());
             default -> { }
         }
         abrir(player, a.pos());
@@ -148,6 +160,66 @@ public final class Batcomputador {
         player.level().playSound(null, pos, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.7f, 1.6f);
         player.level().sendParticles(new DustParticleOptions(0x4FE3FF, 0.8f), player.getX(), player.getY() + 1, player.getZ(),
             24, 0.4, 0.6, 0.4, 0.02);
+    }
+
+    // ---------------------------------------------------------------- cinto
+
+    /** O herói cujo cinto a tela mostra: o do jogador, se tiver cinto; senão o primeiro que tem (o Batman). */
+    public static Personagem donoDoCinto(ServerPlayer player) {
+        Personagem p = EstadoJogador.de(player).personagem();
+        if (p != null && p.cinto() != null) return p;
+        return com.danrod.dcuniverse.character.Personagens.todos().stream().filter(x -> x.cinto() != null)
+            .min(java.util.Comparator.comparing(x -> x.id().toString())).orElse(null);
+    }
+
+    private static Rede.BatCinto cinto(ServerPlayer player) {
+        Personagem p = donoDoCinto(player);
+        if (p == null) return Rede.BatCinto.VAZIO;
+        Personagem.Habilidade sup = Cinto.suprema(player, p);
+        return new Rede.BatCinto(p.id().toString(), p.cinto().slots(), Cinto.gadgets(p).stream().map(Personagem.Habilidade::id).toList(),
+            Cinto.slots(player, p), Cinto.supremas(p).stream().map(Personagem.Habilidade::id).toList(), sup == null ? "" : sup.id());
+    }
+
+    /** Põe o gadget no espaço do cinto; transformado, o menu radial muda na hora (e a escolha continua na mesma habilidade). */
+    public static void equipar(ServerPlayer player, BlockPos pos, int slot, String id) {
+        Personagem p = donoDoCinto(player);
+        if (p == null) return;
+        String antes = selecionadaId(player, p);
+        if (!Cinto.equipar(player, p, slot, id)) return;
+        depoisDeMudar(player, p, antes);
+        Guia.concluir(player, "cinto");
+        player.level().playSound(null, pos, SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.BLOCKS, 0.7f, 1.3f);
+    }
+
+    public static void escolherVeiculo(ServerPlayer player, BlockPos pos, String id) {
+        Personagem p = donoDoCinto(player);
+        if (p == null) return;
+        String antes = selecionadaId(player, p);
+        if (!Cinto.escolherVeiculo(player, p, id)) return;
+        // A suprema nova herda a recarga da anterior: trocar de veículo não zera a espera.
+        EstadoJogador e = EstadoJogador.de(player);
+        long maior = 0;
+        for (Personagem.Habilidade s : Cinto.supremas(p)) maior = Math.max(maior, e.prontaEm(s.id()));
+        e.setProntaEm(id, maior);
+        depoisDeMudar(player, p, antes);
+        player.level().playSound(null, pos, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.6f, 1.2f);
+    }
+
+    private static String selecionadaId(ServerPlayer player, Personagem p) {
+        EstadoJogador e = EstadoJogador.de(player);
+        if (!p.id().equals(e.personagemId())) return "";
+        var habs = Cinto.equipadas(player, p);
+        return habs.isEmpty() ? "" : habs.get(Math.min(e.selecionada(), habs.size() - 1)).id();
+    }
+
+    private static void depoisDeMudar(ServerPlayer player, Personagem p, String antes) {
+        EstadoJogador e = EstadoJogador.de(player);
+        if (!p.id().equals(e.personagemId())) return;
+        var habs = Cinto.equipadas(player, p);
+        int i = 0;
+        for (int k = 0; k < habs.size(); k++) if (habs.get(k).id().equals(antes)) i = k;
+        e.setSelecionada(i);
+        Rede.sincronizar(player);
     }
 
     // ---------------------------------------------------------------- fabricar

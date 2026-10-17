@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 10;
+    private static final int VERSAO = 11;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -190,7 +190,39 @@ public final class Rede {
     public record BatFab(String receita, String item, int qtd, List<BatCusto> custos, boolean pode) {}
 
     /** Abre (ou atualiza) a tela do Batcomputador: heroi = tem recarga tecnológica; recarga = segundos até recarregar de novo. */
-    public record BatAbrir(net.minecraft.core.BlockPos pos, boolean heroi, int recarga, List<BatFab> fabricaveis, List<String> analisados) {
+    /**
+     * Cinto do Batcomputador: de quem é ("" = nenhum herói com cinto), quantos espaços, os gadgets que dá para levar,
+     * o que está em cada espaço ("" vazio), as supremas que dá para escolher e a escolhida.
+     */
+    public record BatCinto(String personagem, int slots, List<String> gadgets, List<String> equipados, List<String> veiculos, String veiculo) {
+        public static final BatCinto VAZIO = new BatCinto("", 0, List.of(), List.of(), List.of(), "");
+
+        static void encode(BatCinto c, FriendlyByteBuf b) {
+            b.writeUtf(c.personagem);
+            b.writeVarInt(c.slots);
+            for (List<String> l : List.of(c.gadgets, c.equipados, c.veiculos)) {
+                b.writeVarInt(l.size());
+                for (String s : l) b.writeUtf(s);
+            }
+            b.writeUtf(c.veiculo);
+        }
+
+        static BatCinto decode(FriendlyByteBuf b) {
+            String p = b.readUtf();
+            int slots = Math.min(b.readVarInt(), 16);
+            List<List<String>> ls = new ArrayList<>();
+            for (int k = 0; k < 3; k++) {
+                int n = Math.min(b.readVarInt(), 64);
+                List<String> l = new ArrayList<>();
+                for (int i = 0; i < n; i++) l.add(b.readUtf());
+                ls.add(List.copyOf(l));
+            }
+            return new BatCinto(p, slots, ls.get(0), ls.get(1), ls.get(2), b.readUtf());
+        }
+    }
+
+    public record BatAbrir(net.minecraft.core.BlockPos pos, boolean heroi, int recarga, List<BatFab> fabricaveis, List<String> analisados,
+                           BatCinto cinto) {
         public static void encode(BatAbrir m, FriendlyByteBuf b) {
             b.writeBlockPos(m.pos);
             b.writeBoolean(m.heroi);
@@ -210,6 +242,7 @@ public final class Rede {
             }
             b.writeVarInt(m.analisados.size());
             for (String a : m.analisados) b.writeUtf(a);
+            BatCinto.encode(m.cinto, b);
         }
 
         public static BatAbrir decode(FriendlyByteBuf b) {
@@ -230,7 +263,7 @@ public final class Rede {
             int na = Math.min(b.readVarInt(), 256);
             List<String> an = new ArrayList<>();
             for (int i = 0; i < na; i++) an.add(b.readUtf());
-            return new BatAbrir(pos, heroi, recarga, List.copyOf(fab), List.copyOf(an));
+            return new BatAbrir(pos, heroi, recarga, List.copyOf(fab), List.copyOf(an), BatCinto.decode(b));
         }
     }
 
@@ -475,7 +508,7 @@ public final class Rede {
         }
         long agora = player.level().getGameTime();
         List<HabInfo> habs = new ArrayList<>();
-        for (Personagem.Habilidade h : p.habilidades()) {
+        for (Personagem.Habilidade h : com.danrod.dcuniverse.character.Cinto.equipadas(player, p)) {
             int restante = (int) Math.max(0, e.prontaEm(h.id()) - agora);
             int max = com.danrod.dcuniverse.ability.Cargas.max(h);
             habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD, h.suprema(), player.isCreative() ? 0 : h.custo(), restante,

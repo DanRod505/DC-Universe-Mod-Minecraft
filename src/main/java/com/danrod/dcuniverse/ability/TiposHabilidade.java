@@ -23,7 +23,9 @@ public final class TiposHabilidade {
         Map.entry("throwable", new com.danrod.dcuniverse.ability.active.Arremesso()),
         Map.entry("vehicle", new com.danrod.dcuniverse.ability.active.Veiculo()),
         Map.entry("smoke", new com.danrod.dcuniverse.ability.active.Fumaca()),
-        Map.entry("explosive_gel", new com.danrod.dcuniverse.ability.active.Gel())
+        Map.entry("explosive_gel", new com.danrod.dcuniverse.ability.active.Gel()),
+        Map.entry("net", new com.danrod.dcuniverse.ability.active.Lancador()),
+        Map.entry("disruptor", new com.danrod.dcuniverse.ability.active.Disruptor())
     ));
 
     private TiposHabilidade() {}

@@ -58,7 +58,8 @@ public final class Cargas {
     public static void tick(ServerPlayer player, Personagem p) {
         EstadoJogador e = EstadoJogador.de(player);
         long agora = player.level().getGameTime();
-        for (Personagem.Habilidade h : p.habilidades()) {
+        // Só o que está no cinto é fabricado (o que ficou no Batcomputador espera lá).
+        for (Personagem.Habilidade h : com.danrod.dcuniverse.character.Cinto.equipadas(player, p)) {
             int max = max(h);
             if (max == 0) continue;
             int n = e.cargas(h.id(), max);

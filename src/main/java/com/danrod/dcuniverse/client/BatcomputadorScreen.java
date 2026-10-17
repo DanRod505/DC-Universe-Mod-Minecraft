@@ -1,6 +1,9 @@
 package com.danrod.dcuniverse.client;
 
+import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.content.Batcomputador;
+import com.google.gson.JsonParser;
+import net.minecraft.client.renderer.RenderPipelines;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.core.Rede;
 import net.minecraft.ChatFormatting;
@@ -43,7 +46,7 @@ import java.util.Map;
  * (Gadgets, Fabricar, Análise, Mapa), uma linha de varredura descendo e o rodapé com o estado do sistema.
  */
 public final class BatcomputadorScreen extends Screen {
-    private static final int W = 340, H = 216;
+    private static final int W = 340, H = 232;
     private static final int FUNDO = 0xF2080C14, FUNDO2 = 0xFF0E1522, CIANO = 0xFF39C8F0, CIANO_ESC = 0xFF15506A,
         TEXTO = 0xFFDDE8F0, SUAVE = 0xFF7F93A6, VERMELHO = 0xFFFF5548, VERDE = 0xFF5CE08A, OURO = 0xFFFFC857;
 
@@ -213,36 +216,162 @@ public final class BatcomputadorScreen extends Screen {
 
     // ---------------------------------------------------------------- gadgets
 
+    private static final int BOLSA_W = 34, BOLSA_H = 30, TILE = 26;
+    private static final int OURO_ESC = 0xFF8E6618, OURO_CLARO = 0xFFFFE9A0, COURO = 0xFF1A1C22;
+    /** Espaço do cinto escolhido para receber o próximo gadget clicado. */
+    private int espaco;
+    private Personagem cintoDe;
+
+    /** O herói do cinto, lido do catálogo do servidor (o mesmo JSON que o Guia usa). */
+    private Personagem heroiDoCinto() {
+        String id = dados.cinto().personagem();
+        if (id.isEmpty()) return null;
+        if (cintoDe == null || !cintoDe.id().toString().equals(id)) {
+            String json = EstadoCliente.catalogo.get(id);
+            if (json == null) return null;
+            try {
+                cintoDe = Personagem.parse(Identifier.parse(id), JsonParser.parseString(json).getAsJsonObject());
+            } catch (RuntimeException ex) {
+                return null;
+            }
+        }
+        return cintoDe;
+    }
+
+    private static Identifier icone(String hab) {
+        return Identifier.fromNamespaceAndPath(com.danrod.dcuniverse.DCUniverse.MODID, "textures/gui/ability/" + hab + ".png");
+    }
+
+    private void iconeHab(GuiGraphicsExtractor g, String hab, int x, int y, int tam, int tinta) {
+        g.blit(RenderPipelines.GUI_TEXTURED, icone(hab), x, y, 0, 0, tam, tam, tam, tam, tinta);
+    }
+
+    private int bolsaX(int x, int w, int i) {
+        int n = dados.cinto().slots();
+        int passo = (w - 40) / Math.max(1, n);
+        return x + 20 + i * passo + (passo - BOLSA_W) / 2;
+    }
+
+    private int tileX(int x, int w, int i) {
+        int n = dados.cinto().gadgets().size();
+        return x + (w - n * (TILE + 4) + 4) / 2 + i * (TILE + 4);
+    }
+
     private void gadgets(GuiGraphicsExtractor g, int x, int y, int w, int h, int mx, int my) {
         Rede.Sync s = EstadoCliente.atual;
-        if (!dados.heroi()) {
-            g.text(font, Component.translatable("dcuniverse.batcomputador.gadgets.titulo").withStyle(ChatFormatting.BOLD), x + 8, y + 8, CIANO, false);
-            paragrafo(g, Component.translatable("dcuniverse.batcomputador.gadgets.sem_heroi"), x + 8, y + 24, w - 16, SUAVE);
+        Rede.BatCinto c = dados.cinto();
+        if (c.personagem().isEmpty()) {
+            paragrafo(g, Component.translatable("dcuniverse.batcomputador.gadgets.sem_cinto"), x + 8, y + 8, w - 16, SUAVE);
             return;
         }
-        g.text(font, Component.translatable("dcuniverse.batcomputador.gadgets.cinto").withStyle(ChatFormatting.BOLD), x + 8, y + 8, CIANO, false);
-        int ly = y + 22;
-        for (Rede.HabInfo hab : s.habilidades()) {
-            if (hab.cargasMax() <= 0) continue;
-            g.text(font, Component.translatable("habilidade.dcuniverse." + hab.id()), x + 8, ly, TEXTO, false);
-            int bx = x + 150, bw = 10;
-            for (int i = 0; i < hab.cargasMax(); i++) {
-                boolean cheia = i < hab.cargas();
-                g.fill(bx + i * (bw + 2), ly, bx + i * (bw + 2) + bw, ly + 7, cheia ? CIANO : 0xFF1A2A36);
+        espaco = Mth.clamp(espaco, 0, Math.max(0, c.slots() - 1));
+        long ocupados = c.equipados().stream().filter(e -> !e.isEmpty()).count();
+        g.text(font, Component.translatable("dcuniverse.batcomputador.gadgets.cinto").withStyle(ChatFormatting.BOLD), x + 8, y + 5, CIANO, false);
+        Component esp = Component.translatable("dcuniverse.batcomputador.gadgets.espacos", ocupados, c.slots());
+        g.text(font, esp, x + w - 8 - font.width(esp), y + 5, SUAVE, false);
+        String foco = "";
+        boolean focoEspaco = false;
+        // O cinto: faixa dourada com fivelas e as bolsas penduradas.
+        int cy = y + 30;
+        g.fill(x + 10, cy - 1, x + w - 10, cy + 11, OURO_ESC);
+        g.fill(x + 10, cy, x + w - 10, cy + 10, OURO);
+        g.fill(x + 10, cy, x + w - 10, cy + 2, OURO_CLARO);
+        g.fill(x + 10, cy + 8, x + w - 10, cy + 10, 0xFFC99A2E);
+        for (int k = x + 14; k < x + w - 12; k += 6) g.fill(k, cy + 4, k + 2, cy + 5, 0xFFD9AC3E);
+        for (int i = 0; i < c.slots(); i++) {
+            int bx = bolsaX(x, w, i), by = y + 17;
+            String gad = i < c.equipados().size() ? c.equipados().get(i) : "";
+            boolean sel = i == espaco, sobre = sobre(mx, my, bx, by, BOLSA_W, BOLSA_H);
+            if (sobre) {
+                foco = gad;
+                focoEspaco = gad.isEmpty();
             }
-            g.text(font, hab.cargas() + "/" + hab.cargasMax(), bx + hab.cargasMax() * (bw + 2) + 4, ly, SUAVE, false);
-            ly += 12;
-            if (ly > y + h - 46) break;
+            if (sel) g.fill(bx - 2, by - 2, bx + BOLSA_W + 2, by + BOLSA_H + 2, 0x6039C8F0);
+            g.fill(bx, by, bx + BOLSA_W, by + BOLSA_H, sel ? CIANO : sobre ? 0xFF6A7488 : 0xFF3A3E4A);
+            g.fill(bx + 1, by + 1, bx + BOLSA_W - 1, by + BOLSA_H - 1, COURO);
+            g.fill(bx + 1, by + 1, bx + BOLSA_W - 1, by + 7, 0xFF2A2D36);
+            g.fill(bx + BOLSA_W / 2 - 3, by + 2, bx + BOLSA_W / 2 + 3, by + 6, OURO);
+            g.fill(bx + BOLSA_W / 2 - 2, by + 3, bx + BOLSA_W / 2 + 2, by + 4, OURO_CLARO);
+            if (!gad.isEmpty()) {
+                iconeHab(g, gad, bx + (BOLSA_W - 18) / 2, by + 8, 18, -1);
+                Rede.HabInfo info = s.habilidades().stream().filter(hb -> hb.id().equals(gad)).findFirst().orElse(null);
+                if (info != null && info.cargasMax() > 0) {
+                    int pw = Math.max(2, (BOLSA_W - 6 - (info.cargasMax() - 1)) / info.cargasMax());
+                    for (int k = 0; k < info.cargasMax(); k++) {
+                        int px = bx + 3 + k * (pw + 1);
+                        g.fill(px, by + BOLSA_H - 3, px + pw, by + BOLSA_H - 1, k < info.cargas() ? CIANO : 0xFF1A2A36);
+                    }
+                }
+            } else {
+                g.centeredText(font, "+", bx + BOLSA_W / 2, by + 13, sel ? CIANO : 0xFF56626E);
+            }
+            g.text(font, String.valueOf(i + 1), bx + 3, by + 1, 0xFF7F93A6, false);
         }
-        // energia
-        float frac = s.max() <= 0 ? 0 : s.energia() / s.max();
-        g.text(font, Component.translatable("dcuniverse.batcomputador.gadgets.energia", Math.round(s.energia()), Math.round(s.max())), x + 8, y + h - 40, TEXTO, false);
-        g.fill(x + 8, y + h - 29, x + w - 8, y + h - 25, 0xFF1A2A36);
-        g.fill(x + 8, y + h - 29, x + 8 + (int) ((w - 16) * frac), y + h - 25, CIANO);
-        boolean pronto = recargaFalta() <= 0;
-        Component rot = pronto ? Component.translatable("dcuniverse.batcomputador.gadgets.recarregar")
-            : Component.translatable("dcuniverse.batcomputador.gadgets.aguarde", recargaFalta());
-        botao(g, rot, x + w / 2 - 80, y + h - 20, 160, pronto, mx, my);
+        // Arsenal: todos os gadgets do herói; os do cinto têm a etiqueta dourada com o número do espaço.
+        g.text(font, Component.translatable("dcuniverse.batcomputador.gadgets.arsenal").withStyle(ChatFormatting.BOLD), x + 8, y + 55, CIANO, false);
+        Component dica = Component.translatable("dcuniverse.batcomputador.gadgets.dica");
+        g.text(font, dica, x + w - 8 - font.width(dica), y + 55, SUAVE, false);
+        int ty = y + 67;
+        for (int i = 0; i < c.gadgets().size(); i++) {
+            String gad = c.gadgets().get(i);
+            int tx = tileX(x, w, i);
+            int noCinto = c.equipados().indexOf(gad);
+            boolean sobre = sobre(mx, my, tx, ty, TILE, TILE), noEspaco = noCinto == espaco;
+            if (sobre) foco = gad;
+            g.fill(tx, ty, tx + TILE, ty + TILE, sobre ? 0xFF16506A : noCinto >= 0 ? 0xFF13283A : 0xFF0C1824);
+            borda(g, tx, ty, TILE, TILE, noEspaco ? CIANO : noCinto >= 0 ? OURO_ESC : sobre ? CIANO_ESC : 0xFF1E3446);
+            iconeHab(g, gad, tx + 3, ty + 3, 20, noCinto >= 0 || sobre ? -1 : 0xFFA8B0BC);
+            if (noCinto >= 0) {
+                g.fill(tx + TILE - 8, ty, tx + TILE, ty + 8, OURO);
+                g.text(font, String.valueOf(noCinto + 1), tx + TILE - 6, ty, 0xFF1A1205, false);
+            }
+        }
+        // Ficha do gadget em foco (o do mouse, ou o do espaço escolhido).
+        if (foco.isEmpty() && !focoEspaco) foco = espaco < c.equipados().size() ? c.equipados().get(espaco) : "";
+        int fy = y + 99;
+        g.fill(x + 6, fy, x + w - 6, fy + 50, 0x40163048);
+        borda(g, x + 6, fy, w - 12, 50, 0xFF13324A);
+        if (foco.isEmpty()) {
+            g.text(font, Component.translatable("dcuniverse.batcomputador.gadgets.vazio").withStyle(ChatFormatting.BOLD), x + 12, fy + 5, TEXTO, false);
+            paragrafo(g, Component.translatable("dcuniverse.batcomputador.gadgets.vazio.desc"), x + 12, fy + 17, w - 24, SUAVE);
+        } else {
+            Personagem p = heroiDoCinto();
+            Personagem.Habilidade hab = p == null ? null : p.habilidade(foco);
+            int noCinto = c.equipados().indexOf(foco);
+            g.text(font, Component.translatable("habilidade.dcuniverse." + foco).withStyle(ChatFormatting.BOLD), x + 12, fy + 5, OURO, false);
+            Component onde = noCinto >= 0 ? Component.translatable("dcuniverse.batcomputador.gadgets.no_cinto", noCinto + 1)
+                : Component.translatable("dcuniverse.batcomputador.gadgets.fora");
+            g.text(font, onde, x + w - 12 - font.width(onde), fy + 5, noCinto >= 0 ? VERDE : SUAVE, false);
+            var ammo = hab == null ? null : com.danrod.dcuniverse.ability.Cargas.ammo(hab);
+            if (ammo != null) {
+                g.text(font, Component.translatable("dcuniverse.batcomputador.gadgets.cargas", ammo.i("max", 1), fmt(ammo.d("reload", 5)),
+                    fmt(ammo.d("reload_cost", 0))), x + 12, fy + 15, CIANO, false);
+            }
+            Component desc = Component.translatable("habilidade.dcuniverse." + foco + ".desc");
+            List<FormattedCharSequence> linhas = font.split(desc, w - 24);
+            // Três linhas; se não couber, a terceira termina em "..." e o texto inteiro aparece com o mouse em cima.
+            var partes = font.getSplitter().splitLines(desc.getString(), w - 24, net.minecraft.network.chat.Style.EMPTY);
+            for (int i = 0; i < Math.min(3, partes.size()); i++) {
+                String l = partes.get(i).getString();
+                if (i == 2 && partes.size() > 3) l = font.plainSubstrByWidth(l, w - 24 - font.width("...")).stripTrailing() + "...";
+                g.text(font, l, x + 12, fy + 26 + i * 9, SUAVE, false);
+            }
+            if (linhas.size() > 3 && sobre(mx, my, x + 6, fy, w - 12, 50)) g.setTooltipForNextFrame(font, linhas, mx, my);
+        }
+        // Energia e recarga na hora (só transformado num herói com tecnologia).
+        int ry = y + h - 17;
+        if (dados.heroi()) {
+            float frac = s.max() <= 0 ? 0 : s.energia() / s.max();
+            g.text(font, Component.translatable("dcuniverse.batcomputador.gadgets.energia", Math.round(s.energia()), Math.round(s.max())), x + 8, ry, TEXTO, false);
+            g.fill(x + 8, ry + 10, x + 150, ry + 13, 0xFF1A2A36);
+            g.fill(x + 8, ry + 10, x + 8 + (int) (142 * frac), ry + 13, CIANO);
+        } else {
+            g.text(font, Component.translatable("dcuniverse.batcomputador.gadgets.so_heroi"), x + 8, ry + 3, SUAVE, false);
+        }
+        boolean pronto = dados.heroi() && recargaFalta() <= 0;
+        Component rot = recargaFalta() > 0 ? Component.translatable("dcuniverse.batcomputador.gadgets.aguarde", recargaFalta())
+            : Component.translatable("dcuniverse.batcomputador.gadgets.recarregar");
+        botao(g, rot, x + w - 158, ry - 1, 150, pronto, mx, my);
     }
 
     // ---------------------------------------------------------------- fabricar
@@ -517,6 +646,7 @@ public final class BatcomputadorScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean duplo) {
+        if (e.button() == 1 && aba == Aba.GADGETS && cliqueGadgets(e.x(), e.y(), x0 + 8, y0 + 44, W - 16, H - 60, true)) return true;
         if (e.button() != 0) return super.mouseClicked(e, duplo);
         double mx = e.x(), my = e.y();
         int w = (W - 16) / Aba.values().length;
@@ -531,10 +661,7 @@ public final class BatcomputadorScreen extends Screen {
         int x = x0 + 8, y = y0 + 44, cw = W - 16, ch = H - 60;
         switch (aba) {
             case GADGETS -> {
-                if (dados.heroi() && recargaFalta() <= 0 && sobre(mx, my, x + cw / 2 - 80, y + ch - 20, 160, 14)) {
-                    enviar(Batcomputador.RECARREGAR, "");
-                    return true;
-                }
+                if (cliqueGadgets(mx, my, x, y, cw, ch, false)) return true;
             }
             case FABRICAR -> {
                 List<Rede.BatFab> fab = dados.fabricaveis();
@@ -565,6 +692,46 @@ public final class BatcomputadorScreen extends Screen {
             default -> { }
         }
         return super.mouseClicked(e, duplo);
+    }
+
+    /** Clique na aba Gadgets: espaço do cinto, gadget do arsenal ou recarga. direito = esvaziar o espaço. */
+    private boolean cliqueGadgets(double mx, double my, int x, int y, int w, int h, boolean direito) {
+        Rede.BatCinto c = dados.cinto();
+        if (c.personagem().isEmpty()) return false;
+        for (int i = 0; i < c.slots(); i++) {
+            if (!sobre(mx, my, bolsaX(x, w, i), y + 17, BOLSA_W, BOLSA_H)) continue;
+            if (direito) {
+                if (i < c.equipados().size() && !c.equipados().get(i).isEmpty()) enviar(Batcomputador.EQUIPAR, i + ":");
+            } else {
+                espaco = i;
+                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.8f, 0.3f));
+            }
+            return true;
+        }
+        if (direito) return false;
+        for (int i = 0; i < c.gadgets().size(); i++) {
+            if (!sobre(mx, my, tileX(x, w, i), y + 67, TILE, TILE)) continue;
+            String gad = c.gadgets().get(i);
+            // Clicar no gadget que já está no espaço escolhido tira ele de lá; senão guarda (trocando se estava em outro).
+            boolean jaAqui = espaco < c.equipados().size() && c.equipados().get(espaco).equals(gad);
+            enviar(Batcomputador.EQUIPAR, espaco + ":" + (jaAqui ? "" : gad));
+            if (!jaAqui) {
+                // Anda para o próximo espaço vazio, para montar o cinto com poucos cliques.
+                for (int k = 1; k <= c.slots(); k++) {
+                    int j = (espaco + k) % c.slots();
+                    if (j < c.equipados().size() && c.equipados().get(j).isEmpty() && j != espaco) {
+                        espaco = j;
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+        if (dados.heroi() && recargaFalta() <= 0 && sobre(mx, my, x + w - 158, y + h - 18, 150, 14)) {
+            enviar(Batcomputador.RECARREGAR, "");
+            return true;
+        }
+        return false;
     }
 
     @Override

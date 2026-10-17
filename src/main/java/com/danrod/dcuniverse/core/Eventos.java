@@ -79,6 +79,8 @@ public final class Eventos {
             Fortaleza.tick();
             com.danrod.dcuniverse.ability.active.Gancho.tick();
             com.danrod.dcuniverse.ability.active.Fumaca.tick(e.server());
+            com.danrod.dcuniverse.ability.active.Disruptor.tick();
+            for (var level : e.server().getAllLevels()) com.danrod.dcuniverse.content.Teias.tick(level);
         });
         ServerStoppingEvent.BUS.addListener(e -> {
             Onda.limpar();
@@ -87,9 +89,12 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.active.Gancho.limpar();
             com.danrod.dcuniverse.ability.active.Veiculo.limpar();
             com.danrod.dcuniverse.ability.active.Fumaca.limpar();
+            com.danrod.dcuniverse.ability.active.Disruptor.limpar();
+            com.danrod.dcuniverse.content.Teias.limpar();
         });
         Naturais.registrar();
         com.danrod.dcuniverse.content.Batcomputador.registrar();
+        com.danrod.dcuniverse.content.Teias.registrar();
         com.danrod.dcuniverse.content.BatwingEntidade.registrar();
         com.danrod.dcuniverse.ability.Congelamento.registrar();
         com.danrod.dcuniverse.ability.active.Detetive.registrar();

@@ -927,6 +927,107 @@ def icone_gel_explosivo():
     return t
 
 
+def icone_batarangue_congelante():
+    def fundo(t):
+        # Geada atrás: halo azul-gelo e cristais saindo das pontas.
+        brilho(t, 16, 16, 15, hexa("#7FD8FF"), 0.8)
+        d = ImageDraw.Draw(t.img)
+        for ang in range(15, 360, 60):
+            a = math.radians(ang)
+            x1, y1 = 16 + 15 * math.cos(a), 16 + 15 * math.sin(a)
+            d.line([(16 + 8 * math.cos(a), 16 + 8 * math.sin(a)), (x1, y1)], fill=hexa("#CFF4FF"), width=1)
+            for lado in (-1, 1):
+                b = a + lado * 0.6
+                d.line([(16 + 12 * math.cos(a), 16 + 12 * math.sin(a)), (16 + 12 * math.cos(a) + 3 * math.cos(b),
+                         16 + 12 * math.sin(a) + 3 * math.sin(b))], fill=hexa("#9FE4FF"), width=1)
+    t = _batarangue_icone(fundo, (hexa("#3A5A78"), hexa("#E2F8FF"), hexa("#16283C")))
+    # Cápsula de nitrogênio no meio e gelo grudado na lâmina.
+    d = ImageDraw.Draw(t.img)
+    d.ellipse([13, 12, 18, 17], fill=hexa("#A8ECFF"), outline=hexa("#2C6A94"))
+    t.p(14, 13, hexa("#FFFFFF"))
+    for x, y in ((5, 12), (6, 11), (26, 12), (25, 11), (11, 20), (20, 20)):
+        t.p(x, y, hexa("#F0FCFF"))
+    return t
+
+
+def icone_batarangue_sonico():
+    def fundo(t):
+        # Ondas de som saindo dos dois lados.
+        d = ImageDraw.Draw(t.img)
+        for r, cor in ((14, "#6A4CFF"), (11, "#9A84FF"), (8, "#D4CBFF")):
+            d.arc([16 - r, 15 - r, 16 + r, 15 + r], start=150, end=210, fill=hexa(cor, 230), width=1)
+            d.arc([16 - r, 15 - r, 16 + r, 15 + r], start=330, end=30, fill=hexa(cor, 230), width=1)
+    t = _batarangue_icone(fundo, (hexa("#34304A"), hexa("#C9C0F0"), hexa("#14121E")))
+    # Emissor no centro: alto-falante redondo com o anel lilás aceso.
+    disco(t, 16, 15, 3.6, lambda x, y, dd: hexa("#B8A8FF") if dd > 2.4 else mistura(hexa("#2A2440"), hexa("#4A4270"), dd / 2.4))
+    t.p(15, 14, hexa("#F2EEFF"))
+    return t
+
+
+def icone_lancador_rede():
+    t = Tela(32, 32)
+    # Rede aberta voando (losango em perspectiva), estufada, com os pesos nas pontas.
+    cantos = [(16, 2), (30, 13), (17, 28), (2, 16)]
+
+    def ponto(u, v):
+        (ax, ay), (bx, by), (cx, cy), (dx, dy) = cantos
+        x = (1 - u) * (1 - v) * ax + u * (1 - v) * bx + u * v * cx + (1 - u) * v * dx
+        y = (1 - u) * (1 - v) * ay + u * (1 - v) * by + u * v * cy + (1 - u) * v * dy
+        barriga = 2.5 * math.sin(math.pi * u) * math.sin(math.pi * v)
+        return x + barriga * 0.4, y + barriga
+
+    # Rastro do disparo atrás da rede.
+    d = ImageDraw.Draw(t.img)
+    for k, (x0, y0) in enumerate(((0, 30), (3, 31), (0, 26))):
+        d.line([(x0, y0), (x0 + 5, y0 - 4)], fill=hexa("#C8D4EA", 150 - k * 30), width=1)
+    rede = Tela(32, 32)
+    dr = ImageDraw.Draw(rede.img)
+    n = 4
+    for i in range(n + 1):
+        k = i / n
+        borda = i in (0, n)
+        for j in range(16):
+            a, b = j / 16, (j + 1) / 16
+            # Corda clara em cima, sombra na metade de baixo (a barriga fica no escuro).
+            sombra = 0.25 + 0.5 * math.sin(math.pi * k) * math.sin(math.pi * (a + b) / 2)
+            cor = mistura(hexa("#C3CAD8") if borda else hexa("#9AA4B8"), hexa("#3C4356"), sombra)
+            dr.line([ponto(k, a), ponto(k, b)], fill=cor, width=1)
+            dr.line([ponto(a, k), ponto(b, k)], fill=cor, width=1)
+    contornar(rede, hexa("#0B0E18", 140))
+    t.img.alpha_composite(rede.img)
+    d = ImageDraw.Draw(t.img)
+    for (x, y) in cantos:
+        d.rectangle([x - 2, y - 1, x + 1, y + 2], fill=hexa("#5A6274"), outline=CONTORNO)
+        t.p(x - 1, y, hexa("#E2E8F2"))
+        t.p(x, y, hexa("#9AA4B8"))
+    return t
+
+
+def icone_disruptor():
+    t = Tela(32, 32)
+    d = ImageDraw.Draw(t.img)
+    # Arma do disruptor de lado: corpo escuro, antena em forquilha e o visor verde.
+    corpo = [(3, 19), (17, 17), (19, 20), (17, 23), (10, 24), (8, 29), (4, 29), (5, 24), (3, 23)]
+    d.polygon(corpo, fill=hexa("#2C3038"))
+    d.line([(3, 19), (17, 17)], fill=hexa("#7A8296"), width=1)
+    d.rectangle([9, 19, 12, 21], fill=hexa("#3AFF8A"))
+    t.p(9, 19, hexa("#D8FFE8"))
+    d.line([(17, 18), (22, 15)], fill=hexa("#5A6274"), width=2)
+    d.line([(17, 21), (22, 22)], fill=hexa("#5A6274"), width=2)
+    contornar(t)
+    # Pulso: arco elétrico até um alvo (a mira) e faíscas.
+    raio = [(22, 18), (24, 15), (26, 18), (28, 13), (30, 9)]
+    d.line(raio, fill=hexa("#3A7BFF"), width=3)
+    d.line(raio, fill=hexa("#E8F6FF"), width=1)
+    d.ellipse([24, 3, 31, 10], outline=hexa("#FF4A3A"))
+    d.line([(27, 2), (27, 4)], fill=hexa("#FF4A3A"))
+    d.line([(27, 9), (27, 11)], fill=hexa("#FF4A3A"))
+    brilho(t, 28, 7, 5, hexa("#7FC8FF"), 0.7)
+    for x, y in ((21, 14), (25, 20), (29, 15)):
+        t.p(x, y, hexa("#BFE6FF"))
+    return t
+
+
 EMBLEMAS["batman"] = emblema_batman
 ICONES.update({
     "gancho": icone_gancho,
@@ -937,6 +1038,10 @@ ICONES.update({
     "modo_detetive": icone_modo_detetive,
     "bomba_fumaca": icone_bomba_fumaca,
     "gel_explosivo": icone_gel_explosivo,
+    "batarangue_congelante": icone_batarangue_congelante,
+    "batarangue_sonico": icone_batarangue_sonico,
+    "lancador_rede": icone_lancador_rede,
+    "disruptor": icone_disruptor,
 })
 
 
