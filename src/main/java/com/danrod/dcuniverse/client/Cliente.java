@@ -47,6 +47,8 @@ public final class Cliente {
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "furtivo"), Furtivo::desenhar);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "visor"), Visor::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "salto"), Saltador::desenhar);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batwing"), Piloto::desenhar);
@@ -74,6 +76,7 @@ public final class Cliente {
             usando = false;
         });
         GuiaItem.abrir = GuiaScreen::abrir;
+        com.danrod.dcuniverse.core.EstadoCliente.batcomputador = BatcomputadorScreen::receber;
         Skins.registrar();
         Pecas.registrar();
         Voador.registrar();
@@ -81,6 +84,7 @@ public final class Cliente {
         Efeitos.registrarFeixe();
         RaioX.registrar();
         Detetive.registrar();
+        Visor.registrar();
         Saltador.registrar();
         Piloto.registrar();
     }

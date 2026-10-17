@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "G": "minecraft:gold_nugget",
+    "Q": "minecraft:quartz",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "QRQ",
+    "CGC",
+    "QRQ"
+  ],
+  "result": {
+    "id": "dcuniverse:placa_circuito",
+    "count": 2
+  }
+}

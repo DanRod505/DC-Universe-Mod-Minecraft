@@ -26,7 +26,32 @@
    "obter": true
   },
   {
+   "id": "minerio_prometio",
+   "cat": "minerio",
+   "obter": true
+  },
+  {
+   "id": "lingote_prometio",
+   "cat": "recurso",
+   "obter": true
+  },
+  {
    "id": "tecido_tatico",
+   "cat": "componente",
+   "obter": false
+  },
+  {
+   "id": "placa_circuito",
+   "cat": "componente",
+   "obter": false
+  },
+  {
+   "id": "componente_tecnologico",
+   "cat": "componente",
+   "obter": false
+  },
+  {
+   "id": "nucleo_energia",
    "cat": "componente",
    "obter": false
   },
@@ -51,7 +76,37 @@
    "obter": false
   },
   {
+   "id": "batarangue_simples",
+   "cat": "ferramenta",
+   "obter": false
+  },
+  {
+   "id": "gancho_escalada",
+   "cat": "ferramenta",
+   "obter": false
+  },
+  {
+   "id": "capa_planador",
+   "cat": "equipamento",
+   "obter": false
+  },
+  {
+   "id": "visor_tatico",
+   "cat": "equipamento",
+   "obter": false
+  },
+  {
    "id": "camara_solar",
+   "cat": "bloco",
+   "obter": false
+  },
+  {
+   "id": "carregador_tecnologico",
+   "cat": "bloco",
+   "obter": false
+  },
+  {
+   "id": "batcomputador",
    "cat": "bloco",
    "obter": false
   },
@@ -72,6 +127,38 @@
   }
  ],
  "receitas": [
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "B": "minecraft:black_dye",
+    "I": "minecraft:iron_ingot"
+   },
+   "pattern": [
+    " I ",
+    "IBI"
+   ],
+   "result": {
+    "id": "dcuniverse:batarangue_simples",
+    "count": 4
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "B": "minecraft:black_concrete",
+    "C": "dcuniverse:componente_tecnologico",
+    "P": "minecraft:glass_pane",
+    "T": "minecraft:crafter"
+   },
+   "pattern": [
+    "PPP",
+    "CTC",
+    "BBB"
+   ],
+   "result": {
+    "id": "dcuniverse:batcomputador"
+   }
+  },
   {
    "type": "minecraft:crafting_shaped",
    "key": {
@@ -106,6 +193,71 @@
   {
    "type": "minecraft:crafting_shaped",
    "key": {
+    "M": "minecraft:phantom_membrane",
+    "T": "dcuniverse:tecido_tatico"
+   },
+   "pattern": [
+    "T T",
+    "TMT",
+    "T T"
+   ],
+   "result": {
+    "id": "dcuniverse:capa_planador"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "I": "minecraft:iron_block",
+    "N": "dcuniverse:nucleo_energia",
+    "R": "minecraft:redstone_block"
+   },
+   "pattern": [
+    "IRI",
+    "INI",
+    "IRI"
+   ],
+   "result": {
+    "id": "dcuniverse:carregador_tecnologico"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "A": "dcuniverse:componente_tecnologico",
+    "B": "dcuniverse:tecido_tatico",
+    "C": "dcuniverse:batarangue_simples",
+    "N": "dcuniverse:nucleo_meta_1"
+   },
+   "pattern": [
+    "BCB",
+    "ANA",
+    "BAB"
+   ],
+   "result": {
+    "id": "dcuniverse:cinto_batman"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "C": "minecraft:comparator",
+    "I": "minecraft:iron_ingot",
+    "P": "dcuniverse:placa_circuito",
+    "R": "minecraft:redstone"
+   },
+   "pattern": [
+    "IPI",
+    "RCR",
+    "IPI"
+   ],
+   "result": {
+    "id": "dcuniverse:componente_tecnologico"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
     "A": "dcuniverse:cristal_kryptoniano",
     "B": "dcuniverse:tecido_tatico",
     "C": "minecraft:sunflower",
@@ -132,6 +284,22 @@
    }
   },
   {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "H": "minecraft:tripwire_hook",
+    "I": "minecraft:iron_ingot",
+    "S": "minecraft:string"
+   },
+   "pattern": [
+    "  H",
+    " S ",
+    "I  "
+   ],
+   "result": {
+    "id": "dcuniverse:gancho_escalada"
+   }
+  },
+  {
    "type": "minecraft:crafting_shapeless",
    "ingredients": [
     "minecraft:book",
@@ -139,6 +307,41 @@
    ],
    "result": {
     "id": "dcuniverse:guia_heroi"
+   }
+  },
+  {
+   "type": "minecraft:smelting",
+   "ingredient": "dcuniverse:minerio_prometio",
+   "result": {
+    "id": "dcuniverse:lingote_prometio"
+   },
+   "experience": 0.1,
+   "cookingtime": 200
+  },
+  {
+   "type": "minecraft:blasting",
+   "category": "misc",
+   "ingredient": "dcuniverse:minerio_prometio",
+   "result": {
+    "id": "dcuniverse:lingote_prometio"
+   },
+   "experience": 1.0,
+   "cookingtime": 100
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "C": "dcuniverse:componente_tecnologico",
+    "G": "minecraft:glowstone",
+    "P": "dcuniverse:lingote_prometio"
+   },
+   "pattern": [
+    "PGP",
+    "GCG",
+    "PGP"
+   ],
+   "result": {
+    "id": "dcuniverse:nucleo_energia"
    }
   },
   {
@@ -209,6 +412,24 @@
   {
    "type": "minecraft:crafting_shaped",
    "key": {
+    "C": "minecraft:copper_ingot",
+    "G": "minecraft:gold_nugget",
+    "Q": "minecraft:quartz",
+    "R": "minecraft:redstone"
+   },
+   "pattern": [
+    "QRQ",
+    "CGC",
+    "QRQ"
+   ],
+   "result": {
+    "id": "dcuniverse:placa_circuito",
+    "count": 2
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
     "I": "minecraft:iron_nugget",
     "L": "minecraft:leather",
     "S": "minecraft:string"
@@ -221,6 +442,21 @@
    "result": {
     "id": "dcuniverse:tecido_tatico",
     "count": 4
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "G": "minecraft:tinted_glass",
+    "I": "minecraft:iron_ingot",
+    "P": "dcuniverse:placa_circuito"
+   },
+   "pattern": [
+    "IPI",
+    "G G"
+   ],
+   "result": {
+    "id": "dcuniverse:visor_tatico"
    }
   }
  ]

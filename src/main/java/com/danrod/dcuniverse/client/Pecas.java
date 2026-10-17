@@ -104,6 +104,22 @@ public final class Pecas {
         return DEFS.computeIfAbsent(personagem, Pecas::ler);
     }
 
+    /** Capa Planadora (content/Equipamentos) de quem veste o item sem estar transformado: só capa e asa. */
+    private static final Def CAPA_PLANADORA = new Def(Set.of("capa", "planador"), Map.of(),
+        Identifier.fromNamespaceAndPath(com.danrod.dcuniverse.DCUniverse.MODID, "textures/skin/capa_planadora_capa.png"), null);
+
+    /** Peças de quem está sendo desenhado: as do personagem da skin, ou a Capa Planadora vestida no peito. */
+    static Def defDe(AvatarRenderState s) {
+        Def d = def(personagem(s.skin));
+        // (o estado de desenho só traz no peito o que tem modelo de armadura; a capa não tem, então olha o jogador)
+        if (d == null && s.id != Integer.MIN_VALUE && Minecraft.getInstance().level != null
+            && Minecraft.getInstance().level.getEntity(s.id) instanceof Player pl && com.danrod.dcuniverse.content.Equipamentos.vestindoCapa(pl)) {
+            s.showCape = false;
+            return CAPA_PLANADORA;
+        }
+        return d;
+    }
+
     static boolean temCapa(String personagem) {
         Def d = def(personagem);
         return d != null && d.pecas().contains("capa");
@@ -148,7 +164,7 @@ public final class Pecas {
         @Override
         public void submit(PoseStack ps, SubmitNodeCollector col, int luz, AvatarRenderState s, float yRot, float xRot) {
             if (s.isInvisible) return;
-            Def d = def(personagem(s.skin));
+            Def d = defDe(s);
             if (d == null) return;
             PlayerModel m = getParentModel();
             if (d.pecas().contains("musculoso")) musculos(ps, col, luz, s, m);
@@ -329,7 +345,7 @@ public final class Pecas {
     /** Antes de desenhar: anda a abertura da asa para o estado da capa (a pose deitada fica em client/Planador). */
     private static void planar(AvatarRenderState s) {
         if (s.id == Integer.MIN_VALUE) return;
-        Def d = def(personagem(s.skin));
+        Def d = defDe(s);
         if (d == null || !d.pecas().contains("planador")) {
             ASAS.remove(s.id);
             return;

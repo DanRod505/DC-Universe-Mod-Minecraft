@@ -44,6 +44,25 @@ public final class Itens {
     public static final RegistryObject<Item> NUCLEO_META_3 = item("nucleo_meta_3", p -> new Item(p.rarity(Rarity.RARE)));
     public static final RegistryObject<Item> NUCLEO_META_4 = item("nucleo_meta_4", p -> new Item(p.rarity(Rarity.EPIC).fireResistant()));
 
+    // Lote da v0.2: prométio e tecnologia (Batman)
+    public static final RegistryObject<Item> LINGOTE_PROMETIO = item("lingote_prometio", p -> new Item(p.rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> PLACA_CIRCUITO = item("placa_circuito", Item::new);
+    public static final RegistryObject<Item> COMPONENTE_TECNOLOGICO = item("componente_tecnologico", Item::new);
+    public static final RegistryObject<Item> NUCLEO_ENERGIA = item("nucleo_energia", p -> new Item(p.rarity(Rarity.RARE)));
+
+    // Equipamentos sem poderes (qualquer jogador usa)
+    public static final RegistryObject<Item> BATARANGUE_SIMPLES = item("batarangue_simples", p -> new BatarangueItem(p.stacksTo(16)));
+    public static final RegistryObject<Item> GANCHO_ESCALADA = item("gancho_escalada", p -> new GanchoItem(p.durability(GanchoItem.USOS)
+        .repairable(net.minecraft.world.item.Items.STRING)));
+    public static final RegistryObject<Item> CAPA_PLANADOR = item("capa_planador", p -> new Item(p.stacksTo(1)
+        .equippable(EquipmentSlot.CHEST).rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> VISOR_TATICO = item("visor_tatico", p -> new Item(p.durability(Equipamentos.VISOR_DURACAO)
+        .component(net.minecraft.core.component.DataComponents.EQUIPPABLE, net.minecraft.world.item.equipment.Equippable.builder(EquipmentSlot.HEAD)
+            .setAsset(net.minecraft.resources.ResourceKey.create(net.minecraft.world.item.equipment.EquipmentAssets.ROOT_ID,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(DCUniverse.MODID, "visor_tatico")))
+            .setEquipSound(net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_IRON).build())
+        .repairable(PLACA_CIRCUITO.get()).rarity(Rarity.UNCOMMON)));
+
     // Utilidades
     public static final RegistryObject<Item> GUIA_HEROI = item("guia_heroi", p -> new GuiaItem(p.stacksTo(1)));
 

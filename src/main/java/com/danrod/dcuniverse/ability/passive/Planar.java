@@ -4,6 +4,7 @@ import com.danrod.dcuniverse.ability.Passiva;
 import com.danrod.dcuniverse.character.EstadoJogador;
 import com.danrod.dcuniverse.character.Params;
 import com.danrod.dcuniverse.character.Personagem;
+import com.danrod.dcuniverse.content.Equipamentos;
 import com.danrod.dcuniverse.content.Sons;
 import com.danrod.dcuniverse.core.Rede;
 import com.danrod.dcuniverse.energy.Energia;
@@ -74,7 +75,8 @@ public final class Planar implements Passiva {
         if (estado < FECHADA || estado > FREIO) return;
         EstadoJogador e = EstadoJogador.de(player);
         Personagem pers = e.personagem();
-        if (estado != FECHADA && (pers == null || pers.passiva("glide") == null || !noAr(player))) estado = FECHADA;
+        boolean pode = pers == null ? Equipamentos.vestindoCapa(player) : pers.passiva("glide") != null;
+        if (estado != FECHADA && (!pode || !noAr(player))) estado = FECHADA;
         if (e.planar() == estado) return;
         boolean abriu = e.planar() == FECHADA;
         e.setPlanar(estado);
@@ -90,8 +92,14 @@ public final class Planar implements Passiva {
         long agora = player.level().getGameTime();
         if (tipo != ARREMETIDA && agora - r.manobraEm < MANOBRA_INTERVALO - 2) return;
         Personagem pers = e.personagem();
-        if (tipo == IMPULSO && !player.isCreative()
-            && !Energia.gastar(player, pers, pers.passiva("glide").params().f("boost_cost", IMPULSO_CUSTO))) return;
+        if (tipo == IMPULSO && !player.isCreative()) {
+            if (pers == null) {
+                // Capa Planadora sem herói: o impulso cansa em vez de gastar energia.
+                if (!Equipamentos.vestindoCapa(player) || player.getFoodData().getFoodLevel() < Equipamentos.CAPA_IMPULSO_MIN_FOME) return;
+                player.causeFoodExhaustion(Equipamentos.CAPA_IMPULSO_FOME);
+            } else if (pers.passiva("glide") == null
+                || !Energia.gastar(player, pers, pers.passiva("glide").params().f("boost_cost", IMPULSO_CUSTO))) return;
+        }
         if (tipo != ARREMETIDA) r.manobraEm = agora;
         ServerLevel lvl = player.level();
         Vec3 c = player.position().add(0, 0.9, 0);

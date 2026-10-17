@@ -89,6 +89,7 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.active.Fumaca.limpar();
         });
         Naturais.registrar();
+        com.danrod.dcuniverse.content.Batcomputador.registrar();
         com.danrod.dcuniverse.content.BatwingEntidade.registrar();
         com.danrod.dcuniverse.ability.Congelamento.registrar();
         com.danrod.dcuniverse.ability.active.Detetive.registrar();
@@ -102,6 +103,7 @@ public final class Eventos {
         EstadoJogador estado = EstadoJogador.de(player);
         if (!estado.transformado()) {
             if (player.tickCount % 20 == 0) Traje.verificar(player, null);
+            com.danrod.dcuniverse.content.Equipamentos.tick(player);
             return;
         }
         Transformacao.tick(player);

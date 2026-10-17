@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "minecraft:comparator",
+    "I": "minecraft:iron_ingot",
+    "P": "dcuniverse:placa_circuito",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "IPI",
+    "RCR",
+    "IPI"
+  ],
+  "result": {
+    "id": "dcuniverse:componente_tecnologico"
+  }
+}

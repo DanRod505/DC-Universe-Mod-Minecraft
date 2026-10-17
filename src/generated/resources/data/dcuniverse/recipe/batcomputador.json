@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:black_concrete",
+    "C": "dcuniverse:componente_tecnologico",
+    "P": "minecraft:glass_pane",
+    "T": "minecraft:crafter"
+  },
+  "pattern": [
+    "PPP",
+    "CTC",
+    "BBB"
+  ],
+  "result": {
+    "id": "dcuniverse:batcomputador"
+  }
+}

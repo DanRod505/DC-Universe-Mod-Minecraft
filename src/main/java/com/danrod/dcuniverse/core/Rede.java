@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 9;
+    private static final int VERSAO = 10;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -183,6 +183,60 @@ public final class Rede {
 
     public record Destransformar() {}
 
+    /** Custo de uma receita no Batcomputador: item que representa o ingrediente, quantos pede e quantos o jogador tem. */
+    public record BatCusto(String item, int qtd, int tem) {}
+
+    /** Receita que o Batcomputador fabrica: id da receita, resultado e se dá para fazer agora. */
+    public record BatFab(String receita, String item, int qtd, List<BatCusto> custos, boolean pode) {}
+
+    /** Abre (ou atualiza) a tela do Batcomputador: heroi = tem recarga tecnológica; recarga = segundos até recarregar de novo. */
+    public record BatAbrir(net.minecraft.core.BlockPos pos, boolean heroi, int recarga, List<BatFab> fabricaveis, List<String> analisados) {
+        public static void encode(BatAbrir m, FriendlyByteBuf b) {
+            b.writeBlockPos(m.pos);
+            b.writeBoolean(m.heroi);
+            b.writeVarInt(m.recarga);
+            b.writeVarInt(m.fabricaveis.size());
+            for (BatFab f : m.fabricaveis) {
+                b.writeUtf(f.receita());
+                b.writeUtf(f.item());
+                b.writeVarInt(f.qtd());
+                b.writeBoolean(f.pode());
+                b.writeVarInt(f.custos().size());
+                for (BatCusto c : f.custos()) {
+                    b.writeUtf(c.item());
+                    b.writeVarInt(c.qtd());
+                    b.writeVarInt(c.tem());
+                }
+            }
+            b.writeVarInt(m.analisados.size());
+            for (String a : m.analisados) b.writeUtf(a);
+        }
+
+        public static BatAbrir decode(FriendlyByteBuf b) {
+            var pos = b.readBlockPos();
+            boolean heroi = b.readBoolean();
+            int recarga = b.readVarInt();
+            int n = Math.min(b.readVarInt(), 256);
+            List<BatFab> fab = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                String receita = b.readUtf(), item = b.readUtf();
+                int qtd = b.readVarInt();
+                boolean pode = b.readBoolean();
+                int nc = Math.min(b.readVarInt(), 9);
+                List<BatCusto> cs = new ArrayList<>();
+                for (int j = 0; j < nc; j++) cs.add(new BatCusto(b.readUtf(), b.readVarInt(), b.readVarInt()));
+                fab.add(new BatFab(receita, item, qtd, List.copyOf(cs), pode));
+            }
+            int na = Math.min(b.readVarInt(), 256);
+            List<String> an = new ArrayList<>();
+            for (int i = 0; i < na; i++) an.add(b.readUtf());
+            return new BatAbrir(pos, heroi, recarga, List.copyOf(fab), List.copyOf(an));
+        }
+    }
+
+    /** Ação na tela do Batcomputador (content/Batcomputador.RECARREGAR, FABRICAR com o id da receita, ANALISAR com o item da amostra). */
+    public record BatAcao(net.minecraft.core.BlockPos pos, int tipo, String arg) {}
+
     /**
      * Efeito pontual no mundo para o cliente desenhar (onda do pisão, raio X, fortaleza, super-salto...):
      * tipo, posição e dois valores e uma cor livres, que cada tipo interpreta (client/Mundo).
@@ -320,6 +374,20 @@ public final class Rede {
                 if (bw != null) bw.comando(p, m.acao());
             }))
             .add();
+        CANAL.messageBuilder(BatAbrir.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(BatAbrir::encode).decoder(BatAbrir::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.batcomputador.accept(m))
+            .add();
+        CANAL.messageBuilder(BatAcao.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> {
+                b.writeBlockPos(m.pos());
+                b.writeVarInt(m.tipo());
+                b.writeUtf(m.arg());
+            }).decoder(b -> new BatAcao(b.readBlockPos(), b.readVarInt(), b.readUtf(256)))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.content.Batcomputador.acao(p, m)))
+            .add();
         CANAL.messageBuilder(Salto.class)
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> b.writeFloat(m.forca())).decoder(b -> new Salto(b.readFloat()))
@@ -377,7 +445,7 @@ public final class Rede {
     public static Aparencia montarAparencia(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0, 0);
+        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0, e.planar());
         Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
         boolean voando = Voo.voando(player);
         Personagem.Tipo voo = p.passiva("flight");
@@ -399,7 +467,12 @@ public final class Rede {
     public static Sync montar(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return e.amortecendo() ? new Sync("", 0, 0, false, 0, "", List.of(), 0, true, 0, false, false, 0, 0, false, false) : Sync.VAZIO;
+        if (p == null) {
+            // Sem herói, só a Capa Planadora (content/Equipamentos) dá o planar.
+            float capa = com.danrod.dcuniverse.content.Equipamentos.vestindoCapa(player) ? com.danrod.dcuniverse.content.Equipamentos.CAPA_VELOCIDADE : 0;
+            return e.amortecendo() || capa > 0
+                ? new Sync("", 0, 0, false, 0, "", List.of(), capa, e.amortecendo(), 0, false, false, 0, 0, false, false) : Sync.VAZIO;
+        }
         long agora = player.level().getGameTime();
         List<HabInfo> habs = new ArrayList<>();
         for (Personagem.Habilidade h : p.habilidades()) {

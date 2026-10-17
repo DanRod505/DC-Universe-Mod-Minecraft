@@ -127,7 +127,8 @@ public final class Planador {
     public static int estadoVisto(Minecraft mc, Player p) {
         if (p == mc.player) return estado;
         Rede.Aparencia a = EstadoCliente.APARENCIAS.get(p.getId());
-        if (a == null || p.onGround() || p.isInWater() || p.isPassenger()) return Planar.FECHADA;
+        if (p.onGround() || p.isInWater() || p.isPassenger()) return Planar.FECHADA;
+        if (a == null) return EstadoCliente.PLANAR_SEM_HEROI.getOrDefault(p.getId(), Planar.FECHADA);
         return a.planar();
     }
 
@@ -299,7 +300,9 @@ public final class Planador {
         if (tipo == Planar.IMPULSO) {
             Rede.Sync s = EstadoCliente.atual;
             if (Voador.ticks - ultimoImpulso < IMPULSO_INTERVALO) return;
-            if (!p.isCreative() && (s.esgotado() || Hud.energia(s, 0) < Planar.IMPULSO_CUSTO)) return;
+            if (!p.isCreative() && (s.personagem().isEmpty()
+                ? p.getFoodData().getFoodLevel() < com.danrod.dcuniverse.content.Equipamentos.CAPA_IMPULSO_MIN_FOME
+                : s.esgotado() || Hud.energia(s, 0) < Planar.IMPULSO_CUSTO)) return;
             ultimoImpulso = Voador.ticks;
             vel = Math.min(vel + c * IMPULSO, c * MAX_MERGULHO);
             rumo = rumo.add(0, 0.15, 0).normalize();

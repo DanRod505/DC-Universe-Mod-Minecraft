@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "M": "minecraft:phantom_membrane",
+    "T": "dcuniverse:tecido_tatico"
+  },
+  "pattern": [
+    "T T",
+    "TMT",
+    "T T"
+  ],
+  "result": {
+    "id": "dcuniverse:capa_planador"
+  }
+}

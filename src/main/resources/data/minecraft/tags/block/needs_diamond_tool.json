@@ -1,3 +1,6 @@
 {
-  "values": ["dcuniverse:minerio_kryptonita"]
+  "values": [
+    "dcuniverse:minerio_kryptonita",
+    "dcuniverse:minerio_prometio"
+  ]
 }

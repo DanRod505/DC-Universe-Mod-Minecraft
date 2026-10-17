@@ -67,6 +67,7 @@ public final class Testes {
         FUNCOES.register("smoke", () -> Testes::fumaca);
         FUNCOES.register("explosive_gel", () -> Testes::gel);
         FUNCOES.register("counter", () -> Testes::contraAtaque);
+        FUNCOES.register("batch_items", () -> Testes::loteItens);
     }
 
     private Testes() {}
@@ -722,6 +723,68 @@ public final class Testes {
         // Segundo golpe sem novo agachar: a janela já fechou.
         h.assertFalse(com.danrod.dcuniverse.ability.passive.ContraAtaque.defender(p, zumbi, zumbi), "fora da janela o golpe entra");
         zumbi.discard();
+        h.succeed();
+    }
+
+    /**
+     * Lote de itens da v0.2: prométio no mundo e na fornalha, Batcomputador (fabricar do inventário, análise de
+     * amostra com família, recarga do cinto) e a Capa Planadora dando o planar sem transformação.
+     */
+    static void loteItens(GameTestHelper h) {
+        var level = h.getLevel();
+        var minerio = net.minecraft.resources.ResourceKey.create(Registries.PLACED_FEATURE,
+            Identifier.fromNamespaceAndPath(DCUniverse.MODID, "minerio_prometio"));
+        h.assertTrue(level.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE).get(minerio).isPresent(), "veios de prométio no mundo");
+        var rm = level.getServer().getRecipeManager();
+        for (String r : List.of("lingote_prometio", "lingote_prometio_alto_forno", "batcomputador", "carregador_tecnologico", "cinto_batman")) {
+            h.assertTrue(rm.byKey(net.minecraft.resources.ResourceKey.create(Registries.RECIPE,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, r))).isPresent(), "receita " + r);
+        }
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        var pos = h.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1));
+        // Fabricar: o Componente Tecnológico sai direto do inventário, gastando só o que a receita pede.
+        var inv = p.getInventory();
+        inv.add(new ItemStack(Items.IRON_INGOT, 6));
+        inv.add(new ItemStack(Itens.PLACA_CIRCUITO.get(), 2));
+        inv.add(new ItemStack(Items.REDSTONE, 2));
+        inv.add(new ItemStack(Items.COMPARATOR));
+        com.danrod.dcuniverse.content.Batcomputador.fabricar(p, pos, "componente_tecnologico");
+        h.assertTrue(inv.countItem(Itens.COMPONENTE_TECNOLOGICO.get()) == 1, "fabricou o componente");
+        h.assertTrue(inv.countItem(Items.IRON_INGOT) == 2 && inv.countItem(Items.COMPARATOR) == 0, "gastou os ingredientes");
+        com.danrod.dcuniverse.content.Batcomputador.fabricar(p, pos, "componente_tecnologico");
+        h.assertTrue(inv.countItem(Itens.COMPONENTE_TECNOLOGICO.get()) == 1, "sem ingredientes não fabrica");
+        // Análise: carne podre registra o zumbi, e a família inteira (o zumbi do deserto também) fica analisada.
+        inv.add(new ItemStack(Items.ROTTEN_FLESH));
+        com.danrod.dcuniverse.content.Batcomputador.analisar(p, pos, "minecraft:rotten_flesh");
+        h.assertTrue(com.danrod.dcuniverse.content.Batcomputador.analisados(p).contains("minecraft:zombie"), "zumbi analisado");
+        h.assertTrue(inv.countItem(Items.ROTTEN_FLESH) == 0, "a amostra foi usada");
+        h.assertTrue(com.danrod.dcuniverse.content.Batcomputador.familia(net.minecraft.world.entity.EntityTypes.HUSK)
+            == net.minecraft.world.entity.EntityTypes.ZOMBIE, "família do zumbi");
+        h.assertTrue(Guia.concluida(p, "batcomputador"), "tarefa do Batcomputador");
+        // Capa Planadora: sem herói, só plana com a capa vestida.
+        h.assertTrue(Rede.montar(p).planar() == 0, "sem capa não plana");
+        p.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Itens.CAPA_PLANADOR.get()));
+        h.assertTrue(Rede.montar(p).planar() == com.danrod.dcuniverse.content.Equipamentos.CAPA_VELOCIDADE, "a capa dá o planar");
+        p.setOnGround(false);
+        com.danrod.dcuniverse.ability.passive.Planar.definir(p, com.danrod.dcuniverse.ability.passive.Planar.ABERTA);
+        h.assertTrue(EstadoJogador.de(p).planar() == com.danrod.dcuniverse.ability.passive.Planar.ABERTA, "abriu a capa no ar");
+        com.danrod.dcuniverse.ability.passive.Planar.definir(p, com.danrod.dcuniverse.ability.passive.Planar.FECHADA);
+        p.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+        p.setOnGround(false);
+        com.danrod.dcuniverse.ability.passive.Planar.definir(p, com.danrod.dcuniverse.ability.passive.Planar.ABERTA);
+        h.assertTrue(EstadoJogador.de(p).planar() == com.danrod.dcuniverse.ability.passive.Planar.FECHADA, "sem a capa não abre");
+        // Recarga do Batcomputador: enche a energia do Batman na hora, e só de novo depois do intervalo.
+        Transformacao.transformar(p, BATMAN, true);
+        Personagem bat = EstadoJogador.de(p).personagem();
+        EstadoJogador.de(p).setEnergia(0);
+        com.danrod.dcuniverse.content.Batcomputador.recarregar(p, pos);
+        h.assertTrue(EstadoJogador.de(p).energia() == bat.energia().max(), "energia cheia");
+        EstadoJogador.de(p).setEnergia(0);
+        com.danrod.dcuniverse.content.Batcomputador.recarregar(p, pos);
+        h.assertTrue(EstadoJogador.de(p).energia() == 0, "só recarrega de novo depois do intervalo");
+        com.danrod.dcuniverse.content.Batcomputador.resetar(p);
         h.succeed();
     }
 }

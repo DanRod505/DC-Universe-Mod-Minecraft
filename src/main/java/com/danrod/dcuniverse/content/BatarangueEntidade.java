@@ -21,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -63,6 +64,8 @@ public class BatarangueEntidade extends Projectile {
     private boolean guiado = true;
     private int voltandoHa;
     private Entity proximo;
+    /** O item que volta para o inventário de quem jogou (o batarangue do lote); vazio no do Batman. */
+    private ItemStack devolver = ItemStack.EMPTY;
 
     public BatarangueEntidade(EntityType<? extends BatarangueEntidade> tipo, Level level) {
         super(tipo, level);
@@ -90,6 +93,18 @@ public class BatarangueEntidade extends Projectile {
     protected void defineSynchedData(SynchedEntityData.Builder b) {
         b.define(VARIANTE, NORMAL);
         b.define(VOLTANDO, false);
+    }
+
+    /** O batarangue é um item de verdade: volta ao inventário quando pego, ou cai no chão se não puder voltar. */
+    public void devolver(ItemStack item) {
+        devolver = item;
+    }
+
+    /** Some sem voltar à mão: o item (se houver) cai onde o batarangue está. */
+    private void cair() {
+        if (!devolver.isEmpty() && level() instanceof ServerLevel l) spawnAtLocation(l, devolver);
+        devolver = ItemStack.EMPTY;
+        discard();
     }
 
     public int variante() {
@@ -135,7 +150,7 @@ public class BatarangueEntidade extends Projectile {
         }
         Entity dono = getOwner();
         if (dono == null || !dono.isAlive() || dono.level() != level()) {
-            discard();
+            cair();
             return;
         }
         if (tickCount % 5 == 1) level().playSound(null, getX(), getY(), getZ(), Sons.BATARANGUE_GIRO.get(), SoundSource.PLAYERS, 0.55f, 0.9f + random.nextFloat() * 0.2f);
@@ -386,6 +401,8 @@ public class BatarangueEntidade extends Projectile {
         double dist = d.length();
         if (dist < 1.3 || voltandoHa > 200) {
             level().playSound(null, dono.getX(), dono.getEyeY(), dono.getZ(), Sons.BATARANGUE_PEGA.get(), SoundSource.PLAYERS, 0.8f, 1f);
+            if (!devolver.isEmpty() && dono instanceof Player p && !p.getInventory().add(devolver)) p.drop(devolver, false);
+            devolver = ItemStack.EMPTY;
             discard();
             return;
         }
