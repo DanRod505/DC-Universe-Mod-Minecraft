@@ -39,6 +39,9 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import java.util.function.Consumer;
 
 /**
@@ -55,6 +58,8 @@ public class BatwingEntidade extends Entity {
     public static final float ESCALA = 1.9f;
     /** Altura do assento acima dos pés da entidade (o piloto senta afundado na fuselagem, a cabeça sob o vidro). */
     static final double ASSENTO_Y = 0.7;
+    /** Altura do plano da asa no modelo, onde o desenho gira (client/BatwingModelo.Y0), antes da escala. */
+    public static final float PIVO = 0.42f;
     public static final int TIRO_LIGA = 0, TIRO_DESLIGA = 1, MISSIL = 2, FURTIVO = 3;
     private static final Identifier CAMERA = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batwing_camera");
 
@@ -192,7 +197,33 @@ public class BatwingEntidade extends Entity {
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passageiro, EntityDimensions dim, float escala) {
         boolean piloto = passageiro.getId() == donoId();
-        return new Vec3(0, ASSENTO_Y, (piloto ? 0.75 : 0.2) * ESCALA).yRot(-getYRot() * Mth.DEG_TO_RAD);
+        // O assento gira com o jato inteiro (rumo, nariz e inclinação), em volta do mesmo pivô do desenho:
+        // assim quem está sentado acompanha a cabine nas curvas em vez de ficar parado onde ela estava.
+        float pivo = PIVO * ESCALA;
+        Vector3f v = rotacao(1).transform(new Vector3f(0, (float) ASSENTO_Y - pivo, (piloto ? 0.75f : 0.2f) * ESCALA));
+        return new Vec3(v.x, v.y + pivo, v.z);
+    }
+
+    /** A rotação com que o Batwing é desenhado (client/render/BatwingRenderer): rumo, depois nariz, depois inclinação. */
+    public Quaternionf rotacao(float pt) {
+        float yaw = Mth.rotLerp(pt, yRotO, getYRot()), pitch = Mth.lerp(pt, xRotO, getXRot()), roll = Mth.lerp(pt, rolagemO, rolagem);
+        return new Quaternionf().rotationY(-yaw * Mth.DEG_TO_RAD).rotateX(pitch * Mth.DEG_TO_RAD).rotateZ(roll * Mth.DEG_TO_RAD);
+    }
+
+    /** Só a inclinação do jato (nariz e asas) vista de fora, para girar o corpo de quem está sentado nele. */
+    public Quaternionf inclinacao(float pt) {
+        float yaw = Mth.rotLerp(pt, yRotO, getYRot());
+        return rotacao(pt).rotateY(yaw * Mth.DEG_TO_RAD);
+    }
+
+    @Override
+    protected void positionRider(Entity passageiro, MoveFunction mover) {
+        super.positionRider(passageiro, mover);
+        // Sentado de frente para o painel, como num barco: o corpo segue o jato, a cabeça olha livre.
+        if (passageiro instanceof LivingEntity vivo) {
+            vivo.setYBodyRot(getYRot());
+            vivo.yBodyRotO = yRotO;
+        }
     }
 
     @Override

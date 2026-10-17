@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -23,11 +24,16 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.ComputeFovModifierEvent;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.network.PacketDistributor;
 
+import org.joml.Vector3f;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -43,6 +49,10 @@ public final class Piloto {
     private static float rolagemCam;
     private static int batida;
     private static final Map<Integer, Motor> MOTORES = new HashMap<>();
+    /** Jogadores desenhados agora girados junto com o Batwing (o Post desfaz o giro do Pre). */
+    private static final Set<Integer> GIRADOS = new HashSet<>();
+    /** Altura do assento acima dos pés de quem está montado (Avatar.DEFAULT_VEHICLE_ATTACHMENT). */
+    private static final float ASSENTO = 0.6f;
 
     private Piloto() {}
 
@@ -67,6 +77,34 @@ public final class Piloto {
             e.setNewFovModifier(e.getNewFovModifier() * (1 + 0.22f * frac * frac));
         });
         ViewportEvent.ComputeCameraAngles.BUS.addListener(Piloto::camera);
+        // Quem está sentado no Batwing inclina com ele, girando em volta do próprio assento.
+        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
+            if (!(e.getState() instanceof AvatarRenderState s)) return false;
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.level == null || !(mc.level.getEntity(s.id) instanceof Entity p) || !(p.getVehicle() instanceof BatwingEntidade b)) return false;
+            var ps = e.getPoseStack();
+            ps.pushPose();
+            ps.translate(0, ASSENTO, 0);
+            ps.mulPose(b.inclinacao(mc.getDeltaTracker().getGameTimeDeltaPartialTick(false)));
+            ps.translate(0, -ASSENTO, 0);
+            GIRADOS.add(s.id);
+            return false;
+        });
+        RenderLivingEvent.Post.BUS.addListener(e -> {
+            if (e.getState() instanceof AvatarRenderState s && GIRADOS.remove(s.id)) e.getPoseStack().popPose();
+        });
+    }
+
+    /**
+     * Em primeira pessoa o olho fica na cabeça girada junto com o jato (mixin/CameraMixin), e não reto acima do
+     * assento: senão, inclinado numa curva, a câmera sairia da cabine.
+     * @return o quanto mover a câmera, ou null se a entidade não está num Batwing
+     */
+    public static Vec3 olhoNaCabine(Entity e, float pt) {
+        if (e == null || !(e.getVehicle() instanceof BatwingEntidade b)) return null;
+        float h = e.getEyeHeight() - ASSENTO;
+        Vector3f v = b.inclinacao(pt).transform(new Vector3f(0, h, 0));
+        return new Vec3(v.x, v.y - h, v.z);
     }
 
     public static void limpar() {
@@ -107,8 +145,14 @@ public final class Piloto {
         for (Entity e : mc.level.entitiesForRendering()) {
             if (e instanceof BatwingEntidade bw && bw.estado() != BatwingEntidade.CHEGANDO || e instanceof BatwingEntidade bw2 && bw2.tickCount > 8) {
                 Motor m = MOTORES.get(e.getId());
+                // Dentro do jato o motor toca junto do ouvinte; quem embarca ou salta troca de som.
+                boolean dentro = mc.player.getVehicle() == e;
+                if (m != null && !m.isStopped() && m.dentro != dentro) {
+                    mc.getSoundManager().stop(m);
+                    m = null;
+                }
                 if (m == null || m.isStopped()) {
-                    m = new Motor((BatwingEntidade) e);
+                    m = new Motor((BatwingEntidade) e, dentro);
                     MOTORES.put(e.getId(), m);
                     mc.getSoundManager().play(m);
                 }
@@ -247,19 +291,30 @@ public final class Piloto {
 
     // ------------------------------------------------------------------ motor
 
-    /** Ronco do motor preso a um Batwing: o tom sobe com a velocidade; no modo furtivo quase some. */
+    /**
+     * Ronco do motor preso a um Batwing: o tom sobe com a velocidade; no modo furtivo quase some. Para quem está
+     * dentro, o som não tem posição (fica com o ouvinte): com a câmera de terceira pessoa a uns 11 blocos, um som
+     * preso ao jato chegava baixo, de lado e aos trancos, porque o jato pula de posição a cada tick e a câmera não.
+     */
     private static final class Motor extends AbstractTickableSoundInstance {
         private final BatwingEntidade b;
+        final boolean dentro;
 
-        Motor(BatwingEntidade b) {
+        Motor(BatwingEntidade b, boolean dentro) {
             super(Sons.BATWING_MOTOR.get(), SoundSource.NEUTRAL, b.getRandom());
             this.b = b;
+            this.dentro = dentro;
             this.looping = true;
             this.delay = 0;
             this.volume = 0.01f;
-            this.x = b.getX();
-            this.y = b.getY();
-            this.z = b.getZ();
+            if (dentro) {
+                this.relative = true;
+                this.attenuation = Attenuation.NONE;
+            } else {
+                this.x = b.getX();
+                this.y = b.getY();
+                this.z = b.getZ();
+            }
         }
 
         @Override
@@ -273,6 +328,7 @@ public final class Piloto {
             float alvo = b.oculto() ? 0.18f : 0.9f;
             volume += (alvo - volume) * 0.15f;
             pitch = (float) Mth.clamp(0.7 + v * 0.32, 0.6, 1.8);
+            if (dentro) return;
             x = b.getX();
             y = b.getY();
             z = b.getZ();

@@ -1,5 +1,6 @@
 package com.danrod.dcuniverse.client;
 
+import com.danrod.dcuniverse.content.BatwingEntidade;
 import org.joml.Vector3f;
 
 /**
@@ -12,7 +13,7 @@ import org.joml.Vector3f;
  */
 public final class BatwingModelo {
     /** Altura do plano da asa acima dos pés da entidade. */
-    public static final float Y0 = 0.42f;
+    public static final float Y0 = BatwingEntidade.PIVO;
     public static final float MEIA_ENVERGADURA = 3.45f;
     private static final float TW = 256, TH = 128;
 
