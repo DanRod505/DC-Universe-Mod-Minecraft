@@ -53,6 +53,19 @@ public final class Sons {
     public static final RegistryObject<SoundEvent> GEL_DETONA = som("habilidade.gel_detona");
     public static final RegistryObject<SoundEvent> CONTRA_ATAQUE = som("habilidade.contra_ataque");
 
+    // Batman (v0.2): veículos da garagem (Batmóvel, Batmoto, Batbarco)
+    public static final RegistryObject<SoundEvent> BATMOVEL_MOTOR = som("habilidade.batmovel_motor");
+    public static final RegistryObject<SoundEvent> BATMOVEL_CHEGA = som("habilidade.batmovel_chega");
+    public static final RegistryObject<SoundEvent> BATMOTO_MOTOR = som("habilidade.batmoto_motor");
+    public static final RegistryObject<SoundEvent> BATMOTO_CHEGA = som("habilidade.batmoto_chega");
+    public static final RegistryObject<SoundEvent> BATBARCO_MOTOR = som("habilidade.batbarco_motor");
+    public static final RegistryObject<SoundEvent> BATBARCO_EMERGE = som("habilidade.batbarco_emerge");
+    public static final RegistryObject<SoundEvent> BATBARCO_MERGULHA = som("habilidade.batbarco_mergulha");
+    public static final RegistryObject<SoundEvent> BATBARCO_TORPEDO = som("habilidade.batbarco_torpedo");
+    public static final RegistryObject<SoundEvent> VEICULO_PNEU = som("habilidade.veiculo_pneu");
+    public static final RegistryObject<SoundEvent> VEICULO_TURBO = som("habilidade.veiculo_turbo");
+    public static final RegistryObject<SoundEvent> VEICULO_ATROPELA = som("habilidade.veiculo_atropela");
+
     private Sons() {}
 
     private static RegistryObject<SoundEvent> som(String nome) {

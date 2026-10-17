@@ -40,5 +40,20 @@ public final class Entidades {
             .noLootTable().sized(0.6f, 0.4f).clientTrackingRange(6).updateInterval(1)
             .build(TIPOS.key("rede")));
 
+    public static final RegistryObject<EntityType<VeiculoBat>> BATMOVEL = TIPOS.register("batmovel",
+        () -> EntityType.Builder.<VeiculoBat>of(VeiculoBat::new, MobCategory.MISC)
+            .noLootTable().sized(2.4f, 1.4f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("batmovel")));
+
+    public static final RegistryObject<EntityType<VeiculoBat>> BATMOTO = TIPOS.register("batmoto",
+        () -> EntityType.Builder.<VeiculoBat>of(VeiculoBat::new, MobCategory.MISC)
+            .noLootTable().sized(1.1f, 1.2f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("batmoto")));
+
+    public static final RegistryObject<EntityType<VeiculoBat>> BATBARCO = TIPOS.register("batbarco",
+        () -> EntityType.Builder.<VeiculoBat>of(VeiculoBat::new, MobCategory.MISC)
+            .noLootTable().sized(2.6f, 1.1f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("batbarco")));
+
     private Entidades() {}
 }

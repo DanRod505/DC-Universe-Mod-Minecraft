@@ -30,9 +30,10 @@ public final class Habilidades {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
         if (p == null || player.isSpectator()) return;
-        // Pilotando o veículo da suprema, a tecla de uso é dele (modo furtivo do Batwing).
-        if (com.danrod.dcuniverse.content.BatwingEntidade.pilotando(player) != null) {
-            if (pressionado) com.danrod.dcuniverse.content.BatwingEntidade.pilotando(player).comando(player, com.danrod.dcuniverse.content.BatwingEntidade.FURTIVO);
+        // Pilotando o veículo da suprema, a tecla de uso é dele (modo furtivo do Batwing, casco elétrico do Batmóvel...).
+        var veiculo = com.danrod.dcuniverse.content.VeiculoDono.pilotando(player);
+        if (veiculo != null) {
+            if (pressionado) veiculo.comando(player, com.danrod.dcuniverse.content.VeiculoDono.ESPECIAL);
             return;
         }
         if (!pressionado) {

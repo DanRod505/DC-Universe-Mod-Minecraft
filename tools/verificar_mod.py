@@ -156,7 +156,8 @@ def verificar_personagens(raiz, recursos, erros):
                 erros.append(f"{nome}: scale = {c.get('scale', 1.0)}, mas a altura de {corpo['altura']} m pede {escala}")
             verificar_pecas(recursos, nome, corpo, erros)
         supremas = [h for h in c.get("abilities", []) if h.get("supreme")]
-        if len(supremas) > 1:
+        # Mais de uma só com cinto, e todas veículos: o jogador escolhe na Garagem do Batcomputador qual leva.
+        if len(supremas) > 1 and not ("belt" in c and all(h.get("type") == "vehicle" for h in supremas)):
             erros.append(f"{nome}: mais de uma suprema")
         for h in supremas:
             if not 60 <= h.get("cost_pct", 0) <= 80:

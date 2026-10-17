@@ -111,6 +111,11 @@ public final class EstadoJogador {
         return tag.getCompoundOrEmpty("recargas").getLongOr(habilidade, 0L);
     }
 
+    /** Zera todas as recargas (comando /dcu ready). */
+    public void limparRecargas() {
+        tag.remove("recargas");
+    }
+
     public void setProntaEm(String habilidade, long tick) {
         CompoundTag r = tag.getCompoundOrEmpty("recargas");
         r.putLong(habilidade, tick);

@@ -52,6 +52,8 @@ public final class Cliente {
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "salto"), Saltador::desenhar);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batwing"), Piloto::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "veiculo"), Motorista::desenhar);
         });
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> {
             e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new);
@@ -60,6 +62,9 @@ public final class Cliente {
             e.registerEntityRenderer(Entidades.MISSIL.get(), MissilRenderer::new);
             e.registerEntityRenderer(Entidades.GEL.get(), com.danrod.dcuniverse.client.render.GelRenderer::new);
             e.registerEntityRenderer(Entidades.REDE.get(), com.danrod.dcuniverse.client.render.RedeRenderer::new);
+            e.registerEntityRenderer(Entidades.BATMOVEL.get(), com.danrod.dcuniverse.client.render.VeiculoRenderer::new);
+            e.registerEntityRenderer(Entidades.BATMOTO.get(), com.danrod.dcuniverse.client.render.VeiculoRenderer::new);
+            e.registerEntityRenderer(Entidades.BATBARCO.get(), com.danrod.dcuniverse.client.render.VeiculoRenderer::new);
         });
         TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
         ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> {
@@ -74,6 +79,7 @@ public final class Cliente {
             Saltador.limpar();
             Gancheador.limpar();
             Piloto.limpar();
+            Motorista.limpar();
             usando = false;
         });
         GuiaItem.abrir = GuiaScreen::abrir;
@@ -88,6 +94,7 @@ public final class Cliente {
         Visor.registrar();
         Saltador.registrar();
         Piloto.registrar();
+        Motorista.registrar();
     }
 
     private static void tick() {
@@ -125,6 +132,7 @@ public final class Cliente {
         Mundo.tick(mc);
         Gancheador.tick(mc);
         Piloto.tick(mc);
+        Motorista.tick(mc);
         if (mc.level != null) SomCanal.tick(mc, mc.level);
     }
 }

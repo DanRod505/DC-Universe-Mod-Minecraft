@@ -42,15 +42,15 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Tela do Batcomputador (content/Batcomputador decide tudo no servidor). Painel escuro com acentos ciano, quatro abas
- * (Gadgets, Fabricar, Análise, Mapa), uma linha de varredura descendo e o rodapé com o estado do sistema.
+ * Tela do Batcomputador (content/Batcomputador decide tudo no servidor). Painel escuro com acentos ciano, cinco abas
+ * (Gadgets, Garagem, Fabricar, Análise, Mapa), uma linha de varredura descendo e o rodapé com o estado do sistema.
  */
 public final class BatcomputadorScreen extends Screen {
     private static final int W = 340, H = 232;
     private static final int FUNDO = 0xF2080C14, FUNDO2 = 0xFF0E1522, CIANO = 0xFF39C8F0, CIANO_ESC = 0xFF15506A,
         TEXTO = 0xFFDDE8F0, SUAVE = 0xFF7F93A6, VERMELHO = 0xFFFF5548, VERDE = 0xFF5CE08A, OURO = 0xFFFFC857;
 
-    enum Aba { GADGETS, FABRICAR, ANALISE, MAPA }
+    enum Aba { GADGETS, GARAGEM, FABRICAR, ANALISE, MAPA }
 
     private static Aba ultimaAba = Aba.GADGETS;
     private Rede.BatAbrir dados;
@@ -153,6 +153,7 @@ public final class BatcomputadorScreen extends Screen {
         borda(g, cx, cy, cw, ch, 0xFF13324A);
         switch (aba) {
             case GADGETS -> gadgets(g, cx, cy, cw, ch, mx, my);
+            case GARAGEM -> garagem(g, cx, cy, cw, ch, mx, my, t);
             case FABRICAR -> fabricar(g, cx, cy, cw, ch, mx, my);
             case ANALISE -> analise(g, cx, cy, cw, ch, mx, my, pt);
             case MAPA -> mapa(g, cx, cy, cw, ch, t);
@@ -522,6 +523,94 @@ public final class BatcomputadorScreen extends Screen {
         });
     }
 
+    // ---------------------------------------------------------------- garagem
+
+    private static final int CARTAO_W = 74, CARTAO_H = 48;
+    private final Map<String, Entity> vitrine = new HashMap<>();
+
+    private int cartaoX(int x, int w, int i) {
+        int n = Math.max(1, dados.cinto().veiculos().size());
+        return x + (w - n * CARTAO_W - (n - 1) * 5) / 2 + i * (CARTAO_W + 5);
+    }
+
+    /** Veículo de mentira para a vitrine (fora do mundo, com id próprio negativo). */
+    private Entity vitrine(String id) {
+        if (minecraft.level == null) return null;
+        return vitrine.computeIfAbsent(id, k -> {
+            EntityType<?> tipo = switch (k) {
+                case "batmovel" -> com.danrod.dcuniverse.content.Entidades.BATMOVEL.get();
+                case "batmoto" -> com.danrod.dcuniverse.content.Entidades.BATMOTO.get();
+                case "batbarco" -> com.danrod.dcuniverse.content.Entidades.BATBARCO.get();
+                default -> com.danrod.dcuniverse.content.Entidades.BATWING.get();
+            };
+            Entity e = tipo.create(minecraft.level, EntitySpawnReason.LOAD);
+            if (e != null) e.setId(-2_000_000 - vitrine.size());
+            return e;
+        });
+    }
+
+    /**
+     * Aba Garagem: os veículos que a suprema pode chamar, cada um girando numa vitrine; clicar escolhe. Embaixo,
+     * os números do veículo sob o mouse (ou do escolhido).
+     */
+    private void garagem(GuiGraphicsExtractor g, int x, int y, int w, int h, int mx, int my, float t) {
+        Rede.BatCinto c = dados.cinto();
+        if (c.veiculos().size() < 2) {
+            paragrafo(g, Component.translatable("dcuniverse.batcomputador.gadgets.sem_cinto"), x + 8, y + 8, w - 16, SUAVE);
+            return;
+        }
+        g.text(font, Component.translatable("dcuniverse.batcomputador.garagem.titulo").withStyle(ChatFormatting.BOLD), x + 8, y + 5, CIANO, false);
+        String foco = c.veiculo();
+        for (int i = 0; i < c.veiculos().size(); i++) {
+            String id = c.veiculos().get(i);
+            int cx = cartaoX(x, w, i), cy = y + 18;
+            boolean esc = id.equals(c.veiculo()), sobre = sobre(mx, my, cx, cy, CARTAO_W, CARTAO_H);
+            if (sobre) foco = id;
+            g.fill(cx, cy, cx + CARTAO_W, cy + CARTAO_H, esc ? 0xFF102A3A : sobre ? 0xFF0F2030 : 0xFF0A141E);
+            borda(g, cx, cy, CARTAO_W, CARTAO_H, esc ? OURO : sobre ? CIANO : CIANO_ESC);
+            iconeHab(g, id, cx + (CARTAO_W - 32) / 2, cy + 3, 32, esc || sobre ? -1 : 0xFFB0B8C8);
+            Component nome = Component.translatable("habilidade.dcuniverse." + id);
+            g.centeredText(font, nome, cx + CARTAO_W / 2, cy + 37, esc ? OURO : TEXTO);
+            if (esc) {
+                Component tag = Component.translatable("dcuniverse.batcomputador.garagem.escolhido");
+                int tw = font.width(tag) + 6;
+                g.fill(cx + CARTAO_W - tw - 2, cy + 2, cx + CARTAO_W - 2, cy + 12, OURO);
+                g.text(font, tag, cx + CARTAO_W - tw + 1, cy + 3, 0xFF1A1206, false);
+            }
+        }
+        // Ficha do veículo em foco: ele girando numa vitrine à esquerda (uma só por tela: o desenho de entidade da
+        // interface reaproveita a mesma textura) e o texto à direita.
+        int fy = y + 18 + CARTAO_H + 6, fh = y + h - 6 - fy;
+        g.fill(x + 6, fy, x + w - 6, y + h - 6, 0x80081018);
+        borda(g, x + 6, fy, w - 12, fh, 0xFF13324A);
+        int vw = 124;
+        for (int k = 0; k < 8; k++) g.fill(x + 8, fy + fh - 26 + k * 3, x + 6 + vw, fy + fh - 25 + k * 3, ((0x10 + k * 8) << 24) | 0x39C8F0);
+        Entity e = vitrine(foco);
+        if (e != null) {
+            var r = minecraft.getEntityRenderDispatcher().getRenderer(e);
+            var st = r.createRenderState(e, 1f);
+            st.shadowPieces.clear();
+            st.outlineColor = 0;
+            float escala = switch (foco) {
+                case "batmoto" -> 30f;
+                case "batwing" -> 8f;
+                default -> 15f;
+            };
+            float giro = (t * 1.6f) % 360;
+            org.joml.Quaternionf rot = new org.joml.Quaternionf().rotateZ((float) Math.PI).rotateX(-0.38f).rotateY(giro * Mth.DEG_TO_RAD);
+            g.entity(st, escala, new org.joml.Vector3f(0, foco.equals("batwing") ? 0.6f : 0.55f, 0), rot, null, x + 7, fy + 1, x + 6 + vw, fy + fh - 1);
+        }
+        g.fill(x + 6 + vw, fy + 4, x + 7 + vw, fy + fh - 4, 0xFF13324A);
+        int tx = x + 12 + vw, tw = x + w - 12 - tx;
+        g.text(font, Component.translatable("habilidade.dcuniverse." + foco).withStyle(ChatFormatting.BOLD), tx, fy + 6, foco.equals(c.veiculo()) ? OURO : TEXTO, false);
+        Component papel = Component.translatable("dcuniverse.batcomputador.garagem." + foco + ".papel");
+        g.text(font, papel, x + w - 12 - font.width(papel), fy + 6, CIANO, false);
+        paragrafo(g, Component.translatable("dcuniverse.batcomputador.garagem." + foco + ".resumo"), tx, fy + 19, tw, SUAVE);
+        Component dica = foco.equals(c.veiculo()) ? Component.translatable("dcuniverse.batcomputador.garagem.escolhido_dica")
+            : Component.translatable("dcuniverse.batcomputador.garagem.dica");
+        g.text(font, dica, tx, fy + fh - 13, foco.equals(c.veiculo()) ? OURO : CIANO, false);
+    }
+
     // ---------------------------------------------------------------- mapa
 
     private void mapa(GuiGraphicsExtractor g, int x, int y, int w, int h, float t) {
@@ -662,6 +751,15 @@ public final class BatcomputadorScreen extends Screen {
         switch (aba) {
             case GADGETS -> {
                 if (cliqueGadgets(mx, my, x, y, cw, ch, false)) return true;
+            }
+            case GARAGEM -> {
+                Rede.BatCinto c = dados.cinto();
+                for (int i = 0; i < c.veiculos().size(); i++) {
+                    if (sobre(mx, my, cartaoX(x, cw, i), y + 18, CARTAO_W, CARTAO_H)) {
+                        if (!c.veiculos().get(i).equals(c.veiculo())) enviar(Batcomputador.VEICULO, c.veiculos().get(i));
+                        return true;
+                    }
+                }
             }
             case FABRICAR -> {
                 List<Rede.BatFab> fab = dados.fabricaveis();

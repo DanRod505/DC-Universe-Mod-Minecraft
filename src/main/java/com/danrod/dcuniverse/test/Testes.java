@@ -71,6 +71,7 @@ public final class Testes {
         FUNCOES.register("utility_belt", () -> Testes::cinto);
         FUNCOES.register("new_gadgets", () -> Testes::gadgetsNovos);
         FUNCOES.register("freeze_sonic", () -> Testes::batarangues);
+        FUNCOES.register("garage", () -> Testes::garagem);
     }
 
     private Testes() {}
@@ -750,12 +751,62 @@ public final class Testes {
         h.assertValueEqual(sup.id(), "batwing", "a suprema é o Batwing");
         h.assertTrue(Habilidades.executar(p, bat, sup), "invoca o Batwing");
         h.assertValueEqual(e.energia(), bat.energia().max() * 0.25f, "custa 75% da energia");
-        var bw = com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+        var bw = (com.danrod.dcuniverse.content.BatwingEntidade) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
         h.assertTrue(bw != null && bw.isAlive(), "Batwing no mundo");
         // (Embarcar teleporta o jogador, o que o jogador de teste não suporta: testado no jogo.)
         Transformacao.destransformar(p);
         h.assertValueEqual(bw.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "o Batwing vai embora");
         bw.discard();
+        com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        h.succeed();
+    }
+
+    /**
+     * Garagem: o veículo escolhido no Batcomputador é o que a suprema chama; chamar de novo o mesmo não gasta nada;
+     * o Batbarco precisa de água funda e, quando vem, o veículo antigo vai embora.
+     */
+    static void garagem(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        h.assertTrue(com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "batmoto"), "escolhe a Batmoto");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "gancho"), "o gancho não é veículo");
+        Personagem.Habilidade sup = com.danrod.dcuniverse.character.Cinto.suprema(p, bat);
+        h.assertValueEqual(sup.id(), "batmoto", "a suprema agora é a Batmoto");
+        var equipadas = com.danrod.dcuniverse.character.Cinto.equipadas(p, bat);
+        h.assertValueEqual(equipadas.get(equipadas.size() - 1).id(), "batmoto", "no menu radial vai a Batmoto");
+        e.setEnergia(bat.energia().max());
+        h.assertTrue(Habilidades.executar(p, bat, sup), "chama a Batmoto");
+        var moto = com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+        h.assertTrue(moto instanceof com.danrod.dcuniverse.content.VeiculoBat v && v.modelo().equals("batmoto"), "Batmoto no mundo");
+        float depois = e.energia();
+        h.assertTrue(depois < bat.energia().max(), "a primeira chamada custa");
+        Habilidades.executar(p, bat, sup);
+        h.assertValueEqual(e.energia(), depois, "chamar de novo a mesma não custa");
+        // Batbarco sem água: não vem, e a Batmoto fica.
+        com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "batbarco");
+        Personagem.Habilidade barco = com.danrod.dcuniverse.character.Cinto.suprema(p, bat);
+        e.setProntaEm(barco.id(), 0);
+        e.setEnergia(bat.energia().max());
+        h.assertFalse(Habilidades.executar(p, bat, barco), "sem água o Batbarco não vem");
+        h.assertValueEqual(e.energia(), bat.energia().max(), "e não gasta");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Veiculo.de(p) == moto, "a Batmoto continua");
+        // Com um lago do lado, ele emerge e a Batmoto vai embora.
+        for (int x = 3; x <= 7; x++)
+            for (int z = 0; z <= 4; z++)
+                for (int y = -2; y <= 0; y++) h.setBlock(x, 1 + y, z, net.minecraft.world.level.block.Blocks.WATER);
+        h.assertTrue(Habilidades.executar(p, bat, barco), "com água o Batbarco vem");
+        var b = com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+        h.assertTrue(b instanceof com.danrod.dcuniverse.content.VeiculoBat v && v.modelo().equals("batbarco"), "Batbarco no mundo");
+        h.assertValueEqual(((com.danrod.dcuniverse.content.VeiculoDono) moto).estado(), com.danrod.dcuniverse.content.VeiculoDono.INDO, "a Batmoto vai embora");
+        Transformacao.destransformar(p);
+        h.assertValueEqual(((com.danrod.dcuniverse.content.VeiculoDono) b).estado(), com.danrod.dcuniverse.content.VeiculoDono.INDO, "o Batbarco vai embora");
+        moto.discard();
+        b.discard();
+        com.danrod.dcuniverse.character.Cinto.resetar(p);
         com.danrod.dcuniverse.ability.active.Veiculo.limpar();
         h.succeed();
     }

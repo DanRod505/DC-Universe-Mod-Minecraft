@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Em primeira pessoa no Batwing, o olho acompanha a cabeça inclinada junto com o jato (client/Piloto). */
+/** Em primeira pessoa no Batwing (e nos outros veículos), o olho acompanha a cabeça inclinada junto com o jato (client/Piloto). */
 @Mixin(Camera.class)
 public abstract class CameraMixin {
     @Shadow
@@ -29,6 +29,7 @@ public abstract class CameraMixin {
     private void dcuniverse$cabine(float partialTicks, CallbackInfo ci) {
         if (isDetached()) return;
         Vec3 d = Piloto.olhoNaCabine(entity(), partialTicks);
+        if (d == null) d = com.danrod.dcuniverse.client.Motorista.olhoNoBanco(entity(), partialTicks);
         if (d != null) setPosition(position().add(d));
     }
 }

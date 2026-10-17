@@ -403,8 +403,8 @@ public final class Rede {
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> b.writeVarInt(m.acao())).decoder(b -> new Veiculo(b.readVarInt()))
             .consumerMainThread((m, ctx) -> comJogador(ctx, p -> {
-                var bw = com.danrod.dcuniverse.content.BatwingEntidade.pilotando(p);
-                if (bw != null) bw.comando(p, m.acao());
+                var v = com.danrod.dcuniverse.content.VeiculoDono.pilotando(p);
+                if (v != null) v.comando(p, m.acao());
             }))
             .add();
         CANAL.messageBuilder(BatAbrir.class)

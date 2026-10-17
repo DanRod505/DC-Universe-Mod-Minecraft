@@ -1028,6 +1028,102 @@ def icone_disruptor():
     return t
 
 
+def _carroceria(t, pontos, topo, base):
+    """Pinta um polígono com luz na borda de cima e degradê até embaixo."""
+    m = mascara(32, 32, lambda d, e: d.polygon(escalar(pontos, e), fill=255))
+    px = m.load()
+    ys = [y for y in range(32) for x in range(32) if px[x, y]]
+    y0, y1 = min(ys), max(ys)
+    for y in range(32):
+        for x in range(32):
+            if px[x, y]:
+                cima = y == 0 or not px[x, y - 1]
+                t.p(x, y, topo if cima else mistura(base[0], base[1], (y - y0) / max(1, y1 - y0)))
+
+
+def _roda(t, cx, cy, r):
+    disco(t, cx, cy, r, lambda x, y, dd: hexa("#15171C") if dd > r - 1.6 else mistura(hexa("#8A93A8"), hexa("#3A4050"), dd / r))
+    t.p(cx, cy, hexa("#D9AC3E"))
+
+
+def icone_batmovel():
+    t = Tela(32, 32)
+    d = ImageDraw.Draw(t.img)
+    # Asfalto e a luz do farol no chão.
+    d.line([(0, 26), (31, 26)], fill=hexa("#2A2F3A"))
+    # Batmóvel de lado, indo para a direita: nariz baixo, cabine recuada e a barbatana de morcego atrás.
+    corpo = [(1, 22), (2, 17), (5, 15), (7, 9), (9, 9), (11, 14), (14, 12), (19, 12), (23, 15), (30, 18),
+             (31, 21), (29, 23), (3, 23)]
+    _carroceria(t, corpo, hexa("#5A6276"), (hexa("#2A2E38"), hexa("#0E1014")))
+    contornar(t, CONTORNO)
+    d.polygon([(15, 13), (19, 13), (22, 15), (14, 15)], fill=hexa("#3A6EA8"))
+    t.p(18, 13, hexa("#BFE0FF"))
+    # Filete âmbar ao longo da lateral.
+    d.line([(6, 19), (27, 19)], fill=hexa("#D98A2A"))
+    _roda(t, 7, 23, 4)
+    _roda(t, 25, 23, 3)
+    # Farol e lanterna.
+    t.p(30, 19, hexa("#FFF4C8"))
+    t.p(31, 19, hexa("#FFFFFF"))
+    brilho(t, 31, 19, 4, hexa("#FFE8A0"), 0.8)
+    t.p(1, 19, hexa("#FF3A2A"))
+    t.p(2, 19, hexa("#FF7A5A"))
+    # Chama do turbo.
+    d.line([(0, 17), (1, 17)], fill=hexa("#7FD0FF"))
+    brilho(t, 0, 17, 3, hexa("#3A7BFF"), 0.6)
+    return t
+
+
+def icone_batmoto():
+    t = Tela(32, 32)
+    d = ImageDraw.Draw(t.img)
+    d.line([(0, 29), (31, 29)], fill=hexa("#2A2F3A"))
+    _roda(t, 7, 24, 5)
+    _roda(t, 25, 24, 5)
+    # Garfo dianteiro e braço traseiro ligando as rodas à carenagem.
+    d.line([(25, 24), (22, 15)], fill=hexa("#7A8296"), width=2)
+    d.line([(7, 24), (13, 19)], fill=hexa("#4A5064"), width=2)
+    # Carenagem fina: rabeta, banco, tanque e o para-brisa com orelhas de morcego.
+    corpo = [(2, 15), (8, 15), (11, 17), (15, 15), (19, 12), (21, 7), (22, 10), (23, 7), (24, 11), (27, 16),
+             (25, 19), (20, 21), (12, 21), (6, 18)]
+    _carroceria(t, corpo, hexa("#5A6276"), (hexa("#2A2E38"), hexa("#0E1014")))
+    contornar(t, CONTORNO)
+    d.polygon([(20, 10), (22, 11), (24, 13), (21, 14)], fill=hexa("#3A6EA8"))
+    d.line([(4, 16), (10, 16)], fill=hexa("#1A1C22"))
+    d.line([(9, 18), (24, 18)], fill=hexa("#D98A2A"))
+    t.p(27, 16, hexa("#FFFFFF"))
+    brilho(t, 28, 16, 4, hexa("#FFE8A0"), 0.8)
+    t.p(2, 15, hexa("#FF3A2A"))
+    # Rastro de velocidade.
+    for y, x0 in ((11, 0), (20, 0), (13, 3)):
+        d.line([(x0, y), (x0 + 3, y)], fill=hexa("#7A8296"))
+    return t
+
+
+def icone_batbarco():
+    t = Tela(32, 32)
+    d = ImageDraw.Draw(t.img)
+    # Água: ondas e espuma.
+    for y in range(22, 32):
+        for x in range(32):
+            onda = math.sin(x * 0.7 + y * 0.9) * 0.5 + 0.5
+            t.p(x, y, mistura(hexa("#1E4A7A"), hexa("#0A1A30"), (y - 22) / 10 * 0.8 + onda * 0.2))
+    # Casco em V saindo da água, com a barbatana dorsal e as asas laterais.
+    corpo = [(2, 21), (4, 17), (9, 15), (12, 10), (14, 14), (21, 14), (31, 19), (27, 23), (6, 23)]
+    _carroceria(t, corpo, hexa("#5A6276"), (hexa("#2A2E38"), hexa("#0E1014")))
+    d.polygon([(14, 18), (19, 18), (13, 22)], fill=hexa("#1A1C22"))
+    contornar(t, CONTORNO)
+    d.polygon([(16, 14), (21, 14), (24, 16), (15, 16)], fill=hexa("#3A6EA8"))
+    t.p(20, 14, hexa("#BFE0FF"))
+    d.line([(6, 19), (27, 19)], fill=hexa("#3A9AE8"))
+    # Espuma na proa e o rastro atrás.
+    for x, y in ((29, 22), (30, 23), (28, 23), (31, 21), (3, 22), (1, 23), (0, 22), (5, 24), (2, 24)):
+        t.p(x, y, hexa("#E8F6FF"))
+    brilho(t, 1, 21, 3, hexa("#7FD0FF"), 0.6)
+    t.p(31, 19, hexa("#FFFFFF"))
+    return t
+
+
 EMBLEMAS["batman"] = emblema_batman
 ICONES.update({
     "gancho": icone_gancho,
@@ -1042,6 +1138,9 @@ ICONES.update({
     "batarangue_sonico": icone_batarangue_sonico,
     "lancador_rede": icone_lancador_rede,
     "disruptor": icone_disruptor,
+    "batmovel": icone_batmovel,
+    "batmoto": icone_batmoto,
+    "batbarco": icone_batbarco,
 })
 
 

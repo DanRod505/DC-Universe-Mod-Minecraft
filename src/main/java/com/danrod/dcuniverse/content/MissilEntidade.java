@@ -123,7 +123,7 @@ public class MissilEntidade extends Projectile {
         ServerPlayer dono = getOwner() instanceof ServerPlayer sp ? sp : null;
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(onde, onde).inflate(raio))) {
             double d = Math.sqrt(e.getBoundingBox().distanceToSqr(onde));
-            if (d > raio || dono == null || !Alvos.podeAtingir(dono, e) || e.getVehicle() instanceof BatwingEntidade) continue;
+            if (d > raio || dono == null || !Alvos.podeAtingir(dono, e) || e.getVehicle() instanceof VeiculoDono) continue;
             float f = (float) (1 - d / (raio + 1));
             Alvos.ferir(dono, e, damageSources().explosion(this, dono), dano * f);
             Vec3 fora = e.position().subtract(onde);

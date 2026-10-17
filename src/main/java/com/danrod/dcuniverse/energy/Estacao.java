@@ -1,7 +1,7 @@
 package com.danrod.dcuniverse.energy;
 
 import com.danrod.dcuniverse.DCUniverse;
-import com.danrod.dcuniverse.content.BatwingEntidade;
+import com.danrod.dcuniverse.content.VeiculoDono;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -24,7 +24,7 @@ public final class Estacao {
     private Estacao() {}
 
     public static boolean perto(Player player, int raio) {
-        if (player.getVehicle() instanceof BatwingEntidade) return true;
+        if (player.getVehicle() instanceof VeiculoDono) return true;
         return blocos(player, raio);
     }
 

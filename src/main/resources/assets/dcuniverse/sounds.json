@@ -385,5 +385,93 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.contra_ataque"
+  },
+  "habilidade.batmovel_motor": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batmovel_motor"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batmovel_motor"
+  },
+  "habilidade.batmovel_chega": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batmovel_chega"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batmovel_chega"
+  },
+  "habilidade.batmoto_motor": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batmoto_motor"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batmoto_motor"
+  },
+  "habilidade.batmoto_chega": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batmoto_chega"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batmoto_chega"
+  },
+  "habilidade.batbarco_motor": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batbarco_motor"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batbarco_motor"
+  },
+  "habilidade.batbarco_emerge": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batbarco_emerge"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batbarco_emerge"
+  },
+  "habilidade.batbarco_mergulha": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batbarco_mergulha"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batbarco_mergulha"
+  },
+  "habilidade.batbarco_torpedo": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batbarco_torpedo"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batbarco_torpedo"
+  },
+  "habilidade.veiculo_pneu": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/veiculo_pneu"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.veiculo_pneu"
+  },
+  "habilidade.veiculo_turbo": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/veiculo_turbo"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.veiculo_turbo"
+  },
+  "habilidade.veiculo_atropela": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/veiculo_atropela"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.veiculo_atropela"
   }
 }

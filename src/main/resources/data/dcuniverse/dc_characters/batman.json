@@ -55,6 +55,20 @@
     { "id": "batwing", "type": "vehicle", "supreme": true, "cost_pct": 75, "cooldown": 150,
       "duration": 90, "speed": 30, "boost_speed": 60, "missiles": 4, "missile_reload": 5,
       "missile_damage": 7, "missile_radius": 3.5, "gun_damage": 1, "gun_range": 64,
-      "lock_angle": 18, "lock_range": 96 }
+      "lock_angle": 18, "lock_range": 96 },
+    { "id": "batmovel", "type": "vehicle", "model": "batmovel", "supreme": true, "cost_pct": 70, "cooldown": 140,
+      "duration": 100, "speed": 26, "boost_speed": 42, "accel": 0.032, "steer": 4,
+      "gun_damage": 1, "gun_range": 48, "rounds": 6, "rounds_reload": 4, "rounds_damage": 6, "rounds_radius": 3,
+      "ram_damage": 7, "ram_min_speed": 8, "special_radius": 5, "special_damage": 4, "stun": 3, "special_cooldown": 12,
+      "lock_angle": 18, "lock_range": 64 },
+    { "id": "batmoto", "type": "vehicle", "model": "batmoto", "supreme": true, "cost_pct": 60, "cooldown": 120,
+      "duration": 100, "speed": 30, "boost_speed": 50, "accel": 0.042, "steer": 5, "jump": 0.7,
+      "gun_damage": 0.75, "gun_range": 40, "gun_heat": 0.018, "rounds": 6, "rounds_reload": 2, "rounds_damage": 4, "rounds_stun": 1,
+      "rounds_range": 28, "ram_damage": 4, "ram_min_speed": 9, "special_radius": 5, "special_duration": 6, "blind": 4,
+      "special_cooldown": 15 },
+    { "id": "batbarco", "type": "vehicle", "model": "batbarco", "supreme": true, "cost_pct": 65, "cooldown": 130,
+      "duration": 100, "speed": 22, "boost_speed": 36, "dive_speed": 14, "accel": 0.028, "steer": 3.4,
+      "gun_damage": 1, "gun_range": 48, "rounds": 4, "rounds_reload": 5, "rounds_damage": 7, "rounds_radius": 3.5,
+      "ram_damage": 5, "ram_min_speed": 8, "lock_angle": 20, "lock_range": 64 }
   ]
 }

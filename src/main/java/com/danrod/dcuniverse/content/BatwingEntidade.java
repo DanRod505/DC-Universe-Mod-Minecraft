@@ -55,15 +55,15 @@ import java.util.function.Predicate;
  * (tecla de usar habilidade): mobs perdem o piloto de vista. Sem piloto, fica pairando no lugar até o dono voltar
  * (clique direito ou o gancho nele). No fim da duração, os passageiros descem planando e ele vai embora.
  */
-public class BatwingEntidade extends Entity {
-    public static final int CHEGANDO = 0, PILOTADO = 1, PAIRANDO = 2, INDO = 3;
+public class BatwingEntidade extends Entity implements VeiculoDono {
+    public static final int PAIRANDO = PARADO;
     /** Escala do modelo (client/BatwingModelo é desenhado em blocos e aumentado por ela): o Batman cabe na cabine. */
     public static final float ESCALA = 1.9f;
     /** Altura do assento acima dos pés da entidade (o piloto senta afundado na fuselagem, a cabeça sob o vidro). */
     static final double ASSENTO_Y = 0.7;
     /** Altura do plano da asa no modelo, onde o desenho gira (client/BatwingModelo.Y0), antes da escala. */
     public static final float PIVO = 0.42f;
-    public static final int TIRO_LIGA = 0, TIRO_DESLIGA = 1, MISSIL = 2, FURTIVO = 3;
+    public static final int MISSIL = SECUNDARIA, FURTIVO = ESPECIAL;
     private static final Identifier CAMERA = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batwing_camera");
 
     private static final EntityDataAccessor<Integer> DONO = SynchedEntityData.defineId(BatwingEntidade.class, EntityDataSerializers.INT);
@@ -135,6 +135,7 @@ public class BatwingEntidade extends Entity {
 
     // ------------------------------------------------------------------ consultas
 
+    @Override
     public int estado() {
         return entityData.get(ESTADO);
     }
@@ -167,6 +168,7 @@ public class BatwingEntidade extends Entity {
         return entityData.get(ALVO);
     }
 
+    @Override
     public int donoId() {
         return entityData.get(DONO);
     }
@@ -181,7 +183,8 @@ public class BatwingEntidade extends Entity {
      */
     public static void registrar() {
         LivingAttackEvent.BUS.addListener((Predicate<LivingAttackEvent>) e -> {
-            if (!(e.getEntity().getVehicle() instanceof BatwingEntidade b)) return false;
+            // Vale para todos os veículos da suprema (content/VeiculoDono).
+            if (!(e.getEntity().getVehicle() instanceof VeiculoDono) || !(e.getEntity().getVehicle() instanceof Entity b)) return false;
             DamageSource f = e.getSource();
             return f.is(DamageTypes.IN_WALL) || f.is(DamageTypes.DROWN) || f.is(DamageTypes.FALL) || f.is(DamageTypes.FLY_INTO_WALL) || f.is(DamageTypes.CRAMMING)
                 || f.getEntity() != null && (f.getEntity() == b || b.hasPassenger(f.getEntity()))
@@ -274,6 +277,7 @@ public class BatwingEntidade extends Entity {
     }
 
     /** O dono entra no assento do piloto (pelo clique, pelo gancho ou na chegada). */
+    @Override
     public void embarcar(ServerPlayer dono) {
         if (dono.getId() != donoId() || estado() == INDO || hasPassenger(dono)) return;
         // O assento do piloto é o primeiro: quem estava sozinho atrás continua atrás.
@@ -433,6 +437,7 @@ public class BatwingEntidade extends Entity {
     }
 
     /** Os passageiros descem planando e o Batwing sobe e vai embora. */
+    @Override
     public void irEmbora() {
         if (estado() == INDO) return;
         Entity dono = dono();
@@ -456,6 +461,7 @@ public class BatwingEntidade extends Entity {
     // ------------------------------------------------------------------ armas
 
     /** Comando do piloto (pacote Rede.Veiculo ou a tecla de usar habilidade). */
+    @Override
     public void comando(ServerPlayer piloto, int acao) {
         if (pilotando(piloto) != this || estado() != PILOTADO) return;
         switch (acao) {

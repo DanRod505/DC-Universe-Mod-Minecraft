@@ -18,7 +18,7 @@ import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/** /dcu transform|untransform|select|energy|status|guide|hud: comandos de admin para testes (seção 2.4). */
+/** /dcu transform|untransform|select|energy|ready|status|guide|hud: comandos de admin para testes (seção 2.4). */
 public final class Comandos {
     private Comandos() {}
 
@@ -73,6 +73,15 @@ public final class Comandos {
                             c.getSource().sendSuccess(() -> Component.literal("Energia: " + e.energia()), false);
                             return 1;
                         }))))
+            .then(Commands.literal("ready")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .executes(c -> {
+                        ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                        EstadoJogador.de(alvo).limparRecargas();
+                        Rede.sincronizar(alvo);
+                        c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + ": recargas zeradas"), false);
+                        return 1;
+                    })))
             .then(Commands.literal("status")
                 .then(Commands.argument("jogador", EntityArgument.player())
                     .executes(c -> {

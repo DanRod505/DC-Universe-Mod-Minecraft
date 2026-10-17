@@ -58,6 +58,18 @@ public final class Fumaca implements TipoHabilidade {
         return true;
     }
 
+    /** Nuvem de fumaça solta por outra coisa (a cortina da Batmoto): cega e tira o alvo como a bomba. */
+    public static void nuvem(ServerPlayer dono, Vec3 c, float raio, float dur, float cegueiraSeg) {
+        ServerLevel level = dono.level();
+        Nuvem n = new Nuvem(level.dimension(), c, raio, level.getGameTime() + Math.round(dur * 20), Math.round(cegueiraSeg * 20), dono.getUUID());
+        synchronized (NUVENS) {
+            NUVENS.add(n);
+        }
+        Rede.efeito(level, c.x, c.y, c.z, "smoke", dur, raio, 0x5E636C);
+        level.playSound(null, c.x, c.y, c.z, Sons.FUMACA.get(), SoundSource.PLAYERS, 1.2f, 0.9f);
+        afetar(level, n);
+    }
+
     /** Tick do servidor: a cada meio segundo, cega quem está nas nuvens e tira o alvo dos mobs. */
     public static void tick(net.minecraft.server.MinecraftServer server) {
         synchronized (NUVENS) {

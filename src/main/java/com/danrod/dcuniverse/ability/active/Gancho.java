@@ -4,7 +4,7 @@ import com.danrod.dcuniverse.ability.Alvos;
 import com.danrod.dcuniverse.ability.TipoHabilidade;
 import com.danrod.dcuniverse.character.Params;
 import com.danrod.dcuniverse.character.Personagem;
-import com.danrod.dcuniverse.content.BatwingEntidade;
+import com.danrod.dcuniverse.content.VeiculoDono;
 import com.danrod.dcuniverse.content.Sons;
 import com.danrod.dcuniverse.core.Rede;
 import com.danrod.dcuniverse.guia.Guia;
@@ -65,7 +65,7 @@ public final class Gancho implements TipoHabilidade {
         BlockHitResult bloco = player.level().clip(new ClipContext(olhos, fim, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         Vec3 limite = bloco.getType() == HitResult.Type.MISS ? fim : bloco.getLocation();
         EntityHitResult ent = ProjectileUtil.getEntityHitResult(player, olhos, limite, new AABB(olhos, limite).inflate(1.0),
-            e -> e != player && !e.isSpectator() && e.isPickable() && (e instanceof LivingEntity || e instanceof BatwingEntidade),
+            e -> e != player && !e.isSpectator() && e.isPickable() && (e instanceof LivingEntity || e instanceof VeiculoDono),
             olhos.distanceToSqr(limite));
         double vel = velBlocosSeg / 20.0;
         long agora = player.level().getGameTime();
@@ -78,7 +78,7 @@ public final class Gancho implements TipoHabilidade {
             boolean pvp = !(alvo instanceof Player) || Alvos.podeAtingir(player, alvo);
             if (pequenoMob && Alvos.podeAtingir(player, alvo)) {
                 a = new Ativo(player, PUXA_MOB, ent.getLocation(), alvo, agora, chega(dist) + 20, vel);
-            } else if (pvp || alvo instanceof BatwingEntidade) {
+            } else if (pvp || alvo instanceof VeiculoDono) {
                 a = new Ativo(player, ENTIDADE, ent.getLocation(), alvo, agora, chega(dist) + (int) (dist / vel) + 40, vel);
             } else {
                 a = new Ativo(player, ERROU, ent.getLocation(), null, agora, chega(dist) * 2, vel);
@@ -115,7 +115,7 @@ public final class Gancho implements TipoHabilidade {
         Ativo a = ATIVOS.remove(player.getUUID());
         if (a == null) return;
         player.resetFallDistance();
-        if (a.modo == ENTIDADE && a.alvo instanceof BatwingEntidade bw && bw.isAlive() && player.distanceTo(bw) < 5) bw.embarcar(player);
+        if (a.modo == ENTIDADE && a.alvo instanceof VeiculoDono bw && a.alvo.isAlive() && player.distanceTo(a.alvo) < 5) bw.embarcar(player);
         Rede.gancho(player, SOLTO, Vec3.ZERO, -1, 0);
     }
 
@@ -134,7 +134,7 @@ public final class Gancho implements TipoHabilidade {
             if (!fim && a.modo != ERROU) dono.resetFallDistance();
             if (!fim) {
                 switch (a.modo) {
-                    case ENTIDADE -> fim = t > 2 && dono.distanceTo(a.alvo) < (a.alvo instanceof BatwingEntidade ? 3.2 : a.alvo.getBbWidth() / 2 + 1.4);
+                    case ENTIDADE -> fim = t > 2 && dono.distanceTo(a.alvo) < (a.alvo instanceof VeiculoDono ? 3.2 : a.alvo.getBbWidth() / 2 + 1.4);
                     case PUXA_MOB -> fim = puxarMob(a, t);
                     default -> {}
                 }
@@ -143,7 +143,7 @@ public final class Gancho implements TipoHabilidade {
                 it.remove();
                 if (dono.isAlive()) {
                     dono.resetFallDistance();
-                    if (a.modo == ENTIDADE && a.alvo instanceof BatwingEntidade bw && bw.isAlive() && dono.distanceTo(bw) < 5) bw.embarcar(dono);
+                    if (a.modo == ENTIDADE && a.alvo instanceof VeiculoDono bw && a.alvo.isAlive() && dono.distanceTo(a.alvo) < 5) bw.embarcar(dono);
                 }
                 Rede.gancho(dono, SOLTO, Vec3.ZERO, -1, 0);
             }

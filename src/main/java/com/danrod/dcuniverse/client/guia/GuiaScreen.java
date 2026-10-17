@@ -455,10 +455,14 @@ public final class GuiaScreen extends Screen {
             out.add(secao("dcuniverse.guia.secao.habilidades"));
             for (Personagem.Habilidade h : normais) habilidade(out, p, h);
         }
-        Personagem.Habilidade sup = p.suprema();
-        if (sup != null) {
+        // Com cinto pode haver várias (os veículos do Batman, escolhidos na Garagem): mostra todas.
+        List<Personagem.Habilidade> supremas = p.habilidades().stream().filter(Personagem.Habilidade::suprema).toList();
+        if (!supremas.isEmpty()) {
             out.add(espaco(4));
             out.add(secao("dcuniverse.guia.secao.suprema"));
+        }
+        for (Personagem.Habilidade sup : supremas) {
+            if (sup != supremas.get(0)) out.add(espaco(3));
             int pct = Math.round(sup.custo() * 100f / p.energia().max());
             out.add(nome(Component.translatable("habilidade.dcuniverse." + sup.id())));
             texto(out, Component.translatable("habilidade.dcuniverse." + sup.id() + ".desc"), TINTA, 1);
@@ -509,6 +513,16 @@ public final class GuiaScreen extends Screen {
             out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.voo", fmt(prm.d("speed", 30)), fmt(prm.d("boost_speed", 60)))));
             out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.armas", fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 64)),
                 prm.i("missiles", 4), fmt(prm.d("missile_damage", 7)), fmt(prm.d("missile_radius", 3.5)), fmt(prm.d("missile_reload", 5)))));
+        }
+        if (prm.json().has("model") && !prm.s("model", "").equals("batwing")) {
+            String m = prm.s("model", "");
+            out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.velocidade", fmt(prm.d("speed", 26)), fmt(prm.d("boost_speed", 42)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.armas." + m, fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 48)),
+                prm.i("rounds", 4), fmt(prm.d("rounds_damage", 6)), fmt(prm.d("rounds_reload", 4)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.atropelo", fmt(prm.d("ram_min_speed", 8)), fmt(prm.d("ram_damage", 6)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.especial." + m, fmt(prm.d("special_radius", 5)),
+                fmt(prm.d("special_damage", 4)), fmt(prm.d("stun", 3)), fmt(prm.d("special_cooldown", 12)), fmt(prm.d("special_duration", 6)),
+                fmt(prm.d("dive_speed", 14)))));
         }
         if (prm.json().has("drain")) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.dreno", fmt(prm.d("drain", 1.5)),
