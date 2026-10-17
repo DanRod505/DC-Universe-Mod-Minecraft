@@ -72,6 +72,24 @@ public final class EstadoJogador {
         tag.putBoolean("amortecendo", v);
     }
 
+    /** Capa do planar: 0 fechada, 1 aberta, 2 mergulho, 3 freio (ability/passive/Planar). */
+    public int planar() {
+        return tag.getIntOr("planar", 0);
+    }
+
+    public void setPlanar(int v) {
+        tag.putInt("planar", v);
+    }
+
+    /** Modo Detetive ligado (ability/active/Detetive): gasta energia por segundo até desligar. */
+    public boolean detetive() {
+        return tag.getBooleanOr("detetive", false);
+    }
+
+    public void setDetetive(boolean v) {
+        tag.putBoolean("detetive", v);
+    }
+
     public int selecionada() {
         return tag.getIntOr("selecionada", 0);
     }
@@ -97,6 +115,28 @@ public final class EstadoJogador {
         CompoundTag r = tag.getCompoundOrEmpty("recargas");
         r.putLong(habilidade, tick);
         tag.put("recargas", r);
+    }
+
+    /** Cargas do gadget (Cargas); sem registro ainda = cheio (def). */
+    public int cargas(String habilidade, int def) {
+        return tag.getCompoundOrEmpty("cargas").getIntOr(habilidade, def);
+    }
+
+    public void setCargas(String habilidade, int n) {
+        CompoundTag c = tag.getCompoundOrEmpty("cargas");
+        c.putInt(habilidade, n);
+        tag.put("cargas", c);
+    }
+
+    /** Tick em que a próxima carga fica pronta (0 = nenhuma sendo fabricada). */
+    public long proximaCarga(String habilidade) {
+        return tag.getCompoundOrEmpty("prox_carga").getLongOr(habilidade, 0L);
+    }
+
+    public void setProximaCarga(String habilidade, long tick) {
+        CompoundTag c = tag.getCompoundOrEmpty("prox_carga");
+        c.putLong(habilidade, tick);
+        tag.put("prox_carga", c);
     }
 
     public long ultimaTransformacao() {
@@ -145,5 +185,7 @@ public final class EstadoJogador {
         setEsgotado(false);
         setDestransformarEm(0L);
         tag.remove("recargas");
+        tag.remove("cargas");
+        tag.remove("prox_carga");
     }
 }

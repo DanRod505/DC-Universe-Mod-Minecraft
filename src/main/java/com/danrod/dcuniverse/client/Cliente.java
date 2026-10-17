@@ -3,6 +3,9 @@ package com.danrod.dcuniverse.client;
 import com.danrod.dcuniverse.DCUniverse;
 import com.danrod.dcuniverse.client.guia.GuiaScreen;
 import com.danrod.dcuniverse.client.guia.GuiaToast;
+import com.danrod.dcuniverse.client.render.BatarangueRenderer;
+import com.danrod.dcuniverse.client.render.BatwingRenderer;
+import com.danrod.dcuniverse.client.render.MissilRenderer;
 import com.danrod.dcuniverse.content.Entidades;
 import com.danrod.dcuniverse.content.GuiaItem;
 import com.danrod.dcuniverse.core.EstadoCliente;
@@ -40,9 +43,23 @@ public final class Cliente {
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "raio_x"), RaioX::desenharTela);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "detetive"), Detetive::desenharTela);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "furtivo"), Furtivo::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "visor"), Visor::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "salto"), Saltador::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batwing"), Piloto::desenhar);
         });
-        EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new));
+        EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> {
+            e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new);
+            e.registerEntityRenderer(Entidades.BATARANGUE.get(), BatarangueRenderer::new);
+            e.registerEntityRenderer(Entidades.BATWING.get(), BatwingRenderer::new);
+            e.registerEntityRenderer(Entidades.MISSIL.get(), MissilRenderer::new);
+            e.registerEntityRenderer(Entidades.GEL.get(), com.danrod.dcuniverse.client.render.GelRenderer::new);
+        });
         TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
         ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> {
             EstadoCliente.limpar();
@@ -50,18 +67,26 @@ public final class Cliente {
             Pecas.limpar();
             Hud.limpar();
             Voador.limpar();
+            Planador.limpar();
             Mundo.limpar();
             SomCanal.limpar();
             Saltador.limpar();
+            Gancheador.limpar();
+            Piloto.limpar();
             usando = false;
         });
         GuiaItem.abrir = GuiaScreen::abrir;
+        com.danrod.dcuniverse.core.EstadoCliente.batcomputador = BatcomputadorScreen::receber;
         Skins.registrar();
         Pecas.registrar();
         Voador.registrar();
+        Planador.registrar();
         Efeitos.registrarFeixe();
         RaioX.registrar();
+        Detetive.registrar();
+        Visor.registrar();
         Saltador.registrar();
+        Piloto.registrar();
     }
 
     private static void tick() {
@@ -97,6 +122,8 @@ public final class Cliente {
         Voador.tick(mc);
         Efeitos.tick(mc);
         Mundo.tick(mc);
+        Gancheador.tick(mc);
+        Piloto.tick(mc);
         if (mc.level != null) SomCanal.tick(mc, mc.level);
     }
 }

@@ -11,21 +11,24 @@ import java.util.Map;
 
 /** Tipos de passiva disponíveis para os JSONs. O dcuVerify lê os nomes daqui. */
 public final class TiposPassiva {
-    public static final Map<String, Passiva> TIPOS = Map.of(
-        "flight", new Voo(),
-        "glide", new Planar(),
-        "fall_immunity", new Passiva() {
+    public static final Map<String, Passiva> TIPOS = Map.ofEntries(
+        Map.entry("flight", new Voo()),
+        Map.entry("glide", new Planar()),
+        Map.entry("fall_immunity", new Passiva() {
             @Override
             public boolean semQueda(ServerPlayer player, Params p) {
                 return true;
             }
-        },
-        "night_vision", new Efeito(MobEffects.NIGHT_VISION),
-        "fire_immunity", new Efeito(MobEffects.FIRE_RESISTANCE),
+        }),
+        Map.entry("night_vision", new Efeito(MobEffects.NIGHT_VISION)),
+        Map.entry("fire_immunity", new Efeito(MobEffects.FIRE_RESISTANCE)),
         // Estas três agem pelos eventos do jogo (passive/Naturais) e pelo cliente (client/Saltador).
-        "super_strength", new Passiva() {},
-        "projectile_resistance", new Passiva() {},
-        "super_jump", new Passiva() {}
+        Map.entry("super_strength", new Passiva() {}),
+        Map.entry("projectile_resistance", new Passiva() {}),
+        Map.entry("super_jump", new Passiva() {}),
+        // Batman: stealth age pelo evento de visibilidade; counter abre a janela no tick e defende no ataque.
+        Map.entry("stealth", new com.danrod.dcuniverse.ability.passive.Furtividade()),
+        Map.entry("counter", new com.danrod.dcuniverse.ability.passive.ContraAtaque())
     );
 
     private TiposPassiva() {}

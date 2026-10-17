@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "dcuniverse:componente_tecnologico",
+    "G": "minecraft:glowstone",
+    "P": "dcuniverse:lingote_prometio"
+  },
+  "pattern": [
+    "PGP",
+    "GCG",
+    "PGP"
+  ],
+  "result": {
+    "id": "dcuniverse:nucleo_energia"
+  }
+}

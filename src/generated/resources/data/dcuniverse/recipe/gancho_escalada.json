@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "H": "minecraft:tripwire_hook",
+    "I": "minecraft:iron_ingot",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    "  H",
+    " S ",
+    "I  "
+  ],
+  "result": {
+    "id": "dcuniverse:gancho_escalada"
+  }
+}

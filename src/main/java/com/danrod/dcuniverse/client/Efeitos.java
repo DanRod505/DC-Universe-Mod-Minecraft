@@ -47,7 +47,7 @@ public final class Efeitos {
             if (level.getEntity(id) instanceof Player pl) transformacao(level, pl, a.cor());
         });
         EstadoCliente.TRANSFORMOU.clear();
-        if (mc.player != null && Planador.planando(mc.player)) rastro(level, mc.player);
+        if (mc.player != null && Planador.amortecendo(mc.player)) rastro(level, mc.player);
     }
 
     /** Dois feixes saindo dos olhos que se encontram no alvo, com núcleo claro, olhos acesos e faíscas no impacto. */

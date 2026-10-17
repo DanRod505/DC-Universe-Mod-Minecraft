@@ -1,0 +1,46 @@
+{
+  "n": 2,
+  "level": 1,
+  "color": "#F2C64A",
+  "scale": 1.02,
+  "stats": { "vida": 14, "armadura": 14, "dano": 3, "terra": 6 },
+  "energy": {
+    "max": 200,
+    "regen": 0.5,
+    "recharge": [
+      { "type": "tech_station", "per_second": 6.0, "radius": 4, "reload_mult": 3 }
+    ]
+  },
+  "suit": [ "chest", "legs", "feet" ],
+  "passives": [
+    { "type": "glide", "speed": 11, "boost_cost": 10 },
+    { "type": "night_vision" },
+    { "type": "stealth", "max_light": 7, "visibility": 0.3 },
+    { "type": "counter", "window": 0.4, "cooldown": 1, "damage_mult": 1.5, "stun": 1.5, "knockback": 1.2 }
+  ],
+  "abilities": [
+    { "id": "gancho", "type": "grapple", "cost": 2, "cooldown": 0.5,
+      "range": 40, "speed": 30, "small_size": 1.2 },
+    { "id": "batarangue", "type": "throwable", "cost": 0, "cooldown": 0.8,
+      "range": 24, "speed": 1.6, "damage_mult": 1.0, "stun": 1, "ricochet": 2,
+      "ammo": { "max": 6, "reload": 2.5, "reload_cost": 2 } },
+    { "id": "batarangue_explosivo", "type": "throwable", "cost": 0, "cooldown": 1.5, "variant": "explosive",
+      "range": 24, "speed": 1.5, "damage_mult": 1.5, "radius": 3,
+      "ammo": { "max": 3, "reload": 8, "reload_cost": 10 } },
+    { "id": "batarangue_eletrico", "type": "throwable", "cost": 0, "cooldown": 1.5, "variant": "electric",
+      "range": 24, "speed": 1.5, "damage_mult": 0.8, "stun": 3,
+      "ammo": { "max": 3, "reload": 6, "reload_cost": 8 } },
+    { "id": "modo_detetive", "type": "vision", "mode": "detective", "cost": 5, "cooldown": 0.5,
+      "drain": 1.5, "range": 32, "weak_point_mult": 1.25, "color": "#3A9BFF" },
+    { "id": "bomba_fumaca", "type": "smoke", "cost": 0, "cooldown": 2,
+      "radius": 5, "duration": 8, "blind": 5, "escape": 3,
+      "ammo": { "max": 3, "reload": 12, "reload_cost": 8 } },
+    { "id": "gel_explosivo", "type": "explosive_gel", "cost": 0, "cooldown": 0.5,
+      "range": 6, "radius": 2.5, "damage_mult": 2.0, "max_placed": 3,
+      "ammo": { "max": 3, "reload": 15, "reload_cost": 10 } },
+    { "id": "batwing", "type": "vehicle", "supreme": true, "cost_pct": 75, "cooldown": 150,
+      "duration": 90, "speed": 30, "boost_speed": 60, "missiles": 4, "missile_reload": 5,
+      "missile_damage": 7, "missile_radius": 3.5, "gun_damage": 1, "gun_range": 64,
+      "lock_angle": 18, "lock_range": 96 }
+  ]
+}

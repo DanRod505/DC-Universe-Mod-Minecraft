@@ -147,7 +147,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 #### 2. Batman (Bruce Wayne)
 *Preparação, equipamento e estratégia: você vence porque planejou, não porque é mais forte.*
 
-- **Naturais (ativam pela ação):** Planar com a capa (segurar pulo caindo); Visão noturna no capuz; Furtividade: mobs detectam mais tarde ao agachar no escuro; Contra-ataque: bloquear no momento certo devolve o golpe
+- **Naturais (ativam pela ação):** Planar com a capa (pulo no ar abre; mergulho, arremetida, freio, giros e impulso); Visão noturna no capuz; Furtividade: mobs detectam mais tarde ao agachar no escuro; Contra-ataque: bloquear no momento certo devolve o golpe
 - **Poderes e combate (menu radial):** Modo Detetive (destaca mobs, rastros de jogadores, pontos fracos e blocos interativos); Batarangue (ricocheteia, corta cordas/teias, atordoa); Gancho de escalada (puxa até o bloco mirado); Bomba de fumaça (cegueira em área + fuga); Gel explosivo (marca uma parede e detona depois)
 - **Armas, ferramentas e invocações:** Cinto de utilidades com slots configuráveis (escolhe quais gadgets levar); Batcomputador (bloco) para fabricar gadgets e analisar amostras; Invocar o Batmóvel/Batwing (veículos craftados)
 - **Utilidade no survival:** Gadgets craftáveis com materiais do jogo (o preparo é o loop de progressão); Gancho para escalar e explorar cavernas; Gel explosivo para mineração controlada; Batcaverna: base com bancada de pesquisa

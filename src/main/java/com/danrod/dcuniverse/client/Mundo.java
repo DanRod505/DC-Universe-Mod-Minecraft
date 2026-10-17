@@ -52,6 +52,8 @@ public final class Mundo {
             ATIVOS.clear();
         }
         RaioX.limpar();
+        Detetive.limpar();
+        Furtivo.limpar();
         Gelo.limpar();
     }
 
@@ -65,6 +67,8 @@ public final class Mundo {
             ATIVOS.removeIf(a -> tickAtivo(level, a, agora - a.inicio));
         }
         RaioX.tick(mc);
+        Detetive.tick(mc);
+        Furtivo.tick(mc);
     }
 
     private static void comecar(Minecraft mc, ClientLevel level, Rede.Efeito e, long agora) {
@@ -77,8 +81,22 @@ public final class Mundo {
             case "fortress_end" -> fortalezaFim(level, e);
             case "jump" -> salto(level, e);
             case "xray" -> RaioX.ligar(mc, e);
+            case "detective" -> Detetive.ligar(mc, e);
+            case "counter" -> Furtivo.contra(e.a());
+            case "smoke" -> {
+                Fumaca.inicio(level, e);
+                adicionar(e, agora);
+            }
             case "freeze" -> Gelo.ligar(mc, e);
             case "thaw" -> Gelo.soltar(e);
+            case "arco" -> {
+                arcoInicio(level, e);
+                adicionar(e, agora);
+            }
+            case "tiro" -> {
+                tiroInicio(level, e);
+                adicionar(e, agora);
+            }
             default -> {}
         }
     }
@@ -94,6 +112,9 @@ public final class Mundo {
         return switch (a.e.tipo()) {
             case "slam" -> pisaoTick(level, a, t);
             case "fortress" -> fortalezaTick(level, a, t);
+            case "arco" -> t > 6;
+            case "tiro" -> t > 2;
+            case "smoke" -> Fumaca.tick(level, a.e, t);
             default -> true;
         };
     }
@@ -229,10 +250,15 @@ public final class Mundo {
             switch (a.e.tipo()) {
                 case "slam" -> anel(ps, col, cam, a.e, t);
                 case "fortress" -> pilar(ps, col, cam, a.e, t);
+                case "arco" -> arco(ps, col, cam, a.e, t);
+                case "tiro" -> tiro(ps, col, cam, a.e, t);
+                case "smoke" -> Fumaca.desenhar(ps, col, cam, a.e, t);
                 default -> {}
             }
         }
+        Gancheador.desenhar(ps, col, cam, pt);
         RaioX.desenhar(ps, col, cam, pt);
+        Detetive.desenhar(ps, col, cam, pt);
         Efeitos.feixePrimeiraPessoa(ps, col, cam, pt);
         Gelo.desenhar(ps, col, cam, pt);
     }
@@ -302,5 +328,85 @@ public final class Mundo {
             for (int i = 0; i < 4; i++) buf.addVertex(m, (float) de.x + v[i][0], v[i][1], (float) de.z + v[i][2]).setColor(r, g, b, al[i]);
             for (int i = 3; i >= 0; i--) buf.addVertex(m, (float) de.x + v[i][0], v[i][1], (float) de.z + v[i][2]).setColor(r, g, b, al[i]);
         }
+    }
+
+    // ------------------------------------------------------------------ batarangue elétrico e metralhadoras do Batwing
+
+    /** Ponta final dos efeitos de linha: a = dx, b = dz, cor = bits de dy. */
+    private static Vec3 fim(Rede.Efeito e) {
+        return new Vec3(e.x() + e.a(), e.y() + Float.intBitsToFloat(e.cor()), e.z() + e.b());
+    }
+
+    private static void arcoInicio(ClientLevel level, Rede.Efeito e) {
+        Vec3 de = new Vec3(e.x(), e.y(), e.z()), ate = fim(e);
+        RandomSource rnd = level.getRandom();
+        for (int i = 0; i < 10; i++) {
+            Vec3 p = de.lerp(ate, rnd.nextDouble());
+            level.addParticle(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, rnd.nextGaussian() * 0.1, rnd.nextGaussian() * 0.1, rnd.nextGaussian() * 0.1);
+        }
+        for (int i = 0; i < 8; i++) {
+            level.addParticle(ParticleTypes.ELECTRIC_SPARK, ate.x, ate.y, ate.z, rnd.nextGaussian() * 0.25, rnd.nextDouble() * 0.3, rnd.nextGaussian() * 0.25);
+        }
+    }
+
+    private static void tiroInicio(ClientLevel level, Rede.Efeito e) {
+        Vec3 ate = fim(e);
+        RandomSource rnd = level.getRandom();
+        BlockState st = level.getBlockState(net.minecraft.core.BlockPos.containing(ate.x, ate.y, ate.z));
+        for (int i = 0; i < 4; i++) {
+            level.addParticle(ParticleTypes.CRIT, ate.x, ate.y, ate.z, rnd.nextGaussian() * 0.2, rnd.nextDouble() * 0.25, rnd.nextGaussian() * 0.2);
+        }
+        if (!st.isAir()) level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, st), ate.x, ate.y, ate.z, 0, 0.2, 0);
+        level.addParticle(ParticleTypes.SMOKE, ate.x, ate.y, ate.z, 0, 0.03, 0);
+    }
+
+    /** Raio azul em zigue-zague, que muda de forma a cada tick e some em 6 ticks. */
+    private static void arco(PoseStack ps, SubmitNodeCollector col, Vec3 cam, Rede.Efeito e, float t) {
+        float alfa = Mth.clamp(1 - t / 6f, 0, 1);
+        if (alfa <= 0) return;
+        Vec3 de = new Vec3(e.x(), e.y(), e.z()).subtract(cam), ate = fim(e).subtract(cam);
+        RandomSource rnd = RandomSource.create(Double.doubleToLongBits(e.x() * 31 + e.z()) + (long) t * 7919);
+        int n = Math.max(4, (int) (de.distanceTo(ate) * 2.5));
+        Vec3[] p = new Vec3[n + 1];
+        for (int i = 0; i <= n; i++) {
+            Vec3 base = de.lerp(ate, i / (double) n);
+            double j = (i == 0 || i == n) ? 0 : 0.35;
+            p[i] = base.add(rnd.nextGaussian() * j, rnd.nextGaussian() * j, rnd.nextGaussian() * j);
+        }
+        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Matrix4f m = pose.pose();
+            for (int i = 0; i < n; i++) {
+                fita(m, buf, p[i], p[i + 1], 0.32f, 0x3A7BFF, 0.35f * alfa);
+                fita(m, buf, p[i], p[i + 1], 0.09f, 0xDDEBFF, 0.95f * alfa);
+            }
+        });
+    }
+
+    /** Traçante amarelo das metralhadoras: um risco curto que corre até o ponto atingido. */
+    private static void tiro(PoseStack ps, SubmitNodeCollector col, Vec3 cam, Rede.Efeito e, float t) {
+        Vec3 de = new Vec3(e.x(), e.y(), e.z()).subtract(cam), ate = fim(e).subtract(cam);
+        double d = de.distanceTo(ate);
+        if (d < 0.1) return;
+        double u0 = Mth.clamp(t / 2.0, 0, 1), u1 = Mth.clamp(u0 + 6 / d, 0, 1);
+        if (u0 >= 1) return;
+        Vec3 a = de.lerp(ate, u0), b = de.lerp(ate, u1);
+        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Matrix4f m = pose.pose();
+            fita(m, buf, a, b, 0.18f, 0xFFB030, 0.45f);
+            fita(m, buf, a, b, 0.06f, 0xFFF4C0, 1f);
+        });
+    }
+
+    /** Fita virada para a câmera entre dois pontos (relativos à câmera). */
+    private static void fita(Matrix4f m, VertexConsumer buf, Vec3 a, Vec3 b, float largura, int cor, float alfa) {
+        Vec3 dir = b.subtract(a);
+        Vec3 lado = dir.cross(a.add(b).scale(0.5));
+        if (lado.lengthSqr() < 1e-8) return;
+        lado = lado.normalize().scale(largura / 2);
+        float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, bl = (cor & 255) / 255f;
+        buf.addVertex(m, (float) (a.x - lado.x), (float) (a.y - lado.y), (float) (a.z - lado.z)).setColor(r, g, bl, alfa);
+        buf.addVertex(m, (float) (a.x + lado.x), (float) (a.y + lado.y), (float) (a.z + lado.z)).setColor(r, g, bl, alfa);
+        buf.addVertex(m, (float) (b.x + lado.x), (float) (b.y + lado.y), (float) (b.z + lado.z)).setColor(r, g, bl, alfa);
+        buf.addVertex(m, (float) (b.x - lado.x), (float) (b.y - lado.y), (float) (b.z - lado.z)).setColor(r, g, bl, alfa);
     }
 }

@@ -121,5 +121,269 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.ricochete"
+  },
+  "habilidade.gancho_disparo": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/gancho_disparo"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.gancho_disparo"
+  },
+  "habilidade.gancho_puxa": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/gancho_puxa"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.gancho_puxa"
+  },
+  "habilidade.gancho_impulso": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/gancho_impulso"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.gancho_impulso"
+  },
+  "habilidade.batarangue_arremesso": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batarangue_arremesso"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batarangue_arremesso"
+  },
+  "habilidade.batarangue_giro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batarangue_giro"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batarangue_giro"
+  },
+  "habilidade.batarangue_acerta": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batarangue_acerta"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batarangue_acerta"
+  },
+  "habilidade.batarangue_pega": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batarangue_pega"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batarangue_pega"
+  },
+  "habilidade.choque": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/choque"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.choque"
+  },
+  "habilidade.batwing_chega": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batwing_chega"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batwing_chega"
+  },
+  "habilidade.batwing_motor": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batwing_motor"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batwing_motor"
+  },
+  "habilidade.batwing_tiro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batwing_tiro"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batwing_tiro"
+  },
+  "habilidade.batwing_missil": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batwing_missil"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batwing_missil"
+  },
+  "habilidade.batwing_furtivo": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batwing_furtivo"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batwing_furtivo"
+  },
+  "habilidade.batwing_revela": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batwing_revela"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batwing_revela"
+  },
+  "habilidade.batwing_superaquece": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/batwing_superaquece"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.batwing_superaquece"
+  },
+  "habilidade.capa_abre": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_abre"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_abre"
+  },
+  "habilidade.capa_fecha": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_fecha"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_fecha"
+  },
+  "habilidade.capa_vento": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_vento",
+        "stream": false
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_vento"
+  },
+  "habilidade.capa_impulso": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_impulso"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_impulso"
+  },
+  "habilidade.capa_arremetida": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_arremetida"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_arremetida"
+  },
+  "habilidade.pouso_rolamento": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/pouso_rolamento"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.pouso_rolamento"
+  },
+  "musica.planar_0": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_0",
+        "stream": true
+      }
+    ]
+  },
+  "musica.planar_1": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_1",
+        "stream": true
+      }
+    ]
+  },
+  "musica.planar_2": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_2",
+        "stream": true
+      }
+    ]
+  },
+  "musica.planar_3": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_3",
+        "stream": true
+      }
+    ]
+  },
+  "musica.planar_apice": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_apice"
+      }
+    ]
+  },
+  "habilidade.detetive_liga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/detetive_liga"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.detetive_liga"
+  },
+  "habilidade.detetive_desliga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/detetive_desliga"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.detetive_desliga"
+  },
+  "habilidade.fumaca": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/fumaca"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.fumaca"
+  },
+  "habilidade.gel_aplica": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/gel_aplica"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.gel_aplica"
+  },
+  "habilidade.gel_bipe": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/gel_bipe"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.gel_bipe"
+  },
+  "habilidade.gel_detona": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/gel_detona"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.gel_detona"
+  },
+  "habilidade.contra_ataque": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/contra_ataque"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.contra_ataque"
   }
 }

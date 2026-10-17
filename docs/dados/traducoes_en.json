@@ -5,6 +5,8 @@
     "batcomputador": "Batcomputer",
     "bloco_kryptonita": "Block of Kryptonite",
     "camara_solar": "Solar Chamber",
+    "capa_planador": "Glider Cape",
+    "carregador_tecnologico": "Tech Charger",
     "cinto_batman": "Utility Belt",
     "componente_tecnologico": "Tech Component",
     "comunicador_liga": "League Communicator",
@@ -12,19 +14,27 @@
     "cristal_superman": "Crystal of the House of El",
     "fragmento_alienigena": "Alien Fragment",
     "fragmento_kryptonita": "Kryptonite Shard",
+    "gancho_escalada": "Grappling Hook",
     "guia_heroi": "Hero's Guide",
+    "lingote_prometio": "Promethium Ingot",
     "minerio_kryptonita": "Kryptonite Ore",
+    "minerio_prometio": "Promethium Ore",
+    "nucleo_energia": "Energy Core",
     "nucleo_meta_1": "Meta-Human Core I",
     "nucleo_meta_2": "Meta-Human Core II",
     "nucleo_meta_3": "Meta-Human Core III",
     "nucleo_meta_4": "Meta-Human Core IV",
     "placa_circuito": "Circuit Board",
     "tecido_tatico": "Tactical Fabric",
-    "torta_martha": "Martha's Pie"
+    "torta_martha": "Martha's Pie",
+    "visor_tatico": "Tactical Visor"
   },
   "personagens": {
     "1": {
       "exp": "Absolute strength and power: you are the strongest person in the world, and the world must be handled with care."
+    },
+    "2": {
+      "exp": "Preparation, gear and strategy: you win because you planned, not because you are stronger."
     }
   },
   "guia": {
@@ -71,6 +81,44 @@
     },
     "tecido_tatico": {
       "desc": "Tough fabric with a kevlar weave. The base of every hero suit."
+    },
+    "cinto_batman": {
+      "desc": "Right-click to put on Batman's suit and carry his gadgets. Press H to turn back to normal."
+    },
+    "minerio_prometio": {
+      "desc": "Rare ore from the bottom of the world, locked in deepslate. It glows faintly in the dark and only drops with a diamond pickaxe.",
+      "obter": "Mine deepslate between Y -60 and -30, in small veins of 1 to 3 blocks (very rare)."
+    },
+    "lingote_prometio": {
+      "desc": "Nearly indestructible metal, the base of heavy tech: energy cores today, top-tier armor later.",
+      "obter": "Smelt Promethium Ore in a furnace or, twice as fast, in a blast furnace."
+    },
+    "placa_circuito": {
+      "desc": "The brain of every device. It also repairs the Tactical Visor at an anvil."
+    },
+    "componente_tecnologico": {
+      "desc": "Mechanical and electronic part that builds gadgets, the Batcomputer and the Utility Belt."
+    },
+    "nucleo_energia": {
+      "desc": "Promethium battery that stores plenty of energy. Powers the Tech Charger and energy armors."
+    },
+    "batarangue_simples": {
+      "desc": "Throwable that comes back to your hand (2 damage). Anyone can use it: it cuts webs and leaves and presses buttons from afar. It returns to your inventory, or drops if you miss the catch."
+    },
+    "gancho_escalada": {
+      "desc": "Batman's grapple without powers: right-click fires up to 30 blocks and pulls you there; click again to let go. Each shot uses 1 of 200 uses, and it recharges at the Tech Charger."
+    },
+    "capa_planador": {
+      "desc": "Wear it on your chest to glide like Batman: jump in midair to open it, dive to gain speed and pull up to climb. Double-tap W for a boost that tires you (costs hunger); double-tap A/D to roll and hold S to brake."
+    },
+    "visor_tatico": {
+      "desc": "Tactical helmet: night vision and hostile mobs within 24 blocks outlined in red, with a threat count on screen. A charge lasts 30 minutes of use; recharge it at the Tech Charger or repair it with a Circuit Board."
+    },
+    "carregador_tecnologico": {
+      "desc": "Recharge station: tech heroes nearby regain energy faster and the belt makes charges 3 times quicker. Use the Tactical Visor or the Grappling Hook on it to recharge them (costs 1 redstone)."
+    },
+    "batcomputador": {
+      "desc": "Batman's command center. Gadgets: refills the belt and energy at once (every 60 s). Fabricate: makes tech parts straight from your inventory. Analysis: a mob sample reveals its file and you deal +15% damage to that type. Map: the terrain around with threats and players. It is also a recharge station."
     }
   }
 }

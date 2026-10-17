@@ -5,6 +5,8 @@ import com.danrod.dcuniverse.ability.Alvos;
 import com.danrod.dcuniverse.character.Params;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.client.Skins;
+import com.danrod.dcuniverse.ability.passive.Planar;
+import com.danrod.dcuniverse.client.Planador;
 import com.danrod.dcuniverse.client.Voador;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.guia.Guia;
@@ -429,9 +431,19 @@ public final class GuiaScreen extends Screen {
                     double max = t.params().d("speed", 12);
                     texto(out, Component.translatable("dcuniverse.guia.voo.detalhe", fmt(max * Voador.CRUZEIRO), fmt(max),
                         fmt(t.params().d("dash_cost", 15))), SUAVE, 2);
+                } else if (t.tipo().equals("glide")) {
+                    double v = t.params().d("speed", 10);
+                    texto(out, Component.translatable("dcuniverse.guia.planar.detalhe", fmt(v), fmt(v * Planador.MAX_ABERTA),
+                        fmt(v * Planador.MAX_MERGULHO), fmt(t.params().d("boost_cost", Planar.IMPULSO_CUSTO))), SUAVE, 2);
                 } else if (t.tipo().equals("super_jump")) {
                     texto(out, Component.translatable("dcuniverse.guia.salto.detalhe", fmt(alturaSalto(t.params().d("power", 2))),
                         fmt(t.params().d("charge", 1))), SUAVE, 2);
+                } else if (t.tipo().equals("stealth")) {
+                    texto(out, Component.translatable("dcuniverse.guia.furtividade.detalhe", t.params().i("max_light", 7),
+                        Math.round((1 - t.params().d("visibility", 0.3)) * 100)), SUAVE, 2);
+                } else if (t.tipo().equals("counter")) {
+                    texto(out, Component.translatable("dcuniverse.guia.contra.detalhe", fmt(t.params().d("window", 0.4)),
+                        fmt(Alvos.dano(p, t.params().d("damage_mult", 1.5)) / 2.0), fmt(t.params().d("stun", 1.5)), fmt(t.params().d("cooldown", 1))), SUAVE, 2);
                 } else if (t.tipo().equals("projectile_resistance")) {
                     texto(out, Component.translatable("dcuniverse.guia.ricochete.detalhe", fmt(t.params().d("max_damage", 10) / 2)), SUAVE, 2);
                 }
@@ -478,6 +490,13 @@ public final class GuiaScreen extends Screen {
         if (prm.d("impact_radius", 0) > 0) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.impacto", fmt(prm.d("impact_radius", 0)))));
         }
+        if (h.tipo().equals("grapple")) out.add(item(Component.translatable("dcuniverse.guia.hab.gancho", fmt(prm.d("speed", 30)))));
+        if (prm.i("ricochet", 0) > 0) out.add(item(Component.translatable("dcuniverse.guia.hab.ricochete", prm.i("ricochet", 0))));
+        if (prm.s("variant", "").equals("electric")) out.add(item(Component.translatable("dcuniverse.guia.hab.choque")));
+        Params ammo = com.danrod.dcuniverse.ability.Cargas.ammo(h);
+        if (ammo != null) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.cargas", ammo.i("max", 1), fmt(ammo.d("reload", 5)), fmt(ammo.d("reload_cost", 0)))));
+        }
         detalhes(out, prm);
         out.add(espaco(3));
     }
@@ -486,6 +505,19 @@ public final class GuiaScreen extends Screen {
     private void detalhes(List<Bloco> out, Params prm) {
         if (prm.json().has("radius")) out.add(item(Component.translatable("dcuniverse.guia.hab.raio", fmt(prm.d("radius", 0)))));
         if (prm.json().has("duration")) out.add(item(Component.translatable("dcuniverse.guia.hab.duracao", fmt(prm.d("duration", 0)))));
+        if (prm.json().has("missiles")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.voo", fmt(prm.d("speed", 30)), fmt(prm.d("boost_speed", 60)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.armas", fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 64)),
+                prm.i("missiles", 4), fmt(prm.d("missile_damage", 7)), fmt(prm.d("missile_radius", 3.5)), fmt(prm.d("missile_reload", 5)))));
+        }
+        if (prm.json().has("drain")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.dreno", fmt(prm.d("drain", 1.5)),
+                Math.round((prm.d("weak_point_mult", 1.25) - 1) * 100))));
+        }
+        if (prm.json().has("blind")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.fumaca", fmt(prm.d("blind", 5)), fmt(prm.d("escape", 3)))));
+        }
+        if (prm.json().has("max_placed")) out.add(item(Component.translatable("dcuniverse.guia.hab.gel", prm.i("max_placed", 3))));
         if (prm.d("stun", 0) > 0) out.add(item(Component.translatable("dcuniverse.guia.hab.lento", fmt(Math.min(4, prm.d("stun", 0))))));
         if (prm.d("regen_level", 0) > 0) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.cura", (int) prm.d("regen_level", 0), fmt(prm.d("energy_per_second", 0)))));

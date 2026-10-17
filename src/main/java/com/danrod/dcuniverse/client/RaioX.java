@@ -202,7 +202,7 @@ public final class RaioX {
      * Corpos dos jogadores visíveis (o próprio só fora da primeira pessoa). O que o raio X revela atrás deles
      * não é desenhado, senão as caixas e contornos, que ignoram a profundidade, apareceriam por cima do corpo.
      */
-    private static List<AABB> corpos(Minecraft mc) {
+    static List<AABB> corpos(Minecraft mc) {
         List<AABB> r = new ArrayList<>();
         boolean primeira = mc.options.getCameraType().isFirstPerson();
         for (Player p : mc.level.players()) {
@@ -212,7 +212,7 @@ public final class RaioX {
         return r;
     }
 
-    private static boolean escondido(List<AABB> corpos, Vec3 cam, Vec3 alvo, double folga) {
+    static boolean escondido(List<AABB> corpos, Vec3 cam, Vec3 alvo, double folga) {
         for (AABB b : corpos) {
             AABB g = b.inflate(folga);
             if (!g.contains(cam) && !g.contains(alvo) && g.clip(cam, alvo).isPresent()) return true;
@@ -220,7 +220,7 @@ public final class RaioX {
         return false;
     }
 
-    private static void caixa(Matrix4f m, VertexConsumer buf, double x, double y, double z, float folga, int cor, float alfa) {
+    static void caixa(Matrix4f m, VertexConsumer buf, double x, double y, double z, float folga, int cor, float alfa) {
         float x0 = (float) x + folga, y0 = (float) y + folga, z0 = (float) z + folga;
         float x1 = (float) x + 1 - folga, y1 = (float) y + 1 - folga, z1 = (float) z + 1 - folga;
         int c = ARGB.color(Math.round(Mth.clamp(alfa, 0, 1) * 255), cor);
@@ -233,7 +233,7 @@ public final class RaioX {
     }
 
     /** As 12 arestas da caixa como filetes claros (dois planos cruzados cada), para o contorno ler de longe. */
-    private static void arestas(Matrix4f m, VertexConsumer buf, double x, double y, double z, float folga, int cor, float alfa) {
+    static void arestas(Matrix4f m, VertexConsumer buf, double x, double y, double z, float folga, int cor, float alfa) {
         float a0 = folga, a1 = 1 - folga, w = 0.035f;
         int c = ARGB.color(Math.round(Mth.clamp(alfa, 0, 1) * 255), cor);
         float[][] cantos = {{a0, a0}, {a1, a0}, {a1, a1}, {a0, a1}};
@@ -246,7 +246,7 @@ public final class RaioX {
         }
     }
 
-    private static void filete(Matrix4f m, VertexConsumer buf, int c, float x0, float y0, float z0, float x1, float y1, float z1, float w, int eixo) {
+    static void filete(Matrix4f m, VertexConsumer buf, int c, float x0, float y0, float z0, float x1, float y1, float z1, float w, int eixo) {
         // Dois planos perpendiculares ao eixo do filete.
         float[][] lados = eixo == 0 ? new float[][] {{w, 0, 0}, {0, 0, w}} : eixo == 1 ? new float[][] {{0, w, 0}, {0, 0, w}} : new float[][] {{w, 0, 0}, {0, w, 0}};
         for (float[] l : lados) {
@@ -255,7 +255,7 @@ public final class RaioX {
         }
     }
 
-    private static void quad(Matrix4f m, VertexConsumer buf, int c, float... v) {
+    static void quad(Matrix4f m, VertexConsumer buf, int c, float... v) {
         for (int i = 0; i < 12; i += 3) buf.addVertex(m, v[i], v[i + 1], v[i + 2]).setColor(c);
     }
 

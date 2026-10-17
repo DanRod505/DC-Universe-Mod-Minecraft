@@ -21,6 +21,37 @@ public final class Sons {
     public static final RegistryObject<SoundEvent> SALTO_CARGA = som("habilidade.salto_carga");
     public static final RegistryObject<SoundEvent> SALTO = som("habilidade.salto");
     public static final RegistryObject<SoundEvent> RICOCHETE = som("habilidade.ricochete");
+    // Batman (v0.2): gancho, batarangues e Batwing
+    public static final RegistryObject<SoundEvent> GANCHO_DISPARO = som("habilidade.gancho_disparo");
+    public static final RegistryObject<SoundEvent> GANCHO_PUXA = som("habilidade.gancho_puxa");
+    public static final RegistryObject<SoundEvent> GANCHO_IMPULSO = som("habilidade.gancho_impulso");
+    public static final RegistryObject<SoundEvent> BATARANGUE_ARREMESSO = som("habilidade.batarangue_arremesso");
+    public static final RegistryObject<SoundEvent> BATARANGUE_GIRO = som("habilidade.batarangue_giro");
+    public static final RegistryObject<SoundEvent> BATARANGUE_ACERTA = som("habilidade.batarangue_acerta");
+    public static final RegistryObject<SoundEvent> BATARANGUE_PEGA = som("habilidade.batarangue_pega");
+    public static final RegistryObject<SoundEvent> CHOQUE = som("habilidade.choque");
+    public static final RegistryObject<SoundEvent> BATWING_CHEGA = som("habilidade.batwing_chega");
+    public static final RegistryObject<SoundEvent> BATWING_MOTOR = som("habilidade.batwing_motor");
+    public static final RegistryObject<SoundEvent> BATWING_TIRO = som("habilidade.batwing_tiro");
+    public static final RegistryObject<SoundEvent> BATWING_MISSIL = som("habilidade.batwing_missil");
+    public static final RegistryObject<SoundEvent> BATWING_FURTIVO = som("habilidade.batwing_furtivo");
+    public static final RegistryObject<SoundEvent> BATWING_REVELA = som("habilidade.batwing_revela");
+    public static final RegistryObject<SoundEvent> BATWING_SUPERAQUECE = som("habilidade.batwing_superaquece");
+    public static final RegistryObject<SoundEvent> CAPA_ABRE = som("habilidade.capa_abre");
+    public static final RegistryObject<SoundEvent> CAPA_FECHA = som("habilidade.capa_fecha");
+    public static final RegistryObject<SoundEvent> CAPA_VENTO = som("habilidade.capa_vento");
+    public static final RegistryObject<SoundEvent> CAPA_IMPULSO = som("habilidade.capa_impulso");
+    public static final RegistryObject<SoundEvent> CAPA_ARREMETIDA = som("habilidade.capa_arremetida");
+    public static final RegistryObject<SoundEvent> POUSO_ROLAMENTO = som("habilidade.pouso_rolamento");
+
+    // Batman (v0.2, etapa 3): modo detetive, fumaça, gel explosivo e contra-ataque
+    public static final RegistryObject<SoundEvent> DETETIVE_LIGA = som("habilidade.detetive_liga");
+    public static final RegistryObject<SoundEvent> DETETIVE_DESLIGA = som("habilidade.detetive_desliga");
+    public static final RegistryObject<SoundEvent> FUMACA = som("habilidade.fumaca");
+    public static final RegistryObject<SoundEvent> GEL_APLICA = som("habilidade.gel_aplica");
+    public static final RegistryObject<SoundEvent> GEL_BIPE = som("habilidade.gel_bipe");
+    public static final RegistryObject<SoundEvent> GEL_DETONA = som("habilidade.gel_detona");
+    public static final RegistryObject<SoundEvent> CONTRA_ATAQUE = som("habilidade.contra_ataque");
 
     private Sons() {}
 

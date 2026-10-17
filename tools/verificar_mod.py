@@ -15,7 +15,7 @@ Verificações:
 - registro: todo item/bloco com nome no lang está registrado no Java e todo item dcuniverse: usado em
   receita, loot table ou tag tem nome no lang;
 - sons: todo som de content/Sons.java está no sounds.json, com o .ogg existindo (os das habilidades mono,
-  para tocar no lugar certo do mundo; a trilha do voo é estéreo de propósito) e a legenda traduzida nos dois idiomas;
+  para tocar no lugar certo do mundo; as trilhas do voo e do planar são estéreo de propósito) e a legenda traduzida nos dois idiomas;
 - blocos: todo bloco de content/Blocos.java tem blockstate, modelo e textura.
 Lê src/main/resources e src/generated/resources (receitas geradas por tools/gerar_conteudo.py).
 
@@ -200,7 +200,7 @@ def verificar_personagens(raiz, recursos, erros):
 
 
 # Peças 3D já feitas em client/Pecas.java (as outras de docs/SKINS.md entram com os personagens que as usam).
-PECAS_PRONTAS = {"capa", "musculoso", "brilho"}
+PECAS_PRONTAS = {"capa", "musculoso", "brilho", "orelhas_bat", "cinto_3d", "laminas", "planador"}
 
 
 def verificar_pecas(recursos, nome, corpo, erros):
