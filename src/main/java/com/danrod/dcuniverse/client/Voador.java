@@ -204,7 +204,7 @@ public final class Voador {
             tremor = 14;
             soco = 0.3f;
             clarao = 1f;
-            TrilhaVoo.estrondo(mc);
+            Trilha.VOO.impacto(mc);
             Rede.CANAL.send(new Rede.Estrondo(), PacketDistributor.SERVER.noArg());
         }
     }
@@ -321,7 +321,7 @@ public final class Voador {
         Cauda.tick(level, POSES.keySet());
         LocalPlayer p = mc.player;
         boolean voa = p != null && voando(p) && vel != null;
-        TrilhaVoo.tick(mc, voa, voa ? vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo()) : 0);
+        Trilha.VOO.tick(mc, voa ? trilha(vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo())) : null);
         if (p != null && vel != null && (som == null || som.isStopped()) && vel.length() * 20 > 6) {
             som = new SomVento(p);
             mc.getSoundManager().play(som);
@@ -441,6 +441,16 @@ public final class Voador {
         }
     }
 
+    /** Volume de cada camada da trilha pela velocidade (fração da máxima). */
+    private static float[] trilha(double frac) {
+        return new float[] {
+            1f - 0.35f * Trilha.suave(0.6, 1.0, frac),
+            // No cruzeiro o piano entra baixinho; ele só cresce de vez junto com o boost.
+            0.6f * Trilha.suave(0.08, 0.26, frac) + 0.4f * Trilha.suave(0.4, 0.66, frac),
+            Trilha.suave(0.4, 0.66, frac),
+            Trilha.suave(0.74, 0.93, frac)};
+    }
+
     private static float suave(float t) {
         return t * t * (3 - 2 * t);
     }
@@ -525,7 +535,7 @@ public final class Voador {
         manobra = -1;
         POSES.clear();
         Cauda.limpar();
-        TrilhaVoo.limpar();
+        Trilha.VOO.limpar();
         clarao = 0;
         if (som != null) som.parar();
         som = null;

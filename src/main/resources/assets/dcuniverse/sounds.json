@@ -290,5 +290,44 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.pouso_rolamento"
+  },
+  "musica.planar_0": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_0",
+        "stream": true
+      }
+    ]
+  },
+  "musica.planar_1": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_1",
+        "stream": true
+      }
+    ]
+  },
+  "musica.planar_2": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_2",
+        "stream": true
+      }
+    ]
+  },
+  "musica.planar_3": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_3",
+        "stream": true
+      }
+    ]
+  },
+  "musica.planar_apice": {
+    "sounds": [
+      {
+        "name": "dcuniverse:musica/planar_apice"
+      }
+    ]
   }
 }

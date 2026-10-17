@@ -178,6 +178,7 @@ public final class Planador {
             // A capa estala aberta e puxa para cima: a velocidade do mergulho vira altura.
             arremetida = ARREMETIDA_TICKS;
             soco = 0.15f;
+            if (vel > c * MAX_ABERTA * 0.88) Trilha.PLANAR.impacto(mc);
             Voador.tremer(5);
             manobraLocal(Planar.ARREMETIDA);
         }
@@ -383,10 +384,25 @@ public final class Planador {
             }
         }
         LocalPlayer p = mc.player;
+        Trilha.PLANAR.tick(mc, estado == Planar.FECHADA ? null : trilha());
         if (p != null && estado != Planar.FECHADA && (som == null || som.isStopped())) {
             som = new SomPlanar(p);
             mc.getSoundManager().play(som);
         }
+    }
+
+    /**
+     * Volume de cada camada do tema pela velocidade, em fração da máxima de capa aberta (o cruzeiro fica em ~0,32 e
+     * o mergulho passa de 1): a noite sempre, o piano gótico ao planar, a tensão acelerando e o ápice nos mergulhos.
+     */
+    private static float[] trilha() {
+        double c = cruzeiro();
+        double frac = c <= 0 ? 0 : vel / (c * MAX_ABERTA);
+        return new float[] {
+            1f - 0.4f * Trilha.suave(0.8, 1.2, frac),
+            0.5f + 0.5f * Trilha.suave(0.2, 0.45, frac),
+            Trilha.suave(0.5, 0.8, frac),
+            Trilha.suave(0.88, 1.15, frac)};
     }
 
     /** Guarda a posição das duas pontas da capa (onde nascem os rastros de ar). */
@@ -554,6 +570,7 @@ public final class Planador {
         POSES.clear();
         if (som != null) som.parar();
         som = null;
+        Trilha.PLANAR.limpar();
     }
 
     /** Vento do planar no jogador local: sobe e fica mais agudo com a velocidade. */

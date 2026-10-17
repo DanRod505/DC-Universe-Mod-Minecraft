@@ -13,7 +13,7 @@ Saídas (em src/main/resources/assets/dcuniverse/sounds/musica/):
 - voo_2.ogg  crescendo: cordas, arpejo de sintetizador, cordas graves pulsando e um bumbo suave (boost).
 - voo_3.ogg  épico: tema nas cordas agudas, metais sintetizados, tambores, pratos e guitarras (perto da máxima).
 - voo_estrondo.ogg  impacto ao quebrar a barreira do som.
-Quem toca as camadas e decide o volume de cada uma é client/TrilhaVoo.java.
+Quem toca as camadas é client/Trilha.java (com o volume decidido em client/Voador).
 
 Uso: python3 tools/arte/trilha_voo.py --raiz . [--previa arquivo.ogg]  (precisa de numpy, scipy e ffmpeg)
 """
