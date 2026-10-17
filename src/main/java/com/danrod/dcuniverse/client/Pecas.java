@@ -1,5 +1,7 @@
 package com.danrod.dcuniverse.client;
 
+import com.danrod.dcuniverse.ability.passive.Planar;
+import com.danrod.dcuniverse.content.Sons;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -18,6 +20,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -242,7 +245,7 @@ public final class Pecas {
                 // dobras verticais do tecido parado
                 float dobra = 0.25f * t * Mth.cos(c * Mth.PI * 4);
                 pt[i][j] = new Vector3f(xLado + c * larg, y, z).add(new Vector3f(norm[i]).mul(onda + dobra));
-                if (g > 0) pt[i][j].lerp(asa(c, t, p.fase), g);
+                if (g > 0) pt[i][j].lerp(asa(c, t, p.fase, p.agito, asa.freio), g);
             }
             if (g > 0) norm[i].lerp(new Vector3f(0, 0, 1), g).normalize();
             if (i < FAIXAS) {
@@ -291,7 +294,7 @@ public final class Pecas {
      * a 1 (barra). A borda de cima vai dos ombros às mãos (braços abertos em posePlanar) e passa um pouco delas; a de
      * baixo desce até os joelhos no meio e sobe para as pontas, recortada em três gomos entre as varetas.
      */
-    private static Vector3f asa(float c, float t, float fase) {
+    private static Vector3f asa(float c, float t, float fase, float agito, float freio) {
         float u = Math.abs(c) * 2;
         float frente = 0.2f + 7f * (float) Math.pow(u, 1.4);
         float gomo = Mth.sin((u * 3 % 1) * Mth.PI);
@@ -301,7 +304,9 @@ public final class Pecas {
         float x = c * ENVERGADURA * (1 - 0.05f * t);
         // tecido esticado: sobe um pouco para as pontas (diedro) e barriga entre as varetas; a barra treme no vento
         float z = 2.5f + 1.3f * u * u + 0.5f * Mth.sin(t * Mth.PI) * (1 - u) + 0.35f * gomo * t
-            + 0.18f * t * Mth.sin(fase * 2.2f + u * 5);
+            + (0.12f + 0.35f * agito) * t * Mth.sin(fase * 2.2f + u * 5)
+            // freio: a capa enche de ar como um paraquedas
+            + freio * 2f * Mth.sin(t * Mth.PI) * (1 - u);
         return new Vector3f(x, y, z);
     }
 
@@ -309,7 +314,7 @@ public final class Pecas {
 
     /** Abertura da asa de cada jogador: anda para o alvo (abre em ~1/3 s, fecha mais rápido). */
     private static final class Asa {
-        float abertura;
+        float abertura, freio;
         long ultimo;
         boolean aberta;
     }
@@ -321,7 +326,7 @@ public final class Pecas {
         return x * x * (3 - 2 * x);
     }
 
-    /** Antes de desenhar: atualiza a abertura e, planando, deita o corpo como no élitro (só em parte). */
+    /** Antes de desenhar: anda a abertura da asa para o estado da capa (a pose deitada fica em client/Planador). */
     private static void planar(AvatarRenderState s) {
         if (s.id == Integer.MIN_VALUE) return;
         Def d = def(personagem(s.skin));
@@ -336,34 +341,23 @@ public final class Pecas {
         long agora = System.nanoTime();
         float dt = a.ultimo == 0 ? 0.05f : Mth.clamp((agora - a.ultimo) / 1e9f, 0, 0.1f);
         a.ultimo = agora;
-        boolean alvo = planando(mc, pl);
-        a.abertura = Mth.clamp(a.abertura + (alvo ? dt * 2.2f : -dt * 5f), 0, 1);
+        int est = Planador.estadoVisto(mc, pl);
+        boolean alvo = est != Planar.FECHADA;
+        // no mergulho a capa fecha em parte (asa recolhida); no freio abre toda e enche de ar
+        float alvoAbertura = !alvo ? 0 : est == Planar.MERGULHO ? 0.4f : 1;
+        a.abertura = a.abertura < alvoAbertura ? Math.min(alvoAbertura, a.abertura + dt * 2.2f)
+            : Math.max(alvoAbertura, a.abertura - dt * (alvo ? 3f : 5f));
+        a.freio += ((est == Planar.FREIO ? 1 : 0) - a.freio) * Math.min(1, dt * 6);
         if (alvo && !a.aberta && a.abertura > 0.05f) {
             // estalo do tecido abrindo (cada cliente toca o seu, na posição de quem abriu)
-            mc.level.playLocalSound(pl.getX(), pl.getY() + 1, pl.getZ(), com.danrod.dcuniverse.content.Sons.CAPA_ABRE.get(),
-                net.minecraft.sounds.SoundSource.PLAYERS, 0.9f, 0.95f + pl.getRandom().nextFloat() * 0.1f, false);
+            mc.level.playLocalSound(pl.getX(), pl.getY() + 1, pl.getZ(), Sons.CAPA_ABRE.get(),
+                SoundSource.PLAYERS, 0.9f, 0.95f + pl.getRandom().nextFloat() * 0.1f, false);
+        } else if (!alvo && a.aberta) {
+            mc.level.playLocalSound(pl.getX(), pl.getY() + 1, pl.getZ(), Sons.CAPA_FECHA.get(),
+                SoundSource.PLAYERS, 0.8f, 0.95f + pl.getRandom().nextFloat() * 0.1f, false);
         }
         a.aberta = alvo;
         if (ASAS.size() > 64) ASAS.entrySet().removeIf(en -> agora - en.getValue().ultimo > 10_000_000_000L);
-        float g = suave(a.abertura);
-        if (g <= 0.001f || s.isFallFlying) return;
-        float deitado = 0.72f * g;
-        s.isFallFlying = true;
-        s.fallFlyingTimeInTicks = 10f * Mth.sqrt(deitado);
-        s.shouldApplyFlyingYRot = false;
-        s.capeLean *= 1 - g;
-        s.capeLean2 *= 1 - g;
-        s.walkAnimationSpeed *= 1 - g;
-    }
-
-    /** Planando: o jogador local pergunta ao Planador; os outros, pelo movimento (caindo devagar e indo para a frente). */
-    private static boolean planando(Minecraft mc, Player p) {
-        if (p == mc.player) return Planador.planando(mc.player);
-        if (p.onGround() || p.isPassenger() || p.isInWater() || p.isFallFlying() || p.getAbilities().flying) return false;
-        var a = EstadoCliente.APARENCIAS.get(p.getId());
-        if (a != null && a.voando()) return false;
-        double dy = p.getY() - p.yo, dx = p.getX() - p.xo, dz = p.getZ() - p.zo;
-        return dy < -0.01 && dy > -0.2 && dx * dx + dz * dz > 0.1 * 0.1;
     }
 
     /** Depois da animação do modelo (mixin PlayerModelMixin): braços abertos segurando a asa, pernas juntas. */

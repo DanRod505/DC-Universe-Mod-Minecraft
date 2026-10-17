@@ -1,5 +1,6 @@
 package com.danrod.dcuniverse.client;
 
+import com.danrod.dcuniverse.ability.passive.Planar;
 import com.danrod.dcuniverse.ability.passive.Voo;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.core.Rede;
@@ -69,7 +70,9 @@ public final class Voador {
     /** Velocidade atual do jogador local (blocos/tick), null quando não está voando. */
     private static Vec3 vel;
     private static boolean armado = true;
-    private static int tremor, ticks;
+    private static int tremor;
+    /** Ticks do cliente (conta sempre, mesmo sem voar; o toque duplo do planar também usa). */
+    static int ticks;
     private static float soco;
     /** Clarão branco na tela ao quebrar a barreira do som (1 a 0). */
     private static float clarao;
@@ -91,7 +94,7 @@ public final class Voador {
     }
 
     /** Detecta o toque duplo de uma tecla. */
-    private static final class Toque {
+    static final class Toque {
         boolean antes;
         int ultimo = -100;
 
@@ -278,6 +281,10 @@ public final class Voador {
         soco *= 0.85f;
         clarao *= 0.8f;
         for (Rede.ManobraVista m; (m = EstadoCliente.MANOBRAS.poll()) != null; ) {
+            if (m.tipo() >= Planar.GIRO_ESQUERDA) {
+                Planador.manobraVista(level, m);
+                continue;
+            }
             Pose ps = POSES.get(m.entidade());
             if (ps != null) {
                 ps.manobra = m.tipo();
@@ -448,10 +455,18 @@ public final class Voador {
             // Clarão ao quebrar a barreira do som.
             g.fill(0, 0, g.guiWidth(), g.guiHeight(), (Math.round(clarao * 110) << 24) | 0xFFFFFF);
         }
-        if (vel == null || mc.player == null || mc.gui.hud.isHidden() || !mc.options.getCameraType().isFirstPerson()) return;
+        if (vel == null) {
+            linhas(g, Planador.forcaLinhas());
+            return;
+        }
         double frac = vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo());
-        float forca = (float) Mth.clamp((frac - 0.45) / 0.55, 0, 1.2);
-        if (forca <= 0) return;
+        linhas(g, (float) Mth.clamp((frac - 0.45) / 0.55, 0, 1.2));
+    }
+
+    /** As linhas de velocidade com a força dada (0 a 1,2), só em primeira pessoa; o planar usa as mesmas. */
+    static void linhas(GuiGraphicsExtractor g, float forca) {
+        Minecraft mc = Minecraft.getInstance();
+        if (forca <= 0 || mc.player == null || mc.gui.hud.isHidden() || !mc.options.getCameraType().isFirstPerson()) return;
         int w = g.guiWidth(), h = g.guiHeight();
         float cx = w / 2f, cy = h / 2f;
         float raio = (float) Math.sqrt(cx * cx + cy * cy);

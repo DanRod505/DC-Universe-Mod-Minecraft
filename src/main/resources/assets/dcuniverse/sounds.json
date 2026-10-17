@@ -249,5 +249,46 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.capa_abre"
+  },
+  "habilidade.capa_fecha": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_fecha"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_fecha"
+  },
+  "habilidade.capa_vento": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_vento",
+        "stream": false
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_vento"
+  },
+  "habilidade.capa_impulso": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_impulso"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_impulso"
+  },
+  "habilidade.capa_arremetida": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_arremetida"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_arremetida"
+  },
+  "habilidade.pouso_rolamento": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/pouso_rolamento"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.pouso_rolamento"
   }
 }

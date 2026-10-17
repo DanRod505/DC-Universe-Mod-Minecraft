@@ -28,6 +28,11 @@ Batman (v0.2):
 - batwing_revela.ogg    camuflagem desligando
 - batwing_superaquece.ogg  metralhadoras superaquecidas: chiado e alarme
 - capa_abre.ogg  capa pesada abrindo em asa: estalo de tecido e lufada
+- capa_fecha.ogg        a asa recolhendo: tecido dobrando e um baque abafado
+- capa_vento.ogg        vento na capa planando: assobio do ar e o tecido tremulando (laço sem emenda)
+- capa_impulso.ogg      bater forte da capa: estalo duplo e a lufada empurrando
+- capa_arremetida.ogg   saída do mergulho: o ar rugindo na capa e subindo de tom
+- pouso_rolamento.ogg   pouso em rolamento: pés batendo, rolar no chão e o tecido arrastando
 
 Uso: python3 tools/arte/sons.py --raiz .  (precisa de numpy, scipy e ffmpeg)
 """
@@ -452,6 +457,70 @@ def capa_abre():
     return finalizar(normalizar(eco(x, 0.4, 0.1)[: int(seg * SR)], 0.85), 0.15)
 
 
+def capa_fecha():
+    seg = 0.5
+    t = t_(seg)
+    tecido = filtro(ruido(seg), "bandpass", [150, 1800]) * np.abs(np.sin(2 * np.pi * 11 * t)) ** 4 * np.exp(-t / 0.12)
+    baque = filtro(ruido(0.12), "lowpass", 350) * env(int(0.12 * SR), 0.003, 0.04) * 1.4
+    x = misturar((0, tecido * 0.8), (0.12, baque))
+    return finalizar(normalizar(eco(x, 0.3, 0.08)[: int(seg * SR)], 0.75), 0.12)
+
+
+def capa_vento():
+    seg = 4.25
+    t = t_(seg)
+    # corpo do vento: ruído largo com a intensidade ondulando devagar (rajadas)
+    rajada = 0.75 + 0.25 * np.sin(2 * np.pi * t / 4.0 * 2) * np.sin(2 * np.pi * t / 4.0 * 1 + 0.7)
+    corpo = filtro(ruido(seg), "bandpass", [90, 1200]) * rajada
+    # assobio do ar passando na borda da capa (faixa estreita que desliza um pouco)
+    assobio = filtro(ruido(seg), "bandpass", [1400, 1700], 3) * (0.5 + 0.5 * np.sin(2 * np.pi * t / 4.0 * 3)) ** 2
+    # tecido tremulando: batidas rápidas e irregulares, graves
+    trem = np.abs(np.sin(2 * np.pi * 7 * t + 2 * np.sin(2 * np.pi * t / 4.0 * 5))) ** 6
+    tecido = filtro(ruido(seg), "bandpass", [100, 600]) * trem
+    x = corpo * 0.7 + assobio * 0.35 + tecido * 0.5
+    return normalizar(laco(x, 0.25), 0.7)
+
+
+def capa_impulso():
+    seg = 0.9
+    t = t_(seg)
+    estalo = filtro(ruido(0.03), "bandpass", [400, 4000]) * env(int(0.03 * SR), 0.001, 0.01) * 1.8
+    tremula = np.abs(np.sin(2 * np.pi * 16 * t)) ** 5 * np.exp(-t / 0.15)
+    tecido = filtro(ruido(seg), "bandpass", [120, 1500]) * tremula
+    empurra = filtro(ruido(seg), "bandpass", [60, 900]) * env(len(t), 0.03, 0.3)
+    grave = np.sin(2 * np.pi * np.cumsum(70 - 30 * t) / SR) * env(len(t), 0.005, 0.12)
+    x = misturar((0, estalo), (0.09, estalo * 0.8), (0.0, tecido * 0.7), (0.02, empurra), (0.0, grave * 0.6))
+    return finalizar(normalizar(eco(x, 0.5, 0.12)[: int(seg * SR)], 0.9), 0.2)
+
+
+def capa_arremetida():
+    seg = 1.4
+    t = t_(seg)
+    # o ar ruge na capa e a faixa sobe com a curva (o mergulho virando subida)
+    ruge = ruido(seg)
+    baixo = filtro(ruge, "bandpass", [80, 600]) * env(len(t), 0.05, 0.6)
+    alto = filtro(ruge, "bandpass", [700, 2600]) * env(len(t), 0.25, 0.45)
+    sobe = varredura(220, 520, seg, 0.7) * env(len(t), 0.2, 0.5) * 0.25
+    tremula = np.abs(np.sin(2 * np.pi * (10 + 8 * t) * t)) ** 5 * np.exp(-t / 0.5)
+    tecido = filtro(ruido(seg), "bandpass", [120, 1200]) * tremula
+    x = baixo * 0.9 + alto * 0.5 + sobe + tecido * 0.6
+    return finalizar(normalizar(eco(x, 0.7, 0.15)[: int(seg * SR)], 0.9), 0.3)
+
+
+def pouso_rolamento():
+    seg = 1.0
+    t = t_(seg)
+    def batida(dur, corte, ganho):
+        return filtro(ruido(dur), "lowpass", corte) * env(int(dur * SR), 0.002, dur / 4) * ganho
+    pes = misturar((0, batida(0.1, 500, 1.4)), (0.06, batida(0.1, 600, 1.0)))
+    rola = filtro(ruido(0.5), "bandpass", [150, 2500]) * np.abs(np.sin(2 * np.pi * 6 * t_(0.5))) ** 2 \
+        * env(int(0.5 * SR), 0.05, 0.2)
+    ombro = batida(0.12, 400, 1.1)
+    arrasta = filtro(ruido(0.5), "bandpass", [300, 3000]) * env(int(0.5 * SR), 0.05, 0.15)
+    x = misturar((0, pes), (0.1, rola * 0.7), (0.2, ombro), (0.35, arrasta * 0.5))
+    return finalizar(normalizar(eco(x, 0.4, 0.1)[: int(seg * SR)], 0.85), 0.2)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -462,6 +531,8 @@ SONS = {
     "batwing_chega": batwing_chega, "batwing_motor": batwing_motor, "batwing_tiro": batwing_tiro,
     "batwing_missil": batwing_missil, "batwing_furtivo": batwing_furtivo, "batwing_revela": batwing_revela,
     "batwing_superaquece": batwing_superaquece, "capa_abre": capa_abre,
+    "capa_fecha": capa_fecha, "capa_vento": capa_vento, "capa_impulso": capa_impulso,
+    "capa_arremetida": capa_arremetida, "pouso_rolamento": pouso_rolamento,
 }
 
 

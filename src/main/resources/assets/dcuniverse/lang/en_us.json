@@ -61,7 +61,7 @@
   "dcuniverse.guia.passiva.fall_immunity": "Immune to fall damage",
   "dcuniverse.guia.passiva.fire_immunity": "Immune to fire and lava",
   "dcuniverse.guia.passiva.night_vision": "Sees in the dark",
-  "dcuniverse.guia.passiva.glide": "Glides while holding jump in the air",
+  "dcuniverse.guia.passiva.glide": "Jumping in the air opens the cape to glide (jump again closes it)",
   "dcuniverse.guia.suprema.custo": "Costs %s%% of energy, %s s cooldown",
   "item.dcuniverse.cristal_superman": "Crystal of the House of El",
   "item.dcuniverse.guia_heroi": "Hero's Guide",
@@ -97,6 +97,7 @@
   "dcuniverse.guia.atributo.planar": "Gliding",
   "dcuniverse.guia.ficha.unidades": "Health and damage in hearts; running, flight and gliding in blocks per second.",
   "dcuniverse.guia.voo.detalhe": "Cruise %s b/s. Holding Ctrl (boost) speed keeps rising up to %s b/s and the trail shows. The dash costs %s energy.",
+  "dcuniverse.guia.planar.detalhe": "Cruise %s b/s with the cape open; curving down it reaches %s b/s and diving (Shift) %s b/s. Release Shift while fast to pull up into the sky. S brakes like a parachute, A/D turn, double-tap A/D barrel-rolls sideways (dodge) and double-tap W beats the cape for a boost that costs %s energy. Landing fast turns into a roll, with no fall damage.",
   "dcuniverse.guia.secao.historia": "Story",
   "dcuniverse.guia.hab.segurar": "Hold V: %s energy per second",
   "dcuniverse.guia.hab.apertar": "Press V: %s energy",
@@ -246,5 +247,14 @@
   "item.dcuniverse.cinto_batman": "Utility Belt",
   "personagem.dcuniverse.batman.exp": "Preparation, gear and strategy: you win because you planned, not because you are stronger.",
   "dcuniverse.guia.item.cinto_batman": "Right-click to put on Batman's suit and carry his gadgets. Press H to turn back to normal.",
-  "subtitles.dcuniverse.habilidade.capa_abre": "Cape opens into a wing"
+  "subtitles.dcuniverse.habilidade.capa_abre": "Cape opens into a wing",
+  "dcuniverse.guia.tarefa.planar": "Glide with the cape",
+  "dcuniverse.guia.tarefa.planar.desc": "As Batman, press jump in the air.",
+  "dcuniverse.guia.tarefa.manobra_planar": "Do a gliding maneuver",
+  "dcuniverse.guia.tarefa.manobra_planar.desc": "While gliding, double-tap A, D or W, or dive with Shift and let go.",
+  "subtitles.dcuniverse.habilidade.capa_fecha": "Cape folds",
+  "subtitles.dcuniverse.habilidade.capa_vento": "Wind in the cape",
+  "subtitles.dcuniverse.habilidade.capa_impulso": "Cape beats",
+  "subtitles.dcuniverse.habilidade.capa_arremetida": "Cape pulls up",
+  "subtitles.dcuniverse.habilidade.pouso_rolamento": "Rolling landing"
 }

@@ -60,6 +60,7 @@ public final class Cliente {
             Pecas.limpar();
             Hud.limpar();
             Voador.limpar();
+            Planador.limpar();
             Mundo.limpar();
             SomCanal.limpar();
             Saltador.limpar();
@@ -71,6 +72,7 @@ public final class Cliente {
         Skins.registrar();
         Pecas.registrar();
         Voador.registrar();
+        Planador.registrar();
         Efeitos.registrarFeixe();
         RaioX.registrar();
         Saltador.registrar();

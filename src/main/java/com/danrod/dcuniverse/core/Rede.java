@@ -111,10 +111,11 @@ public final class Rede {
     /**
      * Aparência de um jogador para quem está vendo ele: personagem ("" = normal), a cor do personagem e o
      * efeito da habilidade canalizada agora (tipo, "" = nenhuma), com cor, alcance e ângulo, para todo mundo
-     * ver o raio ou o sopro, e se ele está voando (para a pose de voo).
+     * ver o raio ou o sopro, se ele está voando (para a pose de voo) e o estado da capa do planar
+     * (ability/passive/Planar: 0 fechada, 1 aberta, 2 mergulho, 3 freio).
      */
     public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo, boolean voando,
-                            int rastro, int rastro2, int rastro3) {
+                            int rastro, int rastro2, int rastro3, int planar) {
         public static void encode(Aparencia m, FriendlyByteBuf b) {
             b.writeVarInt(m.entidade);
             b.writeUtf(m.personagem);
@@ -127,11 +128,12 @@ public final class Rede {
             b.writeInt(m.rastro);
             b.writeInt(m.rastro2);
             b.writeInt(m.rastro3);
+            b.writeVarInt(m.planar);
         }
 
         public static Aparencia decode(FriendlyByteBuf b) {
             return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat(), b.readBoolean(),
-                b.readInt(), b.readInt(), b.readInt());
+                b.readInt(), b.readInt(), b.readInt(), b.readVarInt());
         }
     }
 
@@ -172,6 +174,9 @@ public final class Rede {
 
     /** Manobra de voo feita pelo cliente (Voo.GIRO_ESQUERDA... ARRANCADA). */
     public record Manobra(int tipo) {}
+
+    /** O cliente abriu, fechou ou mudou a capa do planar (ability/passive/Planar.FECHADA...FREIO). */
+    public record Planar(int estado) {}
 
     /** Outro jogador fez uma manobra: quem vê anima a pose dele. */
     public record ManobraVista(int entidade, int tipo) {}
@@ -268,7 +273,18 @@ public final class Rede {
         CANAL.messageBuilder(Manobra.class)
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> b.writeVarInt(m.tipo())).decoder(b -> new Manobra(b.readVarInt()))
-            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Voo.manobra(p, m.tipo())))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> {
+                if (m.tipo() >= com.danrod.dcuniverse.ability.passive.Planar.GIRO_ESQUERDA) {
+                    com.danrod.dcuniverse.ability.passive.Planar.manobra(p, m.tipo());
+                } else {
+                    Voo.manobra(p, m.tipo());
+                }
+            }))
+            .add();
+        CANAL.messageBuilder(Planar.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.estado())).decoder(b -> new Planar(b.readVarInt()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.ability.passive.Planar.definir(p, m.estado())))
             .add();
         CANAL.messageBuilder(ManobraVista.class)
             .direction(PacketFlow.CLIENTBOUND)
@@ -361,16 +377,17 @@ public final class Rede {
     public static Aparencia montarAparencia(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0);
+        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0, 0);
         Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
         boolean voando = Voo.voando(player);
         Personagem.Tipo voo = p.passiva("flight");
         int rastro = voo == null ? 0 : voo.params().color("trail_color", p.cor());
         int rastro2 = voo == null ? 0 : voo.params().color("trail_color2", rastro);
         int rastro3 = voo == null ? 0 : voo.params().color("trail_color3", clarear(rastro));
-        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0, voando, rastro, rastro2, rastro3);
+        int planar = e.planar();
+        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0, voando, rastro, rastro2, rastro3, planar);
         return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
-            h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2, rastro3);
+            h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2, rastro3, planar);
     }
 
     /** Envia o estado completo ao próprio jogador. */

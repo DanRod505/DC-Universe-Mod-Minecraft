@@ -72,6 +72,15 @@ public final class EstadoJogador {
         tag.putBoolean("amortecendo", v);
     }
 
+    /** Capa do planar: 0 fechada, 1 aberta, 2 mergulho, 3 freio (ability/passive/Planar). */
+    public int planar() {
+        return tag.getIntOr("planar", 0);
+    }
+
+    public void setPlanar(int v) {
+        tag.putInt("planar", v);
+    }
+
     public int selecionada() {
         return tag.getIntOr("selecionada", 0);
     }

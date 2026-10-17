@@ -13,7 +13,7 @@
   },
   "suit": [ "chest", "legs", "feet" ],
   "passives": [
-    { "type": "glide", "speed": 11 },
+    { "type": "glide", "speed": 11, "boost_cost": 10 },
     { "type": "night_vision" }
   ],
   "abilities": [

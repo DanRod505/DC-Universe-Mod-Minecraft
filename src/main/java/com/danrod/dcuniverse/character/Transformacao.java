@@ -93,6 +93,7 @@ public final class Transformacao {
         DemoHud.parar(player);
         Traje.remover(player);
         Atributos.remover(player);
+        estado.setPlanar(0);
         estado.limparTransformacao();
         // Destransformar no ar não mata de queda: desce planando devagar (decisão 6).
         if (player.isAlive()) QuedaAmortecida.iniciarSeNoAr(player);

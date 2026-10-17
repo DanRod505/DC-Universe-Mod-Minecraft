@@ -61,7 +61,7 @@
   "dcuniverse.guia.passiva.fall_immunity": "Imune a dano de queda",
   "dcuniverse.guia.passiva.fire_immunity": "Imune a fogo e lava",
   "dcuniverse.guia.passiva.night_vision": "Enxerga no escuro",
-  "dcuniverse.guia.passiva.glide": "Plana ao segurar pulo caindo",
+  "dcuniverse.guia.passiva.glide": "Pulo no ar abre a capa e plana (pulo de novo fecha)",
   "dcuniverse.guia.suprema.custo": "Custa %s%% da energia, recarga de %s s",
   "item.dcuniverse.cristal_superman": "Cristal da Casa de El",
   "item.dcuniverse.guia_heroi": "Guia do Herói",
@@ -97,6 +97,7 @@
   "dcuniverse.guia.atributo.planar": "Planar",
   "dcuniverse.guia.ficha.unidades": "Vida e dano em corações; corrida, voo e planar em blocos por segundo.",
   "dcuniverse.guia.voo.detalhe": "Cruzeiro de %s b/s. Segurando Ctrl (boost) a velocidade vai subindo até %s b/s e o rastro aparece. A arrancada custa %s de energia.",
+  "dcuniverse.guia.planar.detalhe": "Cruzeiro de %s b/s com a capa aberta; descendo em curva chega a %s b/s e mergulhando (Shift) a %s b/s. Solte o Shift rápido para arremeter para o alto. S freia como paraquedas, A/D fazem curvas, toque duplo em A/D gira de lado (esquiva) e toque duplo em W bate a capa num impulso que custa %s de energia. Pousar rápido vira um rolamento, sem dano de queda.",
   "dcuniverse.guia.secao.historia": "História",
   "dcuniverse.guia.hab.segurar": "Segure V: %s de energia por segundo",
   "dcuniverse.guia.hab.apertar": "Aperte V: %s de energia",
@@ -246,5 +247,14 @@
   "item.dcuniverse.cinto_batman": "Cinto de Utilidades",
   "personagem.dcuniverse.batman.exp": "Preparação, equipamento e estratégia: você vence porque planejou, não porque é mais forte.",
   "dcuniverse.guia.item.cinto_batman": "Clique direito para vestir o traje do Batman e levar os gadgets dele. A tecla H volta ao normal.",
-  "subtitles.dcuniverse.habilidade.capa_abre": "Capa abre em asa"
+  "subtitles.dcuniverse.habilidade.capa_abre": "Capa abre em asa",
+  "dcuniverse.guia.tarefa.planar": "Plane com a capa",
+  "dcuniverse.guia.tarefa.planar.desc": "Como Batman, aperte pulo no ar.",
+  "dcuniverse.guia.tarefa.manobra_planar": "Faça uma manobra planando",
+  "dcuniverse.guia.tarefa.manobra_planar.desc": "Planando, toque duas vezes A, D ou W, ou mergulhe com Shift e solte.",
+  "subtitles.dcuniverse.habilidade.capa_fecha": "Capa recolhe",
+  "subtitles.dcuniverse.habilidade.capa_vento": "Vento na capa",
+  "subtitles.dcuniverse.habilidade.capa_impulso": "Capa bate forte",
+  "subtitles.dcuniverse.habilidade.capa_arremetida": "Capa arremete",
+  "subtitles.dcuniverse.habilidade.pouso_rolamento": "Pouso em rolamento"
 }

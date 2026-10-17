@@ -5,6 +5,8 @@ import com.danrod.dcuniverse.ability.Alvos;
 import com.danrod.dcuniverse.character.Params;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.client.Skins;
+import com.danrod.dcuniverse.ability.passive.Planar;
+import com.danrod.dcuniverse.client.Planador;
 import com.danrod.dcuniverse.client.Voador;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.guia.Guia;
@@ -429,6 +431,10 @@ public final class GuiaScreen extends Screen {
                     double max = t.params().d("speed", 12);
                     texto(out, Component.translatable("dcuniverse.guia.voo.detalhe", fmt(max * Voador.CRUZEIRO), fmt(max),
                         fmt(t.params().d("dash_cost", 15))), SUAVE, 2);
+                } else if (t.tipo().equals("glide")) {
+                    double v = t.params().d("speed", 10);
+                    texto(out, Component.translatable("dcuniverse.guia.planar.detalhe", fmt(v), fmt(v * Planador.MAX_ABERTA),
+                        fmt(v * Planador.MAX_MERGULHO), fmt(t.params().d("boost_cost", Planar.IMPULSO_CUSTO))), SUAVE, 2);
                 } else if (t.tipo().equals("super_jump")) {
                     texto(out, Component.translatable("dcuniverse.guia.salto.detalhe", fmt(alturaSalto(t.params().d("power", 2))),
                         fmt(t.params().d("charge", 1))), SUAVE, 2);

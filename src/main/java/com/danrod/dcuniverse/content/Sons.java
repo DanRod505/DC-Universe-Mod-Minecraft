@@ -38,6 +38,11 @@ public final class Sons {
     public static final RegistryObject<SoundEvent> BATWING_REVELA = som("habilidade.batwing_revela");
     public static final RegistryObject<SoundEvent> BATWING_SUPERAQUECE = som("habilidade.batwing_superaquece");
     public static final RegistryObject<SoundEvent> CAPA_ABRE = som("habilidade.capa_abre");
+    public static final RegistryObject<SoundEvent> CAPA_FECHA = som("habilidade.capa_fecha");
+    public static final RegistryObject<SoundEvent> CAPA_VENTO = som("habilidade.capa_vento");
+    public static final RegistryObject<SoundEvent> CAPA_IMPULSO = som("habilidade.capa_impulso");
+    public static final RegistryObject<SoundEvent> CAPA_ARREMETIDA = som("habilidade.capa_arremetida");
+    public static final RegistryObject<SoundEvent> POUSO_ROLAMENTO = som("habilidade.pouso_rolamento");
 
     private Sons() {}
 
