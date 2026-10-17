@@ -20,9 +20,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
 import org.joml.Matrix3f;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
@@ -32,25 +34,31 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Peças 3D dos personagens (docs/SKINS.md), ligadas por nome em assets/<ns>/skins/<personagem>.json:
  * - capa: capa de tecido em faixas que pendem da nuca, balançam com o movimento, esvoaçam no voo e se esticam atrás
  *   do corpo na alta velocidade (textura <personagem>_capa.png: fora em 0,0,40,64, dentro em 40,0,40,64);
  * - musculoso: peito e ombros 1/2 pixel mais altos, com a própria textura da skin (o brasão acompanha o volume);
- * - brilho: com "glow": {"efeito": "textura"}, a textura acende (emissiva) enquanto o personagem usa aquele efeito.
+ * - brilho: com "glow": {"efeito": "textura"}, a textura acende (emissiva) enquanto o personagem usa aquele efeito;
+ * - planador: a capa vira asa quando o personagem plana (abre esticada até as mãos, braços abertos e corpo deitado);
+ * - orelhas_bat, cinto_3d (fita, 6 bolsos e fivela) e laminas (três em cada manopla): peças com a textura <personagem>_pecas.png
+ *   (mapa em tools/arte/skin_batman.pecas_textura).
  * Vale para todos os jogadores visíveis e para a prévia do Guia, que usa a mesma skin.
  */
 public final class Pecas {
-    record Def(Set<String> pecas, Map<String, Identifier> brilho, Identifier capa) {}
+    record Def(Set<String> pecas, Map<String, Identifier> brilho, Identifier capa, Identifier extras) {}
 
     private static final Map<String, Def> DEFS = new HashMap<>();
     private static final Map<Integer, Pano> PANOS = new HashMap<>();
+    /** Quanto a capa-asa de cada jogador está aberta (0 a 1), atualizado a cada quadro em que ele é desenhado. */
+    private static final Map<Integer, Asa> ASAS = new HashMap<>();
 
     /** Tamanho da capa em pixels do modelo: largura em cima e embaixo, comprimento e espessura. */
     private static final float LARG_CIMA = 10, LARG_BAIXO = 12.5f, COMPRIMENTO = 21, ESPESSURA = 0.45f;
     /** Faixas ao longo da capa e colunas na largura (para as ondas). */
-    private static final int FAIXAS = 10, COLUNAS = 6;
+    private static final int FAIXAS = 10, COLUNAS = 12;
 
     private Pecas() {}
 
@@ -64,11 +72,16 @@ public final class Pecas {
                 }
             }
         });
+        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
+            if (e.getState() instanceof AvatarRenderState s) planar(s);
+            return false;
+        });
     }
 
     public static void limpar() {
         DEFS.clear();
         PANOS.clear();
+        ASAS.clear();
     }
 
     /** O personagem da skin (textures/skin/<nome>.png) ou null se não for skin de personagem. */
@@ -108,7 +121,8 @@ public final class Pecas {
                     brilho.put(e.getKey(), id.withPath("textures/skin/" + e.getValue().getAsString() + ".png"));
                 }
             }
-            return new Def(Set.copyOf(pecas), Map.copyOf(brilho), id.withPath("textures/skin/" + id.getPath() + "_capa.png"));
+            return new Def(Set.copyOf(pecas), Map.copyOf(brilho), id.withPath("textures/skin/" + id.getPath() + "_capa.png"),
+                id.withPath("textures/skin/" + id.getPath() + "_pecas.png"));
         } catch (Exception ex) {
             return null;
         }
@@ -136,6 +150,9 @@ public final class Pecas {
             PlayerModel m = getParentModel();
             if (d.pecas().contains("musculoso")) musculos(ps, col, luz, s, m);
             if (d.pecas().contains("capa")) capa(ps, col, luz, s, m, d.capa());
+            if (d.pecas().contains("orelhas_bat")) orelhas(ps, col, luz, s, m, d.extras());
+            if (d.pecas().contains("cinto_3d")) cinto(ps, col, luz, s, m, d.extras());
+            if (d.pecas().contains("laminas")) laminas(ps, col, luz, s, m, d.extras());
             if (d.pecas().contains("brilho") && s.id != Integer.MIN_VALUE) {
                 var a = EstadoCliente.APARENCIAS.get(s.id);
                 Identifier t = a == null ? null : d.brilho().get(a.efeito());
@@ -200,6 +217,8 @@ public final class Pecas {
         m.root().translateAndRotate(ps);
         m.body.translateAndRotate(ps);
         Pano p = simular(s, ps.last().pose());
+        Asa asa = ASAS.get(s.id);
+        float g = asa == null ? 0 : suave(asa.abertura);
         // Pontos da capa: (FAIXAS + 1) linhas de (COLUNAS + 1) pontos, em pixels do modelo (y para baixo, z para trás).
         Vector3f[][] pt = new Vector3f[FAIXAS + 1][COLUNAS + 1];
         Vector3f[] norm = new Vector3f[FAIXAS + 1];
@@ -223,7 +242,9 @@ public final class Pecas {
                 // dobras verticais do tecido parado
                 float dobra = 0.25f * t * Mth.cos(c * Mth.PI * 4);
                 pt[i][j] = new Vector3f(xLado + c * larg, y, z).add(new Vector3f(norm[i]).mul(onda + dobra));
+                if (g > 0) pt[i][j].lerp(asa(c, t, p.fase), g);
             }
+            if (g > 0) norm[i].lerp(new Vector3f(0, 0, 1), g).normalize();
             if (i < FAIXAS) {
                 y += dir.y * passo;
                 z += dir.z * passo;
@@ -261,6 +282,245 @@ public final class Pecas {
             }
         });
         ps.popPose();
+    }
+
+    /**
+     * Ponto da capa aberta como asa (pixels do modelo, no espaço do corpo): c de -0,5 a 0,5 na largura, t de 0 (gola)
+     * a 1 (barra). A borda de cima vai dos ombros às mãos (braços abertos em posePlanar) e passa um pouco delas; a de
+     * baixo desce até os joelhos no meio e sobe para as pontas, recortada em três gomos entre as varetas.
+     */
+    private static Vector3f asa(float c, float t, float fase) {
+        float u = Math.abs(c) * 2;
+        float frente = 0.2f + 7f * (float) Math.pow(u, 1.4);
+        float gomo = Mth.sin((u * 3 % 1) * Mth.PI);
+        float tras = 21f - 13f * (float) Math.pow(u, 1.5) - 2.6f * gomo;
+        tras = Math.max(tras, frente + 2.5f);
+        float y = Mth.lerp(t, frente, tras);
+        float x = c * ENVERGADURA * (1 - 0.05f * t);
+        // tecido esticado: sobe um pouco para as pontas (diedro) e barriga entre as varetas; a barra treme no vento
+        float z = 2.5f + 1.3f * u * u + 0.5f * Mth.sin(t * Mth.PI) * (1 - u) + 0.35f * gomo * t
+            + 0.18f * t * Mth.sin(fase * 2.2f + u * 5);
+        return new Vector3f(x, y, z);
+    }
+
+    // ------------------------------------------------------------------ planar
+
+    /** Abertura da asa de cada jogador: anda para o alvo (abre em ~1/3 s, fecha mais rápido). */
+    private static final class Asa {
+        float abertura;
+        long ultimo;
+        boolean aberta;
+    }
+
+    /** Envergadura da capa aberta, em pixels do modelo (2,5 blocos). */
+    private static final float ENVERGADURA = 40;
+
+    private static float suave(float x) {
+        return x * x * (3 - 2 * x);
+    }
+
+    /** Antes de desenhar: atualiza a abertura e, planando, deita o corpo como no élitro (só em parte). */
+    private static void planar(AvatarRenderState s) {
+        if (s.id == Integer.MIN_VALUE) return;
+        Def d = def(personagem(s.skin));
+        if (d == null || !d.pecas().contains("planador")) {
+            ASAS.remove(s.id);
+            return;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        Entity e = mc.level == null ? null : mc.level.getEntity(s.id);
+        if (!(e instanceof Player pl)) return;
+        Asa a = ASAS.computeIfAbsent(s.id, k -> new Asa());
+        long agora = System.nanoTime();
+        float dt = a.ultimo == 0 ? 0.05f : Mth.clamp((agora - a.ultimo) / 1e9f, 0, 0.1f);
+        a.ultimo = agora;
+        boolean alvo = planando(mc, pl);
+        a.abertura = Mth.clamp(a.abertura + (alvo ? dt * 2.2f : -dt * 5f), 0, 1);
+        if (alvo && !a.aberta && a.abertura > 0.05f) {
+            // estalo do tecido abrindo (cada cliente toca o seu, na posição de quem abriu)
+            mc.level.playLocalSound(pl.getX(), pl.getY() + 1, pl.getZ(), com.danrod.dcuniverse.content.Sons.CAPA_ABRE.get(),
+                net.minecraft.sounds.SoundSource.PLAYERS, 0.9f, 0.95f + pl.getRandom().nextFloat() * 0.1f, false);
+        }
+        a.aberta = alvo;
+        if (ASAS.size() > 64) ASAS.entrySet().removeIf(en -> agora - en.getValue().ultimo > 10_000_000_000L);
+        float g = suave(a.abertura);
+        if (g <= 0.001f || s.isFallFlying) return;
+        float deitado = 0.72f * g;
+        s.isFallFlying = true;
+        s.fallFlyingTimeInTicks = 10f * Mth.sqrt(deitado);
+        s.shouldApplyFlyingYRot = false;
+        s.capeLean *= 1 - g;
+        s.capeLean2 *= 1 - g;
+        s.walkAnimationSpeed *= 1 - g;
+    }
+
+    /** Planando: o jogador local pergunta ao Planador; os outros, pelo movimento (caindo devagar e indo para a frente). */
+    private static boolean planando(Minecraft mc, Player p) {
+        if (p == mc.player) return Planador.planando(mc.player);
+        if (p.onGround() || p.isPassenger() || p.isInWater() || p.isFallFlying() || p.getAbilities().flying) return false;
+        var a = EstadoCliente.APARENCIAS.get(p.getId());
+        if (a != null && a.voando()) return false;
+        double dy = p.getY() - p.yo, dx = p.getX() - p.xo, dz = p.getZ() - p.zo;
+        return dy < -0.01 && dy > -0.2 && dx * dx + dz * dz > 0.1 * 0.1;
+    }
+
+    /** Depois da animação do modelo (mixin PlayerModelMixin): braços abertos segurando a asa, pernas juntas. */
+    public static void posePlanar(PlayerModel m, AvatarRenderState s) {
+        Asa a = ASAS.get(s.id);
+        if (a == null || a.abertura <= 0.001f) return;
+        float g = suave(a.abertura);
+        m.rightArm.zRot = Mth.lerp(g, m.rightArm.zRot, 1.25f);
+        m.leftArm.zRot = Mth.lerp(g, m.leftArm.zRot, -1.25f);
+        m.rightArm.xRot = Mth.lerp(g, m.rightArm.xRot, -0.12f);
+        m.leftArm.xRot = Mth.lerp(g, m.leftArm.xRot, -0.12f);
+        m.rightArm.yRot = Mth.lerp(g, m.rightArm.yRot, 0);
+        m.leftArm.yRot = Mth.lerp(g, m.leftArm.yRot, 0);
+        m.rightLeg.xRot = Mth.lerp(g, m.rightLeg.xRot, 0.04f);
+        m.leftLeg.xRot = Mth.lerp(g, m.leftLeg.xRot, 0.04f);
+        m.rightLeg.zRot = Mth.lerp(g, m.rightLeg.zRot, 0.05f);
+        m.leftLeg.zRot = Mth.lerp(g, m.leftLeg.zRot, -0.05f);
+    }
+
+    // ------------------------------------------------------------------ orelhas, cinto e lâminas
+
+    /** Coordenadas na textura de peças (64x64), em pixels. */
+    private static final float[] FITA = {0, 0, 16, 4}, BOLSO = {0, 4, 8, 12}, BOLSO_LADO = {8, 4, 12, 12},
+        FIVELA = {16, 0, 24, 8}, ORELHA = {0, 16, 8, 24}, LAMINA = {8, 16, 16, 24};
+
+    /** Orelhas curtas do capuz: pirâmides inclinadas para fora sobre o topo da cabeça. */
+    private static void orelhas(PoseStack ps, SubmitNodeCollector col, int luz, AvatarRenderState s, PlayerModel m, Identifier tex) {
+        int over = LivingEntityRenderer.getOverlayCoords(s, 0);
+        ps.pushPose();
+        m.root().translateAndRotate(ps);
+        m.head.translateAndRotate(ps);
+        col.submitCustomGeometry(ps, RenderTypes.entityCutout(tex), (pose, buf) -> {
+            for (int lado = -1; lado <= 1; lado += 2) {
+                float x0 = 1.5f * lado, x1 = 3.5f * lado;
+                Vector3f a = new Vector3f(x0, -8.45f, -2.3f), b = new Vector3f(x1, -8.45f, -2.3f);
+                Vector3f c = new Vector3f(x1, -8.45f, -0.1f), d = new Vector3f(x0, -8.45f, -0.1f);
+                Vector3f topo = new Vector3f(3.1f * lado, -11.2f, -1.3f);
+                boolean inv = lado < 0;
+                tri(buf, pose, a, b, topo, ORELHA, luz, over, inv);   // frente
+                tri(buf, pose, b, c, topo, ORELHA, luz, over, inv);   // lado de fora
+                tri(buf, pose, c, d, topo, ORELHA, luz, over, inv);   // trás
+                tri(buf, pose, d, a, topo, ORELHA, luz, over, inv);   // lado de dentro
+            }
+        });
+        ps.popPose();
+    }
+
+    /** Cinto de utilidades: a fita em volta da cintura, quatro bolsos na frente, um em cada quadril e a fivela. */
+    private static void cinto(PoseStack ps, SubmitNodeCollector col, int luz, AvatarRenderState s, PlayerModel m, Identifier tex) {
+        int over = LivingEntityRenderer.getOverlayCoords(s, 0);
+        ps.pushPose();
+        m.root().translateAndRotate(ps);
+        m.body.translateAndRotate(ps);
+        col.submitCustomGeometry(ps, RenderTypes.entityCutout(tex), (pose, buf) -> {
+            caixa(buf, pose, -4.35f, 8.85f, -2.35f, 4.35f, 10.75f, 2.35f, FITA, FITA, -1, luz, over);
+            for (float[] x : new float[][] {{-4.15f, -2.65f}, {-2.45f, -0.95f}, {0.95f, 2.45f}, {2.65f, 4.15f}}) {
+                caixa(buf, pose, x[0], 8.7f, -3.5f, x[1], 11.4f, -2.35f, BOLSO, BOLSO_LADO, 2, luz, over);
+            }
+            caixa(buf, pose, -5.5f, 8.7f, -1.0f, -4.35f, 11.4f, 1.0f, BOLSO, BOLSO_LADO, 0, luz, over);
+            caixa(buf, pose, 4.35f, 8.7f, -1.0f, 5.5f, 11.4f, 1.0f, BOLSO, BOLSO_LADO, 1, luz, over);
+            caixa(buf, pose, -0.85f, 8.8f, -2.75f, 0.85f, 10.8f, -2.35f, FIVELA, FITA, 2, luz, over);
+        });
+        ps.popPose();
+    }
+
+    /** Três lâminas no lado de fora de cada manopla, apontando para trás e para o cotovelo. */
+    private static void laminas(PoseStack ps, SubmitNodeCollector col, int luz, AvatarRenderState s, PlayerModel m, Identifier tex) {
+        int over = LivingEntityRenderer.getOverlayCoords(s, 0);
+        for (int lado = -1; lado <= 1; lado += 2) {
+            ModelPart braco = lado < 0 ? m.rightArm : m.leftArm;
+            if (!braco.visible) continue;
+            float fora = lado < 0 ? -3.3f : 3.3f;
+            int l = lado;
+            ps.pushPose();
+            m.root().translateAndRotate(ps);
+            braco.translateAndRotate(ps);
+            col.submitCustomGeometry(ps, RenderTypes.entityCutout(tex), (pose, buf) -> {
+                for (int k = 0; k < 3; k++) {
+                    float y0 = 4.4f + k * 1.25f;
+                    Vector3f a = new Vector3f(fora - 0.3f * l, y0, 0.9f), b = new Vector3f(fora - 0.3f * l, y0 + 1.15f, 0.9f);
+                    Vector3f c = new Vector3f(fora + 1.55f * l, y0 - 0.55f, 1.9f);
+                    lamina(buf, pose, a, b, c, 0.14f, luz, over, l < 0);
+                }
+            });
+            ps.popPose();
+        }
+    }
+
+    /** Lâmina fina: triângulo a-b-c com espessura (para os dois lados no eixo z) e as três bordas. */
+    private static void lamina(VertexConsumer buf, PoseStack.Pose pose, Vector3f a, Vector3f b, Vector3f c, float meia,
+                               int luz, int over, boolean inv) {
+        Vector3f dz = new Vector3f(0, 0, meia);
+        Vector3f a1 = new Vector3f(a).add(dz), b1 = new Vector3f(b).add(dz), c1 = new Vector3f(c).add(dz);
+        Vector3f a0 = new Vector3f(a).sub(dz), b0 = new Vector3f(b).sub(dz), c0 = new Vector3f(c).sub(dz);
+        tri(buf, pose, a1, b1, c1, LAMINA, luz, over, !inv);
+        tri(buf, pose, a0, b0, c0, LAMINA, luz, over, inv);
+        quadPlano(buf, pose, a0, b0, b1, a1, LAMINA, luz, over, inv);
+        quadPlano(buf, pose, b0, c0, c1, b1, LAMINA, luz, over, inv);
+        quadPlano(buf, pose, c0, a0, a1, c1, LAMINA, luz, over, inv);
+    }
+
+    /** Triângulo (enviado como quad com o último vértice repetido); inv troca a ordem para a face apontar ao contrário. */
+    private static void tri(VertexConsumer buf, PoseStack.Pose pose, Vector3f a, Vector3f b, Vector3f c, float[] uv,
+                            int luz, int over, boolean inv) {
+        if (inv) {
+            Vector3f t = a;
+            a = b;
+            b = t;
+        }
+        Vector3f n = new Vector3f(b).sub(a).cross(new Vector3f(c).sub(a)).normalize();
+        float um = (uv[0] + uv[2]) / 2 / 64f;
+        ponto(buf, pose, a, uv[0] / 64f, uv[3] / 64f, n, luz, over);
+        ponto(buf, pose, b, uv[2] / 64f, uv[3] / 64f, n, luz, over);
+        ponto(buf, pose, c, um, uv[1] / 64f, n, luz, over);
+        ponto(buf, pose, c, um, uv[1] / 64f, n, luz, over);
+    }
+
+    private static void quadPlano(VertexConsumer buf, PoseStack.Pose pose, Vector3f a, Vector3f b, Vector3f c, Vector3f d,
+                                  float[] uv, int luz, int over, boolean inv) {
+        if (inv) {
+            Vector3f t = b;
+            b = d;
+            d = t;
+        }
+        Vector3f n = new Vector3f(b).sub(a).cross(new Vector3f(d).sub(a)).normalize();
+        ponto(buf, pose, a, uv[0] / 64f, uv[3] / 64f, n, luz, over);
+        ponto(buf, pose, b, uv[2] / 64f, uv[3] / 64f, n, luz, over);
+        ponto(buf, pose, c, uv[2] / 64f, uv[1] / 64f, n, luz, over);
+        ponto(buf, pose, d, uv[0] / 64f, uv[1] / 64f, n, luz, over);
+    }
+
+    /**
+     * Caixa em pixels do modelo. frente = qual face usa a área "frente" da textura (0 = x-, 1 = x+, 2 = z-, -1 = todas
+     * iguais); as outras usam "lado".
+     */
+    private static void caixa(VertexConsumer buf, PoseStack.Pose pose, float x0, float y0, float z0, float x1, float y1, float z1,
+                              float[] frente, float[] lado, int qual, int luz, int over) {
+        Vector3f[] v = {
+            new Vector3f(x0, y0, z0), new Vector3f(x1, y0, z0), new Vector3f(x1, y1, z0), new Vector3f(x0, y1, z0),
+            new Vector3f(x0, y0, z1), new Vector3f(x1, y0, z1), new Vector3f(x1, y1, z1), new Vector3f(x0, y1, z1)};
+        // cada face: quatro vértices em sentido anti-horário vistos de fora, começando no canto de baixo à esquerda
+        // (y do modelo cresce para baixo)
+        int[][] faces = {{4, 0, 3, 7}, {1, 5, 6, 2}, {0, 1, 2, 3}, {5, 4, 7, 6}, {0, 4, 5, 1}, {3, 2, 6, 7}};
+        for (int f = 0; f < 6; f++) {
+            float[] uv = (qual < 0 || f == qual) ? frente : lado;
+            int[] q = faces[f];
+            Vector3f a = v[q[0]], b = v[q[1]], c = v[q[2]], d = v[q[3]];
+            Vector3f n = new Vector3f(b).sub(a).cross(new Vector3f(d).sub(a)).normalize();
+            // v cresce para baixo na textura, como o y do modelo: a (topo) usa v0
+            ponto(buf, pose, a, uv[0] / 64f, uv[1] / 64f, n, luz, over);
+            ponto(buf, pose, d, uv[0] / 64f, uv[3] / 64f, n, luz, over);
+            ponto(buf, pose, c, uv[2] / 64f, uv[3] / 64f, n, luz, over);
+            ponto(buf, pose, b, uv[2] / 64f, uv[1] / 64f, n, luz, over);
+        }
+    }
+
+    private static void ponto(VertexConsumer buf, PoseStack.Pose pose, Vector3f p, float u, float v, Vector3f n, int luz, int over) {
+        buf.addVertex(pose, p.x / 16f, p.y / 16f, p.z / 16f).setColor(-1).setUv(u, v).setOverlay(over).setLight(luz)
+            .setNormal(pose, n.x, n.y, n.z);
     }
 
     private static void quad(VertexConsumer buf, PoseStack.Pose pose, Vector3f a, Vector3f b, Vector3f c, Vector3f d,

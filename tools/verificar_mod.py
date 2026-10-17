@@ -200,7 +200,7 @@ def verificar_personagens(raiz, recursos, erros):
 
 
 # Peças 3D já feitas em client/Pecas.java (as outras de docs/SKINS.md entram com os personagens que as usam).
-PECAS_PRONTAS = {"capa", "musculoso", "brilho"}
+PECAS_PRONTAS = {"capa", "musculoso", "brilho", "orelhas_bat", "cinto_3d", "laminas", "planador"}
 
 
 def verificar_pecas(recursos, nome, corpo, erros):

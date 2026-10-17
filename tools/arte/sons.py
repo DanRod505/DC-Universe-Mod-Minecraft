@@ -27,6 +27,7 @@ Batman (v0.2):
 - batwing_furtivo.ogg   camuflagem ligando: zumbido que some
 - batwing_revela.ogg    camuflagem desligando
 - batwing_superaquece.ogg  metralhadoras superaquecidas: chiado e alarme
+- capa_abre.ogg  capa pesada abrindo em asa: estalo de tecido e lufada
 
 Uso: python3 tools/arte/sons.py --raiz .  (precisa de numpy, scipy e ffmpeg)
 """
@@ -439,6 +440,18 @@ def batwing_superaquece():
     return finalizar(normalizar(eco(x, 0.6, 0.15)[: int(seg * SR)], 0.85), 0.2)
 
 
+def capa_abre():
+    seg = 0.75
+    t = t_(seg)
+    # estalo seco do tecido esticando, depois a lufada de ar enchendo a asa
+    estalo = filtro(ruido(0.03), "bandpass", [500, 3500]) * env(int(0.03 * SR), 0.001, 0.012) * 1.6
+    tremula = np.abs(np.sin(2 * np.pi * 14 * t)) ** 5 * np.exp(-t / 0.18)
+    tecido = filtro(ruido(seg), "bandpass", [120, 1400]) * tremula
+    lufada = filtro(ruido(seg), "bandpass", [80, 700]) * env(len(t), 0.06, 0.35)
+    x = misturar((0, tecido * 0.7), (0.04, estalo), (0.05, lufada * 0.9))
+    return finalizar(normalizar(eco(x, 0.4, 0.1)[: int(seg * SR)], 0.85), 0.15)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -448,7 +461,7 @@ SONS = {
     "batarangue_acerta": batarangue_acerta, "batarangue_pega": batarangue_pega, "choque": choque,
     "batwing_chega": batwing_chega, "batwing_motor": batwing_motor, "batwing_tiro": batwing_tiro,
     "batwing_missil": batwing_missil, "batwing_furtivo": batwing_furtivo, "batwing_revela": batwing_revela,
-    "batwing_superaquece": batwing_superaquece,
+    "batwing_superaquece": batwing_superaquece, "capa_abre": capa_abre,
 }
 
 

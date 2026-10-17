@@ -56,6 +56,8 @@
 | tanques | Tanques e tubos ligados ao corpo. |
 | aljava | Aljava com flechas visíveis. |
 | cinto_3d | Cinto com bolsos em relevo. |
+| laminas | Lâminas nos antebraços das luvas. |
+| planador | A capa abre em asa de planador (com animação) enquanto plana. |
 | chama_cabeca | Chamas animadas na cabeça. |
 | brilho | Usa a camada emissiva (_glow). |
 
@@ -87,7 +89,7 @@
 
 ### 2. Batman (Bruce Wayne)
 
-**Corpo:** masculino, 1,88 m (escala 1,02), musculoso, modelo humano, braços largo · peças: capa, orelhas_bat, cinto_3d
+**Corpo:** masculino, 1,88 m (escala 1,02), musculoso, modelo humano, braços largo · peças: capa, orelhas_bat, cinto_3d, laminas, planador, brilho
 
 **Traje Tático de Gotham (base):** Armadura cinza-grafite em placas sobre malha preta, morcego preto grande no peito em relevo, cinto de utilidades amarelo-escuro com 6 bolsos em 3D, luvas com três lâminas nos antebraços e capuz com orelhas curtas. Capa preta de tecido pesado que vira asa de planador (animação de abertura). Lentes brancas na máscara quando o visor de detetive está ligado.
 

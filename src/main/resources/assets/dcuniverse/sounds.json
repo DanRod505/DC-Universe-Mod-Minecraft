@@ -241,5 +241,13 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.batwing_superaquece"
+  },
+  "habilidade.capa_abre": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/capa_abre"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.capa_abre"
   }
 }

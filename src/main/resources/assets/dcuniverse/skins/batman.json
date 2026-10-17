@@ -1,3 +1,4 @@
 {
-  "pieces": ["capa", "musculoso"]
+  "pieces": ["capa", "musculoso", "orelhas_bat", "cinto_3d", "laminas", "planador", "brilho"],
+  "glow": { "detective_vision": "batman_lentes" }
 }

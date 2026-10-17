@@ -37,6 +37,7 @@ public final class Sons {
     public static final RegistryObject<SoundEvent> BATWING_FURTIVO = som("habilidade.batwing_furtivo");
     public static final RegistryObject<SoundEvent> BATWING_REVELA = som("habilidade.batwing_revela");
     public static final RegistryObject<SoundEvent> BATWING_SUPERAQUECE = som("habilidade.batwing_superaquece");
+    public static final RegistryObject<SoundEvent> CAPA_ABRE = som("habilidade.capa_abre");
 
     private Sons() {}
 
