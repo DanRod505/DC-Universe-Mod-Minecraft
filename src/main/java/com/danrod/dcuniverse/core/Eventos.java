@@ -89,6 +89,7 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.active.Fumaca.limpar();
         });
         Naturais.registrar();
+        com.danrod.dcuniverse.content.BatwingEntidade.registrar();
         com.danrod.dcuniverse.ability.Congelamento.registrar();
         com.danrod.dcuniverse.ability.active.Detetive.registrar();
         com.danrod.dcuniverse.ability.passive.Furtividade.registrar();

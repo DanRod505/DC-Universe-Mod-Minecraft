@@ -179,8 +179,11 @@ public final class BatwingModelo {
             double lat = Math.PI / 2 * i / nl;  // 0 = base, pi/2 = topo
             for (int j = 0; j <= na; j++) {
                 double lon = Math.PI * 2 * j / na;
-                p[i][j] = new Vector3f(cx + (float) (rx * Math.cos(lat) * Math.sin(lon)), cy + (float) (ry * Math.sin(lat)),
-                    cz + (float) (rz * Math.cos(lat) * Math.cos(lon)));
+                float x = cx + (float) (rx * Math.cos(lat) * Math.sin(lon)), z = cz + (float) (rz * Math.cos(lat) * Math.cos(lon));
+                // A borda do vidro desce até a pele do casco em cada ponto (o dorso é curvo): sem isso a base
+                // plana ficava acima do casco nos lados e na frente, e de dentro aparecia uma fresta para fora.
+                float base = topo(x, z) - 0.04f, s = (float) Math.sin(lat);
+                p[i][j] = new Vector3f(x, base + (cy + ry - base) * (1 - (1 - s) * (1 - s)), z);
             }
         }
         for (int i = 0; i < nl; i++) {

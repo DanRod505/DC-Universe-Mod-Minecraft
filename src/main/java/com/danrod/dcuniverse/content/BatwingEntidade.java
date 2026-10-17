@@ -18,6 +18,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -43,6 +45,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * O Batwing, veículo da suprema do Batman (tipo vehicle). Chega voando, embarca o dono como piloto e tem um
@@ -170,6 +173,25 @@ public class BatwingEntidade extends Entity {
 
     public Entity dono() {
         return level().getEntity(donoId());
+    }
+
+    /**
+     * Quem está dentro do Batwing não se machuca com o próprio jato: batida em parede (a cabeça entra no bloco e
+     * sufoca), afogamento (a cabine é fechada), queda do jato, aperto e os próprios tiros e mísseis.
+     */
+    public static void registrar() {
+        LivingAttackEvent.BUS.addListener((Predicate<LivingAttackEvent>) e -> {
+            if (!(e.getEntity().getVehicle() instanceof BatwingEntidade b)) return false;
+            DamageSource f = e.getSource();
+            return f.is(DamageTypes.IN_WALL) || f.is(DamageTypes.DROWN) || f.is(DamageTypes.FALL) || f.is(DamageTypes.FLY_INTO_WALL) || f.is(DamageTypes.CRAMMING)
+                || f.getEntity() != null && (f.getEntity() == b || b.hasPassenger(f.getEntity()))
+                || f.getDirectEntity() == b;
+        });
+    }
+
+    @Override
+    public boolean causeFallDamage(double distancia, float mult, DamageSource fonte) {
+        return false;
     }
 
     /** O Batwing que o jogador pilota agora, ou null. */

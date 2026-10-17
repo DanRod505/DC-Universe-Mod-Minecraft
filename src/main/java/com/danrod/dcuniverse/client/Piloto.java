@@ -16,6 +16,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.client.resources.sounds.Sound;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.client.sounds.WeighedSoundEvents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -25,6 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.ComputeFovModifierEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -77,6 +83,7 @@ public final class Piloto {
             e.setNewFovModifier(e.getNewFovModifier() * (1 + 0.22f * frac * frac));
         });
         ViewportEvent.ComputeCameraAngles.BUS.addListener(Piloto::camera);
+        PlaySoundEvent.BUS.addListener(Piloto::somNaCabine);
         // Quem está sentado no Batwing inclina com ele, girando em volta do próprio assento.
         RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
             if (!(e.getState() instanceof AvatarRenderState s)) return false;
@@ -93,6 +100,39 @@ public final class Piloto {
         RenderLivingEvent.Post.BUS.addListener(e -> {
             if (e.getState() instanceof AvatarRenderState s && GIRADOS.remove(s.id)) e.getPoseStack().popPose();
         });
+    }
+
+    /**
+     * Sons do próprio Batwing (metralhadoras, mísseis, furtivo, superaquecimento) vêm do servidor presos ao jato;
+     * com a câmera de terceira pessoa a uns 11 blocos eles chegavam fracos e sumiam embaixo do motor. Para quem
+     * está dentro, tocam junto do ouvinte, como o motor.
+     */
+    private static void somNaCabine(PlaySoundEvent e) {
+        SoundInstance s = e.getSound();
+        if (s == null || s.isRelative() || s instanceof Motor) return;
+        Identifier id = s.getIdentifier();
+        if (!DCUniverse.MODID.equals(id.getNamespace()) || !id.getPath().startsWith("habilidade.batwing_")) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || !(mc.player.getVehicle() instanceof BatwingEntidade b)) return;
+        if (b.distanceToSqr(s.getX(), s.getY(), s.getZ()) > 20 * 20) return;
+        e.setSound(new NaCabine(s));
+    }
+
+    /** O mesmo som, sem posição: fica com o ouvinte e não diminui com a distância da câmera. */
+    private record NaCabine(SoundInstance s) implements SoundInstance {
+        @Override public Identifier getIdentifier() { return s.getIdentifier(); }
+        @Override public WeighedSoundEvents resolve(SoundManager m) { return s.resolve(m); }
+        @Override public Sound getSound() { return s.getSound(); }
+        @Override public SoundSource getSource() { return s.getSource(); }
+        @Override public boolean isLooping() { return s.isLooping(); }
+        @Override public boolean isRelative() { return true; }
+        @Override public int getDelay() { return s.getDelay(); }
+        @Override public float getVolume() { return Math.min(1, s.getVolume()); }
+        @Override public float getPitch() { return s.getPitch(); }
+        @Override public double getX() { return 0; }
+        @Override public double getY() { return 0; }
+        @Override public double getZ() { return 0; }
+        @Override public Attenuation getAttenuation() { return Attenuation.NONE; }
     }
 
     /**
@@ -325,7 +365,8 @@ public final class Piloto {
                 return;
             }
             double v = Math.sqrt((b.getX() - b.xo) * (b.getX() - b.xo) + (b.getY() - b.yo) * (b.getY() - b.yo) + (b.getZ() - b.zo) * (b.getZ() - b.zo));
-            float alvo = b.oculto() ? 0.18f : 0.9f;
+            // Dentro fica um pouco abaixo, para as metralhadoras e os mísseis aparecerem por cima do ronco.
+            float alvo = (b.oculto() ? 0.18f : 0.9f) * (dentro ? 0.7f : 1);
             volume += (alvo - volume) * 0.15f;
             pitch = (float) Mth.clamp(0.7 + v * 0.32, 0.6, 1.8);
             if (dentro) return;

@@ -2,6 +2,7 @@ package com.danrod.dcuniverse.client.render;
 
 import com.danrod.dcuniverse.DCUniverse;
 import com.danrod.dcuniverse.client.BatwingModelo;
+import com.danrod.dcuniverse.client.Luz;
 import com.danrod.dcuniverse.content.BatwingEntidade;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -75,7 +76,7 @@ public final class BatwingRenderer extends EntityRenderer<BatwingEntidade, Batwi
             // Camuflagem: casco quase invisível, com um tremor na transparência.
             int a = 40 + Math.round(22 * Mth.sin(s.ageInTicks * 0.35f));
             int cor = (a << 24) | 0xB8C8E0;
-            col.submitCustomGeometry(ps, RenderTypes.entityTranslucent(TEX), (pose, buf) -> {
+            col.submitCustomGeometry(ps, Luz.translucido(TEX), (pose, buf) -> {
                 BatwingModelo.CASCO.enviar(pose, buf, cor, luz);
                 misseis(pose, buf, s, cor, luz);
             });
@@ -88,7 +89,8 @@ public final class BatwingRenderer extends EntityRenderer<BatwingEntidade, Batwi
                 BatwingModelo.LUZ_DIR.enviar(pose, buf, -1, luz);
                 BatwingModelo.LUZ_CAUDA.enviar(pose, buf, -1, luz);
             });
-            col.submitCustomGeometry(ps, RenderTypes.entityTranslucent(TEX), (pose, buf) -> BatwingModelo.VIDRO.enviar(pose, buf, 0x80FFFFFF, luz));
+            // O vidro não grava profundidade: senão a água atrás dele (desenhada depois) some.
+            col.submitCustomGeometry(ps, Luz.translucido(TEX), (pose, buf) -> BatwingModelo.VIDRO.enviar(pose, buf, 0x80FFFFFF, luz));
             int forte = Math.round(255 * s.motor);
             int motor = 0xFF000000 | (forte << 16) | (forte << 8) | forte;
             boolean pisca = ((int) s.ageInTicks / 10) % 2 == 0;
