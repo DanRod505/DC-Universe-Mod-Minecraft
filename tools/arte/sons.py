@@ -33,6 +33,13 @@ Batman (v0.2):
 - capa_impulso.ogg      bater forte da capa: estalo duplo e a lufada empurrando
 - capa_arremetida.ogg   saída do mergulho: o ar rugindo na capa e subindo de tom
 - pouso_rolamento.ogg   pouso em rolamento: pés batendo, rolar no chão e o tecido arrastando
+- detetive_liga.ogg     modo detetive ligando: clique do visor, varredura eletrônica subindo e o zumbido baixo
+- detetive_desliga.ogg  modo detetive desligando: varredura descendo e o clique
+- fumaca.ogg            bomba de fumaça: estalo da cápsula e o chiado forte da fumaça saindo
+- gel_aplica.ogg        gel espirrando e grudando na parede, com o bipe de armado
+- gel_bipe.ogg          bipe curto do detonador (toca acelerando até explodir)
+- gel_detona.ogg        estouro seco do gel: estalo agudo, pancada grave e os pedaços caindo
+- contra_ataque.ogg     defesa no tempo certo: bloqueio seco, o golpe de volta e um sopro de ar
 
 Uso: python3 tools/arte/sons.py --raiz .  (precisa de numpy, scipy e ffmpeg)
 """
@@ -521,6 +528,89 @@ def pouso_rolamento():
     return finalizar(normalizar(eco(x, 0.4, 0.1)[: int(seg * SR)], 0.85), 0.2)
 
 
+def detetive_liga():
+    seg = 1.1
+    t = t_(seg)
+    clique = filtro(ruido(0.012), "bandpass", [1500, 7000]) * env(int(0.012 * SR), 0.0005, 0.003) * 1.5
+    sobe = varredura(500, 2600, 0.45, 0.6) * env(int(0.45 * SR), 0.01, 0.25) * 0.35
+    bip = sum(np.sin(2 * np.pi * f * t_(0.12)) * env(int(0.12 * SR), 0.002, 0.05) for f in (2350, 3520)) * 0.25
+    zum = (np.sin(2 * np.pi * 110 * t) + 0.4 * np.sin(2 * np.pi * 220 * t)) * np.clip(t / 0.2, 0, 1) * np.exp(-t / 0.5) * 0.3
+    x = misturar((0, clique), (0.03, sobe), (0.42, bip), (0.05, zum))
+    return finalizar(normalizar(eco(x, 0.9, 0.25)[: int(seg * SR)], 0.8), 0.2)
+
+
+def detetive_desliga():
+    seg = 0.7
+    desce = varredura(2200, 400, 0.4, 0.8) * env(int(0.4 * SR), 0.005, 0.18) * 0.35
+    clique = filtro(ruido(0.012), "bandpass", [1200, 6000]) * env(int(0.012 * SR), 0.0005, 0.003) * 1.3
+    x = misturar((0, desce), (0.32, clique))
+    return finalizar(normalizar(eco(x, 0.6, 0.2)[: int(seg * SR)], 0.75), 0.15)
+
+
+def fumaca():
+    seg = 2.4
+    t = t_(seg)
+    estalo = filtro(ruido(0.02), "bandpass", [300, 5000]) * env(int(0.02 * SR), 0.0005, 0.006) * 2.0
+    baque = varredura(120, 50, 0.15, 0.5) * env(int(0.15 * SR), 0.001, 0.05)
+    # o gás saindo: chiado forte que vai abafando enquanto a nuvem enche
+    corte = 6500 - 4500 * np.clip(t / seg, 0, 1)
+    chiado = ruido(seg)
+    chiado = filtro(chiado, "highpass", 400) * 0.6 + filtro(chiado, "lowpass", 2200) * 0.5 * (corte / 6500)
+    chiado *= env(len(t), 0.03, 0.8)
+    corpo = filtro(ruido(seg), "lowpass", 300) * env(len(t), 0.08, 0.7) * 1.2
+    x = misturar((0, estalo), (0, baque * 0.9), (0.02, chiado), (0.04, corpo))
+    return finalizar(normalizar(eco(x, 1.0, 0.25)[: int(seg * SR)], 0.85), 0.5)
+
+
+def gel_aplica():
+    seg = 0.7
+    t = t_(0.35)
+    # espirro úmido: ruído grave com borbulhas
+    espirro = filtro(ruido(0.35), "bandpass", [150, 2500]) * env(len(t), 0.004, 0.06)
+    bolhas = sum(np.sin(2 * np.pi * (300 + 900 * RNG.random()) * t_(0.05)) * env(int(0.05 * SR), 0.001, 0.012)
+                 for _ in range(1))
+    gruda = filtro(ruido(0.08), "lowpass", 600) * env(int(0.08 * SR), 0.002, 0.02) * 1.2
+    bip = np.sin(2 * np.pi * 1760 * t_(0.07)) * env(int(0.07 * SR), 0.002, 0.03) * 0.35
+    x = misturar((0, espirro), (0.03, bolhas * 0.5), (0.08, bolhas * 0.4), (0.06, gruda), (0.3, bip))
+    return finalizar(normalizar(eco(x, 0.35, 0.12)[: int(seg * SR)], 0.8), 0.12)
+
+
+def gel_bipe():
+    seg = 0.14
+    t = t_(seg)
+    x = (np.sin(2 * np.pi * 2093 * t) + 0.3 * np.sin(2 * np.pi * 4186 * t)) * env(len(t), 0.002, 0.04)
+    return finalizar(normalizar(x, 0.7), 0.03)
+
+
+def gel_detona():
+    seg = 2.2
+    t = t_(seg)
+    estalo = filtro(ruido(0.02), "highpass", 1500) * env(int(0.02 * SR), 0.0003, 0.005) * 2.2
+    pancada = filtro(ruido(0.6), "lowpass", 220) * env(int(0.6 * SR), 0.002, 0.18) * 2.0
+    soco = varredura(90, 35, 0.4, 0.4) * env(int(0.4 * SR), 0.001, 0.12) * 1.2
+    ronco = filtro(ruido(seg), "lowpass", 500) * env(len(t), 0.02, 0.5) * 0.8
+    pedacos = np.zeros(len(t))
+    for _ in range(26):
+        i = int((0.15 + RNG.random() ** 1.3 * 1.5) * SR)
+        n = int(0.03 * SR)
+        if i + n < len(t):
+            pedacos[i:i + n] += filtro(RNG.standard_normal(n), "bandpass", [400, 3500]) * np.exp(-np.arange(n) / (0.006 * SR)) \
+                * (0.4 + 0.6 * RNG.random()) * (1 - i / len(t))
+    x = misturar((0, estalo), (0, pancada), (0, soco), (0.01, ronco), (0, pedacos * 0.5))
+    return finalizar(normalizar(eco(x, 1.4, 0.3)[: int(seg * SR)], 0.92), 0.4)
+
+
+def contra_ataque():
+    seg = 0.8
+    bloqueio = filtro(ruido(0.04), "bandpass", [600, 5000]) * env(int(0.04 * SR), 0.0005, 0.01) * 1.6
+    couro = filtro(ruido(0.1), "lowpass", 900) * env(int(0.1 * SR), 0.001, 0.025) * 1.2
+    sopro = filtro(ruido(0.3), "bandpass", [300, 2500]) * env(int(0.3 * SR), 0.03, 0.08) * 0.6
+    golpe = filtro(ruido(0.15), "lowpass", 400) * env(int(0.15 * SR), 0.001, 0.04) * 1.8
+    grave = varredura(110, 55, 0.2, 0.5) * env(int(0.2 * SR), 0.001, 0.06)
+    x = misturar((0, bloqueio), (0, couro), (0.06, sopro), (0.14, golpe), (0.14, grave))
+    return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.9), 0.15)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -533,6 +623,8 @@ SONS = {
     "batwing_superaquece": batwing_superaquece, "capa_abre": capa_abre,
     "capa_fecha": capa_fecha, "capa_vento": capa_vento, "capa_impulso": capa_impulso,
     "capa_arremetida": capa_arremetida, "pouso_rolamento": pouso_rolamento,
+    "detetive_liga": detetive_liga, "detetive_desliga": detetive_desliga, "fumaca": fumaca,
+    "gel_aplica": gel_aplica, "gel_bipe": gel_bipe, "gel_detona": gel_detona, "contra_ataque": contra_ataque,
 }
 
 

@@ -385,7 +385,7 @@ public final class Rede {
         int rastro2 = voo == null ? 0 : voo.params().color("trail_color2", rastro);
         int rastro3 = voo == null ? 0 : voo.params().color("trail_color3", clarear(rastro));
         int planar = e.planar();
-        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), "", 0, 0, 0, voando, rastro, rastro2, rastro3, planar);
+        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), e.detetive() ? "detective_vision" : "", 0, 0, 0, voando, rastro, rastro2, rastro3, planar);
         return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
             h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2, rastro3, planar);
     }

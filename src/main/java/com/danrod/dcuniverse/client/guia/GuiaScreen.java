@@ -438,6 +438,12 @@ public final class GuiaScreen extends Screen {
                 } else if (t.tipo().equals("super_jump")) {
                     texto(out, Component.translatable("dcuniverse.guia.salto.detalhe", fmt(alturaSalto(t.params().d("power", 2))),
                         fmt(t.params().d("charge", 1))), SUAVE, 2);
+                } else if (t.tipo().equals("stealth")) {
+                    texto(out, Component.translatable("dcuniverse.guia.furtividade.detalhe", t.params().i("max_light", 7),
+                        Math.round((1 - t.params().d("visibility", 0.3)) * 100)), SUAVE, 2);
+                } else if (t.tipo().equals("counter")) {
+                    texto(out, Component.translatable("dcuniverse.guia.contra.detalhe", fmt(t.params().d("window", 0.4)),
+                        fmt(Alvos.dano(p, t.params().d("damage_mult", 1.5)) / 2.0), fmt(t.params().d("stun", 1.5)), fmt(t.params().d("cooldown", 1))), SUAVE, 2);
                 } else if (t.tipo().equals("projectile_resistance")) {
                     texto(out, Component.translatable("dcuniverse.guia.ricochete.detalhe", fmt(t.params().d("max_damage", 10) / 2)), SUAVE, 2);
                 }
@@ -504,6 +510,14 @@ public final class GuiaScreen extends Screen {
             out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.armas", fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 64)),
                 prm.i("missiles", 4), fmt(prm.d("missile_damage", 7)), fmt(prm.d("missile_radius", 3.5)), fmt(prm.d("missile_reload", 5)))));
         }
+        if (prm.json().has("drain")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.dreno", fmt(prm.d("drain", 1.5)),
+                Math.round((prm.d("weak_point_mult", 1.25) - 1) * 100))));
+        }
+        if (prm.json().has("blind")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.fumaca", fmt(prm.d("blind", 5)), fmt(prm.d("escape", 3)))));
+        }
+        if (prm.json().has("max_placed")) out.add(item(Component.translatable("dcuniverse.guia.hab.gel", prm.i("max_placed", 3))));
         if (prm.d("stun", 0) > 0) out.add(item(Component.translatable("dcuniverse.guia.hab.lento", fmt(Math.min(4, prm.d("stun", 0))))));
         if (prm.d("regen_level", 0) > 0) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.cura", (int) prm.d("regen_level", 0), fmt(prm.d("energy_per_second", 0)))));

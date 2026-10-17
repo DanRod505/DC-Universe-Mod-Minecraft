@@ -81,6 +81,15 @@ public final class EstadoJogador {
         tag.putInt("planar", v);
     }
 
+    /** Modo Detetive ligado (ability/active/Detetive): gasta energia por segundo até desligar. */
+    public boolean detetive() {
+        return tag.getBooleanOr("detetive", false);
+    }
+
+    public void setDetetive(boolean v) {
+        tag.putBoolean("detetive", v);
+    }
+
     public int selecionada() {
         return tag.getIntOr("selecionada", 0);
     }

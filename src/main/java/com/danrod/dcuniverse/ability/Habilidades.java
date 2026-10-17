@@ -64,6 +64,8 @@ public final class Habilidades {
     public static boolean executar(ServerPlayer player, Personagem p, Personagem.Habilidade h) {
         EstadoJogador e = EstadoJogador.de(player);
         long agora = player.level().getGameTime();
+        TipoHabilidade tipo = TiposHabilidade.TIPOS.get(h.tipo());
+        if (tipo.gratis(player, h)) return tipo.usar(player, p, h);
         if (e.prontaEm(h.id()) > agora) return false;
         boolean criativo = player.isCreative();
         if (!criativo && (e.esgotado() || e.energia() < h.custo())) {
@@ -74,7 +76,7 @@ public final class Habilidades {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_cargas", Component.translatable("habilidade.dcuniverse." + h.id())));
             return false;
         }
-        if (!TiposHabilidade.TIPOS.get(h.tipo()).usar(player, p, h)) return false;
+        if (!tipo.usar(player, p, h)) return false;
         if (!criativo) Energia.gastar(player, p, h.custo());
         Cargas.gastar(player, h);
         e.setProntaEm(h.id(), agora + Math.round(h.recargaSeg() * 20));

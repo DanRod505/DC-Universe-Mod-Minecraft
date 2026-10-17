@@ -18,7 +18,7 @@ import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/** /dcu transform|untransform|energy|status|guide|hud: comandos de admin para testes (seção 2.4). */
+/** /dcu transform|untransform|select|energy|status|guide|hud: comandos de admin para testes (seção 2.4). */
 public final class Comandos {
     private Comandos() {}
 
@@ -45,6 +45,19 @@ public final class Comandos {
                         c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + " destransformado"), true);
                         return 1;
                     })))
+            .then(Commands.literal("select")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .then(Commands.argument("habilidade", com.mojang.brigadier.arguments.StringArgumentType.word())
+                        .executes(c -> {
+                            ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                            Personagem p = EstadoJogador.de(alvo).personagem();
+                            String id = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "habilidade");
+                            int i = p == null ? -1 : p.habilidades().indexOf(p.habilidade(id));
+                            if (i < 0) return 0;
+                            com.danrod.dcuniverse.ability.Habilidades.selecionar(alvo, i);
+                            c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + ": " + id), false);
+                            return 1;
+                        }))))
             .then(Commands.literal("energy")
                 .then(Commands.argument("jogador", EntityArgument.player())
                     .then(Commands.argument("valor", FloatArgumentType.floatArg(0))

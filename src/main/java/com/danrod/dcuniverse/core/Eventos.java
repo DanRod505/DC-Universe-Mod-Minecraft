@@ -78,6 +78,7 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.Congelamento.tick();
             Fortaleza.tick();
             com.danrod.dcuniverse.ability.active.Gancho.tick();
+            com.danrod.dcuniverse.ability.active.Fumaca.tick(e.server());
         });
         ServerStoppingEvent.BUS.addListener(e -> {
             Onda.limpar();
@@ -85,9 +86,13 @@ public final class Eventos {
             Fortaleza.limpar();
             com.danrod.dcuniverse.ability.active.Gancho.limpar();
             com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+            com.danrod.dcuniverse.ability.active.Fumaca.limpar();
         });
         Naturais.registrar();
         com.danrod.dcuniverse.ability.Congelamento.registrar();
+        com.danrod.dcuniverse.ability.active.Detetive.registrar();
+        com.danrod.dcuniverse.ability.passive.Furtividade.registrar();
+        com.danrod.dcuniverse.ability.passive.ContraAtaque.registrar();
     }
 
     static void tick(ServerPlayer player) {
@@ -105,6 +110,7 @@ public final class Eventos {
         Passivas.tick(player, p);
         Habilidades.tick(player, p);
         com.danrod.dcuniverse.ability.Cargas.tick(player, p);
+        com.danrod.dcuniverse.ability.active.Detetive.tick(player, p);
         DemoHud.tick(player, p);
         if (player.tickCount % SYNC_TICKS == 0) Rede.sincronizar(player);
     }

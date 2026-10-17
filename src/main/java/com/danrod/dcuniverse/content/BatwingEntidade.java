@@ -51,6 +51,10 @@ import java.util.function.Consumer;
  */
 public class BatwingEntidade extends Entity {
     public static final int CHEGANDO = 0, PILOTADO = 1, PAIRANDO = 2, INDO = 3;
+    /** Escala do modelo (client/BatwingModelo é desenhado em blocos e aumentado por ela): o Batman cabe na cabine. */
+    public static final float ESCALA = 1.9f;
+    /** Altura do assento acima dos pés da entidade (o piloto senta afundado na fuselagem, a cabeça sob o vidro). */
+    static final double ASSENTO_Y = 0.7;
     public static final int TIRO_LIGA = 0, TIRO_DESLIGA = 1, MISSIL = 2, FURTIVO = 3;
     private static final Identifier CAMERA = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batwing_camera");
 
@@ -188,7 +192,7 @@ public class BatwingEntidade extends Entity {
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity passageiro, EntityDimensions dim, float escala) {
         boolean piloto = passageiro.getId() == donoId();
-        return new Vec3(0, 0.15, piloto ? 0.75 : -0.2).yRot(-getYRot() * Mth.DEG_TO_RAD);
+        return new Vec3(0, ASSENTO_Y, (piloto ? 0.75 : 0.2) * ESCALA).yRot(-getYRot() * Mth.DEG_TO_RAD);
     }
 
     @Override
@@ -196,7 +200,7 @@ public class BatwingEntidade extends Entity {
         // Salta por baixo da asa, já no ar; perto do chão, desce pelo lado.
         Vec3 baixo = position().add(0, -passageiro.getBbHeight() - 0.1, 0);
         if (level().noCollision(passageiro, passageiro.getDimensions(passageiro.getPose()).makeBoundingBox(baixo))) return baixo;
-        Vec3 lado = position().add(new Vec3(-3.6, 0.2, 0).yRot(-getYRot() * Mth.DEG_TO_RAD));
+        Vec3 lado = position().add(new Vec3(-3.6 * ESCALA, 0.2, 0).yRot(-getYRot() * Mth.DEG_TO_RAD));
         if (level().noCollision(passageiro, passageiro.getDimensions(passageiro.getPose()).makeBoundingBox(lado))) return lado;
         return super.getDismountLocationForPassenger(passageiro);
     }
@@ -227,7 +231,7 @@ public class BatwingEntidade extends Entity {
         velocidade = 0.5f;
         dono.resetFallDistance();
         var cam = dono.getAttribute(Attributes.CAMERA_DISTANCE);
-        if (cam != null) cam.addOrUpdateTransientModifier(new AttributeModifier(CAMERA, 6, AttributeModifier.Operation.ADD_VALUE));
+        if (cam != null) cam.addOrUpdateTransientModifier(new AttributeModifier(CAMERA, 6 * ESCALA, AttributeModifier.Operation.ADD_VALUE));
         Guia.concluir(dono, "batwing");
     }
 
@@ -305,7 +309,7 @@ public class BatwingEntidade extends Entity {
     private void particulas() {
         if (oculto() || estado() == CHEGANDO && tickCount < 3) return;
         Vec3 tras = Vec3.directionFromRotation(getXRot(), getYRot()).scale(-1);
-        Vec3 bocal = position().add(0, 0.45, 0).add(tras.scale(1.6));
+        Vec3 bocal = position().add(0, 0.45 * ESCALA, 0).add(tras.scale(1.6 * ESCALA));
         if (random.nextInt(2) == 0) level().addParticle(ParticleTypes.SMOKE, bocal.x, bocal.y, bocal.z, tras.x * 0.1, 0.01, tras.z * 0.1);
     }
 
@@ -465,7 +469,7 @@ public class BatwingEntidade extends Entity {
 
     /** Ponto de saída das armas na asa (lado -1 esquerda, 1 direita), no mundo. */
     public Vec3 bocal(int lado, float frente) {
-        Vec3 v = new Vec3(lado * 1.15, 0.32, 1.4 + frente);
+        Vec3 v = new Vec3(lado * 1.15, 0.32, 1.4 + frente).scale(ESCALA);
         return position().add(v.xRot(-getXRot() * Mth.DEG_TO_RAD).yRot(-getYRot() * Mth.DEG_TO_RAD));
     }
 
@@ -532,7 +536,7 @@ public class BatwingEntidade extends Entity {
         int n = misseis();
         entityData.set(MISSEIS, n - 1);
         int lado = n % 2 == 0 ? 1 : -1;
-        Vec3 de = position().add(new Vec3(lado * (n > 2 ? 2.3 : 1.85), 0.05, 0.4).yRot(-getYRot() * Mth.DEG_TO_RAD));
+        Vec3 de = position().add(new Vec3(lado * (n > 2 ? 2.3 : 1.85), 0.05, 0.4).scale(ESCALA).yRot(-getYRot() * Mth.DEG_TO_RAD));
         Entity alvo = procurarAlvo(piloto);
         Vec3 dir = mira(piloto, prm.d("lock_range", 96)).subtract(de).normalize();
         MissilEntidade m = new MissilEntidade(level(), piloto, de, dir, position().subtract(xo, yo, zo).length(), alvo,

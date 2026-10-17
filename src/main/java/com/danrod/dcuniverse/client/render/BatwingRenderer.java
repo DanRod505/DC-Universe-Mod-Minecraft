@@ -35,7 +35,7 @@ public final class BatwingRenderer extends EntityRenderer<BatwingEntidade, Batwi
 
     public BatwingRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
-        shadowRadius = 1.6f;
+        shadowRadius = 1.6f * BatwingEntidade.ESCALA;
         shadowStrength = 0.6f;
     }
 
@@ -46,7 +46,7 @@ public final class BatwingRenderer extends EntityRenderer<BatwingEntidade, Batwi
 
     @Override
     protected AABB getBoundingBoxForCulling(BatwingEntidade e) {
-        return e.getBoundingBox().inflate(2.5, 1, 2.5);
+        return e.getBoundingBox().inflate(2.5 * BatwingEntidade.ESCALA, 1.5, 2.5 * BatwingEntidade.ESCALA);
     }
 
     @Override
@@ -64,6 +64,7 @@ public final class BatwingRenderer extends EntityRenderer<BatwingEntidade, Batwi
     @Override
     public void submit(Estado s, PoseStack ps, SubmitNodeCollector col, CameraRenderState cam) {
         ps.pushPose();
+        ps.scale(BatwingEntidade.ESCALA, BatwingEntidade.ESCALA, BatwingEntidade.ESCALA);
         ps.translate(0, BatwingModelo.Y0, 0);
         ps.mulPose(Axis.YP.rotationDegrees(-s.yaw));
         ps.mulPose(Axis.XP.rotationDegrees(s.pitch));
@@ -87,7 +88,7 @@ public final class BatwingRenderer extends EntityRenderer<BatwingEntidade, Batwi
                 BatwingModelo.LUZ_DIR.enviar(pose, buf, -1, luz);
                 BatwingModelo.LUZ_CAUDA.enviar(pose, buf, -1, luz);
             });
-            col.submitCustomGeometry(ps, RenderTypes.entityTranslucent(TEX), (pose, buf) -> BatwingModelo.VIDRO.enviar(pose, buf, 0xE0FFFFFF, luz));
+            col.submitCustomGeometry(ps, RenderTypes.entityTranslucent(TEX), (pose, buf) -> BatwingModelo.VIDRO.enviar(pose, buf, 0x80FFFFFF, luz));
             int forte = Math.round(255 * s.motor);
             int motor = 0xFF000000 | (forte << 16) | (forte << 8) | forte;
             boolean pisca = ((int) s.ageInTicks / 10) % 2 == 0;

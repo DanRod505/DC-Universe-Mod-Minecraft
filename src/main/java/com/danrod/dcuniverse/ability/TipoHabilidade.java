@@ -10,6 +10,14 @@ public interface TipoHabilidade {
         return false;
     }
 
+    /**
+     * Este uso não custa nada (nem energia, nem carga, nem recarga)? Ex.: desligar o Modo Detetive, detonar o gel.
+     * Conferido antes de usar().
+     */
+    default boolean gratis(ServerPlayer player, Personagem.Habilidade h) {
+        return false;
+    }
+
     /** Modo HOLD: chamado a cada tick enquanto a tecla está segurada e há energia. */
     default void canalizar(ServerPlayer player, Personagem p, Personagem.Habilidade h, int tick) {}
 }

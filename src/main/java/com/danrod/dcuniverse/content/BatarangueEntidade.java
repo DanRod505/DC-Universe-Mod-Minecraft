@@ -319,6 +319,52 @@ public class BatarangueEntidade extends Projectile {
                 level.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.6f, 1.4f);
             }
         }
+        cortarCordas(level, de, ate);
+    }
+
+    /** Cordas (laços) que cruzam o caminho: o mob preso fica solto e a corda cai como item. */
+    private void cortarCordas(ServerLevel level, Vec3 de, Vec3 ate) {
+        AABB area = new AABB(de, ate).inflate(12);
+        for (Entity e : level.getEntities(this, area, x -> x instanceof net.minecraft.world.entity.Leashable l && l.isLeashed())) {
+            var preso = (net.minecraft.world.entity.Leashable) e;
+            Entity dono = preso.getLeashHolder();
+            if (dono == null) continue;
+            Vec3 a = e.position().add(0, e.getBbHeight() * 0.6, 0), b = dono.position().add(0, dono.getBbHeight() * 0.6, 0);
+            if (distanciaSegmentos(de, ate, a, b) > 0.45) continue;
+            preso.dropLeash();
+            Vec3 m = a.lerp(b, 0.5);
+            level.sendParticles(ParticleTypes.CRIT, m.x, m.y, m.z, 6, 0.1, 0.1, 0.1, 0.15);
+            level.playSound(null, m.x, m.y, m.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 0.8f, 1.1f);
+        }
+    }
+
+    /** Menor distância entre os segmentos p1-q1 e p2-q2. */
+    static double distanciaSegmentos(Vec3 p1, Vec3 q1, Vec3 p2, Vec3 q2) {
+        Vec3 d1 = q1.subtract(p1), d2 = q2.subtract(p2), r = p1.subtract(p2);
+        double a = d1.lengthSqr(), e = d2.lengthSqr(), f = d2.dot(r), s, t;
+        if (a < 1e-9 && e < 1e-9) return r.length();
+        if (a < 1e-9) {
+            s = 0;
+            t = Math.clamp(f / e, 0, 1);
+        } else {
+            double c = d1.dot(r);
+            if (e < 1e-9) {
+                t = 0;
+                s = Math.clamp(-c / a, 0, 1);
+            } else {
+                double b = d1.dot(d2), den = a * e - b * b;
+                s = den > 1e-9 ? Math.clamp((b * f - c * e) / den, 0, 1) : 0;
+                t = (b * s + f) / e;
+                if (t < 0) {
+                    t = 0;
+                    s = Math.clamp(-c / a, 0, 1);
+                } else if (t > 1) {
+                    t = 1;
+                    s = Math.clamp((b - c) / a, 0, 1);
+                }
+            }
+        }
+        return p1.add(d1.scale(s)).distanceTo(p2.add(d2.scale(t)));
     }
 
     public static boolean cortavel(BlockState st) {

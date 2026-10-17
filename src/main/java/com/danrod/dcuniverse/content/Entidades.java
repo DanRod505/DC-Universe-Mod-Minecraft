@@ -22,13 +22,18 @@ public final class Entidades {
 
     public static final RegistryObject<EntityType<BatwingEntidade>> BATWING = TIPOS.register("batwing",
         () -> EntityType.Builder.<BatwingEntidade>of(BatwingEntidade::new, MobCategory.MISC)
-            .noLootTable().sized(3.0f, 1.0f).clientTrackingRange(12).updateInterval(1)
+            .noLootTable().sized(5.6f, 1.6f).clientTrackingRange(12).updateInterval(1)
             .build(TIPOS.key("batwing")));
 
     public static final RegistryObject<EntityType<MissilEntidade>> MISSIL = TIPOS.register("missil",
         () -> EntityType.Builder.<MissilEntidade>of(MissilEntidade::new, MobCategory.MISC)
-            .noLootTable().sized(0.4f, 0.4f).clientTrackingRange(8).updateInterval(1)
+            .noLootTable().sized(0.7f, 0.7f).clientTrackingRange(8).updateInterval(1)
             .build(TIPOS.key("missil")));
+
+    public static final RegistryObject<EntityType<GelEntidade>> GEL = TIPOS.register("gel",
+        () -> EntityType.Builder.<GelEntidade>of(GelEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.5f, 0.5f).clientTrackingRange(8).updateInterval(20)
+            .build(TIPOS.key("gel")));
 
     private Entidades() {}
 }

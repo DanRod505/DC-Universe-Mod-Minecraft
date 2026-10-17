@@ -14,7 +14,9 @@
   "suit": [ "chest", "legs", "feet" ],
   "passives": [
     { "type": "glide", "speed": 11, "boost_cost": 10 },
-    { "type": "night_vision" }
+    { "type": "night_vision" },
+    { "type": "stealth", "max_light": 7, "visibility": 0.3 },
+    { "type": "counter", "window": 0.4, "cooldown": 1, "damage_mult": 1.5, "stun": 1.5, "knockback": 1.2 }
   ],
   "abilities": [
     { "id": "gancho", "type": "grapple", "cost": 2, "cooldown": 0.5,
@@ -28,6 +30,14 @@
     { "id": "batarangue_eletrico", "type": "throwable", "cost": 0, "cooldown": 1.5, "variant": "electric",
       "range": 24, "speed": 1.5, "damage_mult": 0.8, "stun": 3,
       "ammo": { "max": 3, "reload": 6, "reload_cost": 8 } },
+    { "id": "modo_detetive", "type": "vision", "mode": "detective", "cost": 5, "cooldown": 0.5,
+      "drain": 1.5, "range": 32, "weak_point_mult": 1.25, "color": "#3A9BFF" },
+    { "id": "bomba_fumaca", "type": "smoke", "cost": 0, "cooldown": 2,
+      "radius": 5, "duration": 8, "blind": 5, "escape": 3,
+      "ammo": { "max": 3, "reload": 12, "reload_cost": 8 } },
+    { "id": "gel_explosivo", "type": "explosive_gel", "cost": 0, "cooldown": 0.5,
+      "range": 6, "radius": 2.5, "damage_mult": 2.0, "max_placed": 3,
+      "ammo": { "max": 3, "reload": 15, "reload_cost": 10 } },
     { "id": "batwing", "type": "vehicle", "supreme": true, "cost_pct": 75, "cooldown": 150,
       "duration": 90, "speed": 30, "boost_speed": 60, "missiles": 4, "missile_reload": 5,
       "missile_damage": 7, "missile_radius": 3.5, "gun_damage": 1, "gun_range": 64,

@@ -52,6 +52,8 @@ public final class Mundo {
             ATIVOS.clear();
         }
         RaioX.limpar();
+        Detetive.limpar();
+        Furtivo.limpar();
         Gelo.limpar();
     }
 
@@ -65,6 +67,8 @@ public final class Mundo {
             ATIVOS.removeIf(a -> tickAtivo(level, a, agora - a.inicio));
         }
         RaioX.tick(mc);
+        Detetive.tick(mc);
+        Furtivo.tick(mc);
     }
 
     private static void comecar(Minecraft mc, ClientLevel level, Rede.Efeito e, long agora) {
@@ -77,6 +81,12 @@ public final class Mundo {
             case "fortress_end" -> fortalezaFim(level, e);
             case "jump" -> salto(level, e);
             case "xray" -> RaioX.ligar(mc, e);
+            case "detective" -> Detetive.ligar(mc, e);
+            case "counter" -> Furtivo.contra(e.a());
+            case "smoke" -> {
+                Fumaca.inicio(level, e);
+                adicionar(e, agora);
+            }
             case "freeze" -> Gelo.ligar(mc, e);
             case "thaw" -> Gelo.soltar(e);
             case "arco" -> {
@@ -104,6 +114,7 @@ public final class Mundo {
             case "fortress" -> fortalezaTick(level, a, t);
             case "arco" -> t > 6;
             case "tiro" -> t > 2;
+            case "smoke" -> Fumaca.tick(level, a.e, t);
             default -> true;
         };
     }
@@ -241,11 +252,13 @@ public final class Mundo {
                 case "fortress" -> pilar(ps, col, cam, a.e, t);
                 case "arco" -> arco(ps, col, cam, a.e, t);
                 case "tiro" -> tiro(ps, col, cam, a.e, t);
+                case "smoke" -> Fumaca.desenhar(ps, col, cam, a.e, t);
                 default -> {}
             }
         }
         Gancheador.desenhar(ps, col, cam, pt);
         RaioX.desenhar(ps, col, cam, pt);
+        Detetive.desenhar(ps, col, cam, pt);
         Efeitos.feixePrimeiraPessoa(ps, col, cam, pt);
         Gelo.desenhar(ps, col, cam, pt);
     }

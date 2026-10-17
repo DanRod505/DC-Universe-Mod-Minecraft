@@ -170,7 +170,7 @@ public final class BatwingModelo {
 
     private static void cabine() {
         // Meio elipsoide de vidro afundado no dorso, um pouco à frente do centro.
-        float cx = 0, cz = 0.85f, rx = 0.34f, ry = 0.3f, rz = 0.82f;
+        float cx = 0, cz = 0.8f, rx = 0.38f, ry = 0.44f, rz = 0.9f;
         float cy = topo(0, cz) - 0.06f;
         int nl = 10, na = 16;
         Vector3f[][] p = new Vector3f[nl + 1][na + 1];

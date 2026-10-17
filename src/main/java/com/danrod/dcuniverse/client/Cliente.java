@@ -43,6 +43,10 @@ public final class Cliente {
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "raio_x"), RaioX::desenharTela);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "detetive"), Detetive::desenharTela);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "furtivo"), Furtivo::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "salto"), Saltador::desenhar);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batwing"), Piloto::desenhar);
@@ -52,6 +56,7 @@ public final class Cliente {
             e.registerEntityRenderer(Entidades.BATARANGUE.get(), BatarangueRenderer::new);
             e.registerEntityRenderer(Entidades.BATWING.get(), BatwingRenderer::new);
             e.registerEntityRenderer(Entidades.MISSIL.get(), MissilRenderer::new);
+            e.registerEntityRenderer(Entidades.GEL.get(), com.danrod.dcuniverse.client.render.GelRenderer::new);
         });
         TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
         ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> {
@@ -75,6 +80,7 @@ public final class Cliente {
         Planador.registrar();
         Efeitos.registrarFeixe();
         RaioX.registrar();
+        Detetive.registrar();
         Saltador.registrar();
         Piloto.registrar();
     }

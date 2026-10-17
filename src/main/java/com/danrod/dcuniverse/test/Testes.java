@@ -63,6 +63,10 @@ public final class Testes {
         FUNCOES.register("gadgets", () -> Testes::gadgets);
         FUNCOES.register("grapple", () -> Testes::gancho);
         FUNCOES.register("batwing", () -> Testes::batwing);
+        FUNCOES.register("detective", () -> Testes::detetive);
+        FUNCOES.register("smoke", () -> Testes::fumaca);
+        FUNCOES.register("explosive_gel", () -> Testes::gel);
+        FUNCOES.register("counter", () -> Testes::contraAtaque);
     }
 
     private Testes() {}
@@ -613,6 +617,111 @@ public final class Testes {
         h.assertValueEqual(bw.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "o Batwing vai embora");
         bw.discard();
         com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        h.succeed();
+    }
+
+
+    /** Modo Detetive: liga gastando energia, drena por segundo, desliga de graça e ao destransformar. */
+    static void detetive(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        Personagem.Habilidade d = bat.habilidade("modo_detetive");
+        e.setEnergia(100);
+        h.assertTrue(Habilidades.executar(p, bat, d), "liga o modo detetive");
+        h.assertTrue(e.detetive(), "ligado");
+        h.assertValueEqual(e.energia(), 95f, "ligar custa 5");
+        h.assertValueEqual(com.danrod.dcuniverse.core.Rede.montarAparencia(p).efeito(), "detective_vision", "lentes acesas para os outros");
+        for (int i = 0; i < 20; i++) com.danrod.dcuniverse.ability.active.Detetive.tick(p, bat);
+        h.assertTrue(Math.abs(e.energia() - 93.5f) < 0.01f, "drena 1,5 por segundo");
+        h.assertTrue(Habilidades.executar(p, bat, d), "desliga mesmo em recarga");
+        h.assertFalse(e.detetive(), "desligado");
+        h.assertTrue(Math.abs(e.energia() - 93.5f) < 0.01f, "desligar não custa");
+        e.setProntaEm(d.id(), 0);
+        Habilidades.executar(p, bat, d);
+        e.setEnergia(0.01f);
+        com.danrod.dcuniverse.ability.active.Detetive.tick(p, bat);
+        h.assertFalse(e.detetive(), "sem energia desliga sozinho");
+        e.setEnergia(100);
+        e.setProntaEm(d.id(), 0);
+        Habilidades.executar(p, bat, d);
+        Transformacao.destransformar(p);
+        h.assertFalse(e.detetive(), "destransformar desliga");
+        h.assertTrue(Guia.concluida(p, "detetive"), "tarefa do modo detetive");
+        h.succeed();
+    }
+
+    /** Bomba de fumaça: cega e tira o alvo do mob dentro da nuvem; quem jogou fica invisível e rápido. */
+    static void fumaca(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(3, 1, 1));
+        zumbi.setTarget(p);
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("bomba_fumaca")), "estoura a fumaça");
+        h.assertTrue(zumbi.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS), "mob cego");
+        h.assertTrue(zumbi.getTarget() == null, "mob perdeu o alvo");
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(p, bat.habilidade("bomba_fumaca")), 2, "gastou uma carga");
+        h.assertTrue(Guia.concluida(p, "fumaca"), "tarefa da fumaça");
+        zumbi.discard();
+        com.danrod.dcuniverse.ability.active.Fumaca.limpar();
+        h.succeed();
+    }
+
+    /** Gel explosivo: cola na parede mirada, agachado detona e o bloco quebra; obsidiana resiste. */
+    static void gel(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        p.setYRot(0);
+        p.setXRot(0);
+        // Corredor limpo até a parede (os testes vizinhos podem deixar blocos por perto).
+        for (int x = 0; x <= 2; x++) for (int y = 1; y <= 3; y++) for (int z = 1; z <= 3; z++) h.setBlock(x, y, z, net.minecraft.world.level.block.Blocks.AIR);
+        h.setBlock(1, 2, 4, net.minecraft.world.level.block.Blocks.STONE);
+        h.setBlock(1, 2, 5, net.minecraft.world.level.block.Blocks.OBSIDIAN);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        Personagem.Habilidade g = bat.habilidade("gel_explosivo");
+        h.assertTrue(Habilidades.executar(p, bat, g), "cola o gel na pedra");
+        h.assertValueEqual(com.danrod.dcuniverse.content.GelEntidade.level(p).size(), 1, "um gel colado");
+        p.setShiftKeyDown(true);
+        h.assertTrue(Habilidades.executar(p, bat, g), "agachado detona (mesmo em recarga)");
+        p.setShiftKeyDown(false);
+        h.assertTrue(Guia.concluida(p, "gel") && Guia.concluida(p, "gel_detonar"), "tarefas do gel");
+        h.runAfterDelay(com.danrod.dcuniverse.content.GelEntidade.PAVIO + 4, () -> {
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.AIR, 1, 2, 4);
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.OBSIDIAN, 1, 2, 5);
+            h.succeed();
+        });
+    }
+
+    /** Contra-ataque: agachar na hora anula o golpe e devolve; fora da janela o golpe entra. */
+    static void contraAtaque(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        Personagem bat = EstadoJogador.de(p).personagem();
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(2, 1, 1));
+        float vidaZumbi = zumbi.getHealth();
+        p.setShiftKeyDown(true);
+        // Só a passiva do contra-ataque (a visão noturna manda pacote, que o jogador de teste não tem).
+        com.danrod.dcuniverse.ability.TiposPassiva.TIPOS.get("counter").tick(p, bat.passiva("counter").params());
+        // (O jogador de teste não pode levar dano: chama direto o que o LivingAttackEvent chama.)
+        h.assertTrue(com.danrod.dcuniverse.ability.passive.ContraAtaque.defender(p, zumbi, zumbi), "golpe anulado");
+        h.assertTrue(zumbi.getHealth() < vidaZumbi, "devolveu o golpe");
+        h.assertTrue(zumbi.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "atordoado");
+        h.assertTrue(Guia.concluida(p, "contra_ataque"), "tarefa do contra-ataque");
+        // Segundo golpe sem novo agachar: a janela já fechou.
+        h.assertFalse(com.danrod.dcuniverse.ability.passive.ContraAtaque.defender(p, zumbi, zumbi), "fora da janela o golpe entra");
+        zumbi.discard();
         h.succeed();
     }
 }

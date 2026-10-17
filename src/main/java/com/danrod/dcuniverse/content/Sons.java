@@ -44,6 +44,15 @@ public final class Sons {
     public static final RegistryObject<SoundEvent> CAPA_ARREMETIDA = som("habilidade.capa_arremetida");
     public static final RegistryObject<SoundEvent> POUSO_ROLAMENTO = som("habilidade.pouso_rolamento");
 
+    // Batman (v0.2, etapa 3): modo detetive, fumaça, gel explosivo e contra-ataque
+    public static final RegistryObject<SoundEvent> DETETIVE_LIGA = som("habilidade.detetive_liga");
+    public static final RegistryObject<SoundEvent> DETETIVE_DESLIGA = som("habilidade.detetive_desliga");
+    public static final RegistryObject<SoundEvent> FUMACA = som("habilidade.fumaca");
+    public static final RegistryObject<SoundEvent> GEL_APLICA = som("habilidade.gel_aplica");
+    public static final RegistryObject<SoundEvent> GEL_BIPE = som("habilidade.gel_bipe");
+    public static final RegistryObject<SoundEvent> GEL_DETONA = som("habilidade.gel_detona");
+    public static final RegistryObject<SoundEvent> CONTRA_ATAQUE = som("habilidade.contra_ataque");
+
     private Sons() {}
 
     private static RegistryObject<SoundEvent> som(String nome) {

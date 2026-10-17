@@ -1,6 +1,7 @@
 package com.danrod.dcuniverse.client.render;
 
 import com.danrod.dcuniverse.DCUniverse;
+import com.danrod.dcuniverse.content.BatwingEntidade;
 import com.danrod.dcuniverse.client.BatwingModelo;
 import com.danrod.dcuniverse.content.MissilEntidade;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -46,6 +47,7 @@ public final class MissilRenderer extends EntityRenderer<MissilEntidade, MissilR
     public void submit(Estado s, PoseStack ps, SubmitNodeCollector col, CameraRenderState cam) {
         ps.pushPose();
         ps.translate(0, 0.2, 0);
+        ps.scale(BatwingEntidade.ESCALA, BatwingEntidade.ESCALA, BatwingEntidade.ESCALA);
         ps.mulPose(Axis.YP.rotationDegrees(s.yaw));
         ps.mulPose(Axis.XP.rotationDegrees(-s.pitch));
         col.submitCustomGeometry(ps, RenderTypes.entityCutout(TEX), (pose, buf) -> BatwingModelo.MISSIL.enviar(pose, buf, -1, s.lightCoords));

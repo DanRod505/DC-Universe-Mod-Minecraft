@@ -816,6 +816,117 @@ def icone_batwing():
     return t
 
 
+def icone_modo_detetive():
+    t = Tela(32, 32)
+    # Fundo: visor azul com grade de varredura e uma faixa clara passando.
+    disco(t, 16, 16, 15.5, lambda x, y, dd: (*mistura(hexa("#1C4F8C"), hexa("#071629"), dd / 15.5)[:3], 245))
+    for y in range(32):
+        for x in range(32):
+            if math.hypot(x + 0.5 - 16, y + 0.5 - 16) < 15 and (x % 4 == 0 or y % 4 == 0):
+                t.p(x, y, mistura(t.get(x, y), hexa("#3A9BFF"), 0.35))
+    for x in range(32):
+        for y, a in ((21, 0.55), (22, 0.3), (20, 0.25)):
+            if math.hypot(x + 0.5 - 16, y + 0.5 - 16) < 15:
+                t.p(x, y, mistura(t.get(x, y), hexa("#9FD4FF"), a))
+    # Capuz do Batman de frente: orelhas, testa, máscara até o nariz e o queixo aparecendo.
+    capuz = Tela(32, 32)
+    m = mascara(32, 32, lambda d, e: d.polygon(escalar([(9, 3), (11, 10), (13, 9), (19, 9), (21, 10), (23, 3), (25, 12), (25, 19),
+                                                        (22, 25), (19, 28), (13, 28), (10, 25), (7, 19), (7, 12)], e), fill=255))
+    px = m.load()
+    for y in range(32):
+        for x in range(32):
+            if px[x, y]:
+                luz = (16 - x) / 16 * 0.5 + (12 - y) / 24
+                capuz.p(x, y, mistura(hexa("#252A36"), hexa("#4C5468"), max(0, luz)) if luz > 0 else mistura(hexa("#252A36"), hexa("#0E1016"), -luz))
+    d = ImageDraw.Draw(capuz.img)
+    # Pele do queixo e da boca.
+    d.polygon([(12, 22), (20, 22), (19, 27), (13, 27)], fill=hexa("#C8987A"))
+    d.line([(14, 25), (18, 25)], fill=hexa("#6E4A3A"), width=1)
+    d.line([(12, 22), (20, 22)], fill=hexa("#1A1D26"), width=1)
+    contornar(capuz)
+    t.img.alpha_composite(capuz.img)
+    # Lentes acesas do modo detetive.
+    for cx in (12.5, 19.5):
+        brilho(t, cx, 16, 6, hexa("#3A9BFF"), 0.9)
+    d = ImageDraw.Draw(t.img)
+    d.polygon([(10, 15), (14, 15), (14, 17), (11, 17)], fill=hexa("#BFE6FF"))
+    d.polygon([(18, 15), (22, 15), (21, 17), (18, 17)], fill=hexa("#BFE6FF"))
+    t.p(12, 15, hexa("#FFFFFF"))
+    t.p(20, 15, hexa("#FFFFFF"))
+    # Um alvo vermelho marcado no canto (ameaça vista pelo visor).
+    d.rectangle([25, 24, 29, 28], outline=hexa("#FF4A3A"), width=1)
+    t.p(27, 26, hexa("#FFB0A0"))
+    return t
+
+
+def icone_bomba_fumaca():
+    t = Tela(32, 32)
+    # Nuvem de fumaça saindo em volta: bolhas cinza com luz em cima e sombra embaixo.
+    bolhas = [(8, 12, 6.5), (24, 11, 6), (6, 21, 5.5), (26, 21, 5.5), (16, 7, 6), (12, 26, 5), (21, 26, 5), (16, 17, 7)]
+    fumaca = Tela(32, 32)
+    for i, (cx, cy, r) in enumerate(bolhas):
+        # Cada bolha com a sua borda escura, assim as de trás aparecem entre as da frente.
+        claro = mistura(hexa("#D4D8E0"), hexa("#9EA4B0"), i / len(bolhas) * 0.5)
+        disco(fumaca, cx, cy, r, lambda x, y, dd, cy=cy, r=r, claro=claro: hexa("#4E525C") if dd > r - 1 and y + 0.5 > cy - r * 0.6
+              else mistura(claro, hexa("#646A76"), min(1, max(0, (y + 0.5 - cy + r * 0.4) / (r * 1.5)))))
+    contornar(fumaca, hexa("#3A3E48"))
+    t.img.alpha_composite(fumaca.img)
+    # A cápsula no meio: esfera preta com a faixa dourada e o pino.
+    disco(t, 16, 18, 6, lambda x, y, dd: mistura(hexa("#3A3E4A"), hexa("#0E1016"), min(1, (dd / 6) * 0.7 + (y - 15) / 14)))
+    d = ImageDraw.Draw(t.img)
+    d.line([(10, 18), (22, 18)], fill=hexa("#D9AC3E"), width=1)
+    d.line([(11, 19), (21, 19)], fill=hexa("#8E6618"), width=1)
+    d.rectangle([15, 11, 17, 12], fill=hexa("#7C869C"))
+    d.line([(15, 11), (17, 11)], fill=hexa("#C3CAD8"), width=1)
+    t.p(13, 15, hexa("#8890A4"))
+    t.p(14, 15, hexa("#5C6274"))
+    contornar(t)
+    return t
+
+
+def icone_gel_explosivo():
+    t = Tela(32, 32)
+    d = ImageDraw.Draw(t.img)
+    # Parede de tijolos.
+    d.rectangle([0, 0, 31, 31], fill=hexa("#5E5A58"))
+    for y in range(0, 32, 6):
+        d.line([(0, y), (31, y)], fill=hexa("#3A3634"), width=1)
+        off = 0 if (y // 6) % 2 == 0 else 6
+        for x in range(off, 32, 12):
+            d.line([(x, y), (x, min(31, y + 6))], fill=hexa("#3A3634"), width=1)
+        d.line([(0, y + 1), (31, y + 1)], fill=hexa("#76726E"), width=1)
+    # Mancha de gel azul irregular, com respingos.
+    gel = Tela(32, 32)
+    pts = []
+    for i in range(20):
+        a = i / 20 * math.tau
+        r = 10 * (1 + 0.22 * math.sin(a * 3 + 0.6) + 0.12 * math.sin(a * 5 + 1.3))
+        pts.append((16 + math.cos(a) * r, 16 + math.sin(a) * r * 0.9))
+    m = mascara(32, 32, lambda dd, e: dd.polygon(escalar(pts, e), fill=255))
+    px = m.load()
+    for y in range(32):
+        for x in range(32):
+            if px[x, y]:
+                dd = math.hypot(x + 0.5 - 16, y + 0.5 - 16) / 11
+                gel.p(x, y, mistura(hexa("#64C4FF"), hexa("#174A86"), min(1, dd)))
+    gd = ImageDraw.Draw(gel.img)
+    for cx, cy, r in ((4, 6, 1.5), (28, 8, 1.2), (27, 27, 1.6), (5, 26, 1.1), (16, 2, 1)):
+        gd.ellipse([cx - r, cy - r, cx + r, cy + r], fill=hexa("#2370C4"))
+    contornar(gel, hexa("#0B2A52"))
+    t.img.alpha_composite(gel.img)
+    # Brilho do gel e o detonador com a luz vermelha.
+    brilho(t, 16, 16, 9, hexa("#7FD8FF"), 0.45)
+    d = ImageDraw.Draw(t.img)
+    d.rectangle([14, 14, 18, 18], fill=hexa("#1A1E26"))
+    d.rectangle([14, 14, 18, 18], outline=hexa("#0B0E18"), width=1)
+    brilho(t, 16, 16, 5, hexa("#FF3A2A"), 1.0)
+    d.rectangle([15, 15, 17, 17], fill=hexa("#FF4A2A"))
+    t.p(16, 16, hexa("#FFF0E0"))
+    t.p(11, 11, hexa("#E8F8FF"))
+    t.p(12, 11, hexa("#BFE6FF"))
+    return t
+
+
 EMBLEMAS["batman"] = emblema_batman
 ICONES.update({
     "gancho": icone_gancho,
@@ -823,6 +934,9 @@ ICONES.update({
     "batarangue_explosivo": icone_batarangue_explosivo,
     "batarangue_eletrico": icone_batarangue_eletrico,
     "batwing": icone_batwing,
+    "modo_detetive": icone_modo_detetive,
+    "bomba_fumaca": icone_bomba_fumaca,
+    "gel_explosivo": icone_gel_explosivo,
 })
 
 
