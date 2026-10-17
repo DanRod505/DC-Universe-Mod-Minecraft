@@ -266,19 +266,21 @@ public final class Pecas {
                     // dentro (mais escura, espelhada)
                     quad(buf, pose, a, b, c, dd, n0, n1, -meia, 40 / 128f + u0, 40 / 128f + u1, v0, v1, luz, over, -1);
                 }
-                // bordas laterais
-                borda(buf, pose, pt[i][0], pt[i + 1][0], norm[i], norm[i + 1], meia, v0, v1, luz, over, -1);
-                borda(buf, pose, pt[i][COLUNAS], pt[i + 1][COLUNAS], norm[i], norm[i + 1], meia, v0, v1, luz, over, 1);
+                // bordas laterais: a coluna da beirada da textura de fora, para sumir junto com os recortes da barra
+                borda(buf, pose, pt[i][0], pt[i + 1][0], norm[i], norm[i + 1], meia, 39.5f / 128f, v0, v1, luz, over, -1);
+                borda(buf, pose, pt[i][COLUNAS], pt[i + 1][COLUNAS], norm[i], norm[i + 1], meia, 0.5f / 128f, v0, v1, luz, over, 1);
             }
-            // barra de baixo
+            // barra de baixo: usa a última linha da textura de fora, assim some onde a barra é recortada (gomos)
+            float vBarra = 63.5f / 64f;
             for (int j = 0; j < COLUNAS; j++) {
                 Vector3f a = pt[FAIXAS][j], b = pt[FAIXAS][j + 1];
                 Vector3f n = norm[FAIXAS];
                 Vector3f dir = new Vector3f(b).sub(a).cross(n).normalize();
-                vert(buf, pose, a, n, meia, 80 / 128f, 0, dir, luz, over);
-                vert(buf, pose, b, n, meia, 84 / 128f, 0, dir, luz, over);
-                vert(buf, pose, b, n, -meia, 84 / 128f, 1, dir, luz, over);
-                vert(buf, pose, a, n, -meia, 80 / 128f, 1, dir, luz, over);
+                float u0 = (1 - j / (float) COLUNAS) * 40 / 128f, u1 = (1 - (j + 1) / (float) COLUNAS) * 40 / 128f;
+                vert(buf, pose, a, n, meia, u0, vBarra, dir, luz, over);
+                vert(buf, pose, b, n, meia, u1, vBarra, dir, luz, over);
+                vert(buf, pose, b, n, -meia, u1, vBarra, dir, luz, over);
+                vert(buf, pose, a, n, -meia, u0, vBarra, dir, luz, over);
             }
         });
         ps.popPose();
@@ -396,8 +398,8 @@ public final class Pecas {
         col.submitCustomGeometry(ps, RenderTypes.entityCutout(tex), (pose, buf) -> {
             for (int lado = -1; lado <= 1; lado += 2) {
                 float x0 = 1.5f * lado, x1 = 3.5f * lado;
-                Vector3f a = new Vector3f(x0, -8.45f, -2.3f), b = new Vector3f(x1, -8.45f, -2.3f);
-                Vector3f c = new Vector3f(x1, -8.45f, -0.1f), d = new Vector3f(x0, -8.45f, -0.1f);
+                Vector3f a = new Vector3f(x0, -7.9f, -2.3f), b = new Vector3f(x1, -7.9f, -2.3f);
+                Vector3f c = new Vector3f(x1, -7.9f, -0.1f), d = new Vector3f(x0, -7.9f, -0.1f);
                 Vector3f topo = new Vector3f(3.1f * lado, -11.2f, -1.3f);
                 boolean inv = lado < 0;
                 tri(buf, pose, a, b, topo, ORELHA, luz, over, inv);   // frente
@@ -433,17 +435,20 @@ public final class Pecas {
         for (int lado = -1; lado <= 1; lado += 2) {
             ModelPart braco = lado < 0 ? m.rightArm : m.leftArm;
             if (!braco.visible) continue;
-            float fora = lado < 0 ? -3.3f : 3.3f;
             int l = lado;
             ps.pushPose();
             m.root().translateAndRotate(ps);
             braco.translateAndRotate(ps);
             col.submitCustomGeometry(ps, RenderTypes.entityCutout(tex), (pose, buf) -> {
+                // trilho na face de fora da manopla, por cima da manga: as lâminas saem dele, sem vão até o braço
+                float dentro = 3.0f * l, trilho = 3.4f * l;
+                caixa(buf, pose, Math.min(dentro, trilho), 4.0f, -0.4f, Math.max(dentro, trilho), 8.6f, 1.9f,
+                    LAMINA, LAMINA, l < 0 ? 0 : 1, luz, over);
                 for (int k = 0; k < 3; k++) {
-                    float y0 = 4.4f + k * 1.25f;
-                    Vector3f a = new Vector3f(fora - 0.3f * l, y0, 0.9f), b = new Vector3f(fora - 0.3f * l, y0 + 1.15f, 0.9f);
-                    Vector3f c = new Vector3f(fora + 1.55f * l, y0 - 0.55f, 1.9f);
-                    lamina(buf, pose, a, b, c, 0.14f, luz, over, l < 0);
+                    float y0 = 4.3f + k * 1.3f;
+                    Vector3f a = new Vector3f(3.3f * l, y0, 0.2f), b = new Vector3f(3.3f * l, y0 + 1.3f, 1.2f);
+                    Vector3f c = new Vector3f(4.9f * l, y0 - 0.4f, 1.9f);
+                    lamina(buf, pose, a, b, c, 0.18f, luz, over, l < 0);
                 }
             });
             ps.popPose();
@@ -533,12 +538,12 @@ public final class Pecas {
     }
 
     private static void borda(VertexConsumer buf, PoseStack.Pose pose, Vector3f a, Vector3f b, Vector3f n0, Vector3f n1,
-                              float meia, float v0, float v1, int luz, int over, int lado) {
+                              float meia, float u, float v0, float v1, int luz, int over, int lado) {
         Vector3f fora = new Vector3f(lado, 0, 0);
-        vert(buf, pose, a, n0, meia, 80 / 128f, v0, fora, luz, over);
-        vert(buf, pose, a, n0, -meia, 84 / 128f, v0, fora, luz, over);
-        vert(buf, pose, b, n1, -meia, 84 / 128f, v1, fora, luz, over);
-        vert(buf, pose, b, n1, meia, 80 / 128f, v1, fora, luz, over);
+        vert(buf, pose, a, n0, meia, u, v0, fora, luz, over);
+        vert(buf, pose, a, n0, -meia, u, v0, fora, luz, over);
+        vert(buf, pose, b, n1, -meia, u, v1, fora, luz, over);
+        vert(buf, pose, b, n1, meia, u, v1, fora, luz, over);
     }
 
     private static void vert(VertexConsumer buf, PoseStack.Pose pose, Vector3f p, Vector3f n, float off, float u, float v,

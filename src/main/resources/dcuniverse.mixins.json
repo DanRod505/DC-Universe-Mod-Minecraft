@@ -3,6 +3,6 @@
   "minVersion": "0.8",
   "package": "com.danrod.dcuniverse.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["EntityRendererMixin", "LevelRendererMixin", "PlayerModelMixin"],
+  "client": ["AbstractClientPlayerMixin", "EntityRendererMixin", "LevelRendererMixin", "PlayerModelMixin"],
   "injectors": { "defaultRequire": 0 }
 }
