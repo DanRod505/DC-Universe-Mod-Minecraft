@@ -275,16 +275,20 @@ public final class Testes {
         h.assertTrue(e.prontaEm("visao_de_calor") > p.level().getGameTime(), "o raio entra em recarga ao soltar");
         h.assertTrue(Guia.concluida(p, "habilidade"), "usar conclui a tarefa");
 
-        int soco = sup.habilidades().indexOf(sup.habilidade("soco_sonico"));
-        Habilidades.selecionar(p, soco);
-        float energia = e.energia();
-        Habilidades.usar(p, true);
-        h.assertValueEqual(e.energia(), energia - 40f, "soco sônico custa 40");
-        h.assertFalse(p.level().getEntitiesOfClass(ProjetilEntidade.class, p.getBoundingBox().inflate(4)).isEmpty(), "a onda sônica sai");
-        Habilidades.usar(p, false);
-        Habilidades.usar(p, true);
-        h.assertValueEqual(e.energia(), energia - 40f, "em recarga não dispara de novo");
-        h.succeed();
+        // A onda é uma entidade: no tick 0 a seção de entidades do chunk recém-gerado pode ainda não estar
+        // carregada, e a entidade nova fica invisível para a busca. Espera alguns ticks.
+        h.runAfterDelay(5, () -> {
+            int soco = sup.habilidades().indexOf(sup.habilidade("soco_sonico"));
+            Habilidades.selecionar(p, soco);
+            float energia = e.energia();
+            Habilidades.usar(p, true);
+            h.assertValueEqual(e.energia(), energia - 40f, "soco sônico custa 40");
+            h.assertFalse(p.level().getEntitiesOfClass(ProjetilEntidade.class, p.getBoundingBox().inflate(4)).isEmpty(), "a onda sônica sai");
+            Habilidades.usar(p, false);
+            Habilidades.usar(p, true);
+            h.assertValueEqual(e.energia(), energia - 40f, "em recarga não dispara de novo");
+            h.succeed();
+        });
     }
 
     /**
