@@ -1,0 +1,29 @@
+{
+  "npc": "dcuniverse:cidadao_jornaleiro",
+  "repeatable": true,
+  "interval": 1,
+  "objectives": [
+    {
+      "type": "talk",
+      "npc": "dcuniverse:lana_lang"
+    },
+    {
+      "type": "talk",
+      "npc": "dcuniverse:martha_kent"
+    },
+    {
+      "type": "talk",
+      "npc": "dcuniverse:cidadao_jornaleiro"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:emerald",
+        "count": 2
+      }
+    ],
+    "xp": 15,
+    "affinity": 4
+  }
+}

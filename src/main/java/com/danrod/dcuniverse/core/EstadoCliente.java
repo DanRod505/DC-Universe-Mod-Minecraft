@@ -34,7 +34,27 @@ public final class EstadoCliente {
     /** Abre ou atualiza a tela do Batcomputador (o cliente troca por client/BatcomputadorScreen::receber). */
     public static volatile java.util.function.Consumer<Rede.BatAbrir> batcomputador = m -> {};
 
+    /** NPCs e missões do servidor (id -> JSON), para o Diário e o capítulo de NPCs. */
+    public static volatile Map<String, String> npcs = Map.of(), missoes = Map.of();
+    /** Diário de Missões do jogador local. */
+    public static volatile Rede.DiarioSync diario = Rede.DiarioSync.VAZIO;
+    /** Missões aceitas ou concluídas que o cliente ainda vai anunciar. */
+    public static final java.util.Queue<Rede.MissaoAviso> AVISOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    /** Abre a conversa com um NPC (client/npc/DialogoScreen::receber). */
+    public static volatile java.util.function.Consumer<Rede.NpcAbrir> npcAbrir = m -> {};
+    /** Escreve a fala de um NPC no chat (client/npc/DialogoScreen::falar). */
+    public static volatile java.util.function.Consumer<Rede.NpcFala> npcFala = m -> {};
+
     private EstadoCliente() {}
+
+    public static void npcCatalogo(Rede.NpcCatalogo c) {
+        npcs = c.npcs();
+        missoes = c.missoes();
+        versaoCatalogo++;
+    }
+
+    /** Muda a cada catálogo novo (quem guarda os JSON já lidos sabe quando ler de novo). */
+    public static volatile int versaoCatalogo;
 
     /** Estado da capa de quem plana sem estar transformado (Capa Planadora), por id da entidade. */
     public static final Map<Integer, Integer> PLANAR_SEM_HEROI = new ConcurrentHashMap<>();
@@ -96,6 +116,10 @@ public final class EstadoCliente {
         passivasDe = "";
         guia = Rede.GuiaSync.VAZIO;
         tarefaNova = "";
+        npcs = Map.of();
+        missoes = Map.of();
+        diario = Rede.DiarioSync.VAZIO;
+        AVISOS.clear();
         APARENCIAS.clear();
         TRANSFORMOU.clear();
         MANOBRAS.clear();

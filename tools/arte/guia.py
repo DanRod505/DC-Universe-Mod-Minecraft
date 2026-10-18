@@ -217,6 +217,32 @@ ICONES = {
               "oo.ooooooooo",
               "++.+++++++++",
               "##.#########"],
+    # Diário de Missões: pergaminho enrolado com a pena
+    "diario": ["........oo..",
+               ".......o+#o.",
+               "oooooooo+#o.",
+               "o++++++o##o.",
+               "o#++++o##o..",
+               "o#ooo+o#o...",
+               "o#+++o##o...",
+               "o#oooo#o#o..",
+               "o#+++++##o..",
+               "o#ooooo+#o..",
+               "o#++++++#o..",
+               "oooooooooo.."],
+    # Facções e NPCs: duas pessoas, uma na frente da outra
+    "npcs": ["......ooo...",
+             ".....o+++o..",
+             "..ooo+###o..",
+             ".o+++o###o..",
+             ".o+##o##o...",
+             ".o###oooooo.",
+             "..o#o+####+o",
+             ".oo+o######o",
+             "o+######o##o",
+             "o########o#o",
+             "o#########oo",
+             "oooooooooooo"],
 }
 
 
@@ -340,6 +366,13 @@ def main():
     icone(t, 336, 64, "anti", hexa("#C2463E"))
     icone(t, 336, 80, "ajudante", hexa("#4FA65A"))
     icone(t, 336, 96, "lista", hexa("#B0841E"))
+    # Diário de Missões (âmbar) e Facções e NPCs (azul-petróleo), marcadores e ícones da v0.3.
+    marcador(t, 360, 48, hexa("#C27A1E"), False)
+    marcador(t, 360, 72, hexa("#C27A1E"), True)
+    marcador(t, 388, 0, hexa("#1F7A7A"), False)
+    marcador(t, 388, 24, hexa("#1F7A7A"), True)
+    icone(t, 420, 0, "diario", hexa("#EED9A8"))
+    icone(t, 420, 16, "npcs", hexa("#9ED8D0"))
     encaixe(t, 304, 140, False)
     encaixe(t, 324, 140, True)
     seta(t, 344, 141)

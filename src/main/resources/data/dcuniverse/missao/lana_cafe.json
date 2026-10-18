@@ -1,0 +1,38 @@
+{
+  "npc": "dcuniverse:lana_lang",
+  "objectives": [
+    {
+      "type": "collect",
+      "item": "minecraft:cocoa_beans",
+      "count": 6
+    },
+    {
+      "type": "collect",
+      "item": "minecraft:sugar",
+      "count": 3
+    },
+    {
+      "type": "collect",
+      "item": "minecraft:milk_bucket",
+      "count": 1
+    },
+    {
+      "type": "deliver",
+      "npc": "dcuniverse:lana_lang"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:cookie",
+        "count": 8
+      },
+      {
+        "item": "minecraft:emerald",
+        "count": 2
+      }
+    ],
+    "xp": 30,
+    "affinity": 10
+  }
+}

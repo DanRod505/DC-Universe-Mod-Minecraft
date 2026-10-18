@@ -27,7 +27,8 @@
     "placa_circuito": "Circuit Board",
     "tecido_tatico": "Tactical Fabric",
     "torta_martha": "Martha's Pie",
-    "visor_tatico": "Tactical Visor"
+    "visor_tatico": "Tactical Visor",
+    "osso_cristal": "Kryptonian Crystal Bone"
   },
   "personagens": {
     "1": {
@@ -119,6 +120,10 @@
     },
     "batcomputador": {
       "desc": "Batman's command center. Gadgets: refills the belt and energy at once (every 60 s). Fabricate: makes tech parts straight from your inventory. Analysis: a mob sample reveals its file and you deal +15% damage to that type. Map: the terrain around with threats and players. It is also a recharge station."
+    },
+    "osso_cristal": {
+      "desc": "An ordinary bone wrapped in a Kryptonian crystal that glows from within. It is the only treat Krypto the Superdog accepts: give him one to tame him (one Krypto per player). If he is hurt, another bone heals him completely.",
+      "obter": "Crafted from a Bone and a Kryptonian Crystal. Martha Kent also gives you one when you accept the mission \"A Four-Legged Friend\"."
     }
   }
 }

@@ -22,6 +22,20 @@ public interface Local {
         return java.util.Map.of();
     }
 
+    /**
+     * Quem mora no local (npc/Residentes): NPCs e mascotes que aparecem quando um jogador chega e voltam no dia
+     * seguinte se sumirem.
+     */
+    default java.util.List<Morador> moradores() {
+        return java.util.List.of();
+    }
+
+    /**
+     * Um morador: {@code quem} é o id do NPC (data/npc) ou "entity:" + o tipo de entidade (mascotes); com vários
+     * separados por vírgula, cada peça da planta pega um em ordem. {@code todas} = um em cada peça da planta.
+     */
+    record Morador(String papel, String quem, String planta, int x, int y, int z, boolean todas) {}
+
     /** Posição dentro de uma planta; {@code chao} = subir até a superfície naquela coluna. */
     record Ponto(String planta, int x, int y, int z, boolean chao) {}
 

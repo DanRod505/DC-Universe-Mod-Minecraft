@@ -315,12 +315,78 @@ def verificar_registro(raiz, pastas, erros):
     erros.extend(f"Java: {i} registrado sem nome no lang" for i in sorted(registrados - nomes))
     for recursos in pastas:
         for arq in sorted(recursos.glob("data/*/*/**/*.json")):
-            if any(x in arq.as_posix() for x in ("/worldgen/", "/test_instance/", "/forge/", "/dc_characters/")):
-                continue  # ids de feature, função de teste e personagem não são itens
+            if any(x in arq.as_posix() for x in ("/worldgen/", "/test_instance/", "/forge/", "/dc_characters/", "/npc/", "/missao/")):
+                continue  # ids de feature, função de teste e personagem não são itens; NPCs e missões têm conferência própria
             for i in sorted(set(re.findall(r'"dcuniverse:([a-z0-9_]+)"', arq.read_text(encoding="utf-8")))):
                 if i not in nomes:
                     erros.append(f"{arq.relative_to(raiz)}: item dcuniverse:{i} inexistente")
 
+
+
+def verificar_npcs(raiz, recursos, erros):
+    """NPCs e missões: itens, NPCs, missões e mascotes citados existem e todo texto tem pt_br e en_us."""
+    langs = [ler_json(recursos / f"assets/dcuniverse/lang/{l}.json", erros) or {} for l in ("pt_br", "en_us")]
+    itens = {k.split(".", 2)[2] for k in langs[1] if k.startswith(("item.dcuniverse.", "block.dcuniverse."))}
+    entidades = {k.split(".", 2)[2] for k in langs[1] if k.startswith("entity.dcuniverse.")}
+    npcs = {a.stem: ler_json(a, erros) or {} for a in sorted(recursos.glob("data/dcuniverse/npc/*.json"))}
+    missoes = {a.stem: ler_json(a, erros) or {} for a in sorted(recursos.glob("data/dcuniverse/missao/*.json"))}
+
+    def item(onde, ref):
+        ns, _, nome = ref.lstrip("#").rpartition(":")
+        if ns == "dcuniverse" and not ref.startswith("#") and nome not in itens:
+            erros.append(f"{onde}: item {ref} inexistente")
+
+    def chave(onde, k):
+        for l, d in zip(("pt_br", "en_us"), langs):
+            if k not in d:
+                erros.append(f"{onde}: falta {k} em {l}.json")
+
+    def ref_npc(onde, ref):
+        if ref.split(":")[-1] not in npcs:
+            erros.append(f"{onde}: NPC {ref} inexistente")
+
+    for nid, n in npcs.items():
+        onde = f"npc/{nid}.json"
+        for s in n.get("skins", []):
+            if not (recursos / "assets" / s.split(":")[0] / s.split(":")[1]).exists():
+                erros.append(f"{onde}: skin {s} não existe")
+        for i in n.get("likes", {}):
+            item(onde, i)
+        for t in n.get("trades", []):
+            for x in t["in"] + [t["out"]]:
+                item(onde, x["item"])
+        texto = n.get("text", nid)
+        chave(onde, f"dcuniverse.npc.{nid}")
+        chave(onde, f"dcuniverse.npc.grupo.{n.get('group', nid)}")
+        if n.get("profession"):
+            chave(onde, f"dcuniverse.npc.profissao.{n['profession']}")
+        for suf in ["oi", "bronca", "sobre"] + [f"fala.{c['id']}" for c in n.get("talks", [])] + [f"oi.{g}" for g in n.get("greetings", [])]:
+            if not any(f"dcuniverse.npc.{x}.{suf}" in langs[0] for x in (nid, texto)):
+                erros.append(f"{onde}: falta dcuniverse.npc.{texto}.{suf}")
+            elif not any(f"dcuniverse.npc.{x}.{suf}" in langs[1] for x in (nid, texto)):
+                erros.append(f"{onde}: falta dcuniverse.npc.{texto}.{suf} em en_us.json")
+    for mid, m in missoes.items():
+        onde = f"missao/{mid}.json"
+        ref_npc(onde, m["npc"])
+        for r in m.get("requires", []):
+            if r.split(":")[-1] not in missoes:
+                erros.append(f"{onde}: missão requerida {r} inexistente")
+        for x in m.get("start_items", []) + m.get("rewards", {}).get("items", []):
+            item(onde, x["item"])
+        for k in ("", ".desc", ".pedido", ".fim"):
+            chave(onde, f"dcuniverse.missao.{mid}{k}")
+        for n, o in enumerate(m["objectives"]):
+            if "item" in o:
+                item(onde, o["item"])
+            if "npc" in o:
+                ref_npc(onde, o["npc"])
+            if o["type"] == "talk":
+                chave(onde, f"dcuniverse.missao.{mid}.fala.{n}")
+            for t in o.get("targets", []):
+                if t.startswith("dcuniverse:") and o["type"] != "transform" and t.split(":")[1] not in entidades:
+                    erros.append(f"{onde}: entidade {t} inexistente")
+            if o["type"] == "go":
+                chave(onde, f"dcuniverse.ponto.{o['local']}.{o['point']}")
 
 def verificar_sons(raiz, recursos, erros):
     java = (raiz / JAVA / "content/Sons.java").read_text(encoding="utf-8")
@@ -389,6 +455,7 @@ def main():
     verificar_teclas(raiz, erros)
     verificar_testes(raiz, recursos, erros)
     verificar_registro(raiz, pastas, erros)
+    verificar_npcs(raiz, recursos, erros)
     verificar_sons(raiz, recursos, erros)
     verificar_blocos(raiz, recursos, erros)
     if erros:

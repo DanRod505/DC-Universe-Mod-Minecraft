@@ -1,0 +1,35 @@
+{
+  "npc": "dcuniverse:martha_kent",
+  "start_items": [
+    {
+      "item": "dcuniverse:osso_cristal",
+      "count": 1
+    }
+  ],
+  "objectives": [
+    {
+      "type": "tame",
+      "targets": [
+        "dcuniverse:krypto"
+      ]
+    },
+    {
+      "type": "talk",
+      "npc": "dcuniverse:martha_kent"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:cooked_beef",
+        "count": 8
+      },
+      {
+        "item": "minecraft:lead",
+        "count": 1
+      }
+    ],
+    "xp": 60,
+    "affinity": 10
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "npc": "dcuniverse:lana_lang",
+  "min": 25,
+  "requires": [
+    "dcuniverse:lana_cafe"
+  ],
+  "objectives": [
+    {
+      "type": "go",
+      "local": "smallville",
+      "point": "cratera",
+      "radius": 10
+    },
+    {
+      "type": "collect",
+      "item": "dcuniverse:fragmento_kryptonita",
+      "count": 3
+    },
+    {
+      "type": "deliver",
+      "npc": "dcuniverse:lana_lang"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:golden_apple",
+        "count": 1
+      },
+      {
+        "item": "minecraft:emerald",
+        "count": 4
+      }
+    ],
+    "xp": 80,
+    "affinity": 15
+  }
+}

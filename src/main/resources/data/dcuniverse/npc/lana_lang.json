@@ -1,0 +1,97 @@
+{
+  "skins": [
+    "dcuniverse:textures/entity/npc/lana_lang.png"
+  ],
+  "slim": true,
+  "wander": 6,
+  "likes": {
+    "minecraft:cookie": 3,
+    "minecraft:cake": 6,
+    "minecraft:peony": 4,
+    "minecraft:pink_tulip": 3,
+    "minecraft:emerald": 3,
+    "dcuniverse:fragmento_kryptonita": 5,
+    "minecraft:amethyst_shard": 4
+  },
+  "talks": [
+    {
+      "id": "talon"
+    },
+    {
+      "id": "cratera"
+    },
+    {
+      "id": "colar"
+    },
+    {
+      "id": "clark"
+    },
+    {
+      "id": "meteoros",
+      "min": 25
+    },
+    {
+      "id": "cidade",
+      "min": 50
+    },
+    {
+      "id": "segredo",
+      "min": 75
+    }
+  ],
+  "greetings": [
+    "superman",
+    "batman"
+  ],
+  "trades": [
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 1
+        }
+      ],
+      "out": {
+        "item": "minecraft:cookie",
+        "count": 6
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 2
+        }
+      ],
+      "out": {
+        "item": "minecraft:pumpkin_pie",
+        "count": 3
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:cocoa_beans",
+          "count": 8
+        }
+      ],
+      "out": {
+        "item": "minecraft:emerald",
+        "count": 1
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 3
+        }
+      ],
+      "out": {
+        "item": "minecraft:cake",
+        "count": 1
+      },
+      "min": 50
+    }
+  ]
+}

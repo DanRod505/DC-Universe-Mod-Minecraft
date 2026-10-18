@@ -1,0 +1,38 @@
+{
+  "npc": "dcuniverse:cidadao_xerife",
+  "repeatable": true,
+  "interval": 1,
+  "objectives": [
+    {
+      "type": "kill",
+      "targets": [
+        "minecraft:zombie",
+        "minecraft:husk",
+        "minecraft:zombie_villager",
+        "minecraft:skeleton",
+        "minecraft:spider",
+        "minecraft:creeper"
+      ],
+      "count": 6,
+      "local": "smallville"
+    },
+    {
+      "type": "talk",
+      "npc": "dcuniverse:cidadao_xerife"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:emerald",
+        "count": 4
+      },
+      {
+        "item": "minecraft:iron_ingot",
+        "count": 3
+      }
+    ],
+    "xp": 30,
+    "affinity": 8
+  }
+}

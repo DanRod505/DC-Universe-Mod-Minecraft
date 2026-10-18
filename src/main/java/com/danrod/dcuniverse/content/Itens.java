@@ -72,6 +72,7 @@ public final class Itens {
         .repairable(PLACA_CIRCUITO.get()).rarity(Rarity.UNCOMMON)));
 
     // Utilidades
+    public static final RegistryObject<Item> OSSO_CRISTAL = item("osso_cristal", p -> new Item(p.stacksTo(16).rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> GUIA_HEROI = item("guia_heroi", p -> new GuiaItem(p.stacksTo(1)));
 
     /**

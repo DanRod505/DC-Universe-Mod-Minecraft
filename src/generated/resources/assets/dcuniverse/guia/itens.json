@@ -116,6 +116,11 @@
    "obter": true
   },
   {
+   "id": "osso_cristal",
+   "cat": "utilidade",
+   "obter": true
+  },
+  {
    "id": "cristal_superman",
    "cat": "transformacao",
    "obter": false
@@ -407,6 +412,16 @@
    ],
    "result": {
     "id": "dcuniverse:nucleo_meta_4"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shapeless",
+   "ingredients": [
+    "minecraft:bone",
+    "dcuniverse:cristal_kryptoniano"
+   ],
+   "result": {
+    "id": "dcuniverse:osso_cristal"
    }
   },
   {

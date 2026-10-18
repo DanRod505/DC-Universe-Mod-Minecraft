@@ -55,5 +55,26 @@ public final class Entidades {
             .noLootTable().sized(2.6f, 1.1f).clientTrackingRange(12).updateInterval(1)
             .build(TIPOS.key("batbarco")));
 
+    public static final RegistryObject<EntityType<com.danrod.dcuniverse.npc.NpcEntidade>> NPC = TIPOS.register("npc",
+        () -> EntityType.Builder.<com.danrod.dcuniverse.npc.NpcEntidade>of(com.danrod.dcuniverse.npc.NpcEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.6f, 1.8f).eyeHeight(1.62f).clientTrackingRange(10)
+            .build(TIPOS.key("npc")));
+
+    /** O mesmo NPC com braços finos (modelo slim). */
+    public static final RegistryObject<EntityType<com.danrod.dcuniverse.npc.NpcEntidade>> NPC_SLIM = TIPOS.register("npc_slim",
+        () -> EntityType.Builder.<com.danrod.dcuniverse.npc.NpcEntidade>of(com.danrod.dcuniverse.npc.NpcEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.6f, 1.8f).eyeHeight(1.62f).clientTrackingRange(10)
+            .build(TIPOS.key("npc_slim")));
+
+    public static final RegistryObject<EntityType<com.danrod.dcuniverse.npc.Krypto>> KRYPTO = TIPOS.register("krypto",
+        () -> EntityType.Builder.<com.danrod.dcuniverse.npc.Krypto>of(com.danrod.dcuniverse.npc.Krypto::new, MobCategory.CREATURE)
+            .noLootTable().sized(0.6f, 0.85f).eyeHeight(0.68f).clientTrackingRange(10)
+            .build(TIPOS.key("krypto")));
+
+    public static final RegistryObject<EntityType<com.danrod.dcuniverse.npc.Streaky>> STREAKY = TIPOS.register("streaky",
+        () -> EntityType.Builder.<com.danrod.dcuniverse.npc.Streaky>of(com.danrod.dcuniverse.npc.Streaky::new, MobCategory.CREATURE)
+            .noLootTable().sized(0.6f, 0.7f).eyeHeight(0.35f).clientTrackingRange(10)
+            .build(TIPOS.key("streaky")));
+
     private Entidades() {}
 }

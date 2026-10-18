@@ -73,6 +73,8 @@ public final class Testes {
         FUNCOES.register("freeze_sonic", () -> Testes::batarangues);
         FUNCOES.register("garage", () -> Testes::garagem);
         FUNCOES.register("smallville", () -> Testes::smallville);
+        FUNCOES.register("npcs", () -> Testes::npcs);
+        FUNCOES.register("pets", () -> Testes::mascotes);
     }
 
     private Testes() {}
@@ -1009,6 +1011,126 @@ public final class Testes {
                 && t.getKey().startsWith("dcuniverse.placa.talon")) placaComTexto = true;
         h.assertTrue(placaComTexto, "placas do Talon com texto traduzível");
         h.succeed();
+    }
+
+    private static Identifier dcu(String path) {
+        return Identifier.fromNamespaceAndPath(DCUniverse.MODID, path);
+    }
+
+    private static com.danrod.dcuniverse.npc.NpcEntidade npc(GameTestHelper h, String id, ServerPlayer p) {
+        var d = com.danrod.dcuniverse.npc.Npcs.npc(dcu(id));
+        h.assertTrue(d != null, "NPC " + id + " carregado do datapack");
+        var tipo = d.slim() ? com.danrod.dcuniverse.content.Entidades.NPC_SLIM.get() : com.danrod.dcuniverse.content.Entidades.NPC.get();
+        var n = tipo.create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        net.minecraft.core.BlockPos pos = h.absolutePos(new net.minecraft.core.BlockPos(2, 1, 2));
+        n.configurar(d, pos, "");
+        n.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        h.getLevel().addFreshEntity(n);
+        p.snapTo(pos.getX() + 1.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        return n;
+    }
+
+    /**
+     * NPCs (v0.3 etapa 2): o datapack de NPCs e missões é coerente, a afinidade sobe por nível, presente vale uma
+     * vez por dia, e uma missão completa pelo diálogo (aceitar, coletar, entregar) dá a recompensa.
+     */
+    static void npcs(GameTestHelper h) {
+        var npcs = com.danrod.dcuniverse.npc.Npcs.npcs();
+        var missoes = com.danrod.dcuniverse.npc.Npcs.missoes();
+        h.assertTrue(npcs.size() >= 7 && missoes.size() >= 10, "NPCs e missões carregados (" + npcs.size() + ", " + missoes.size() + ")");
+        for (var m : missoes) {
+            h.assertTrue(com.danrod.dcuniverse.npc.Npcs.npc(m.npc()) != null, "quem dá " + m.id() + " existe");
+            for (var o : m.objetivos()) {
+                if (o.npc() != null) h.assertTrue(com.danrod.dcuniverse.npc.Npcs.npc(o.npc()) != null, "NPC do objetivo de " + m.id());
+                if (o.item() != null) h.assertTrue(!o.item().pilha().isEmpty(), "item do objetivo de " + m.id());
+            }
+            for (var r : m.recompensa().itens()) h.assertTrue(!r.pilha().isEmpty(), "recompensa de " + m.id());
+            for (var r : m.requer()) h.assertTrue(com.danrod.dcuniverse.npc.Npcs.missao(r) != null, "requisito de " + m.id());
+        }
+        for (var d : npcs) {
+            for (var t : d.trocas()) h.assertTrue(!t.saida().pilha().isEmpty(), "troca de " + d.id());
+            for (String g : d.gostos().keySet()) h.assertTrue(!new com.danrod.dcuniverse.npc.ItemRef(g, 1).pilha().isEmpty(), "presente " + g + " de " + d.id());
+        }
+        ServerPlayer p = jogador(h);
+        var martha = npc(h, "martha_kent", p);
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "martha_kent"), 0, "afinidade começa em zero");
+        com.danrod.dcuniverse.npc.Dialogo.abrir(p, martha);
+        h.assertTrue(com.danrod.dcuniverse.npc.Afinidade.conhecidos(p).contains("dcuniverse:martha_kent"), "conversar registra o NPC");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.PUMPKIN, 2));
+        com.danrod.dcuniverse.npc.Dialogo.escolher(p, martha.getId(), "presente");
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "martha_kent"), 5, "presente que ela gosta dá afinidade");
+        com.danrod.dcuniverse.npc.Dialogo.escolher(p, martha.getId(), "presente");
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "martha_kent"), 5, "só um presente por dia");
+        h.assertValueEqual(p.getMainHandItem().getCount(), 1, "o segundo presente não é gasto");
+        Identifier ovos = dcu("martha_ovos");
+        com.danrod.dcuniverse.npc.Dialogo.escolher(p, martha.getId(), "aceitar:" + ovos);
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.ativa(p, ovos), "missão aceita pelo diálogo");
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.rastreada(p), ovos.toString(), "a missão aceita passa a ser seguida");
+        p.getInventory().add(new ItemStack(Items.EGG, 6));
+        com.danrod.dcuniverse.missao.Diario.verificar(p);
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.entregas(p, dcu("martha_kent")).stream().anyMatch(m -> m.id().equals(ovos)), "pronta para entregar");
+        com.danrod.dcuniverse.npc.Dialogo.escolher(p, martha.getId(), "entregar:" + ovos);
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.concluida(p, ovos) && !com.danrod.dcuniverse.missao.Diario.ativa(p, ovos), "missão concluída");
+        h.assertValueEqual(p.getInventory().countItem(Items.EGG), 0, "ovos entregues");
+        h.assertTrue(p.getInventory().countItem(Items.BREAD) >= 4, "recompensa recebida");
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "martha_kent"), 10, "missão dá afinidade");
+        h.assertTrue(!com.danrod.dcuniverse.missao.Diario.disponivel(p, com.danrod.dcuniverse.npc.Npcs.missao(ovos)), "repetível só no dia seguinte");
+        h.assertTrue(!com.danrod.dcuniverse.missao.Diario.disponivel(p, com.danrod.dcuniverse.npc.Npcs.missao(dcu("martha_streaky"))), "missão trancada por afinidade e requisito");
+        com.danrod.dcuniverse.npc.Afinidade.definir(p, "cidadaos", 80);
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.nivel(80), 3, "80 é Confidente");
+        h.assertValueEqual(com.danrod.dcuniverse.npc.DefNpc.preco(12, 80), 9, "Confidente paga 25% menos");
+        h.assertTrue(martha.hurtServer(h.getLevel(), h.getLevel().damageSources().playerAttack(p), 50f) == false || martha.isAlive(), "NPC não morre por dano comum");
+        h.assertTrue(martha.isAlive(), "Martha continua viva");
+        h.succeed();
+    }
+
+    /** Mascotes: o Krypto só aceita o Osso de Cristal, é um por jogador e conta para a missão da Martha. */
+    static void mascotes(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Identifier m = dcu("martha_krypto");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.aceitar(p, m), "aceitar Um Amigo de Quatro Patas");
+        h.assertValueEqual(p.getInventory().countItem(Itens.OSSO_CRISTAL.get()), 1, "a Martha entrega o Osso de Cristal");
+        var k = com.danrod.dcuniverse.content.Entidades.KRYPTO.get().create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        net.minecraft.core.BlockPos pos = h.absolutePos(new net.minecraft.core.BlockPos(2, 1, 2));
+        k.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        k.setInvulnerable(true); // testes vizinhos soltam ondas de choque; o dono falso não recebe a mensagem de morte
+        h.getLevel().addFreshEntity(k);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BONE));
+        k.mobInteract(p, net.minecraft.world.InteractionHand.MAIN_HAND);
+        h.assertTrue(!k.isTame(), "osso comum não doma o Krypto");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Itens.OSSO_CRISTAL.get()));
+        k.mobInteract(p, net.minecraft.world.InteractionHand.MAIN_HAND);
+        h.assertTrue(k.isTame() && k.isOwnedBy(p), "Osso de Cristal doma na hora");
+        h.assertTrue(com.danrod.dcuniverse.npc.Mascotes.tem(p, "krypto"), "Krypto registrado no jogador");
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(m).objetivo(), 1, "domar avança a missão");
+        var k2 = com.danrod.dcuniverse.content.Entidades.KRYPTO.get().create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        k2.snapTo(pos.getX() + 2.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        h.getLevel().addFreshEntity(k2);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Itens.OSSO_CRISTAL.get()));
+        k2.mobInteract(p, net.minecraft.world.InteractionHand.MAIN_HAND);
+        h.assertTrue(!k2.isTame(), "só um Krypto por jogador");
+        var s = com.danrod.dcuniverse.content.Entidades.STREAKY.get().create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        s.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 2.5, 0f, 0f);
+        s.setInvulnerable(true);
+        h.getLevel().addFreshEntity(s);
+        s.tame(p);
+        h.assertTrue(com.danrod.dcuniverse.npc.Mascotes.tem(p, "streaky"), "Streaky registrado no jogador");
+        h.assertTrue(!s.causeFallDamage(20, 1f, h.getLevel().damageSources().fall()), "Streaky não sofre dano de queda");
+        // O dono voa: o Krypto sai do chão e vai junto.
+        p.snapTo(pos.getX() + 0.5, pos.getY() + 4, pos.getZ() + 0.5, 0f, 0f);
+        p.getAbilities().flying = true;
+        h.runAfterDelay(10, () -> {
+            h.assertTrue(k.voando() && k.isNoGravity(), "Krypto voa quando o dono voa");
+            h.assertTrue(k.getY() > pos.getY() + 0.5, "Krypto subiu do chão (" + k.getY() + ")");
+            p.getAbilities().flying = false;
+            h.runAfterDelay(3, () -> {
+                h.assertTrue(!k.voando(), "Krypto pousa quando o dono para de voar");
+                k.discard();
+                k2.discard();
+                s.discard();
+                h.succeed();
+            });
+        });
     }
 
     private static boolean achar(net.minecraft.server.level.ServerLevel level, net.minecraft.world.level.levelgen.structure.BoundingBox c,

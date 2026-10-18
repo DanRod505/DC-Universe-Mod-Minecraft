@@ -55,17 +55,36 @@ public final class Smallville implements Local {
 
     @Override
     public java.util.Map<String, Ponto> pontos() {
-        return java.util.Map.of(
-            "centro", new Ponto("smallville/rua_principal", 65, 1, 4, true),
-            "kent", new Ponto("smallville/casa_kent", 8, 1, -2, true),
-            "quarto_clark", new Ponto("smallville/casa_kent", 4, 7, 7, false),
-            "celeiro", new Ponto("smallville/celeiro", 7, 1, -2, true),
-            "sotao", new Ponto("smallville/celeiro", 8, 8, 16, false),
-            "nave", new Ponto("smallville/celeiro", 10, -4, 16, false),
-            "talon", new Ponto("smallville/talon", 9, 1, -3, true),
-            "igreja", new Ponto("smallville/igreja", 6, 1, -3, true),
-            "praca", new Ponto("smallville/praca", 13, 2, 11, false),
-            "cratera", new Ponto("smallville/cratera", Fazenda.CrateraPasto.C, 1, -2, true));
+        return java.util.Map.ofEntries(
+            java.util.Map.entry("centro", new Ponto("smallville/rua_principal", 65, 1, 4, true)),
+            java.util.Map.entry("kent", new Ponto("smallville/casa_kent", 8, 1, -2, true)),
+            java.util.Map.entry("quarto_clark", new Ponto("smallville/casa_kent", 4, 7, 7, false)),
+            java.util.Map.entry("celeiro", new Ponto("smallville/celeiro", 7, 1, -2, true)),
+            java.util.Map.entry("sotao", new Ponto("smallville/celeiro", 8, 8, 16, false)),
+            java.util.Map.entry("nave", new Ponto("smallville/celeiro", 10, -4, 16, false)),
+            java.util.Map.entry("talon", new Ponto("smallville/talon", 9, 1, -3, true)),
+            java.util.Map.entry("igreja", new Ponto("smallville/igreja", 6, 1, -3, true)),
+            java.util.Map.entry("praca", new Ponto("smallville/praca", 13, 2, 11, false)),
+            java.util.Map.entry("cratera", new Ponto("smallville/cratera", Fazenda.CrateraPasto.C, 1, -2, true)),
+            java.util.Map.entry("martha", new Ponto("smallville/casa_kent", 12, 2, 7, false)),
+            java.util.Map.entry("lana", new Ponto("smallville/talon", 7, 1, 13, false)),
+            java.util.Map.entry("armazem", new Ponto("smallville/armazem", 6, 1, -2, true)));
+    }
+
+    /** Cidadãos de cada casa da vila, na ordem das casas no traçado. */
+    private static final String CIDADAOS = "dcuniverse:cidadao_fazendeiro,dcuniverse:cidadao_jornaleiro,dcuniverse:cidadao_fazendeiro,"
+        + "dcuniverse:cidadao_xerife,dcuniverse:cidadao_fazendeira,dcuniverse:cidadao_jornaleiro,dcuniverse:cidadao_fazendeira";
+
+    @Override
+    public java.util.List<Morador> moradores() {
+        return java.util.List.of(
+            new Morador("martha", "dcuniverse:martha_kent", "smallville/casa_kent", 12, 2, 7, false),
+            new Morador("lana", "dcuniverse:lana_lang", "smallville/talon", 7, 1, 13, false),
+            new Morador("comerciante", "dcuniverse:cidadao_comerciante", "smallville/armazem", 11, 2, 8, false),
+            new Morador("praca", "dcuniverse:cidadao_jornaleiro", "smallville/praca", 13, 2, 11, false),
+            new Morador("casa", CIDADAOS, "smallville/casa", 6, 2, 2, true),
+            new Morador("krypto", "entity:dcuniverse:krypto", "smallville/casa_kent", 8, 1, -3, false),
+            new Morador("streaky", "entity:dcuniverse:streaky", "smallville/casa_kent", 13, 2, 2, false));
     }
 
     @Override

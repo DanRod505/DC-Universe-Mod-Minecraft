@@ -28,7 +28,8 @@ public final class Guia {
         "gancho", "batarangue", "batwing", "planar", "manobra_planar",
         "detetive", "fumaca", "gel", "gel_detonar", "contra_ataque", "furtivo",
         "capa_planador", "visor_tatico", "batcomputador", "cinto", "garagem",
-        "smallville", "nave_kalel");
+        "smallville", "nave_kalel",
+        "conversar_npc", "missao_aceitar", "missao_concluir", "trocar_npc", "presente_npc", "domar_krypto", "domar_streaky");
     /** Segundos recarregando ao sol para ganhar o visto de "sol". */
     public static final int SEGUNDOS_SOL = 5;
 

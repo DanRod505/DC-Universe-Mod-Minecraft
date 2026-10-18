@@ -1,0 +1,30 @@
+{
+  "npc": "dcuniverse:martha_kent",
+  "repeatable": true,
+  "interval": 1,
+  "objectives": [
+    {
+      "type": "collect",
+      "item": "minecraft:egg",
+      "count": 6
+    },
+    {
+      "type": "deliver",
+      "npc": "dcuniverse:martha_kent"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:bread",
+        "count": 4
+      },
+      {
+        "item": "minecraft:pumpkin_pie",
+        "count": 1
+      }
+    ],
+    "xp": 20,
+    "affinity": 5
+  }
+}

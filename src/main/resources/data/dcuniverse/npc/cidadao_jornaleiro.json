@@ -1,0 +1,108 @@
+{
+  "text": "cidadao",
+  "group": "cidadaos",
+  "wander": 10,
+  "likes": {
+    "minecraft:bread": 2,
+    "minecraft:pumpkin_pie": 3,
+    "minecraft:emerald": 3,
+    "minecraft:sunflower": 2,
+    "minecraft:cookie": 2
+  },
+  "skins": [
+    "dcuniverse:textures/entity/npc/jornaleiro_1.png",
+    "dcuniverse:textures/entity/npc/jornaleiro_2.png"
+  ],
+  "names": [
+    "Pete",
+    "Hank",
+    "Earl",
+    "Walt",
+    "Jesse",
+    "Bo",
+    "Gus",
+    "Roy",
+    "Dale",
+    "Lyle"
+  ],
+  "profession": "jornaleiro",
+  "trades": [
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 1
+        }
+      ],
+      "out": {
+        "item": "minecraft:paper",
+        "count": 12
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 2
+        }
+      ],
+      "out": {
+        "item": "minecraft:map",
+        "count": 1
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:sugar_cane",
+          "count": 16
+        }
+      ],
+      "out": {
+        "item": "minecraft:emerald",
+        "count": 1
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 4
+        }
+      ],
+      "out": {
+        "item": "minecraft:spyglass",
+        "count": 1
+      },
+      "min": 50
+    }
+  ],
+  "talks": [
+    {
+      "id": "tempo"
+    },
+    {
+      "id": "kents"
+    },
+    {
+      "id": "meteoro"
+    },
+    {
+      "id": "talon"
+    },
+    {
+      "id": "herois"
+    },
+    {
+      "id": "profissao"
+    },
+    {
+      "id": "segredo",
+      "min": 50
+    }
+  ],
+  "greetings": [
+    "superman",
+    "batman"
+  ]
+}

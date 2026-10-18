@@ -38,9 +38,13 @@ public final class Chegada {
         ONDE.remove(player.getUUID());
     }
 
-    private static String localEm(ServerPlayer player) {
-        BlockPos pos = player.blockPosition();
-        var gerente = player.level().structureManager();
+    public static String localEm(ServerPlayer player) {
+        return localEm(player.level(), player.blockPosition());
+    }
+
+    /** Id do local do mod em que a posição está ("" = nenhum). */
+    public static String localEm(net.minecraft.server.level.ServerLevel level, BlockPos pos) {
+        var gerente = level.structureManager();
         for (Structure s : gerente.getAllStructuresAt(pos).keySet()) {
             if (!(s instanceof LocalEstrutura l)) continue;
             StructureStart st = gerente.getStructureAt(pos, s);
