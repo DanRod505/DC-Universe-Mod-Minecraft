@@ -72,6 +72,7 @@ public final class Testes {
         FUNCOES.register("new_gadgets", () -> Testes::gadgetsNovos);
         FUNCOES.register("freeze_sonic", () -> Testes::batarangues);
         FUNCOES.register("garage", () -> Testes::garagem);
+        FUNCOES.register("smallville", () -> Testes::smallville);
     }
 
     private Testes() {}
@@ -976,5 +977,44 @@ public final class Testes {
         h.assertTrue(EstadoJogador.de(p).energia() == 0, "só recarrega de novo depois do intervalo");
         com.danrod.dcuniverse.content.Batcomputador.resetar(p);
         h.succeed();
+    }
+
+    /**
+     * Smallville (v0.3): cada planta do local constrói sem erro num canto longe do teste, a nave de Kal-El fica
+     * no porão do celeiro, a cratera tem o baú do meteoro, as placas recebem texto e a chegada marca a tarefa.
+     */
+    static void smallville(GameTestHelper h) {
+        var level = h.getLevel();
+        net.minecraft.core.BlockPos base = h.absolutePos(net.minecraft.core.BlockPos.ZERO).offset(0, 0, 3000);
+        int i = 0;
+        java.util.Map<String, net.minecraft.world.level.levelgen.structure.BoundingBox> caixas = new java.util.HashMap<>();
+        for (var e : new java.util.TreeMap<>(com.danrod.dcuniverse.world.estrutura.Estruturas.PLANTAS).entrySet()) {
+            if (!e.getKey().startsWith("smallville/")) continue;
+            var p = e.getValue();
+            net.minecraft.core.BlockPos origem = base.offset(i++ * 160, 0, 0);
+            var caixa = new net.minecraft.world.level.levelgen.structure.BoundingBox(origem.getX() - 6, origem.getY() - p.abaixo() - 2, origem.getZ() - 6,
+                origem.getX() + p.largura() + 6, origem.getY() + p.altura() + 2, origem.getZ() + p.fundo() + 6);
+            p.construir(new com.danrod.dcuniverse.world.estrutura.Obra(level, caixa, origem, net.minecraft.world.level.block.Rotation.NONE, 42L));
+            caixas.put(e.getKey(), caixa);
+        }
+        h.assertTrue(caixas.size() >= 20, "todas as plantas de Smallville construíram (" + caixas.size() + ")");
+        h.assertTrue(achar(level, caixas.get("smallville/celeiro"), b -> b.is(com.danrod.dcuniverse.content.Blocos.NAVE_KALEL.get())), "nave de Kal-El no porão do celeiro");
+        h.assertTrue(achar(level, caixas.get("smallville/cratera"), b -> b.is(com.danrod.dcuniverse.content.Blocos.MINERIO_KRYPTONITA.get())), "kryptonita na cratera");
+        h.assertTrue(achar(level, caixas.get("smallville/cratera"), b -> b.is(net.minecraft.world.level.block.Blocks.CHEST)), "baú do meteoro na cratera");
+        boolean placaComTexto = false;
+        var cx = caixas.get("smallville/talon");
+        for (net.minecraft.core.BlockPos q : net.minecraft.core.BlockPos.betweenClosed(cx.minX(), cx.minY(), cx.minZ(), cx.maxX(), cx.maxY(), cx.maxZ()))
+            if (level.getBlockEntity(q) instanceof net.minecraft.world.level.block.entity.SignBlockEntity s
+                && s.getFrontText().getMessage(1, false).getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
+                && t.getKey().startsWith("dcuniverse.placa.talon")) placaComTexto = true;
+        h.assertTrue(placaComTexto, "placas do Talon com texto traduzível");
+        h.succeed();
+    }
+
+    private static boolean achar(net.minecraft.server.level.ServerLevel level, net.minecraft.world.level.levelgen.structure.BoundingBox c,
+                                 java.util.function.Predicate<net.minecraft.world.level.block.state.BlockState> teste) {
+        for (net.minecraft.core.BlockPos q : net.minecraft.core.BlockPos.betweenClosed(c.minX(), c.minY(), c.minZ(), c.maxX(), c.maxY(), c.maxZ()))
+            if (teste.test(level.getBlockState(q))) return true;
+        return false;
     }
 }

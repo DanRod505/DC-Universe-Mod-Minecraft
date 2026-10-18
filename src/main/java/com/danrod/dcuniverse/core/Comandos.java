@@ -124,6 +124,31 @@ public final class Comandos {
                         .executes(c -> {
                             DemoHud.parar(EntityArgument.getPlayer(c, "jogador"));
                             return 1;
-                        })))));
+                        }))))
+            // Teleporta para um local gerado (e um ponto dele): /dcu local smallville nave
+            .then(Commands.literal("local")
+                .then(Commands.argument("local", com.mojang.brigadier.arguments.StringArgumentType.word())
+                    .suggests((c, b) -> SharedSuggestionProvider.suggest(com.danrod.dcuniverse.world.estrutura.Estruturas.LOCAIS.keySet(), b))
+                    .executes(c -> irPara(c.getSource(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"), ""))
+                    .then(Commands.argument("ponto", com.mojang.brigadier.arguments.StringArgumentType.word())
+                        .suggests((c, b) -> {
+                            var l = com.danrod.dcuniverse.world.estrutura.Estruturas.LOCAIS.get(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"));
+                            return SharedSuggestionProvider.suggest(l == null ? java.util.Set.of() : l.pontos().keySet(), b);
+                        })
+                        .executes(c -> irPara(c.getSource(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"),
+                            com.mojang.brigadier.arguments.StringArgumentType.getString(c, "ponto")))))));
+    }
+
+    private static int irPara(CommandSourceStack src, String local, String ponto) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer p = src.getPlayerOrException();
+        var pos = com.danrod.dcuniverse.world.estrutura.Locais.ponto(p.level(), local, ponto, p.blockPosition());
+        if (pos.isEmpty()) {
+            src.sendFailure(Component.translatable("dcuniverse.cmd.local_nao_achado", local));
+            return 0;
+        }
+        var b = pos.get();
+        p.teleportTo(p.level(), b.getX() + 0.5, b.getY(), b.getZ() + 0.5, java.util.Set.of(), p.getYRot(), p.getXRot(), true);
+        src.sendSuccess(() -> Component.literal(local + (ponto.isEmpty() ? "" : " / " + ponto) + ": " + b.toShortString()), false);
+        return 1;
     }
 }

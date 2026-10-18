@@ -62,7 +62,10 @@ public final class Eventos {
         });
         PlayerEvent.PlayerRespawnEvent.BUS.addListener(e -> sync(e.getEntity()));
         PlayerEvent.PlayerLoggedOutEvent.BUS.addListener(e -> {
-            if (e.getEntity() instanceof ServerPlayer sp) DemoHud.parar(sp);
+            if (e.getEntity() instanceof ServerPlayer sp) {
+                DemoHud.parar(sp);
+                com.danrod.dcuniverse.world.estrutura.Chegada.sair(sp);
+            }
         });
         PlayerEvent.StartTracking.BUS.addListener(e -> {
             if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof ServerPlayer alvo) {
@@ -104,7 +107,10 @@ public final class Eventos {
 
     static void tick(ServerPlayer player) {
         QuedaAmortecida.tick(player);
-        if (player.tickCount % 20 == 0) Guia.tickSegundo(player);
+        if (player.tickCount % 20 == 0) {
+            Guia.tickSegundo(player);
+            com.danrod.dcuniverse.world.estrutura.Chegada.tickSegundo(player);
+        }
         EstadoJogador estado = EstadoJogador.de(player);
         if (!estado.transformado()) {
             if (player.tickCount % 20 == 0) Traje.verificar(player, null);
