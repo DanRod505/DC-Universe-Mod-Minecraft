@@ -149,6 +149,9 @@ def verificar_personagens(raiz, recursos, erros):
             for k, v in esperado.items():
                 if real.get(k) != v:
                     erros.append(f"{nome}: {k} = {real.get(k)}, mas a ficha diz {v}")
+            # Categoria: filtro do índice de personagens no Guia.
+            if c.get("category") != doc["cat"]:
+                erros.append(f"{nome}: category = {c.get('category')}, mas docs/dados diz {doc['cat']}")
         corpo = skins_doc.get(c.get("n"))
         if corpo is not None:
             escala = round(corpo["altura"] / 1.85, 2)
@@ -262,6 +265,16 @@ def verificar_guia(raiz, recursos, erros):
     registrados = set(re.findall(r'(?:item|blocoComItem)\("([a-z0-9_]+)"', java_todo))  # bloco() sozinho não tem item
     no_guia = {x["id"] for x in dados["itens"]}
     erros.extend(f"Guia: {x} registrado sem página no capítulo Itens" for x in sorted(registrados - no_guia))
+    # Abas do criativo (content/Itens.Aba): toda categoria de item cai numa aba de verdade, com nome nos dois idiomas.
+    itens_java = (raiz / JAVA / "content/Itens.java").read_text(encoding="utf-8")
+    abas = re.findall(r'^\s+[A-Z]+\("(dcuniverse[a-z_]*)", "[a-z0-9_]+"((?:, "[a-z]+")+)\)', itens_java, re.M)
+    cats_abas = {c for _, cs in abas for c in re.findall(r'"([a-z]+)"', cs)}
+    for x in dados["itens"]:
+        if x["cat"] not in cats_abas:
+            erros.append(f"criativo: categoria {x['cat']} de {x['id']} sem aba em Itens.Aba")
+    for i in IDIOMAS:
+        lang = ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {}
+        erros.extend(f"criativo: falta itemGroup.{a} em {i}.json" for a, _ in abas if f"itemGroup.{a}" not in lang)
     for i in IDIOMAS:
         lang = ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {}
         for x in dados["itens"]:
