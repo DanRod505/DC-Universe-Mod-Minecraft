@@ -79,6 +79,24 @@ public final class Congelamento {
         if (s.exposicao >= EXPOSICAO) congelar(level, (Mob) e, s, agora);
     }
 
+    /**
+     * Congela na hora (batarangue congelante), sem precisar da exposição do sopro: o mob fica preso por ticks (até o
+     * teto de 4 s); jogadores e chefes só ficam lentos e gelados. Respeita a imunidade de quem acabou de sair do gelo.
+     */
+    public static void congelarJa(LivingEntity e, int ticks) {
+        if (!(e.level() instanceof ServerLevel level)) return;
+        long agora = level.getGameTime();
+        e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, Math.min(TETO, ticks) + 20, 3));
+        e.setTicksFrozen(e.getTicksRequiredToFreeze() + 40);
+        e.clearFire();
+        if (e instanceof Player || e.is(Tags.EntityTypes.BOSSES) || !(e instanceof Mob m)) return;
+        Estado s = ESTADOS.computeIfAbsent(e, k -> new Estado());
+        if (s.congelado || agora < s.imuneAte) return;
+        s.ultimaExposicao = agora;
+        congelar(level, m, s, agora);
+        s.ate = agora + Math.min(TETO, Math.max(20, ticks));
+    }
+
     private static void congelar(ServerLevel level, Mob m, Estado s, long agora) {
         s.congelado = true;
         s.inicio = agora;

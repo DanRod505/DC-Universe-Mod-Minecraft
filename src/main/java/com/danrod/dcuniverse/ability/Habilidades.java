@@ -16,7 +16,7 @@ public final class Habilidades {
     public static void selecionar(ServerPlayer player, int indice) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null || indice < 0 || indice >= p.habilidades().size()) return;
+        if (p == null || indice < 0 || indice >= com.danrod.dcuniverse.character.Cinto.equipadas(player, p).size()) return;
         boolean canalizava = !e.canalizando().isEmpty();
         e.setCanalizando("");
         e.setSelecionada(indice);
@@ -30,15 +30,22 @@ public final class Habilidades {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
         if (p == null || player.isSpectator()) return;
+        // Pilotando o veículo da suprema, a tecla de uso é dele (modo furtivo do Batwing, casco elétrico do Batmóvel...).
+        var veiculo = com.danrod.dcuniverse.content.VeiculoDono.pilotando(player);
+        if (veiculo != null) {
+            if (pressionado) veiculo.comando(player, com.danrod.dcuniverse.content.VeiculoDono.ESPECIAL);
+            return;
+        }
         if (!pressionado) {
             parar(player, e);
             return;
         }
-        if (e.destransformarEm() != 0L || p.habilidades().isEmpty()) return;
-        Personagem.Habilidade h = p.habilidades().get(Math.min(e.selecionada(), p.habilidades().size() - 1));
+        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(player, p);
+        if (e.destransformarEm() != 0L || habs.isEmpty()) return;
+        Personagem.Habilidade h = habs.get(Math.min(e.selecionada(), habs.size() - 1));
         if (h.modo() == Personagem.Modo.HOLD) {
             if (e.prontaEm(h.id()) > player.level().getGameTime()) return;
-            if (e.esgotado()) {
+            if (e.esgotado() && !player.isCreative()) {
                 Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
                 return;
             }
@@ -52,19 +59,28 @@ public final class Habilidades {
     }
 
     /**
-     * Usa uma habilidade INSTANT (inclusive a suprema): confere recarga e energia, executa e só então cobra.
+     * Usa uma habilidade INSTANT (inclusive a suprema): confere recarga, munição e energia, executa e só então
+     * cobra. No criativo não gasta energia nem munição (a recarga vale igual).
      * @return true se a habilidade foi usada
      */
     public static boolean executar(ServerPlayer player, Personagem p, Personagem.Habilidade h) {
         EstadoJogador e = EstadoJogador.de(player);
         long agora = player.level().getGameTime();
+        TipoHabilidade tipo = TiposHabilidade.TIPOS.get(h.tipo());
+        if (tipo.gratis(player, h)) return tipo.usar(player, p, h);
         if (e.prontaEm(h.id()) > agora) return false;
-        if (e.esgotado() || e.energia() < h.custo()) {
+        boolean criativo = player.isCreative();
+        if (!criativo && (e.esgotado() || e.energia() < h.custo())) {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
             return false;
         }
-        if (!TiposHabilidade.TIPOS.get(h.tipo()).usar(player, p, h)) return false;
-        Energia.gastar(player, p, h.custo());
+        if (!Cargas.tem(player, h)) {
+            Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_cargas", Component.translatable("habilidade.dcuniverse." + h.id())));
+            return false;
+        }
+        if (!tipo.usar(player, p, h)) return false;
+        if (!criativo) Energia.gastar(player, p, h.custo());
+        Cargas.gastar(player, h);
         e.setProntaEm(h.id(), agora + Math.round(h.recargaSeg() * 20));
         return true;
     }
@@ -75,7 +91,7 @@ public final class Habilidades {
         String id = e.canalizando();
         if (id.isEmpty()) return;
         Personagem.Habilidade h = p.habilidade(id);
-        if (h == null || !Energia.gastar(player, p, h.custo() / 20f)) {
+        if (h == null || !player.isCreative() && !Energia.gastar(player, p, h.custo() / 20f)) {
             parar(player, e);
             return;
         }

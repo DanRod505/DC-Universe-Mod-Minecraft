@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "dcuniverse:block/minerio_prometio"
+    }
+  }
+}

@@ -5,6 +5,8 @@ import com.danrod.dcuniverse.ability.Alvos;
 import com.danrod.dcuniverse.character.Params;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.client.Skins;
+import com.danrod.dcuniverse.ability.passive.Planar;
+import com.danrod.dcuniverse.client.Planador;
 import com.danrod.dcuniverse.client.Voador;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.guia.Guia;
@@ -21,6 +23,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.PlayerFaceExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.PageButton;
 import net.minecraft.client.input.KeyEvent;
@@ -38,13 +41,16 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Guia do Herói (docs/GUIA.md): livro aberto com marcadores de capítulo na borda direita.
- * Capítulos: Primeiros Passos (tarefas com visto), Personagens (prévia 3D giratória e ficha) e Itens e Receitas
- * (busca, categorias, receita, como obter e "usado em", com links entre os itens; dados em ItensGuia).
+ * Capítulos: Primeiros Passos (tarefas com visto), Personagens (índice com busca e filtros; ficha com prévia 3D
+ * giratória e sumário clicável) e Itens e Receitas (busca, categorias, receita, como obter e "usado em", com links
+ * entre os itens; dados em ItensGuia).
  * Todo texto sai do lang; fichas e habilidades vêm dos mesmos JSON que o servidor usa (pacote Catalogo).
  */
 public final class GuiaScreen extends Screen {
@@ -70,7 +76,39 @@ public final class GuiaScreen extends Screen {
         }
     }
 
+    /** Filtros do índice de personagens (campo "category" do JSON, o mesmo "cat" de docs/dados). */
+    enum Filtro {
+        TODOS(32), HEROI(16), VILAO(48), ANTI(64), AJUDANTE(80);
+
+        /** Ícone 12x12 na coluna 336 da textura. */
+        final int icone;
+
+        Filtro(int icone) {
+            this.icone = icone;
+        }
+
+        static Filtro de(String cat) {
+            return switch (cat) {
+                case "vilao" -> VILAO;
+                case "anti" -> ANTI;
+                case "ajudante" -> AJUDANTE;
+                default -> HEROI;
+            };
+        }
+
+        String chave() {
+            return "dcuniverse.guia.personagens.filtro." + name().toLowerCase(Locale.ROOT);
+        }
+    }
+
+    /** Título do sumário da ficha: aponta para o bloco onde o tópico começa. */
+    private record Topico(Component nome, boolean sub, Bloco bloco) {}
+
     private static Capitulo ultimoCapitulo = Capitulo.PASSOS;
+    /** Personagens: true mostra o índice (busca, filtros e grade de rostos); false, a ficha do personagem. */
+    private static boolean naLista = true;
+    private static Filtro ultimoFiltro = Filtro.TODOS;
+    private static String ultimaBuscaPers = "";
     private static String ultimoPersonagem = "";
     private static String ultimoItem = "";
     private static ItensGuia.Grupo ultimoGrupo = ItensGuia.Grupo.TODOS;
@@ -78,6 +116,14 @@ public final class GuiaScreen extends Screen {
 
     private Capitulo capitulo;
     private List<Personagem> personagens = List.of();
+    private final Map<String, Filtro> categorias = new HashMap<>();
+    /** Páginas do sumário no começo da ficha (as do conteúdo vêm depois). */
+    private int paginasSumario;
+    /** Tópico escolhido no sumário: brilha por um instante na página de destino para o olho achar onde começa. */
+    private int destaque = -1;
+    private long destaqueAte;
+    private Bloco blocoDestaque;
+    private int rolagemPers;
     private int indice;
     private int pagina;
     private int x0, y0;
@@ -113,6 +159,7 @@ public final class GuiaScreen extends Screen {
         if (!ativo.isEmpty()) {
             ultimoCapitulo = Capitulo.PERSONAGENS;
             ultimoPersonagem = ativo;
+            naLista = false;
         }
         s.capitulo = ultimoCapitulo;
         Minecraft.getInstance().gui.setScreen(s);
@@ -123,7 +170,7 @@ public final class GuiaScreen extends Screen {
     protected void init() {
         x0 = (width - W - 18) / 2;
         y0 = (height - H) / 2;
-        personagens = carregarPersonagens();
+        personagens = carregarPersonagens(categorias);
         indice = 0;
         for (int i = 0; i < personagens.size(); i++) {
             if (personagens.get(i).id().toString().equals(ultimoPersonagem)) indice = i;
@@ -140,22 +187,27 @@ public final class GuiaScreen extends Screen {
         busca.setTextColor(TINTA);
         busca.setMaxLength(40);
         busca.setHint(Component.translatable("dcuniverse.guia.itens.buscar").withColor(SUAVE));
-        busca.setValue(ultimaBusca);
         busca.setResponder(t -> {
-            ultimaBusca = t;
-            rolagem = 0;
+            if (capitulo == Capitulo.ITENS) {
+                ultimaBusca = t;
+                rolagem = 0;
+            } else {
+                ultimaBuscaPers = t;
+                rolagemPers = 0;
+            }
         });
+        sincronizarBusca();
         atualizarBotoes();
     }
 
     /** Personagens do servidor na ordem da lista do mod (campo "n" do JSON). */
-    private static List<Personagem> carregarPersonagens() {
+    private static List<Personagem> carregarPersonagens(Map<String, Filtro> categorias) {
         List<Personagem> out = new ArrayList<>();
-        List<Integer> ordem = new ArrayList<>();
         EstadoCliente.catalogo.forEach((id, json) -> {
             try {
                 var obj = JsonParser.parseString(json).getAsJsonObject();
                 out.add(Personagem.parse(Identifier.parse(id), obj));
+                categorias.put(id, Filtro.de(obj.has("category") ? obj.get("category").getAsString() : "heroi"));
             } catch (RuntimeException e) {
                 DCUniverse.LOGGER.warn("Guia: personagem {} ignorado: {}", id, e.toString());
             }
@@ -182,18 +234,49 @@ public final class GuiaScreen extends Screen {
     }
 
     private void irPara(Capitulo c) {
-        if (c == capitulo) return;
+        if (c == capitulo) {
+            // O marcador de Personagens com uma ficha aberta volta ao índice.
+            if (c == Capitulo.PERSONAGENS && !naLista) abrirLista();
+            return;
+        }
         capitulo = c;
         ultimoCapitulo = c;
         pagina = 0;
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
+        sincronizarBusca();
+        atualizarBotoes();
+    }
+
+    /** O campo de busca é um só: mostra o texto e a dica do capítulo aberto. */
+    private void sincronizarBusca() {
+        boolean itens = capitulo == Capitulo.ITENS;
+        busca.setHint(Component.translatable(itens ? "dcuniverse.guia.itens.buscar" : "dcuniverse.guia.personagens.buscar").withColor(SUAVE));
+        busca.setValue(itens ? ultimaBusca : ultimaBuscaPers);
+        busca.setFocused(false);
+    }
+
+    private void abrirLista() {
+        naLista = true;
+        pagina = 0;
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
+        sincronizarBusca();
+        atualizarBotoes();
+    }
+
+    private void abrirFicha(Personagem p) {
+        indice = Math.max(0, personagens.indexOf(p));
+        ultimoPersonagem = p.id().toString();
+        naLista = false;
+        pagina = 0;
+        busca.setFocused(false);
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
         atualizarBotoes();
     }
 
     private void atualizarBotoes() {
-        busca.visible = busca.active = capitulo == Capitulo.ITENS;
+        busca.visible = busca.active = capitulo == Capitulo.ITENS || (capitulo == Capitulo.PERSONAGENS && naLista);
         if (!busca.visible) busca.setFocused(false);
-        boolean pers = capitulo == Capitulo.PERSONAGENS && personagens.size() > 1;
+        boolean pers = capitulo == Capitulo.PERSONAGENS && !naLista && personagens.size() > 1;
         anterior.visible = proximo.visible = pers;
         int paginas = paginasDireita().size();
         pagina = Mth.clamp(pagina, 0, Math.max(0, paginas - 1));
@@ -227,18 +310,32 @@ public final class GuiaScreen extends Screen {
         g.blit(RenderPipelines.GUI_TEXTURED, TEX, x0, y0, 0, 0, W, H, TEX_W, TEX_H);
         switch (capitulo) {
             case PASSOS -> passosEsquerda(g);
-            case PERSONAGENS -> personagemEsquerda(g, mx, my);
+            case PERSONAGENS -> {
+                if (naLista) listaEsquerda(g, mx, my);
+                else personagemEsquerda(g, mx, my);
+            }
             case ITENS -> itensEsquerda(g, mx, my);
         }
         List<List<Bloco>> paginas = paginasDireita();
         if (!paginas.isEmpty()) {
             int y = y0 + TOPO;
+            long agora = System.currentTimeMillis();
             for (Bloco b : paginas.get(Math.min(pagina, paginas.size() - 1))) {
+                if (b == blocoDestaque && agora < destaqueAte) {
+                    int alfa = (int) (0x70 * Math.min(1.0, (destaqueAte - agora) / 600.0));
+                    g.fill(x0 + DIR_X - 3, y - 2, x0 + DIR_X + PAG_W + 2, y + b.altura - 1, alfa << 24 | 0xE0B040);
+                }
                 b.desenho.desenhar(g, x0 + DIR_X, y);
                 y += b.altura;
             }
             if (paginas.size() > 1) {
-                g.centeredText(font, (pagina + 1) + " / " + paginas.size(), x0 + DIR_X + PAG_W / 2, y0 + BASE - 7, SUAVE);
+                String cont = (pagina + 1) + " / " + paginas.size();
+                g.centeredText(font, cont, x0 + DIR_X + PAG_W / 2, y0 + BASE - 7, SUAVE);
+                if (capitulo == Capitulo.PERSONAGENS && !naLista && paginasSumario > 0 && pagina >= paginasSumario) {
+                    // Atalho de volta ao sumário, ao lado do número da página.
+                    botaoLista(g, x0 + DIR_X + PAG_W / 2 - font.width(cont) / 2 - 15, y0 + BASE - 9,
+                        "dcuniverse.guia.sumario.voltar", () -> virar(0));
+                }
             }
         }
         super.extractRenderState(g, mx, my, a);
@@ -326,6 +423,7 @@ public final class GuiaScreen extends Screen {
     private void personagemEsquerda(GuiGraphicsExtractor g, int mx, int my) {
         int x = x0 + ESQ_X, y = y0 + TOPO;
         titulo(g, Component.translatable("dcuniverse.guia.capitulo.personagens"), x, y);
+        botaoLista(g, x, y - 2, "dcuniverse.guia.personagens.indice", this::abrirLista);
         Personagem p = atual();
         if (p == null) {
             paragrafo(g, Component.translatable("dcuniverse.guia.personagens.vazio"), x, y + 30, PAG_W, SUAVE);
@@ -392,7 +490,17 @@ public final class GuiaScreen extends Screen {
         g.entity(s, PREVIA_H / 2.2f, new Vector3f(0, s.boundingBoxHeight / 2f + 0.0625f, 0), rot, camera, ax0, ay0, ax1, ay1);
     }
 
-    private List<Bloco> personagemDireita() {
+    /** Liga o bloco a um título do sumário. */
+    private Bloco topico(List<Topico> topicos, Bloco b, Component nome, boolean sub) {
+        topicos.add(new Topico(nome, sub, b));
+        return b;
+    }
+
+    private Bloco secao(List<Topico> topicos, String chave) {
+        return topico(topicos, secao(chave), Component.translatable(chave), false);
+    }
+
+    private List<Bloco> personagemDireita(List<Topico> topicos) {
         Personagem p = atual();
         List<Bloco> out = new ArrayList<>();
         if (p == null) return out;
@@ -402,7 +510,7 @@ public final class GuiaScreen extends Screen {
             return out;
         }
         texto(out, Component.translatable(chave + ".exp").withStyle(ChatFormatting.ITALIC), SUAVE, 6);
-        out.add(secao("dcuniverse.guia.secao.ficha"));
+        out.add(secao(topicos, "dcuniverse.guia.secao.ficha"));
         Personagem.Ficha f = p.ficha();
         out.add(atributo("vida", f.vida(), FichaEscala.VIDA, fmt(f.vida())));
         out.add(atributo("armadura", f.armadura(), FichaEscala.ARMADURA, fmt(f.armadura())));
@@ -415,23 +523,33 @@ public final class GuiaScreen extends Screen {
         if (planar != null) out.add(atributo("planar", planar.params().d("speed", 10), FichaEscala.PLANAR, fmt(planar.params().d("speed", 10))));
         texto(out, Component.translatable("dcuniverse.guia.ficha.unidades"), SUAVE, 0);
         out.add(espaco(4));
-        out.add(secao("dcuniverse.guia.secao.energia"));
+        out.add(secao(topicos, "dcuniverse.guia.secao.energia"));
         out.add(item(Component.translatable("dcuniverse.guia.recarga.base", fmt(p.energia().regen()))));
         for (Personagem.Tipo r : p.energia().recargas()) {
             out.add(item(Component.translatable("dcuniverse.guia.recarga." + r.tipo(), fmt(r.params().d("per_second", 0)))));
         }
         if (!p.passivas().isEmpty()) {
             out.add(espaco(4));
-            out.add(secao("dcuniverse.guia.secao.passivas"));
+            out.add(secao(topicos, "dcuniverse.guia.secao.passivas"));
             for (Personagem.Tipo t : p.passivas()) {
                 out.add(item(Component.translatable("dcuniverse.guia.passiva." + t.tipo())));
                 if (t.tipo().equals("flight")) {
                     double max = t.params().d("speed", 12);
                     texto(out, Component.translatable("dcuniverse.guia.voo.detalhe", fmt(max * Voador.CRUZEIRO), fmt(max),
                         fmt(t.params().d("dash_cost", 15))), SUAVE, 2);
+                } else if (t.tipo().equals("glide")) {
+                    double v = t.params().d("speed", 10);
+                    texto(out, Component.translatable("dcuniverse.guia.planar.detalhe", fmt(v), fmt(v * Planador.MAX_ABERTA),
+                        fmt(v * Planador.MAX_MERGULHO), fmt(t.params().d("boost_cost", Planar.IMPULSO_CUSTO))), SUAVE, 2);
                 } else if (t.tipo().equals("super_jump")) {
                     texto(out, Component.translatable("dcuniverse.guia.salto.detalhe", fmt(alturaSalto(t.params().d("power", 2))),
                         fmt(t.params().d("charge", 1))), SUAVE, 2);
+                } else if (t.tipo().equals("stealth")) {
+                    texto(out, Component.translatable("dcuniverse.guia.furtividade.detalhe", t.params().i("max_light", 7),
+                        Math.round((1 - t.params().d("visibility", 0.3)) * 100)), SUAVE, 2);
+                } else if (t.tipo().equals("counter")) {
+                    texto(out, Component.translatable("dcuniverse.guia.contra.detalhe", fmt(t.params().d("window", 0.4)),
+                        fmt(Alvos.dano(p, t.params().d("damage_mult", 1.5)) / 2.0), fmt(t.params().d("stun", 1.5)), fmt(t.params().d("cooldown", 1))), SUAVE, 2);
                 } else if (t.tipo().equals("projectile_resistance")) {
                     texto(out, Component.translatable("dcuniverse.guia.ricochete.detalhe", fmt(t.params().d("max_damage", 10) / 2)), SUAVE, 2);
                 }
@@ -440,29 +558,35 @@ public final class GuiaScreen extends Screen {
         List<Personagem.Habilidade> normais = p.habilidades().stream().filter(h -> !h.suprema()).toList();
         if (!normais.isEmpty()) {
             out.add(espaco(4));
-            out.add(secao("dcuniverse.guia.secao.habilidades"));
-            for (Personagem.Habilidade h : normais) habilidade(out, p, h);
+            out.add(secao(topicos, "dcuniverse.guia.secao.habilidades"));
+            for (Personagem.Habilidade h : normais) habilidade(out, topicos, p, h);
         }
-        Personagem.Habilidade sup = p.suprema();
-        if (sup != null) {
+        // Com cinto pode haver várias (os veículos do Batman, escolhidos na Garagem): mostra todas.
+        List<Personagem.Habilidade> supremas = p.habilidades().stream().filter(Personagem.Habilidade::suprema).toList();
+        if (!supremas.isEmpty()) {
             out.add(espaco(4));
-            out.add(secao("dcuniverse.guia.secao.suprema"));
+            out.add(secao(topicos, "dcuniverse.guia.secao.suprema"));
+        }
+        for (Personagem.Habilidade sup : supremas) {
+            if (sup != supremas.get(0)) out.add(espaco(3));
             int pct = Math.round(sup.custo() * 100f / p.energia().max());
-            out.add(nome(Component.translatable("habilidade.dcuniverse." + sup.id())));
+            Component nomeSup = Component.translatable("habilidade.dcuniverse." + sup.id());
+            out.add(topico(topicos, nome(nomeSup), nomeSup, true));
             texto(out, Component.translatable("habilidade.dcuniverse." + sup.id() + ".desc"), TINTA, 1);
             out.add(item(Component.translatable("dcuniverse.guia.suprema.custo", pct, fmt(sup.recargaSeg()))));
             detalhes(out, sup.params());
         }
         out.add(espaco(4));
-        out.add(secao("dcuniverse.guia.secao.historia"));
+        out.add(secao(topicos, "dcuniverse.guia.secao.historia"));
         texto(out, Component.translatable(chave + ".lore"), TINTA, 0);
         return out;
     }
 
     /** Nome, o que faz e os números: como usar e quanto gasta, recarga, alcance e dano em corações. */
-    private void habilidade(List<Bloco> out, Personagem p, Personagem.Habilidade h) {
+    private void habilidade(List<Bloco> out, List<Topico> topicos, Personagem p, Personagem.Habilidade h) {
         Params prm = h.params();
-        out.add(nome(Component.translatable("habilidade.dcuniverse." + h.id())));
+        Component nomeHab = Component.translatable("habilidade.dcuniverse." + h.id());
+        out.add(topico(topicos, nome(nomeHab), nomeHab, true));
         texto(out, Component.translatable("habilidade.dcuniverse." + h.id() + ".desc"), TINTA, 1);
         boolean segura = h.modo() == Personagem.Modo.HOLD;
         out.add(item(Component.translatable(segura ? "dcuniverse.guia.hab.segurar" : "dcuniverse.guia.hab.apertar", fmt(h.custo()))));
@@ -478,6 +602,13 @@ public final class GuiaScreen extends Screen {
         if (prm.d("impact_radius", 0) > 0) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.impacto", fmt(prm.d("impact_radius", 0)))));
         }
+        if (h.tipo().equals("grapple")) out.add(item(Component.translatable("dcuniverse.guia.hab.gancho", fmt(prm.d("speed", 30)))));
+        if (prm.i("ricochet", 0) > 0) out.add(item(Component.translatable("dcuniverse.guia.hab.ricochete", prm.i("ricochet", 0))));
+        if (prm.s("variant", "").equals("electric")) out.add(item(Component.translatable("dcuniverse.guia.hab.choque")));
+        Params ammo = com.danrod.dcuniverse.ability.Cargas.ammo(h);
+        if (ammo != null) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.cargas", ammo.i("max", 1), fmt(ammo.d("reload", 5)), fmt(ammo.d("reload_cost", 0)))));
+        }
         detalhes(out, prm);
         out.add(espaco(3));
     }
@@ -486,10 +617,188 @@ public final class GuiaScreen extends Screen {
     private void detalhes(List<Bloco> out, Params prm) {
         if (prm.json().has("radius")) out.add(item(Component.translatable("dcuniverse.guia.hab.raio", fmt(prm.d("radius", 0)))));
         if (prm.json().has("duration")) out.add(item(Component.translatable("dcuniverse.guia.hab.duracao", fmt(prm.d("duration", 0)))));
+        if (prm.json().has("missiles")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.voo", fmt(prm.d("speed", 30)), fmt(prm.d("boost_speed", 60)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.armas", fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 64)),
+                prm.i("missiles", 4), fmt(prm.d("missile_damage", 7)), fmt(prm.d("missile_radius", 3.5)), fmt(prm.d("missile_reload", 5)))));
+        }
+        if (prm.json().has("model") && !prm.s("model", "").equals("batwing")) {
+            String m = prm.s("model", "");
+            out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.velocidade", fmt(prm.d("speed", 26)), fmt(prm.d("boost_speed", 42)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.armas." + m, fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 48)),
+                prm.i("rounds", 4), fmt(prm.d("rounds_damage", 6)), fmt(prm.d("rounds_reload", 4)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.atropelo", fmt(prm.d("ram_min_speed", 8)), fmt(prm.d("ram_damage", 6)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.especial." + m, fmt(prm.d("special_radius", 5)),
+                fmt(prm.d("special_damage", 4)), fmt(prm.d("stun", 3)), fmt(prm.d("special_cooldown", 12)), fmt(prm.d("special_duration", 6)),
+                fmt(prm.d("dive_speed", 14)))));
+        }
+        if (prm.json().has("drain")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.dreno", fmt(prm.d("drain", 1.5)),
+                Math.round((prm.d("weak_point_mult", 1.25) - 1) * 100))));
+        }
+        if (prm.json().has("blind")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.fumaca", fmt(prm.d("blind", 5)), fmt(prm.d("escape", 3)))));
+        }
+        if (prm.json().has("max_placed")) out.add(item(Component.translatable("dcuniverse.guia.hab.gel", prm.i("max_placed", 3))));
         if (prm.d("stun", 0) > 0) out.add(item(Component.translatable("dcuniverse.guia.hab.lento", fmt(Math.min(4, prm.d("stun", 0))))));
         if (prm.d("regen_level", 0) > 0) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.cura", (int) prm.d("regen_level", 0), fmt(prm.d("energy_per_second", 0)))));
         }
+    }
+
+
+    // Índice de personagens ----------------------------------------------------
+
+    private Filtro filtro(Personagem p) {
+        return categorias.getOrDefault(p.id().toString(), Filtro.HEROI);
+    }
+
+    /** Personagens do filtro escolhido; a busca só acha os já descobertos (o nome dos outros ainda é segredo). */
+    private List<Personagem> filtradosPers() {
+        String q = ItensGuia.normalizar(busca.getValue());
+        return personagens.stream()
+            .filter(p -> ultimoFiltro == Filtro.TODOS || filtro(p) == ultimoFiltro)
+            .filter(p -> q.isEmpty() || (descoberto(p) && ItensGuia.normalizar(Component.translatable(p.chaveNome()).getString()).contains(q)))
+            .toList();
+    }
+
+    private int maxRolagemPers() {
+        int linhas = (filtradosPers().size() + COLUNAS - 1) / COLUNAS;
+        return Math.max(0, linhas - GRADE_LINHAS);
+    }
+
+    /** Rosto do personagem (cabeça da skin, com a camada de fora); quem não foi descoberto aparece em silhueta. */
+    private void rosto(GuiGraphicsExtractor g, Personagem p, int x, int y, int tam) {
+        PlayerSkin skin = descoberto(p) ? Skins.skinDoPersonagem(p.id().toString()) : null;
+        PlayerFaceExtractor.extractRenderState(g, skin != null ? skin : SKIN_SILHUETA, x, y, tam);
+    }
+
+    /** Ícone de lista (índice ou sumário) clicável, com dica. */
+    private void botaoLista(GuiGraphicsExtractor g, int x, int y, String dica, Runnable acao) {
+        boolean em = sobre(mouseX, mouseY, x - 1, y - 1, 14, 14);
+        if (em) {
+            g.fill(x - 1, y - 1, x + 13, y + 13, 0x40B0841E);
+            g.setTooltipForNextFrame(Component.translatable(dica), mouseX, mouseY);
+        }
+        g.blit(RenderPipelines.GUI_TEXTURED, TEX, x, y, 336, 96, 12, 12, TEX_W, TEX_H);
+        alvos.add(new Alvo(x - 1, y - 1, 14, 14, ItemStack.EMPTY, acao));
+    }
+
+    /** Campo de busca: papel mais escuro com moldura de tinta e a lupa (o EditBox fica por cima). */
+    private void campoBusca(GuiGraphicsExtractor g, int x) {
+        int by = y0 + BUSCA_Y;
+        boolean foco = busca.isFocused();
+        g.fill(x, by, x + PAG_W, by + 15, foco ? 0xFF7A5C34 : 0xFF9C8460);
+        g.fill(x + 1, by + 1, x + PAG_W - 1, by + 14, 0xFFF8EFD8);
+        g.fill(x + 1, by + 1, x + PAG_W - 1, by + 2, 0x30000000);
+        lupa(g, x + 3, by + 3);
+    }
+
+    /** Barra de rolagem fininha na margem da página, quando a grade tem mais linhas do que cabem. */
+    private void barraRolagem(GuiGraphicsExtractor g, int x, int gy0, int linhas, int rol) {
+        if (linhas <= GRADE_LINHAS) return;
+        int bx = x + PAG_W + 3, alt = GRADE_LINHAS * PASSO - 2;
+        g.fill(bx, gy0, bx + 2, gy0 + alt, 0x40000000);
+        int tam = Math.max(8, alt * GRADE_LINHAS / linhas);
+        int pos = (alt - tam) * rol / Math.max(1, linhas - GRADE_LINHAS);
+        g.fill(bx, gy0 + pos, bx + 2, gy0 + pos + tam, OURO);
+    }
+
+    /** Página esquerda do índice: busca, filtros por categoria e a grade de rostos (clique abre a ficha). */
+    private void listaEsquerda(GuiGraphicsExtractor g, int mx, int my) {
+        int x = x0 + ESQ_X;
+        titulo(g, Component.translatable("dcuniverse.guia.capitulo.personagens"), x, y0 + TOPO);
+        campoBusca(g, x);
+        Filtro[] filtros = Filtro.values();
+        int passo = PAG_W / filtros.length;
+        for (int i = 0; i < filtros.length; i++) {
+            Filtro f = filtros[i];
+            int fx = x + i * passo + (passo - 18) / 2, fy = y0 + GRUPOS_Y;
+            boolean ativo = f == ultimoFiltro;
+            g.blit(RenderPipelines.GUI_TEXTURED, TEX, fx, fy, ativo ? 324 : 304, 140, 18, 18, TEX_W, TEX_H);
+            g.blit(RenderPipelines.GUI_TEXTURED, TEX, fx + 3, fy + 3, 336, f.icone, 12, 12, TEX_W, TEX_H);
+            long n = f == Filtro.TODOS ? personagens.size() : personagens.stream().filter(p -> filtro(p) == f).count();
+            if (n == 0 && !ativo) g.fill(fx + 1, fy + 1, fx + 17, fy + 17, 0x90E8DABA);
+            if (sobre(mx, my, fx, fy, 18, 18)) {
+                g.setTooltipForNextFrame(Component.translatable(f.chave()).append(Component.literal(" (" + n + ")").withStyle(ChatFormatting.GRAY)), mx, my);
+            }
+            alvos.add(new Alvo(fx, fy, 18, 18, ItemStack.EMPTY, () -> {
+                if (ultimoFiltro != f) {
+                    ultimoFiltro = f;
+                    rolagemPers = 0;
+                    minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
+                }
+            }));
+        }
+        g.blit(RenderPipelines.GUI_TEXTURED, TEX, x + PAG_W / 2 - 40, y0 + GRUPOS_Y + 19, 304, 116, 80, 5, TEX_W, TEX_H);
+        List<Personagem> lista = filtradosPers();
+        rolagemPers = Mth.clamp(rolagemPers, 0, maxRolagemPers());
+        int gx0 = x + (PAG_W - COLUNAS * PASSO) / 2 + 1, gy0 = y0 + GRADE_Y;
+        Personagem aberto = atual();
+        for (int i = rolagemPers * COLUNAS; i < Math.min(lista.size(), (rolagemPers + GRADE_LINHAS) * COLUNAS); i++) {
+            Personagem p = lista.get(i);
+            int k = i - rolagemPers * COLUNAS;
+            int sx = gx0 + (k % COLUNAS) * PASSO, sy = gy0 + (k / COLUNAS) * PASSO;
+            g.blit(RenderPipelines.GUI_TEXTURED, TEX, sx, sy, p == aberto ? 324 : 304, 140, 18, 18, TEX_W, TEX_H);
+            rosto(g, p, sx + 1, sy + 1, 16);
+            if (sobre(mx, my, sx, sy, 18, 18)) {
+                g.fill(sx + 1, sy + 1, sx + 17, sy + 17, 0x40FFFFFF);
+                g.setTooltipForNextFrame(font, dicaPersonagem(p), java.util.Optional.empty(), mx, my);
+            }
+            alvos.add(new Alvo(sx, sy, 18, 18, ItemStack.EMPTY, () -> abrirFicha(p)));
+        }
+        barraRolagem(g, x, gy0, (lista.size() + COLUNAS - 1) / COLUNAS, rolagemPers);
+        long vistos = personagens.stream().filter(this::descoberto).count();
+        Component rodape = lista.isEmpty()
+            ? Component.translatable("dcuniverse.guia.personagens.nenhum")
+            : Component.translatable("dcuniverse.guia.personagens.contagem", vistos, personagens.size());
+        g.centeredText(font, rodape, x + PAG_W / 2, y0 + BASE - 7, SUAVE);
+    }
+
+    private List<Component> dicaPersonagem(Personagem p) {
+        boolean visto = descoberto(p);
+        List<Component> linhas = new ArrayList<>();
+        linhas.add(visto ? Component.translatable(p.chaveNome()) : Component.literal("???"));
+        linhas.add(Component.translatable("dcuniverse.guia.personagens.categoria." + filtro(p).name().toLowerCase(Locale.ROOT))
+            .withStyle(ChatFormatting.GRAY));
+        linhas.add(visto ? Component.translatable("dcuniverse.guia.personagem.nivel", p.nivel()).withStyle(ChatFormatting.GRAY)
+            : Component.translatable("dcuniverse.guia.personagem.desconhecido").withStyle(ChatFormatting.GRAY));
+        linhas.add(Component.translatable("dcuniverse.guia.personagens.abrir").withStyle(ChatFormatting.DARK_AQUA));
+        return linhas;
+    }
+
+    /** Página direita do índice: os nomes por categoria, como o índice de um livro (clique abre a ficha). */
+    private List<Bloco> listaDireita() {
+        List<Bloco> out = new ArrayList<>();
+        List<Personagem> lista = filtradosPers();
+        if (lista.isEmpty()) {
+            texto(out, Component.translatable("dcuniverse.guia.personagens.nenhum"), SUAVE, 0);
+            return out;
+        }
+        for (Filtro f : Filtro.values()) {
+            if (f == Filtro.TODOS) continue;
+            List<Personagem> doGrupo = lista.stream().filter(p -> filtro(p) == f).toList();
+            if (doGrupo.isEmpty()) continue;
+            if (!out.isEmpty()) out.add(espaco(3));
+            out.add(secao("dcuniverse.guia.personagens.filtro." + f.name().toLowerCase(Locale.ROOT)));
+            for (Personagem p : doGrupo) {
+                out.add(new Bloco(11, (g, x, y) -> {
+                    boolean visto = descoberto(p);
+                    boolean em = sobre(mouseX, mouseY, x, y - 1, PAG_W, 11);
+                    rosto(g, p, x, y, 8);
+                    String nv = visto ? String.valueOf(p.nivel()) : "";
+                    int nvX = x + PAG_W - font.width(nv);
+                    String nome = visto ? cortar(Component.translatable(p.chaveNome()).getString(), nvX - x - 16) : "???";
+                    Component c = Component.literal(nome);
+                    if (em) c = c.copy().withStyle(ChatFormatting.UNDERLINE);
+                    g.text(font, c, x + 11, y, em ? TITULO : visto ? TINTA : SUAVE, false);
+                    if (visto) g.text(font, nv, nvX, y, SUAVE, false);
+                    if (em) g.setTooltipForNextFrame(font, dicaPersonagem(p), java.util.Optional.empty(), mouseX, mouseY);
+                    alvos.add(new Alvo(x, y - 1, PAG_W, 11, ItemStack.EMPTY, () -> abrirFicha(p)));
+                }));
+            }
+        }
+        return out;
     }
 
 
@@ -546,13 +855,7 @@ public final class GuiaScreen extends Screen {
     private void itensEsquerda(GuiGraphicsExtractor g, int mx, int my) {
         int x = x0 + ESQ_X;
         titulo(g, Component.translatable("dcuniverse.guia.capitulo.itens"), x, y0 + TOPO);
-        // Campo de busca: papel mais escuro com moldura de tinta e a lupa.
-        int by = y0 + BUSCA_Y;
-        boolean foco = busca.isFocused();
-        g.fill(x, by, x + PAG_W, by + 15, foco ? 0xFF7A5C34 : 0xFF9C8460);
-        g.fill(x + 1, by + 1, x + PAG_W - 1, by + 14, 0xFFF8EFD8);
-        g.fill(x + 1, by + 1, x + PAG_W - 1, by + 2, 0x30000000);
-        lupa(g, x + 3, by + 3);
+        campoBusca(g, x);
         // Marcadores de categoria: um ícone por grupo; o escolhido fica no encaixe dourado.
         ItensGuia.Grupo[] grupos = ItensGuia.Grupo.values();
         int passoGrupo = PAG_W / grupos.length;
@@ -595,15 +898,7 @@ public final class GuiaScreen extends Screen {
                     abrir(e.id(), false);
                 });
         }
-        int linhas = (lista.size() + COLUNAS - 1) / COLUNAS;
-        if (linhas > GRADE_LINHAS) {
-            // Barra de rolagem fininha na margem da página.
-            int bx = x + PAG_W + 3, alt = GRADE_LINHAS * PASSO - 2;
-            g.fill(bx, gy0, bx + 2, gy0 + alt, 0x40000000);
-            int tam = Math.max(8, alt * GRADE_LINHAS / linhas);
-            int pos = (alt - tam) * rolagem / Math.max(1, linhas - GRADE_LINHAS);
-            g.fill(bx, gy0 + pos, bx + 2, gy0 + pos + tam, OURO);
-        }
+        barraRolagem(g, x, gy0, (lista.size() + COLUNAS - 1) / COLUNAS, rolagem);
         Component rodape = lista.isEmpty()
             ? Component.translatable("dcuniverse.guia.itens.vazio")
             : Component.translatable("dcuniverse.guia.itens.contagem", lista.size());
@@ -766,11 +1061,75 @@ public final class GuiaScreen extends Screen {
     }
 
     private List<List<Bloco>> paginasDireita() {
-        List<Bloco> blocos = switch (capitulo) {
-            case PASSOS -> passosDireita();
-            case PERSONAGENS -> personagemDireita();
-            case ITENS -> itemDireita();
+        return switch (capitulo) {
+            case PASSOS -> paginar(passosDireita());
+            case PERSONAGENS -> naLista ? paginar(listaDireita()) : fichaPaginas();
+            case ITENS -> paginar(itemDireita());
         };
+    }
+
+    /**
+     * Ficha com sumário: as primeiras páginas listam os tópicos (seções e cada habilidade) com o número da página
+     * onde começam; clicar num deles vira direto para lá.
+     */
+    private List<List<Bloco>> fichaPaginas() {
+        List<Topico> topicos = new ArrayList<>();
+        List<List<Bloco>> conteudo = paginar(personagemDireita(topicos));
+        paginasSumario = 0;
+        blocoDestaque = destaque >= 0 && destaque < topicos.size() ? topicos.get(destaque).bloco() : null;
+        if (topicos.isEmpty() || conteudo.size() < 2) return conteudo;
+        int[] onde = new int[topicos.size()];
+        for (int i = 0; i < topicos.size(); i++) {
+            for (int k = 0; k < conteudo.size(); k++) {
+                if (conteudo.get(k).contains(topicos.get(i).bloco())) onde[i] = k;
+            }
+        }
+        // O sumário tem altura fixa por linha: conta as páginas dele antes de numerar.
+        paginasSumario = paginar(sumario(topicos, onde, 0)).size();
+        List<List<Bloco>> out = new ArrayList<>(paginar(sumario(topicos, onde, paginasSumario)));
+        out.addAll(conteudo);
+        return out;
+    }
+
+    private List<Bloco> sumario(List<Topico> topicos, int[] onde, int desloc) {
+        List<Bloco> out = new ArrayList<>();
+        out.add(secao("dcuniverse.guia.secao.sumario"));
+        for (int i = 0; i < topicos.size(); i++) {
+            Topico t = topicos.get(i);
+            int destino = onde[i] + desloc, qual = i;
+            String num = String.valueOf(destino + 1);
+            boolean secaoNova = !t.sub() && i > 0;
+            out.add(new Bloco(secaoNova ? 12 : 10, (g, x, y) -> {
+                int yy = y + (secaoNova ? 2 : 0);
+                int recuo = t.sub() ? 8 : 0;
+                int numX = x + PAG_W - font.width(num);
+                String nome = cortar(t.nome().getString(), numX - x - recuo - 8);
+                boolean em = sobre(mouseX, mouseY, x, yy - 1, PAG_W, 10);
+                int cor = em ? TITULO : t.sub() ? TINTA : TITULO;
+                Component c = Component.literal(nome).withStyle(t.sub() ? ChatFormatting.RESET : ChatFormatting.BOLD);
+                if (em) c = c.copy().withStyle(ChatFormatting.UNDERLINE);
+                g.text(font, c, x + recuo, yy, cor, false);
+                // Pontilhado até o número, como no sumário de um livro.
+                for (int px = x + recuo + font.width(c) + 3; px < numX - 3; px += 3) g.fill(px, yy + 6, px + 1, yy + 7, 0x80B0841E);
+                g.text(font, num, numX, yy, em ? TITULO : SUAVE, false);
+                alvos.add(new Alvo(x, yy - 1, PAG_W, 10, ItemStack.EMPTY, () -> {
+                    destaque = qual;
+                    destaqueAte = System.currentTimeMillis() + 1800;
+                    virar(destino);
+                }));
+            }));
+        }
+        return out;
+    }
+
+    private void virar(int p) {
+        if (p == pagina) return;
+        pagina = p;
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
+        atualizarBotoes();
+    }
+
+    private List<List<Bloco>> paginar(List<Bloco> blocos) {
         List<List<Bloco>> paginas = new ArrayList<>();
         List<Bloco> atual = new ArrayList<>();
         int livre = BASE - TOPO - 14, usado = 0;
@@ -872,6 +1231,12 @@ public final class GuiaScreen extends Screen {
         }
     }
 
+    /** Texto que não cabe na largura termina em reticências. */
+    private String cortar(String s, int largura) {
+        if (font.width(s) <= largura) return s;
+        return font.plainSubstrByWidth(s, largura - font.width("...")).stripTrailing() + "...";
+    }
+
     private static String fmt(double v) {
         return v == Math.rint(v) ? String.valueOf((long) v) : String.format(Locale.ROOT, "%.1f", v).replace('.', ',');
     }
@@ -890,10 +1255,10 @@ public final class GuiaScreen extends Screen {
                 return true;
             }
         }
-        if (capitulo == Capitulo.ITENS && e.button() == 0 && cliqueItens(e.x(), e.y())) {
+        if (e.button() == 0 && cliqueItens(e.x(), e.y())) {
             return true;
         }
-        if (capitulo == Capitulo.PERSONAGENS && e.button() == 0
+        if (capitulo == Capitulo.PERSONAGENS && !naLista && e.button() == 0
             && sobre(e.x(), e.y(), x0 + ESQ_X + 10, y0 + PREVIA_Y, PAG_W - 20, PREVIA_H)) {
             giroBase += (float) (System.currentTimeMillis() % 14400L) / 40f;
             arrastando = true;
@@ -928,8 +1293,19 @@ public final class GuiaScreen extends Screen {
             rolagem = Mth.clamp(rolagem + (sy < 0 ? 1 : -1), 0, maxRolagem());
             return true;
         }
-        if (sy != 0 && capitulo == Capitulo.PERSONAGENS && sobre(x, y, x0, y0, W / 2, H) && personagens.size() > 1) {
+        if (sy != 0 && capitulo == Capitulo.PERSONAGENS && naLista && sobre(x, y, x0, y0 + GRADE_Y, W / 2, GRADE_LINHAS * PASSO)) {
+            rolagemPers = Mth.clamp(rolagemPers + (sy < 0 ? 1 : -1), 0, maxRolagemPers());
+            return true;
+        }
+        if (sy != 0 && capitulo == Capitulo.PERSONAGENS && !naLista && sobre(x, y, x0, y0, W / 2, H) && personagens.size() > 1) {
             trocarPersonagem(sy < 0 ? 1 : -1);
+            return true;
+        }
+        // Na página direita a roda vira as páginas.
+        if (sy != 0 && sobre(x, y, x0 + W / 2, y0, W / 2, H)) {
+            int total = paginasDireita().size();
+            int nova = Mth.clamp(pagina + (sy < 0 ? 1 : -1), 0, Math.max(0, total - 1));
+            virar(nova);
             return true;
         }
         return super.mouseScrolled(x, y, sx, sy);
@@ -940,6 +1316,11 @@ public final class GuiaScreen extends Screen {
         // Backspace fora da busca volta ao item anterior (o mesmo do botão de voltar).
         if (capitulo == Capitulo.ITENS && e.key() == 259 && !busca.isFocused() && !historico.isEmpty()) {
             voltar();
+            return true;
+        }
+        // Na ficha de um personagem, Backspace volta ao índice.
+        if (capitulo == Capitulo.PERSONAGENS && !naLista && e.key() == 259) {
+            abrirLista();
             return true;
         }
         return super.keyPressed(e);

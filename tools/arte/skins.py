@@ -203,138 +203,23 @@ S_ESCUDO = [
 ]
 
 
-def superman(t, capa, glow):
+def superman(t, capa, glow, pecas):
     import skin_superman
     skin_superman.superman(t, capa, glow, Pincel)
 
 
 # ---------------------------------------------------------------- Batman
 
-MORCEGO = [
-    "R....R..R....R",
-    "RR...RRRR...RR",
-    "RRR..RRRR..RRR",
-    "RRRRRRRRRRRRRR",
-    ".RRRRRRRRRRRR.",
-    "..RR.RRRR.RR..",
-    "...R..RR..R...",
-]
-
-
-def batman(t, capa, glow):
-    rnd = random.Random(2)
-    preto = hexa("#141519")
-    grafite = hexa("#5A606C")
-    placa = hexa("#747B88")
-    ouro = hexa("#B8902E")
-    capuz = hexa("#1A1B20")
-    rosto(t, rnd, PELE, capuz, hexa("#5A6E7A"))
-    # capuz cobre a cabeça; boca e queixo de fora
-    for face in ("cima", "tras", "dir", "esq"):
-        Pincel(t, "cabeca", face).tecido(capuz, rnd, luz=0.10, sombra=0.10, ruido=0.03, bordas=False)
-    f = Pincel(t, "cabeca", "frente")
-    for j in range(0, 11):
-        for i in range(16):
-            olho = j in (7, 8) and (i in range(3, 7) or i in range(9, 13))
-            if not olho:
-                f.p(i, j, clarear(capuz, 0.04 if j < 3 else 0.0))
-    for i in range(16):  # borda do capuz sobre o rosto (formato de máscara)
-        f.p(i, 11 if i in (0, 1, 2, 13, 14, 15) else 10, escurecer(capuz, 0.1))
-    for j in range(11, 16):
-        f.p(0, j, capuz); f.p(15, j, capuz)
-        f.p(1, j, capuz) if j < 14 else None
-        f.p(14, j, capuz) if j < 14 else None
-    for ox in (3, 9):  # olhos fundos e sombreados
-        for i in range(4):
-            f.p(ox + i, 7, hexa("#0A0A0D") if i in (1, 2) else hexa("#2A2224"))
-            f.p(ox + i, 8, hexa("#3A2E2C"))
-    for i in (3, 4, 5, 6, 9, 10, 11, 12):  # testa franzida
-        f.p(i, 6, escurecer(capuz, 0.35))
-    for lado in ("dir", "esq"):
-        o = Pincel(t, "cabeca", lado)
-        for j in range(11, 16):
-            for i in range(8):
-                o.p(i, j, capuz)
-    # orelhas curtas e volume do capuz na camada do chapéu
-    h = Pincel(t, "chapeu", "frente")
-    for i in range(16):
-        h.p(i, 0, clarear(capuz, 0.08))
-    h.bitmap(1, 0, ["E..", "EE.", "EEE"], {"E": capuz})
-    h.bitmap(12, 0, ["..E", ".EE", "EEE"], {"E": capuz})
-
-    # malha preta com placas cinza-grafite
-    for parte in ("corpo", "braco_d", "braco_e", "perna_d", "perna_e"):
-        for face in ("frente", "tras", "dir", "esq", "cima", "baixo"):
-            Pincel(t, parte, face).tecido(preto, rnd, luz=0.12, sombra=0.10, ruido=0.03)
-
-    def placa_em(p, x, y, w, h):
-        for j in range(h):
-            for i in range(w):
-                c = placa if j == 0 or i == 0 else grafite
-                if j == h - 1 or i == w - 1:
-                    c = escurecer(grafite, 0.35)
-                p.p(x + i, y + j, clarear(c, rnd.uniform(0, 0.05)))
-
-    c = Pincel(t, "corpo", "frente")
-    placa_em(c, 1, 1, 14, 11)   # peitoral
-    placa_em(c, 3, 12, 4, 3); placa_em(c, 9, 12, 4, 3)   # abdômen
-    placa_em(c, 3, 15, 4, 3); placa_em(c, 9, 15, 4, 3)
-    c.bitmap(1, 3, MORCEGO, {"R": preto})
-    j = Pincel(t, "jaqueta", "frente")
-    j.bitmap(1, 3, MORCEGO, {"R": hexa("#0E0F12")})
-    tr = Pincel(t, "corpo", "tras")
-    placa_em(tr, 1, 1, 14, 9); placa_em(tr, 4, 11, 8, 6)
-    # cinto de utilidades com 6 bolsos
-    for face in ("frente", "tras", "dir", "esq"):
-        p = Pincel(t, "corpo", face)
-        for i in range(p.w):
-            p.p(i, 18, escurecer(ouro, 0.30)); p.p(i, 19, ouro); p.p(i, 20, ouro); p.p(i, 21, escurecer(ouro, 0.40))
-    for x in (0, 3, 10, 13):
-        c.ret(x, 18, 3, 4, ouro)
-        c.p(x, 18, clarear(ouro, 0.3)); c.p(x + 1, 18, clarear(ouro, 0.3)); c.p(x + 2, 18, clarear(ouro, 0.2))
-        c.p(x + 2, 21, escurecer(ouro, 0.5)); c.p(x + 1, 19, escurecer(ouro, 0.2))
-    c.ret(6, 18, 4, 4, escurecer(ouro, 0.15)); c.ret(7, 19, 2, 2, clarear(ouro, 0.35))
-    jp = Pincel(t, "jaqueta", "frente")  # bolsos em 3D
-    for x in (0, 3, 10, 13):
-        jp.ret(x, 18, 3, 4, ouro)
-        jp.p(x, 18, clarear(ouro, 0.3)); jp.p(x + 2, 21, escurecer(ouro, 0.5))
-    # braços: ombreira, luvas com três lâminas
-    for parte, fora in (("braco_d", "dir"), ("braco_e", "esq")):
-        for face in ("frente", "tras", "dir", "esq"):
-            p = Pincel(t, parte, face)
-            placa_em(p, 0, 0, p.w, 5)
-            for jj in range(14, 24):
-                for i in range(p.w):
-                    p.p(i, jj, clarear(preto, 0.06 if jj == 14 else rnd.uniform(0, 0.04)))
-        s = Pincel(t, "manga_" + parte[-1], fora)  # lâminas na camada externa
-        for k, jj in enumerate((14, 16, 18)):
-            s.bitmap(2 + k, jj, ["GG", "G."], {"G": placa})
-        placa_em(Pincel(t, parte, "cima"), 0, 0, 8, 8)
-    # pernas: placas na coxa e na canela, botas
-    for parte in ("perna_d", "perna_e"):
-        for face in ("frente", "dir", "esq"):
-            p = Pincel(t, parte, face)
-            placa_em(p, 1, 1, 6, 8)
-            placa_em(p, 1, 11, 6, 4)
-        for face in ("frente", "tras", "dir", "esq"):
-            p = Pincel(t, parte, face)
-            for jj in range(16, 24):
-                for i in range(p.w):
-                    p.p(i, jj, clarear(preto, 0.08 if jj == 16 else 0.0) if jj < 22 else hexa("#09090B"))
-    # capa preta pesada
-    for x, y, w, h, cor in ((2, 2, 20, 32, preto), (24, 2, 20, 32, hexa("#22232A")),
-                            (0, 2, 2, 32, preto), (22, 2, 2, 32, preto), (2, 0, 20, 2, preto), (22, 0, 20, 2, preto)):
-        for jj in range(h):
-            for i in range(w):
-                dobra = 0.06 if i % 4 == 0 else 0.0
-                capa.p(x + i, y + jj, clarear(escurecer(cor, dobra), 0.10 * (1 - jj / h)))
-    for i in range(0, 20, 4):  # pontas recortadas na barra
-        capa.p(2 + i, 33, (0, 0, 0, 0)); capa.p(2 + i + 1, 33, (0, 0, 0, 0))
+def batman(t, capa, glow, pecas):
+    import skin_batman
+    skin_batman.batman(t, capa, glow, pecas, Pincel)
 
 
 PERSONAGENS = {"superman": superman, "batman": batman}
 # Capa da peça 3D (client/Pecas: fora em 0,0,40,64); as outras usam a capa comum do jogo (caixa 10x16x1).
-CAPA_3D = {"superman"}
+CAPA_3D = {"superman", "batman"}
+# Nome da camada emissiva de cada personagem (o efeito que a acende fica em assets/dcuniverse/skins/<nome>.json).
+BRILHO = {"superman": "olhos", "batman": "lentes"}
 
 
 def previa(skin, capa, destino, capa3d=False):
@@ -369,12 +254,14 @@ def main():
     a = ap.parse_args()
     pasta = Path(a.raiz).resolve() / "src/main/resources/assets/dcuniverse/textures/skin"
     for nome, desenhar in PERSONAGENS.items():
-        t, capa, glow = Tela(128, 128), Tela(128, 64), Tela(128, 128)
-        desenhar(t, capa, glow)
+        t, capa, glow, pecas = Tela(128, 128), Tela(128, 64), Tela(128, 128), Tela(64, 64)
+        desenhar(t, capa, glow, pecas)
         t.salvar(pasta / f"{nome}.png")
         capa.salvar(pasta / f"{nome}_capa.png")
         if glow.img.getbbox():
-            glow.salvar(pasta / f"{nome}_olhos.png")
+            glow.salvar(pasta / f"{nome}_{BRILHO[nome]}.png")
+        if pecas.img.getbbox():
+            pecas.salvar(pasta / f"{nome}_pecas.png")
         if a.previa:
             Path(a.previa).mkdir(parents=True, exist_ok=True)
             previa(t, capa, Path(a.previa) / f"{nome}.png", nome in CAPA_3D)

@@ -11,6 +11,46 @@ Gera em src/main/resources/assets/dcuniverse/sounds/habilidade/ (mono, para o so
 - salto_carga.ogg       carga do super-salto: vento subindo
 - salto.ogg             impulso do super-salto: pancada e o ar passando
 - ricochete.ogg         projétil batendo no aço e ricocheteando
+Batman (v0.2):
+- gancho_disparo.ogg    disparo pneumático do gancho e o cabo correndo
+- gancho_puxa.ogg       guincho do cabo puxando
+- gancho_impulso.ogg    o cabo solta e o impulso joga para o alto (pano da capa batendo)
+- batarangue_arremesso.ogg  lâmina cortando o ar ao sair da mão
+- batarangue_giro.ogg   zunido curto da lâmina girando (toca a cada 1/4 s enquanto voa)
+- batarangue_acerta.ogg lâmina batendo
+- batarangue_pega.ogg   o batarangue volta e encaixa na luva
+- choque.ogg            descarga elétrica estalando
+- batwing_chega.ogg     o jato passando e freando
+- batwing_motor.ogg     turbina do jato (laço sem emenda; o tom sobe com a velocidade)
+- batwing_tiro.ogg      rajada curta das metralhadoras
+- batwing_missil.ogg    míssil saindo do trilho e acendendo
+- batwing_furtivo.ogg   camuflagem ligando: zumbido que some
+- batwing_revela.ogg    camuflagem desligando
+- batwing_superaquece.ogg  metralhadoras superaquecidas: chiado e alarme
+- capa_abre.ogg  capa pesada abrindo em asa: estalo de tecido e lufada
+- capa_fecha.ogg        a asa recolhendo: tecido dobrando e um baque abafado
+- capa_vento.ogg        vento na capa planando: assobio do ar e o tecido tremulando (laço sem emenda)
+- capa_impulso.ogg      bater forte da capa: estalo duplo e a lufada empurrando
+- capa_arremetida.ogg   saída do mergulho: o ar rugindo na capa e subindo de tom
+- pouso_rolamento.ogg   pouso em rolamento: pés batendo, rolar no chão e o tecido arrastando
+- detetive_liga.ogg     modo detetive ligando: clique do visor, varredura eletrônica subindo e o zumbido baixo
+- detetive_desliga.ogg  modo detetive desligando: varredura descendo e o clique
+- fumaca.ogg            bomba de fumaça: estalo da cápsula e o chiado forte da fumaça saindo
+- gel_aplica.ogg        gel espirrando e grudando na parede, com o bipe de armado
+- gel_bipe.ogg          bipe curto do detonador (toca acelerando até explodir)
+- gel_detona.ogg        estouro seco do gel: estalo agudo, pancada grave e os pedaços caindo
+- contra_ataque.ogg     defesa no tempo certo: bloqueio seco, o golpe de volta e um sopro de ar
+- batmovel_motor.ogg    V8 grave e irregular com o assobio da turbina (laço; o tom sobe com as marchas)
+- batmovel_chega.ogg    o Batmóvel chegando: acelera, reduz, pneus chiam e para
+- batmoto_motor.ogg     motor mais agudo e áspero da Batmoto (laço)
+- batmoto_chega.ogg     a Batmoto chegando e freando
+- batbarco_motor.ogg    motor grave do Batbarco com a água batendo no casco (laço)
+- batbarco_emerge.ogg   o Batbarco rompendo a superfície: jorro e gotas
+- batbarco_mergulha.ogg tanques enchendo, bolhas e o som ficando abafado
+- batbarco_torpedo.ogg  ar comprimido do tubo e a hélice do torpedo zunindo debaixo d'água
+- veiculo_pneu.ogg      pneu derrapando (laço)
+- veiculo_turbo.ogg     pós-combustor acendendo
+- veiculo_atropela.ogg  pancada do veículo atingindo alguém
 
 Uso: python3 tools/arte/sons.py --raiz .  (precisa de numpy, scipy e ffmpeg)
 """
@@ -256,10 +296,517 @@ def ricochete():
     return finalizar(normalizar(eco(x, 0.6, 0.2)[: int(seg * SR)], 0.8), 0.1)
 
 
+# ---------------------------------------------------------------- Batman (v0.2)
+
+def gancho_disparo():
+    seg = 0.9
+    tiro = filtro(ruido(0.06), "bandpass", [300, 3000]) * env(int(0.06 * SR), 0.001, 0.015)
+    baque = varredura(180, 60, 0.15, 0.5) * env(int(0.15 * SR), 0.001, 0.03)
+    t = t_(0.7)
+    cabo = filtro(ruido(0.7), "bandpass", [1800, 5200]) * env(len(t), 0.01, 0.25) * (0.6 + 0.4 * np.sin(2 * np.pi * 38 * t))
+    mola = np.sin(2 * np.pi * 820 * t) * np.exp(-t / 0.08) * 0.3
+    x = misturar((0, tiro * 1.2), (0, baque * 0.8), (0.02, cabo * 0.5), (0.0, mola))
+    return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.9), 0.15)
+
+
+def gancho_puxa():
+    seg = 0.5
+    t = t_(seg)
+    guincho = np.sign(np.sin(2 * np.pi * 95 * t)) * 0.3 + np.sin(2 * np.pi * 190 * t) * 0.4
+    guincho = filtro(guincho, "lowpass", 1500) * (0.7 + 0.3 * np.sin(2 * np.pi * 12 * t))
+    roca = filtro(ruido(seg), "bandpass", [2000, 6000]) * 0.25
+    x = (guincho + roca) * env(len(t), 0.03, 0.3)
+    return finalizar(normalizar(x, 0.7), 0.1)
+
+
+def gancho_impulso():
+    seg = 1.0
+    solta = filtro(ruido(0.02), "highpass", 1500) * 1.5
+    t = t_(0.9)
+    ar = filtro(ruido(0.9), "bandpass", [300, 2400]) * env(len(t), 0.04, 0.3)
+    capa = filtro(ruido(0.9), "bandpass", [150, 900]) * np.abs(np.sin(2 * np.pi * 9 * t)) ** 3 * np.exp(-t / 0.35)
+    x = misturar((0, solta), (0.01, ar * 0.8), (0.05, capa * 0.9))
+    return finalizar(normalizar(eco(x, 0.5, 0.12)[: int(seg * SR)], 0.85), 0.2)
+
+
+def batarangue_arremesso():
+    seg = 0.55
+    t = t_(seg)
+    sopro = filtro(ruido(seg), "bandpass", [700, 4500]) * env(len(t), 0.02, 0.12)
+    lamina = varredura(3200, 1900, seg, 0.7) * env(len(t), 0.01, 0.08) * 0.25
+    x = sopro + lamina
+    return finalizar(normalizar(x, 0.8), 0.1)
+
+
+def batarangue_giro():
+    seg = 0.3
+    t = t_(seg)
+    pulso = np.abs(np.sin(2 * np.pi * 26 * t)) ** 4
+    x = filtro(ruido(seg), "bandpass", [900, 3600]) * pulso * np.sin(np.pi * t / seg)
+    return finalizar(normalizar(x, 0.7), 0.03)
+
+
+def batarangue_acerta():
+    seg = 0.5
+    batida = filtro(ruido(0.015), "bandpass", [800, 6000]) * 1.4
+    tink = sum(g * np.sin(2 * np.pi * f * t_(0.4)) * np.exp(-t_(0.4) / q)
+               for f, g, q in ((1650, 1, 0.07), (3900, 0.5, 0.04), (6100, 0.3, 0.03)))
+    soco = varredura(160, 70, 0.12, 0.5) * env(int(0.12 * SR), 0.001, 0.03)
+    x = misturar((0, batida), (0, tink * 0.5), (0, soco * 0.8))
+    return finalizar(normalizar(eco(x, 0.4, 0.15)[: int(seg * SR)], 0.85), 0.1)
+
+
+def batarangue_pega():
+    seg = 0.4
+    t = t_(0.3)
+    couro = filtro(ruido(0.3), "lowpass", 1200) * env(len(t), 0.001, 0.02)
+    clique = np.sin(2 * np.pi * 2900 * t) * np.exp(-t / 0.02) * 0.4
+    x = misturar((0, couro), (0.008, clique))
+    return finalizar(normalizar(x, 0.8), 0.1)
+
+
+def choque():
+    seg = 0.8
+    t = t_(seg)
+    estalos = np.zeros_like(t)
+    for _ in range(40):
+        i = int(RNG.random() ** 1.6 * len(t) * 0.8)
+        n = int(0.004 * SR)
+        estalos[i:i + n] += RNG.standard_normal(n) * np.exp(-np.arange(n) / (0.001 * SR)) * (1 - i / len(t))
+    zumbido = (np.sign(np.sin(2 * np.pi * 120 * t)) * 0.3 + np.sin(2 * np.pi * 240 * t) * 0.3) * env(len(t), 0.005, 0.18)
+    chiado = filtro(ruido(seg), "highpass", 3000) * env(len(t), 0.005, 0.15) * 0.4
+    x = filtro(estalos, "highpass", 600) + filtro(zumbido, "lowpass", 2500) + chiado
+    return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.85), 0.1)
+
+
+def turbina(t, base, rug=1.0):
+    """Jato: chiado de ar filtrado, o assobio da turbina e o ronco grave."""
+    ar = filtro(ruido(len(t) / SR), "bandpass", [500, 5000]) * 0.5
+    assobio = sum(g * np.sin(2 * np.pi * base * m * t) for m, g in ((1, 0.18), (1.5, 0.08), (2.02, 0.06)))
+    ronco = filtro(ruido(len(t) / SR), "lowpass", 160) * 1.6 * rug
+    return ar + assobio + ronco
+
+
+def batwing_chega():
+    seg = 3.2
+    t = t_(seg)
+    # Passagem: aproxima, passa forte (Doppler) e freia pairando.
+    perto = np.exp(-((t - 1.1) / 0.55) ** 2)
+    base = 1900 - 900 * np.clip((t - 0.9) / 0.6, 0, 1)
+    fase = np.cumsum(base) / SR
+    assobio = np.sin(2 * np.pi * fase) * 0.2 + np.sin(2 * np.pi * fase * 1.5) * 0.08
+    ar = filtro(ruido(seg), "bandpass", [400, 6000]) * 0.6
+    ronco = filtro(ruido(seg), "lowpass", 140) * 2.0
+    volume = 0.25 + 0.75 * perto + 0.3 * np.clip((t - 1.6) / 0.5, 0, 1) * np.exp(-np.maximum(t - 2.2, 0) / 0.6)
+    freio = filtro(ruido(seg), "bandpass", [200, 1200]) * np.exp(-((t - 1.8) / 0.35) ** 2) * 0.8
+    x = (assobio + ar + ronco) * volume + freio
+    x *= np.clip(t / 0.4, 0, 1)
+    return finalizar(normalizar(eco(x, 1.2, 0.2)[: int(seg * SR)], 0.9), 0.4)
+
+
+def batwing_motor():
+    seg = 3.25
+    t = t_(seg)
+    x = turbina(t, 1450) * (0.9 + 0.1 * np.sin(2 * np.pi * 0.5 * t))
+    return normalizar(laco(x, 0.25), 0.75)
+
+
+def batwing_tiro():
+    seg = 0.3
+    out = np.zeros(int(seg * SR))
+    for k in range(2):
+        i = int(k * 0.1 * SR)
+        n = int(0.09 * SR)
+        tt = np.arange(n) / SR
+        estouro = filtro(RNG.standard_normal(n), "bandpass", [200, 4000]) * np.exp(-tt / 0.012)
+        soco = np.sin(2 * np.pi * (140 - 400 * tt) * tt) * np.exp(-tt / 0.02)
+        out[i:i + n] += estouro * 1.2 + soco
+    return finalizar(normalizar(eco(out, 0.4, 0.2)[: len(out)], 0.9), 0.05)
+
+
+def batwing_missil():
+    seg = 1.6
+    trava = filtro(ruido(0.03), "bandpass", [500, 3000]) * 1.2
+    t = t_(1.5)
+    queima = filtro(ruido(1.5), "bandpass", [150, 3500]) * env(len(t), 0.06, 0.6)
+    assobio = varredura(600, 1400, 1.5, 0.5) * env(len(t), 0.1, 0.5) * 0.15
+    x = misturar((0, trava), (0.05, queima), (0.1, assobio))
+    return finalizar(normalizar(eco(x, 0.8, 0.2)[: int(seg * SR)], 0.9), 0.3)
+
+
+def batwing_furtivo():
+    seg = 1.4
+    t = t_(seg)
+    zum = np.sin(2 * np.pi * np.cumsum(420 - 300 * t / seg) / SR) * 0.4
+    brilho = np.sin(2 * np.pi * np.cumsum(1700 - 1200 * t / seg) / SR) * 0.15
+    ar = filtro(ruido(seg), "bandpass", [1500, 6000]) * 0.15
+    x = (zum + brilho + ar) * env(len(t), 0.05, 0.45)
+    return finalizar(normalizar(eco(x, 1.0, 0.3)[: int(seg * SR)], 0.8), 0.2)
+
+
+def batwing_revela():
+    seg = 1.0
+    t = t_(seg)
+    zum = np.sin(2 * np.pi * np.cumsum(140 + 380 * t / seg) / SR) * 0.4
+    brilho = np.sin(2 * np.pi * np.cumsum(600 + 1300 * t / seg) / SR) * 0.15
+    x = (zum + brilho) * np.clip(t / 0.6, 0, 1) * np.exp(-np.maximum(t - 0.6, 0) / 0.1)
+    return finalizar(normalizar(eco(x, 0.6, 0.25)[: int(seg * SR)], 0.8), 0.1)
+
+
+def batwing_superaquece():
+    seg = 1.4
+    t = t_(seg)
+    chiado = filtro(ruido(seg), "highpass", 2500) * env(len(t), 0.01, 0.5) * 0.5
+    alarme = np.sin(2 * np.pi * 980 * t) * (np.sin(2 * np.pi * 5 * t) > 0) * np.clip(1 - t / seg, 0, 1) * 0.35
+    metal = sum(g * np.sin(2 * np.pi * f * t) * np.exp(-t / q) for f, g, q in ((310, 0.4, 0.4), (743, 0.25, 0.25)))
+    x = chiado + alarme + metal
+    return finalizar(normalizar(eco(x, 0.6, 0.15)[: int(seg * SR)], 0.85), 0.2)
+
+
+def capa_abre():
+    seg = 0.75
+    t = t_(seg)
+    # estalo seco do tecido esticando, depois a lufada de ar enchendo a asa
+    estalo = filtro(ruido(0.03), "bandpass", [500, 3500]) * env(int(0.03 * SR), 0.001, 0.012) * 1.6
+    tremula = np.abs(np.sin(2 * np.pi * 14 * t)) ** 5 * np.exp(-t / 0.18)
+    tecido = filtro(ruido(seg), "bandpass", [120, 1400]) * tremula
+    lufada = filtro(ruido(seg), "bandpass", [80, 700]) * env(len(t), 0.06, 0.35)
+    x = misturar((0, tecido * 0.7), (0.04, estalo), (0.05, lufada * 0.9))
+    return finalizar(normalizar(eco(x, 0.4, 0.1)[: int(seg * SR)], 0.85), 0.15)
+
+
+def capa_fecha():
+    seg = 0.5
+    t = t_(seg)
+    tecido = filtro(ruido(seg), "bandpass", [150, 1800]) * np.abs(np.sin(2 * np.pi * 11 * t)) ** 4 * np.exp(-t / 0.12)
+    baque = filtro(ruido(0.12), "lowpass", 350) * env(int(0.12 * SR), 0.003, 0.04) * 1.4
+    x = misturar((0, tecido * 0.8), (0.12, baque))
+    return finalizar(normalizar(eco(x, 0.3, 0.08)[: int(seg * SR)], 0.75), 0.12)
+
+
+def capa_vento():
+    seg = 4.25
+    t = t_(seg)
+    # corpo do vento: ruído largo com a intensidade ondulando devagar (rajadas)
+    rajada = 0.75 + 0.25 * np.sin(2 * np.pi * t / 4.0 * 2) * np.sin(2 * np.pi * t / 4.0 * 1 + 0.7)
+    corpo = filtro(ruido(seg), "bandpass", [90, 1200]) * rajada
+    # assobio do ar passando na borda da capa (faixa estreita que desliza um pouco)
+    assobio = filtro(ruido(seg), "bandpass", [1400, 1700], 3) * (0.5 + 0.5 * np.sin(2 * np.pi * t / 4.0 * 3)) ** 2
+    # tecido tremulando: batidas rápidas e irregulares, graves
+    trem = np.abs(np.sin(2 * np.pi * 7 * t + 2 * np.sin(2 * np.pi * t / 4.0 * 5))) ** 6
+    tecido = filtro(ruido(seg), "bandpass", [100, 600]) * trem
+    x = corpo * 0.7 + assobio * 0.35 + tecido * 0.5
+    return normalizar(laco(x, 0.25), 0.7)
+
+
+def capa_impulso():
+    seg = 0.9
+    t = t_(seg)
+    estalo = filtro(ruido(0.03), "bandpass", [400, 4000]) * env(int(0.03 * SR), 0.001, 0.01) * 1.8
+    tremula = np.abs(np.sin(2 * np.pi * 16 * t)) ** 5 * np.exp(-t / 0.15)
+    tecido = filtro(ruido(seg), "bandpass", [120, 1500]) * tremula
+    empurra = filtro(ruido(seg), "bandpass", [60, 900]) * env(len(t), 0.03, 0.3)
+    grave = np.sin(2 * np.pi * np.cumsum(70 - 30 * t) / SR) * env(len(t), 0.005, 0.12)
+    x = misturar((0, estalo), (0.09, estalo * 0.8), (0.0, tecido * 0.7), (0.02, empurra), (0.0, grave * 0.6))
+    return finalizar(normalizar(eco(x, 0.5, 0.12)[: int(seg * SR)], 0.9), 0.2)
+
+
+def capa_arremetida():
+    seg = 1.4
+    t = t_(seg)
+    # o ar ruge na capa e a faixa sobe com a curva (o mergulho virando subida)
+    ruge = ruido(seg)
+    baixo = filtro(ruge, "bandpass", [80, 600]) * env(len(t), 0.05, 0.6)
+    alto = filtro(ruge, "bandpass", [700, 2600]) * env(len(t), 0.25, 0.45)
+    sobe = varredura(220, 520, seg, 0.7) * env(len(t), 0.2, 0.5) * 0.25
+    tremula = np.abs(np.sin(2 * np.pi * (10 + 8 * t) * t)) ** 5 * np.exp(-t / 0.5)
+    tecido = filtro(ruido(seg), "bandpass", [120, 1200]) * tremula
+    x = baixo * 0.9 + alto * 0.5 + sobe + tecido * 0.6
+    return finalizar(normalizar(eco(x, 0.7, 0.15)[: int(seg * SR)], 0.9), 0.3)
+
+
+def pouso_rolamento():
+    seg = 1.0
+    t = t_(seg)
+    def batida(dur, corte, ganho):
+        return filtro(ruido(dur), "lowpass", corte) * env(int(dur * SR), 0.002, dur / 4) * ganho
+    pes = misturar((0, batida(0.1, 500, 1.4)), (0.06, batida(0.1, 600, 1.0)))
+    rola = filtro(ruido(0.5), "bandpass", [150, 2500]) * np.abs(np.sin(2 * np.pi * 6 * t_(0.5))) ** 2 \
+        * env(int(0.5 * SR), 0.05, 0.2)
+    ombro = batida(0.12, 400, 1.1)
+    arrasta = filtro(ruido(0.5), "bandpass", [300, 3000]) * env(int(0.5 * SR), 0.05, 0.15)
+    x = misturar((0, pes), (0.1, rola * 0.7), (0.2, ombro), (0.35, arrasta * 0.5))
+    return finalizar(normalizar(eco(x, 0.4, 0.1)[: int(seg * SR)], 0.85), 0.2)
+
+
+def detetive_liga():
+    seg = 1.1
+    t = t_(seg)
+    clique = filtro(ruido(0.012), "bandpass", [1500, 7000]) * env(int(0.012 * SR), 0.0005, 0.003) * 1.5
+    sobe = varredura(500, 2600, 0.45, 0.6) * env(int(0.45 * SR), 0.01, 0.25) * 0.35
+    bip = sum(np.sin(2 * np.pi * f * t_(0.12)) * env(int(0.12 * SR), 0.002, 0.05) for f in (2350, 3520)) * 0.25
+    zum = (np.sin(2 * np.pi * 110 * t) + 0.4 * np.sin(2 * np.pi * 220 * t)) * np.clip(t / 0.2, 0, 1) * np.exp(-t / 0.5) * 0.3
+    x = misturar((0, clique), (0.03, sobe), (0.42, bip), (0.05, zum))
+    return finalizar(normalizar(eco(x, 0.9, 0.25)[: int(seg * SR)], 0.8), 0.2)
+
+
+def detetive_desliga():
+    seg = 0.7
+    desce = varredura(2200, 400, 0.4, 0.8) * env(int(0.4 * SR), 0.005, 0.18) * 0.35
+    clique = filtro(ruido(0.012), "bandpass", [1200, 6000]) * env(int(0.012 * SR), 0.0005, 0.003) * 1.3
+    x = misturar((0, desce), (0.32, clique))
+    return finalizar(normalizar(eco(x, 0.6, 0.2)[: int(seg * SR)], 0.75), 0.15)
+
+
+def fumaca():
+    seg = 2.4
+    t = t_(seg)
+    estalo = filtro(ruido(0.02), "bandpass", [300, 5000]) * env(int(0.02 * SR), 0.0005, 0.006) * 2.0
+    baque = varredura(120, 50, 0.15, 0.5) * env(int(0.15 * SR), 0.001, 0.05)
+    # o gás saindo: chiado forte que vai abafando enquanto a nuvem enche
+    corte = 6500 - 4500 * np.clip(t / seg, 0, 1)
+    chiado = ruido(seg)
+    chiado = filtro(chiado, "highpass", 400) * 0.6 + filtro(chiado, "lowpass", 2200) * 0.5 * (corte / 6500)
+    chiado *= env(len(t), 0.03, 0.8)
+    corpo = filtro(ruido(seg), "lowpass", 300) * env(len(t), 0.08, 0.7) * 1.2
+    x = misturar((0, estalo), (0, baque * 0.9), (0.02, chiado), (0.04, corpo))
+    return finalizar(normalizar(eco(x, 1.0, 0.25)[: int(seg * SR)], 0.85), 0.5)
+
+
+def gel_aplica():
+    seg = 0.7
+    t = t_(0.35)
+    # espirro úmido: ruído grave com borbulhas
+    espirro = filtro(ruido(0.35), "bandpass", [150, 2500]) * env(len(t), 0.004, 0.06)
+    bolhas = sum(np.sin(2 * np.pi * (300 + 900 * RNG.random()) * t_(0.05)) * env(int(0.05 * SR), 0.001, 0.012)
+                 for _ in range(1))
+    gruda = filtro(ruido(0.08), "lowpass", 600) * env(int(0.08 * SR), 0.002, 0.02) * 1.2
+    bip = np.sin(2 * np.pi * 1760 * t_(0.07)) * env(int(0.07 * SR), 0.002, 0.03) * 0.35
+    x = misturar((0, espirro), (0.03, bolhas * 0.5), (0.08, bolhas * 0.4), (0.06, gruda), (0.3, bip))
+    return finalizar(normalizar(eco(x, 0.35, 0.12)[: int(seg * SR)], 0.8), 0.12)
+
+
+def gel_bipe():
+    seg = 0.14
+    t = t_(seg)
+    x = (np.sin(2 * np.pi * 2093 * t) + 0.3 * np.sin(2 * np.pi * 4186 * t)) * env(len(t), 0.002, 0.04)
+    return finalizar(normalizar(x, 0.7), 0.03)
+
+
+def gel_detona():
+    seg = 2.2
+    t = t_(seg)
+    estalo = filtro(ruido(0.02), "highpass", 1500) * env(int(0.02 * SR), 0.0003, 0.005) * 2.2
+    pancada = filtro(ruido(0.6), "lowpass", 220) * env(int(0.6 * SR), 0.002, 0.18) * 2.0
+    soco = varredura(90, 35, 0.4, 0.4) * env(int(0.4 * SR), 0.001, 0.12) * 1.2
+    ronco = filtro(ruido(seg), "lowpass", 500) * env(len(t), 0.02, 0.5) * 0.8
+    pedacos = np.zeros(len(t))
+    for _ in range(26):
+        i = int((0.15 + RNG.random() ** 1.3 * 1.5) * SR)
+        n = int(0.03 * SR)
+        if i + n < len(t):
+            pedacos[i:i + n] += filtro(RNG.standard_normal(n), "bandpass", [400, 3500]) * np.exp(-np.arange(n) / (0.006 * SR)) \
+                * (0.4 + 0.6 * RNG.random()) * (1 - i / len(t))
+    x = misturar((0, estalo), (0, pancada), (0, soco), (0.01, ronco), (0, pedacos * 0.5))
+    return finalizar(normalizar(eco(x, 1.4, 0.3)[: int(seg * SR)], 0.92), 0.4)
+
+
+def contra_ataque():
+    seg = 0.8
+    bloqueio = filtro(ruido(0.04), "bandpass", [600, 5000]) * env(int(0.04 * SR), 0.0005, 0.01) * 1.6
+    couro = filtro(ruido(0.1), "lowpass", 900) * env(int(0.1 * SR), 0.001, 0.025) * 1.2
+    sopro = filtro(ruido(0.3), "bandpass", [300, 2500]) * env(int(0.3 * SR), 0.03, 0.08) * 0.6
+    golpe = filtro(ruido(0.15), "lowpass", 400) * env(int(0.15 * SR), 0.001, 0.04) * 1.8
+    grave = varredura(110, 55, 0.2, 0.5) * env(int(0.2 * SR), 0.001, 0.06)
+    x = misturar((0, bloqueio), (0, couro), (0.06, sopro), (0.14, golpe), (0.14, grave))
+    return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.9), 0.15)
+
+
+def motor_pistao(t, disparo, irregular=0.25, brilho=1800, cilindros=8):
+    """Motor a pistão: trem de explosões na frequência de disparo, cada cilindro com força um pouco diferente
+    (o "ronco irregular" de V8), filtrado como escapamento."""
+    fase = np.cumsum(np.full(len(t), disparo)) / SR
+    k = np.floor(fase).astype(int)
+    frac = fase - k
+    forca = 1 + irregular * (RNG.random(cilindros) * 2 - 1)
+    pulso = np.exp(-frac / 0.18) * forca[k % cilindros]
+    pulso -= np.mean(pulso)
+    escape = filtro(pulso, "lowpass", brilho) + filtro(pulso, "bandpass", [brilho * 0.8, brilho * 2.5]) * 0.15
+    grave = np.sin(2 * np.pi * fase / 2) * 0.35
+    ar = filtro(ruido(len(t) / SR), "bandpass", [300, 2500]) * 0.06
+    return escape + grave + ar
+
+
+def batmovel_motor():
+    seg = 2.0
+    t = t_(seg)
+    # V8 grave e irregular mais o assobio da turbina traseira.
+    x = motor_pistao(t, 46, 0.3, 900) + turbina(t, 2100, 0.4) * 0.18
+    return normalizar(laco(x, 0.2), 0.8)
+
+
+def batmovel_chega():
+    seg = 3.0
+    t = t_(seg)
+    # Vem acelerando de longe, reduz a marcha, pneus chiam e para.
+    rpm = 30 + 40 * np.clip(t / 1.4, 0, 1) - 30 * np.clip((t - 1.6) / 0.8, 0, 1)
+    fase = np.cumsum(rpm) / SR
+    k = np.floor(fase).astype(int)
+    forca = 1 + 0.3 * (RNG.random(8) * 2 - 1)
+    pulso = np.exp(-(fase - k) / 0.18) * forca[k % 8]
+    motor = filtro(pulso - np.mean(pulso), "lowpass", 1000) * 1.4
+    perto = 0.25 + 0.75 * np.clip(t / 1.5, 0, 1)
+    chiado = filtro(ruido(seg), "bandpass", [1800, 4200]) * np.exp(-((t - 1.9) / 0.3) ** 2) * 0.6
+    chiado *= 1 + 0.4 * np.sin(2 * np.pi * 30 * t)
+    x = motor * perto * np.exp(-np.maximum(t - 2.4, 0) / 0.3) + chiado
+    return finalizar(normalizar(eco(x, 0.9, 0.18)[: int(seg * SR)], 0.9), 0.3)
+
+
+def batmoto_motor():
+    seg = 2.0
+    t = t_(seg)
+    # Duas rodas: motor mais agudo e áspero, de poucos cilindros.
+    x = motor_pistao(t, 68, 0.18, 1600, 2) + turbina(t, 2600, 0.2) * 0.1
+    return normalizar(laco(x, 0.2), 0.8)
+
+
+def batmoto_chega():
+    seg = 2.4
+    t = t_(seg)
+    rpm = 50 + 60 * np.clip(t / 1.0, 0, 1) - 50 * np.clip((t - 1.2) / 0.6, 0, 1)
+    fase = np.cumsum(rpm) / SR
+    k = np.floor(fase).astype(int)
+    pulso = np.exp(-(fase - k) / 0.15) * (1 + 0.2 * (k % 2))
+    motor = filtro(pulso - np.mean(pulso), "lowpass", 1700) * 1.2
+    perto = 0.25 + 0.75 * np.clip(t / 1.1, 0, 1)
+    chiado = filtro(ruido(seg), "bandpass", [2000, 4500]) * np.exp(-((t - 1.45) / 0.22) ** 2) * 0.45
+    x = motor * perto * np.exp(-np.maximum(t - 1.9, 0) / 0.25) + chiado
+    return finalizar(normalizar(eco(x, 0.8, 0.18)[: int(seg * SR)], 0.9), 0.3)
+
+
+def agua(seg, claro=2500):
+    """Água correndo: ruído com bolhas e espirros."""
+    t = t_(seg)
+    base = filtro(ruido(seg), "bandpass", [150, claro]) * (0.7 + 0.3 * np.sin(2 * np.pi * 0.7 * t + 1))
+    bolhas = np.zeros(len(t))
+    for _ in range(int(seg * 40)):
+        i = int(RNG.random() * (len(t) - 2000))
+        n = int((0.01 + 0.02 * RNG.random()) * SR)
+        f = 400 + 1400 * RNG.random()
+        tt = np.arange(n) / SR
+        bolhas[i:i + n] += np.sin(2 * np.pi * (f + f * 3 * tt) * tt) * np.exp(-tt / 0.006) * 0.25
+    return base + bolhas
+
+
+def batbarco_motor():
+    seg = 2.4
+    t = t_(seg)
+    # Motor de popa grave mais a água batendo no casco.
+    x = motor_pistao(t, 38, 0.2, 700, 6) * 0.9 + agua(seg) * 0.5 + turbina(t, 1700, 0.3) * 0.1
+    return normalizar(laco(x, 0.3), 0.8)
+
+
+def batbarco_emerge():
+    seg = 2.0
+    t = t_(seg)
+    # Rompe a superfície: a água escorrendo, o jorro e as gotas caindo.
+    jorro = filtro(ruido(seg), "bandpass", [200, 5000]) * env(len(t), 0.08, 0.35) * 1.3
+    escorre = agua(seg, 4000) * np.clip(t / 0.3, 0, 1) * np.exp(-t / 0.9) * 0.8
+    gotas = np.zeros(len(t))
+    for _ in range(30):
+        i = int((0.3 + RNG.random() * 1.4) * SR)
+        n = int(0.015 * SR)
+        if i + n < len(t):
+            tt = np.arange(n) / SR
+            f = 900 + 1800 * RNG.random()
+            gotas[i:i + n] += np.sin(2 * np.pi * (f + f * 4 * tt) * tt) * np.exp(-tt / 0.004) * 0.3
+    grave = varredura(70, 40, 0.6, 0.5) * env(int(0.6 * SR), 0.03, 0.2) * 0.7
+    x = misturar((0, jorro), (0, escorre), (0, gotas), (0, grave))
+    return finalizar(normalizar(eco(x, 1.0, 0.25)[: int(seg * SR)], 0.9), 0.3)
+
+
+def batbarco_mergulha():
+    seg = 2.0
+    t = t_(seg)
+    # Afunda: tanques enchendo (borbulhar descendo) e o som ficando abafado.
+    bolhas = np.zeros(len(t))
+    for _ in range(90):
+        i = int(RNG.random() ** 0.8 * 1.5 * SR)
+        n = int((0.015 + 0.03 * RNG.random()) * SR)
+        if i + n < len(t):
+            tt = np.arange(n) / SR
+            f = (700 + 900 * RNG.random()) * (1 - 0.5 * i / len(t))
+            bolhas[i:i + n] += np.sin(2 * np.pi * (f + f * 2 * tt) * tt) * np.exp(-tt / 0.01) * 0.3
+    corte = 3000 - 2500 * np.clip(t / 1.2, 0, 1)
+    agua1 = filtro(ruido(seg), "lowpass", 800) * env(len(t), 0.05, 0.6)
+    agua2 = filtro(ruido(seg), "bandpass", [800, 3000]) * np.clip(1 - t / 0.8, 0, 1) * 0.5
+    zum = np.sin(2 * np.pi * 55 * t) * env(len(t), 0.3, 0.8) * 0.3
+    x = bolhas + agua1 + agua2 * (corte / 3000) + zum
+    return finalizar(normalizar(eco(x, 1.4, 0.35)[: int(seg * SR)], 0.85), 0.4)
+
+
+def batbarco_torpedo():
+    seg = 1.8
+    t = t_(seg)
+    # Ar comprimido do tubo, o mergulho e a hélice zunindo para longe debaixo d'água.
+    tubo = filtro(ruido(0.3), "bandpass", [300, 3000]) * env(int(0.3 * SR), 0.002, 0.07) * 1.5
+    baque = varredura(120, 50, 0.3, 0.5) * env(int(0.3 * SR), 0.001, 0.08)
+    helice = np.sin(2 * np.pi * np.cumsum(260 - 80 * t / seg) / SR) * (0.6 + 0.4 * np.sin(2 * np.pi * 22 * t))
+    helice = filtro(helice, "lowpass", 900) * np.clip((t - 0.15) / 0.2, 0, 1) * np.exp(-t / 0.7) * 0.5
+    bolhas = filtro(ruido(seg), "lowpass", 1200) * env(len(t), 0.1, 0.5) * 0.5
+    x = misturar((0, tubo), (0, baque), (0, helice), (0, bolhas))
+    return finalizar(normalizar(eco(x, 1.2, 0.3)[: int(seg * SR)], 0.9), 0.3)
+
+
+def veiculo_pneu():
+    seg = 1.5
+    t = t_(seg)
+    # Pneu derrapando: chiado com o tom vibrando (borracha agarrando e soltando).
+    f = 1100 + 120 * np.sin(2 * np.pi * 7.3 * t) + 60 * np.sin(2 * np.pi * 13.1 * t)
+    tom = np.sin(2 * np.pi * np.cumsum(f) / SR) * 0.35 + np.sin(2 * np.pi * np.cumsum(f * 2.03) / SR) * 0.12
+    chiado = filtro(ruido(seg), "bandpass", [1200, 4500]) * 0.5
+    x = (tom + chiado) * (0.8 + 0.2 * np.abs(np.sin(2 * np.pi * 31 * t)))
+    return normalizar(laco(x, 0.25), 0.7)
+
+
+def veiculo_turbo():
+    seg = 1.6
+    t = t_(seg)
+    # Pós-combustor acendendo: estouro, rugido e o assobio subindo.
+    estouro = filtro(ruido(0.15), "lowpass", 600) * env(int(0.15 * SR), 0.001, 0.04) * 2
+    rugido = filtro(ruido(seg), "bandpass", [80, 2200]) * env(len(t), 0.05, 0.6) * 1.2
+    assobio = varredura(900, 2600, seg, 0.6) * env(len(t), 0.15, 0.6) * 0.2
+    x = misturar((0, estouro), (0, rugido), (0, assobio))
+    return finalizar(normalizar(eco(x, 0.9, 0.2)[: int(seg * SR)], 0.9), 0.3)
+
+
+def veiculo_atropela():
+    seg = 0.7
+    pancada = filtro(ruido(0.3), "lowpass", 350) * env(int(0.3 * SR), 0.001, 0.06) * 2
+    soco = varredura(95, 40, 0.25, 0.5) * env(int(0.25 * SR), 0.001, 0.07) * 1.2
+    lata = filtro(ruido(0.2), "bandpass", [900, 4000]) * env(int(0.2 * SR), 0.001, 0.03) * 0.7
+    x = misturar((0, pancada), (0, soco), (0.005, lata))
+    return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.9), 0.1)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
     "salto": salto, "ricochete": ricochete,
+    "gancho_disparo": gancho_disparo, "gancho_puxa": gancho_puxa, "gancho_impulso": gancho_impulso,
+    "batarangue_arremesso": batarangue_arremesso, "batarangue_giro": batarangue_giro,
+    "batarangue_acerta": batarangue_acerta, "batarangue_pega": batarangue_pega, "choque": choque,
+    "batwing_chega": batwing_chega, "batwing_motor": batwing_motor, "batwing_tiro": batwing_tiro,
+    "batwing_missil": batwing_missil, "batwing_furtivo": batwing_furtivo, "batwing_revela": batwing_revela,
+    "batwing_superaquece": batwing_superaquece, "capa_abre": capa_abre,
+    "capa_fecha": capa_fecha, "capa_vento": capa_vento, "capa_impulso": capa_impulso,
+    "capa_arremetida": capa_arremetida, "pouso_rolamento": pouso_rolamento,
+    "detetive_liga": detetive_liga, "detetive_desliga": detetive_desliga, "fumaca": fumaca,
+    "gel_aplica": gel_aplica, "gel_bipe": gel_bipe, "gel_detona": gel_detona, "contra_ataque": contra_ataque,
+    "batmovel_motor": batmovel_motor, "batmovel_chega": batmovel_chega, "batmoto_motor": batmoto_motor,
+    "batmoto_chega": batmoto_chega, "batbarco_motor": batbarco_motor, "batbarco_emerge": batbarco_emerge,
+    "batbarco_mergulha": batbarco_mergulha, "batbarco_torpedo": batbarco_torpedo, "veiculo_pneu": veiculo_pneu,
+    "veiculo_turbo": veiculo_turbo, "veiculo_atropela": veiculo_atropela,
 }
 
 

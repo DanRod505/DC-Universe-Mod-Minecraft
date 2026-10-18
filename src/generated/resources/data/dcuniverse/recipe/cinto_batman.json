@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "dcuniverse:componente_tecnologico",
+    "B": "dcuniverse:tecido_tatico",
+    "C": "dcuniverse:batarangue_simples",
+    "N": "dcuniverse:nucleo_meta_1"
+  },
+  "pattern": [
+    "BCB",
+    "ANA",
+    "BAB"
+  ],
+  "result": {
+    "id": "dcuniverse:cinto_batman"
+  }
+}

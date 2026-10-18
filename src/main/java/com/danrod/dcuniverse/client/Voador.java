@@ -1,5 +1,6 @@
 package com.danrod.dcuniverse.client;
 
+import com.danrod.dcuniverse.ability.passive.Planar;
 import com.danrod.dcuniverse.ability.passive.Voo;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.core.Rede;
@@ -69,7 +70,9 @@ public final class Voador {
     /** Velocidade atual do jogador local (blocos/tick), null quando não está voando. */
     private static Vec3 vel;
     private static boolean armado = true;
-    private static int tremor, ticks;
+    private static int tremor;
+    /** Ticks do cliente (conta sempre, mesmo sem voar; o toque duplo do planar também usa). */
+    static int ticks;
     private static float soco;
     /** Clarão branco na tela ao quebrar a barreira do som (1 a 0). */
     private static float clarao;
@@ -91,7 +94,7 @@ public final class Voador {
     }
 
     /** Detecta o toque duplo de uma tecla. */
-    private static final class Toque {
+    static final class Toque {
         boolean antes;
         int ultimo = -100;
 
@@ -201,7 +204,7 @@ public final class Voador {
             tremor = 14;
             soco = 0.3f;
             clarao = 1f;
-            TrilhaVoo.estrondo(mc);
+            Trilha.VOO.impacto(mc);
             Rede.CANAL.send(new Rede.Estrondo(), PacketDistributor.SERVER.noArg());
         }
     }
@@ -278,6 +281,10 @@ public final class Voador {
         soco *= 0.85f;
         clarao *= 0.8f;
         for (Rede.ManobraVista m; (m = EstadoCliente.MANOBRAS.poll()) != null; ) {
+            if (m.tipo() >= Planar.GIRO_ESQUERDA) {
+                Planador.manobraVista(level, m);
+                continue;
+            }
             Pose ps = POSES.get(m.entidade());
             if (ps != null) {
                 ps.manobra = m.tipo();
@@ -314,7 +321,7 @@ public final class Voador {
         Cauda.tick(level, POSES.keySet());
         LocalPlayer p = mc.player;
         boolean voa = p != null && voando(p) && vel != null;
-        TrilhaVoo.tick(mc, voa, voa ? vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo()) : 0);
+        Trilha.VOO.tick(mc, voa ? trilha(vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo())) : null);
         if (p != null && vel != null && (som == null || som.isStopped()) && vel.length() * 20 > 6) {
             som = new SomVento(p);
             mc.getSoundManager().play(som);
@@ -434,6 +441,16 @@ public final class Voador {
         }
     }
 
+    /** Volume de cada camada da trilha pela velocidade (fração da máxima). */
+    private static float[] trilha(double frac) {
+        return new float[] {
+            1f - 0.35f * Trilha.suave(0.6, 1.0, frac),
+            // No cruzeiro o piano entra baixinho; ele só cresce de vez junto com o boost.
+            0.6f * Trilha.suave(0.08, 0.26, frac) + 0.4f * Trilha.suave(0.4, 0.66, frac),
+            Trilha.suave(0.4, 0.66, frac),
+            Trilha.suave(0.74, 0.93, frac)};
+    }
+
     private static float suave(float t) {
         return t * t * (3 - 2 * t);
     }
@@ -448,10 +465,18 @@ public final class Voador {
             // Clarão ao quebrar a barreira do som.
             g.fill(0, 0, g.guiWidth(), g.guiHeight(), (Math.round(clarao * 110) << 24) | 0xFFFFFF);
         }
-        if (vel == null || mc.player == null || mc.gui.hud.isHidden() || !mc.options.getCameraType().isFirstPerson()) return;
+        if (vel == null) {
+            linhas(g, Planador.forcaLinhas());
+            return;
+        }
         double frac = vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo());
-        float forca = (float) Mth.clamp((frac - 0.45) / 0.55, 0, 1.2);
-        if (forca <= 0) return;
+        linhas(g, (float) Mth.clamp((frac - 0.45) / 0.55, 0, 1.2));
+    }
+
+    /** As linhas de velocidade com a força dada (0 a 1,2), só em primeira pessoa; o planar usa as mesmas. */
+    static void linhas(GuiGraphicsExtractor g, float forca) {
+        Minecraft mc = Minecraft.getInstance();
+        if (forca <= 0 || mc.player == null || mc.gui.hud.isHidden() || !mc.options.getCameraType().isFirstPerson()) return;
         int w = g.guiWidth(), h = g.guiHeight();
         float cx = w / 2f, cy = h / 2f;
         float raio = (float) Math.sqrt(cx * cx + cy * cy);
@@ -510,7 +535,7 @@ public final class Voador {
         manobra = -1;
         POSES.clear();
         Cauda.limpar();
-        TrilhaVoo.limpar();
+        Trilha.VOO.limpar();
         clarao = 0;
         if (som != null) som.parar();
         som = null;

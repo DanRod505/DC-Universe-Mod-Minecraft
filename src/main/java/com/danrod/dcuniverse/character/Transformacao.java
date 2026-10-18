@@ -88,9 +88,13 @@ public final class Transformacao {
         EstadoJogador estado = EstadoJogador.de(player);
         Personagem p = estado.personagem();
         Passivas.aoDestransformar(player, p);
+        com.danrod.dcuniverse.ability.active.Gancho.aoDestransformar(player);
+        com.danrod.dcuniverse.ability.active.Veiculo.aoDestransformar(player);
         DemoHud.parar(player);
+        com.danrod.dcuniverse.ability.active.Detetive.definir(player, false, null);
         Traje.remover(player);
         Atributos.remover(player);
+        estado.setPlanar(0);
         estado.limparTransformacao();
         // Destransformar no ar não mata de queda: desce planando devagar (decisão 6).
         if (player.isAlive()) QuedaAmortecida.iniciarSeNoAr(player);

@@ -80,7 +80,7 @@ public final class Skins {
         CACHE.clear();
     }
 
-    static PlayerSkin skinDe(int entidade) {
+    public static PlayerSkin skinDe(int entidade) {
         var a = EstadoCliente.APARENCIAS.get(entidade);
         return a == null ? null : skinDoPersonagem(a.personagem());
     }

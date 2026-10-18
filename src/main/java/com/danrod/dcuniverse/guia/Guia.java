@@ -24,7 +24,10 @@ import java.util.List;
  */
 public final class Guia {
     /** Tarefas de Primeiros Passos, na ordem do livro. Cada etapa nova acrescenta as suas. */
-    public static final List<String> TAREFAS = List.of("transformar", "sol", "radial", "habilidade", "voar", "estrondo", "manobra", "amortecida", "destransformar");
+    public static final List<String> TAREFAS = List.of("transformar", "sol", "radial", "habilidade", "voar", "estrondo", "manobra", "amortecida", "destransformar",
+        "gancho", "batarangue", "batwing", "planar", "manobra_planar",
+        "detetive", "fumaca", "gel", "gel_detonar", "contra_ataque", "furtivo",
+        "capa_planador", "visor_tatico", "batcomputador", "cinto", "garagem");
     /** Segundos recarregando ao sol para ganhar o visto de "sol". */
     public static final int SEGUNDOS_SOL = 5;
 

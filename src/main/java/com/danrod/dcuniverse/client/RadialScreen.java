@@ -148,9 +148,10 @@ public final class RadialScreen extends Screen {
             String seg = Integer.toString((rest + 19) / 20);
             g.text(font, seg, x - font.width(seg) / 2 + 1, y - 4, 0xFFFFFFFF, true);
         }
-        // Custo embaixo do nó.
-        String custo = h.hold() ? fmt(h.custo()) + "/s" : fmt(h.custo());
-        int cor = !s.esgotado() && EstadoCliente.atual.energia() >= h.custo() ? 0xFFB8D8FF : 0xFFFF8A7A;
+        // Custo embaixo do nó (gadget: as cargas).
+        String custo = h.cargas() >= 0 ? h.cargas() + "/" + h.cargasMax() : h.hold() ? fmt(h.custo()) + "/s" : fmt(h.custo());
+        int cor = h.cargas() >= 0 ? (h.cargas() > 0 ? 0xFFFFE08A : 0xFFFF8A7A)
+            : !s.esgotado() && EstadoCliente.atual.energia() >= h.custo() ? 0xFFB8D8FF : 0xFFFF8A7A;
         g.text(font, custo, x - font.width(custo) / 2, y + NO / 2 + 2, cor, true);
     }
 
@@ -184,8 +185,9 @@ public final class RadialScreen extends Screen {
         Rede.HabInfo h = habs.get(i);
         Component nome = Component.translatable("habilidade.dcuniverse." + h.id()).withStyle(ChatFormatting.BOLD);
         linha(g, nome, cx, cy - 22, h.suprema() ? 0xFFFFD84A : 0xFFFFFFFF);
-        Component custo = Component.translatable(h.hold() ? "dcuniverse.radial.custo_seg" : "dcuniverse.radial.custo", fmt(h.custo()));
-        linha(g, custo, cx, cy - 9, 0xFFB8D8FF);
+        Component custo = h.cargas() >= 0 ? Component.translatable("dcuniverse.radial.cargas", h.cargas(), h.cargasMax())
+            : Component.translatable(h.hold() ? "dcuniverse.radial.custo_seg" : "dcuniverse.radial.custo", fmt(h.custo()));
+        linha(g, custo, cx, cy - 9, h.cargas() >= 0 ? 0xFFFFE08A : 0xFFB8D8FF);
         linha(g, Component.translatable("dcuniverse.radial.recarga", fmt(h.recargaTotal() / 20f)), cx, cy + 1, 0xFFB8C0D0);
         Component estado;
         int cor;
@@ -193,6 +195,9 @@ public final class RadialScreen extends Screen {
         if (rest > 0) {
             estado = Component.translatable("dcuniverse.radial.em_recarga", (rest + 19) / 20);
             cor = 0xFFB8C0D0;
+        } else if (h.cargas() == 0) {
+            estado = Component.translatable("dcuniverse.radial.sem_cargas", (Hud.faltaCarga(h) + 19) / 20);
+            cor = 0xFFFF8A7A;
         } else if (!Hud.pronta(s, h)) {
             estado = Component.translatable("dcuniverse.radial.sem_energia");
             cor = 0xFFFF8A7A;

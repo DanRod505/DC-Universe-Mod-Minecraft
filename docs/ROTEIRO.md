@@ -113,11 +113,11 @@ O Superman 100% completo: skin final, todas as habilidades do menu radial, a sup
 
 **Personagem:** Batman (Bruce Wayne)
 
-O Batman 100% completo, com gadgets, gancho, planador e o Batwing como suprema.
+O Batman 100% completo, com gadgets, gancho, planador e quatro veículos como suprema (Batwing, Batmóvel, Batmoto e Batbarco), escolhidos na Garagem do Batcomputador.
 
 **Etapas:**
 
-1. Sistemas: Tipo grapple (gancho) e arremessáveis; Gadgets com munição e recarga tecnológica; Veículo como suprema (Batwing)
+1. Sistemas: Tipo grapple (gancho) e arremessáveis; Gadgets com munição e recarga tecnológica; Veículo como suprema (Batwing, Batmóvel, Batmoto e Batbarco)
 2. Skin e modelo final de Batman (Bruce Wayne)
 3. Habilidades do menu radial e suprema, com efeitos e sons
 4. Lote de itens (11)
@@ -126,7 +126,7 @@ O Batman 100% completo, com gadgets, gancho, planador e o Batwing como suprema.
 
 - Tipo grapple (gancho) e arremessáveis
 - Gadgets com munição e recarga tecnológica
-- Veículo como suprema (Batwing)
+- Veículo como suprema (Batwing, Batmóvel, Batmoto e Batbarco)
 
 **Reaproveita:**
 

@@ -28,9 +28,20 @@ public final class EstadoCliente {
     /** Efeitos pontuais no mundo que o cliente ainda vai começar a desenhar. */
     public static final java.util.Queue<Rede.Efeito> EFEITOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
 
+    /** Cabos de gancho que mudaram e o cliente ainda vai aplicar (client/Gancheador). */
+    public static final java.util.Queue<Rede.GanchoVisto> GANCHOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
+
+    /** Abre ou atualiza a tela do Batcomputador (o cliente troca por client/BatcomputadorScreen::receber). */
+    public static volatile java.util.function.Consumer<Rede.BatAbrir> batcomputador = m -> {};
+
     private EstadoCliente() {}
 
+    /** Estado da capa de quem plana sem estar transformado (Capa Planadora), por id da entidade. */
+    public static final Map<Integer, Integer> PLANAR_SEM_HEROI = new ConcurrentHashMap<>();
+
     public static void aparencia(Rede.Aparencia a) {
+        if (a.personagem().isEmpty() && a.planar() != 0) PLANAR_SEM_HEROI.put(a.entidade(), a.planar());
+        else PLANAR_SEM_HEROI.remove(a.entidade());
         Rede.Aparencia antes = a.personagem().isEmpty() ? APARENCIAS.remove(a.entidade()) : APARENCIAS.put(a.entidade(), a);
         if (!a.personagem().isEmpty() && (antes == null || !antes.personagem().equals(a.personagem()))) TRANSFORMOU.put(a.entidade(), a);
     }
@@ -88,6 +99,7 @@ public final class EstadoCliente {
         APARENCIAS.clear();
         TRANSFORMOU.clear();
         MANOBRAS.clear();
+        GANCHOS.clear();
         EFEITOS.clear();
     }
 }

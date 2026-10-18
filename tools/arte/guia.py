@@ -167,6 +167,56 @@ ICONES = {
               "oooooooooooo",
               "............",
               "............"],
+    # Filtros do índice de personagens: vilão (caveira), anti-herói (máscara), ajudante (estrela)
+    "vilao": ["...oooooo...",
+              "..o++++++o..",
+              ".o+######+o.",
+              "o+########+o",
+              "o#oo####oo#o",
+              "o#ooo##ooo#o",
+              "o##oo##oo##o",
+              ".o####o###o.",
+              "..oo#####oo.",
+              "...o#o#o#o..",
+              "...o#o#o#o..",
+              "....ooooo..."],
+    "anti": ["............",
+             "............",
+             ".oo......oo.",
+             "o++oo..oo++o",
+             "o+###oo###+o",
+             "o#oo####oo#o",
+             "o#ooo##ooo#o",
+             "o##oo##oo##o",
+             ".o###oo###o.",
+             "..ooo..ooo..",
+             "............",
+             "............"],
+    "ajudante": [".....oo.....",
+                 ".....++.....",
+                 "....o++o....",
+                 "oooo#++#oooo",
+                 "o+++++++###o",
+                 ".o#+++++##o.",
+                 "..o#++++#o..",
+                 "..o#+##+#o..",
+                 ".o#+#oo#+#o.",
+                 ".o##o..o##o.",
+                 "oo#o....o#oo",
+                 "ooo......ooo"],
+    # Sumário / índice: lista com marcadores
+    "lista": ["............",
+              "oo.ooooooooo",
+              "++.+++++++++",
+              "##.#########",
+              "............",
+              "oo.ooooooooo",
+              "++.+++++++++",
+              "##.#########",
+              "............",
+              "oo.ooooooooo",
+              "++.+++++++++",
+              "##.#########"],
 }
 
 
@@ -286,6 +336,10 @@ def main():
     marcador(t, 360, 0, verde, False)
     marcador(t, 360, 24, verde, True)
     icone(t, 336, 32, "itens", hexa("#E8C88A"))
+    icone(t, 336, 48, "vilao", hexa("#9A5BC4"))
+    icone(t, 336, 64, "anti", hexa("#C2463E"))
+    icone(t, 336, 80, "ajudante", hexa("#4FA65A"))
+    icone(t, 336, 96, "lista", hexa("#B0841E"))
     encaixe(t, 304, 140, False)
     encaixe(t, 324, 140, True)
     seta(t, 344, 141)

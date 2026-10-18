@@ -12,13 +12,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /** Tipos de habilidade ativa disponíveis para os JSONs (seção 2.8). O dcuVerify lê os nomes daqui. */
 public final class TiposHabilidade {
-    public static final Map<String, TipoHabilidade> TIPOS = new ConcurrentHashMap<>(Map.of(
-        "projectile", new Projetil(),
-        "projectile_beam", new Raio(),
-        "area_cone", new Cone(),
-        "area_blast", new Onda(),
-        "vision", new Visao(),
-        "structure", new Fortaleza()
+    public static final Map<String, TipoHabilidade> TIPOS = new ConcurrentHashMap<>(Map.ofEntries(
+        Map.entry("projectile", new Projetil()),
+        Map.entry("projectile_beam", new Raio()),
+        Map.entry("area_cone", new Cone()),
+        Map.entry("area_blast", new Onda()),
+        Map.entry("vision", new Visao()),
+        Map.entry("structure", new Fortaleza()),
+        Map.entry("grapple", new com.danrod.dcuniverse.ability.active.Gancho()),
+        Map.entry("throwable", new com.danrod.dcuniverse.ability.active.Arremesso()),
+        Map.entry("vehicle", new com.danrod.dcuniverse.ability.active.Veiculo()),
+        Map.entry("smoke", new com.danrod.dcuniverse.ability.active.Fumaca()),
+        Map.entry("explosive_gel", new com.danrod.dcuniverse.ability.active.Gel()),
+        Map.entry("net", new com.danrod.dcuniverse.ability.active.Lancador()),
+        Map.entry("disruptor", new com.danrod.dcuniverse.ability.active.Disruptor())
     ));
 
     private TiposHabilidade() {}

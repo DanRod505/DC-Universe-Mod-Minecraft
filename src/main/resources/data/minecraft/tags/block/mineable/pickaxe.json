@@ -1,3 +1,10 @@
 {
-  "values": ["dcuniverse:minerio_kryptonita", "dcuniverse:bloco_kryptonita", "dcuniverse:camara_solar"]
+  "values": [
+    "dcuniverse:minerio_kryptonita",
+    "dcuniverse:bloco_kryptonita",
+    "dcuniverse:camara_solar",
+    "dcuniverse:minerio_prometio",
+    "dcuniverse:carregador_tecnologico",
+    "dcuniverse:batcomputador"
+  ]
 }

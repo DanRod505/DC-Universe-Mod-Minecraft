@@ -42,6 +42,23 @@ public final class Blocos {
         .sound(SoundType.GLASS).noOcclusion().isRedstoneConductor((s, l, pos) -> false)
         .isSuffocating((s, l, pos) -> false).isViewBlocking((s, l, pos) -> false)), Rarity.RARE);
 
+    /** Minério de Prométio: veios raros no fundo do deepslate; o metal das armaduras e gadgets de ponta. */
+    public static final RegistryObject<Block> MINERIO_PROMETIO = blocoComItem("minerio_prometio", p -> new Block(p
+        .mapColor(MapColor.DEEPSLATE).strength(5f, 6f).requiresCorrectToolForDrops().lightLevel(s -> 3)
+        .sound(SoundType.DEEPSLATE)), Rarity.UNCOMMON);
+
+    /** Carregador Tecnológico: estação de recarga para heróis de tecnologia e seus aparelhos. */
+    public static final RegistryObject<Block> CARREGADOR_TECNOLOGICO = blocoComItem("carregador_tecnologico", p -> new CarregadorBloco(p
+        .mapColor(MapColor.METAL).strength(4f, 8f).requiresCorrectToolForDrops().lightLevel(s -> 10)
+        .sound(SoundType.NETHERITE_BLOCK).noOcclusion().isRedstoneConductor((s, l, pos) -> false)
+        .isSuffocating((s, l, pos) -> false).isViewBlocking((s, l, pos) -> false)), Rarity.UNCOMMON);
+
+    /** Batcomputador: gadgets, fabricação, análise de mobs e mapa (content/Batcomputador). */
+    public static final RegistryObject<Block> BATCOMPUTADOR = blocoComItem("batcomputador", p -> new BatcomputadorBloco(p
+        .mapColor(MapColor.COLOR_BLACK).strength(4f, 8f).requiresCorrectToolForDrops().lightLevel(s -> 7)
+        .sound(SoundType.NETHERITE_BLOCK).noOcclusion().isRedstoneConductor((s, l, pos) -> false)
+        .isSuffocating((s, l, pos) -> false).isViewBlocking((s, l, pos) -> false)), Rarity.RARE);
+
     private Blocos() {}
 
     private static RegistryObject<Block> blocoComItem(String id, Function<BlockBehaviour.Properties, Block> fabrica, Rarity raridade) {

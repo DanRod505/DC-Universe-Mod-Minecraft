@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "ingredient": "dcuniverse:minerio_prometio",
+  "result": {"id": "dcuniverse:lingote_prometio"},
+  "experience": 1.0,
+  "cookingtime": 100
+}

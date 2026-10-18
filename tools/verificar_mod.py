@@ -15,7 +15,7 @@ Verificações:
 - registro: todo item/bloco com nome no lang está registrado no Java e todo item dcuniverse: usado em
   receita, loot table ou tag tem nome no lang;
 - sons: todo som de content/Sons.java está no sounds.json, com o .ogg existindo (os das habilidades mono,
-  para tocar no lugar certo do mundo; a trilha do voo é estéreo de propósito) e a legenda traduzida nos dois idiomas;
+  para tocar no lugar certo do mundo; as trilhas do voo e do planar são estéreo de propósito) e a legenda traduzida nos dois idiomas;
 - blocos: todo bloco de content/Blocos.java tem blockstate, modelo e textura.
 Lê src/main/resources e src/generated/resources (receitas geradas por tools/gerar_conteudo.py).
 
@@ -149,6 +149,9 @@ def verificar_personagens(raiz, recursos, erros):
             for k, v in esperado.items():
                 if real.get(k) != v:
                     erros.append(f"{nome}: {k} = {real.get(k)}, mas a ficha diz {v}")
+            # Categoria: filtro do índice de personagens no Guia.
+            if c.get("category") != doc["cat"]:
+                erros.append(f"{nome}: category = {c.get('category')}, mas docs/dados diz {doc['cat']}")
         corpo = skins_doc.get(c.get("n"))
         if corpo is not None:
             escala = round(corpo["altura"] / 1.85, 2)
@@ -156,7 +159,8 @@ def verificar_personagens(raiz, recursos, erros):
                 erros.append(f"{nome}: scale = {c.get('scale', 1.0)}, mas a altura de {corpo['altura']} m pede {escala}")
             verificar_pecas(recursos, nome, corpo, erros)
         supremas = [h for h in c.get("abilities", []) if h.get("supreme")]
-        if len(supremas) > 1:
+        # Mais de uma só com cinto, e todas veículos: o jogador escolhe na Garagem do Batcomputador qual leva.
+        if len(supremas) > 1 and not ("belt" in c and all(h.get("type") == "vehicle" for h in supremas)):
             erros.append(f"{nome}: mais de uma suprema")
         for h in supremas:
             if not 60 <= h.get("cost_pct", 0) <= 80:
@@ -200,7 +204,7 @@ def verificar_personagens(raiz, recursos, erros):
 
 
 # Peças 3D já feitas em client/Pecas.java (as outras de docs/SKINS.md entram com os personagens que as usam).
-PECAS_PRONTAS = {"capa", "musculoso", "brilho"}
+PECAS_PRONTAS = {"capa", "musculoso", "brilho", "orelhas_bat", "cinto_3d", "laminas", "planador"}
 
 
 def verificar_pecas(recursos, nome, corpo, erros):
@@ -261,6 +265,16 @@ def verificar_guia(raiz, recursos, erros):
     registrados = set(re.findall(r'(?:item|blocoComItem)\("([a-z0-9_]+)"', java_todo))  # bloco() sozinho não tem item
     no_guia = {x["id"] for x in dados["itens"]}
     erros.extend(f"Guia: {x} registrado sem página no capítulo Itens" for x in sorted(registrados - no_guia))
+    # Abas do criativo (content/Itens.Aba): toda categoria de item cai numa aba de verdade, com nome nos dois idiomas.
+    itens_java = (raiz / JAVA / "content/Itens.java").read_text(encoding="utf-8")
+    abas = re.findall(r'^\s+[A-Z]+\("(dcuniverse[a-z_]*)", "[a-z0-9_]+"((?:, "[a-z]+")+)\)', itens_java, re.M)
+    cats_abas = {c for _, cs in abas for c in re.findall(r'"([a-z]+)"', cs)}
+    for x in dados["itens"]:
+        if x["cat"] not in cats_abas:
+            erros.append(f"criativo: categoria {x['cat']} de {x['id']} sem aba em Itens.Aba")
+    for i in IDIOMAS:
+        lang = ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {}
+        erros.extend(f"criativo: falta itemGroup.{a} em {i}.json" for a, _ in abas if f"itemGroup.{a}" not in lang)
     for i in IDIOMAS:
         lang = ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {}
         for x in dados["itens"]:

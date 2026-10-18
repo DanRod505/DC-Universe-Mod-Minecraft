@@ -15,5 +15,45 @@ public final class Entidades {
             .noLootTable().sized(0.3f, 0.3f).clientTrackingRange(4).updateInterval(10)
             .build(TIPOS.key("projetil")));
 
+    public static final RegistryObject<EntityType<BatarangueEntidade>> BATARANGUE = TIPOS.register("batarangue",
+        () -> EntityType.Builder.<BatarangueEntidade>of(BatarangueEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.5f, 0.25f).clientTrackingRange(6).updateInterval(1)
+            .build(TIPOS.key("batarangue")));
+
+    public static final RegistryObject<EntityType<BatwingEntidade>> BATWING = TIPOS.register("batwing",
+        () -> EntityType.Builder.<BatwingEntidade>of(BatwingEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(5.6f, 1.6f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("batwing")));
+
+    public static final RegistryObject<EntityType<MissilEntidade>> MISSIL = TIPOS.register("missil",
+        () -> EntityType.Builder.<MissilEntidade>of(MissilEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.7f, 0.7f).clientTrackingRange(8).updateInterval(1)
+            .build(TIPOS.key("missil")));
+
+    public static final RegistryObject<EntityType<GelEntidade>> GEL = TIPOS.register("gel",
+        () -> EntityType.Builder.<GelEntidade>of(GelEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.5f, 0.5f).clientTrackingRange(8).updateInterval(20)
+            .build(TIPOS.key("gel")));
+
+    public static final RegistryObject<EntityType<RedeEntidade>> REDE = TIPOS.register("rede",
+        () -> EntityType.Builder.<RedeEntidade>of(RedeEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.6f, 0.4f).clientTrackingRange(6).updateInterval(1)
+            .build(TIPOS.key("rede")));
+
+    public static final RegistryObject<EntityType<VeiculoBat>> BATMOVEL = TIPOS.register("batmovel",
+        () -> EntityType.Builder.<VeiculoBat>of(VeiculoBat::new, MobCategory.MISC)
+            .noLootTable().sized(2.4f, 1.4f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("batmovel")));
+
+    public static final RegistryObject<EntityType<VeiculoBat>> BATMOTO = TIPOS.register("batmoto",
+        () -> EntityType.Builder.<VeiculoBat>of(VeiculoBat::new, MobCategory.MISC)
+            .noLootTable().sized(1.1f, 1.2f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("batmoto")));
+
+    public static final RegistryObject<EntityType<VeiculoBat>> BATBARCO = TIPOS.register("batbarco",
+        () -> EntityType.Builder.<VeiculoBat>of(VeiculoBat::new, MobCategory.MISC)
+            .noLootTable().sized(2.6f, 1.1f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("batbarco")));
+
     private Entidades() {}
 }

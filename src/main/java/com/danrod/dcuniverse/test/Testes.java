@@ -43,6 +43,7 @@ public final class Testes {
     public static final DeferredRegister<Consumer<GameTestHelper>> FUNCOES = DeferredRegister.create(Registries.TEST_FUNCTION, DCUniverse.MODID);
 
     private static final Identifier SUPERMAN = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "superman");
+    private static final Identifier BATMAN = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batman");
 
     static {
         FUNCOES.register("transform", () -> Testes::transforma);
@@ -59,6 +60,18 @@ public final class Testes {
         FUNCOES.register("fortress", () -> Testes::fortaleza);
         FUNCOES.register("elements", () -> Testes::elementos);
         FUNCOES.register("kryptonite", () -> Testes::kryptonita);
+        FUNCOES.register("gadgets", () -> Testes::gadgets);
+        FUNCOES.register("grapple", () -> Testes::gancho);
+        FUNCOES.register("batwing", () -> Testes::batwing);
+        FUNCOES.register("detective", () -> Testes::detetive);
+        FUNCOES.register("smoke", () -> Testes::fumaca);
+        FUNCOES.register("explosive_gel", () -> Testes::gel);
+        FUNCOES.register("counter", () -> Testes::contraAtaque);
+        FUNCOES.register("batch_items", () -> Testes::loteItens);
+        FUNCOES.register("utility_belt", () -> Testes::cinto);
+        FUNCOES.register("new_gadgets", () -> Testes::gadgetsNovos);
+        FUNCOES.register("freeze_sonic", () -> Testes::batarangues);
+        FUNCOES.register("garage", () -> Testes::garagem);
     }
 
     private Testes() {}
@@ -129,7 +142,7 @@ public final class Testes {
         Rede.Sync s = Rede.Sync.decode(buf);
         h.assertValueEqual(s.personagem(), SUPERMAN.toString(), "personagem no sync");
         h.assertValueEqual(s.max(), 300f, "energia máxima no sync");
-        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false, 32f, 15f);
+        var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false, 32f, 15f, true, false);
         Rede.Sync.encode(hab, buf);
         h.assertValueEqual(Rede.Sync.decode(buf), hab, "sync com suprema e queda amortecida");
         var guia = new Rede.GuiaSync(List.of("transformar"), List.of(SUPERMAN.toString()), "sol");
@@ -237,7 +250,7 @@ public final class Testes {
         h.assertTrue(s.pronta(suprema), "com energia cheia a suprema está pronta");
         e.setEnergia(suprema.custo() - 1);
         h.assertFalse(Rede.montar(p).pronta(suprema), "sem energia suficiente não está pronta");
-        h.assertFalse(new Rede.Sync("x", 300, 300, false, 0, "", List.of(), 0, false, 0, false, false, 0, 0)
+        h.assertFalse(new Rede.Sync("x", 300, 300, false, 0, "", List.of(), 0, false, 0, false, false, 0, 0, false, false)
             .pronta(new Rede.HabInfo("a", false, true, 210, 20, 1800)), "em recarga não está pronta");
         Transformacao.destransformar(p);
         h.assertFalse(DemoHud.ativa(p), "destransformar encerra a demonstração");
@@ -271,16 +284,20 @@ public final class Testes {
         h.assertTrue(e.prontaEm("visao_de_calor") > p.level().getGameTime(), "o raio entra em recarga ao soltar");
         h.assertTrue(Guia.concluida(p, "habilidade"), "usar conclui a tarefa");
 
-        int soco = sup.habilidades().indexOf(sup.habilidade("soco_sonico"));
-        Habilidades.selecionar(p, soco);
-        float energia = e.energia();
-        Habilidades.usar(p, true);
-        h.assertValueEqual(e.energia(), energia - 40f, "soco sônico custa 40");
-        h.assertFalse(p.level().getEntitiesOfClass(ProjetilEntidade.class, p.getBoundingBox().inflate(4)).isEmpty(), "a onda sônica sai");
-        Habilidades.usar(p, false);
-        Habilidades.usar(p, true);
-        h.assertValueEqual(e.energia(), energia - 40f, "em recarga não dispara de novo");
-        h.succeed();
+        // A onda é uma entidade: no tick 0 a seção de entidades do chunk recém-gerado pode ainda não estar
+        // carregada, e a entidade nova fica invisível para a busca. Espera alguns ticks.
+        h.runAfterDelay(5, () -> {
+            int soco = sup.habilidades().indexOf(sup.habilidade("soco_sonico"));
+            Habilidades.selecionar(p, soco);
+            float energia = e.energia();
+            Habilidades.usar(p, true);
+            h.assertValueEqual(e.energia(), energia - 40f, "soco sônico custa 40");
+            h.assertFalse(p.level().getEntitiesOfClass(ProjetilEntidade.class, p.getBoundingBox().inflate(4)).isEmpty(), "a onda sônica sai");
+            Habilidades.usar(p, false);
+            Habilidades.usar(p, true);
+            h.assertValueEqual(e.energia(), energia - 40f, "em recarga não dispara de novo");
+            h.succeed();
+        });
     }
 
     /**
@@ -515,5 +532,449 @@ public final class Testes {
             }
             h.succeed();
         });
+    }
+
+    /** Gadgets: cada uso gasta uma carga, sem cargas não usa, o cinto fabrica gastando energia; no criativo é livre. */
+    static void gadgets(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        h.assertTrue(Transformacao.transformar(p, BATMAN, true), "transformar no Batman");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        Personagem.Habilidade b = bat.habilidade("batarangue");
+        int max = com.danrod.dcuniverse.ability.Cargas.max(b);
+        h.assertValueEqual(max, 6, "batarangue com 6 cargas");
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(p, b), max, "começa cheio");
+        e.setEnergia(bat.energia().max());
+        for (int i = 0; i < max; i++) {
+            e.setProntaEm(b.id(), 0);
+            h.assertTrue(Habilidades.executar(p, bat, b), "arremesso " + (i + 1));
+        }
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(p, b), 0, "cargas acabaram");
+        e.setProntaEm(b.id(), 0);
+        h.assertFalse(Habilidades.executar(p, bat, b), "sem cargas não arremessa");
+        // Fabricação: a próxima carga sai na hora marcada, gastando reload_cost de energia.
+        com.danrod.dcuniverse.ability.Cargas.tick(p, bat);
+        h.assertTrue(com.danrod.dcuniverse.ability.Cargas.faltam(p, b) > 0, "o cinto começou a fabricar");
+        e.setProximaCarga(b.id(), p.level().getGameTime());
+        float antes = e.energia();
+        com.danrod.dcuniverse.ability.Cargas.tick(p, bat);
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(p, b), 1, "uma carga fabricada");
+        h.assertValueEqual(e.energia(), antes - 2f, "custou 2 de energia");
+        // Criativo: não gasta carga nem energia.
+        ServerPlayer c = (ServerPlayer) h.makeMockServerPlayer(GameType.CREATIVE);
+        Transformacao.transformar(c, BATMAN, true);
+        EstadoJogador ec = EstadoJogador.de(c);
+        ec.setCargas(b.id(), 1);
+        h.assertTrue(Habilidades.executar(c, bat, b), "arremessa no criativo");
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(c, b), 1, "criativo não gasta carga");
+        Personagem.Habilidade g = bat.habilidade("gancho");
+        float energia = ec.energia();
+        com.danrod.dcuniverse.ability.active.Gancho.limpar();
+        h.assertTrue(Habilidades.executar(c, bat, g), "gancho no criativo");
+        h.assertValueEqual(ec.energia(), energia, "criativo não gasta energia");
+        com.danrod.dcuniverse.ability.active.Gancho.limpar();
+        h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.BatarangueEntidade.class, p.getBoundingBox().inflate(64)).forEach(x -> x.discard());
+        h.succeed();
+    }
+
+    /** Vira o jogador de teste para o ponto (lookAt manda pacote, e o jogador de teste não tem conexão). */
+    private static void mirar(ServerPlayer p, net.minecraft.world.phys.Vec3 alvo) {
+        net.minecraft.world.phys.Vec3 d = alvo.subtract(p.getEyePosition());
+        p.setYRot((float) (Math.atan2(-d.x, d.z) * 180 / Math.PI));
+        p.setXRot((float) (-Math.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)) * 180 / Math.PI));
+        p.setYHeadRot(p.getYRot());
+    }
+
+    private static List<String> ids(List<Personagem.Habilidade> habs) {
+        return habs.stream().map(Personagem.Habilidade::id).toList();
+    }
+
+    /**
+     * Cinto: só os gadgets dos espaços vão para o menu (e para o HUD); trocar no Batcomputador troca de lugar, tira e
+     * mantém a habilidade escolhida; a escolha sobrevive à destransformação; só o que está no cinto é fabricado.
+     */
+    static void cinto(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        h.assertTrue(Transformacao.transformar(p, BATMAN, true), "transformar no Batman");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        var pos = h.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1));
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.gadgets(bat).size(), 9, "9 gadgets no arsenal");
+        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), List.of("gancho", "modo_detetive", "batarangue",
+            "batarangue_explosivo", "batarangue_eletrico", "bomba_fumaca", "gel_explosivo", "batwing"), "cinto padrão");
+        h.assertValueEqual(Rede.montar(p).habilidades().stream().map(Rede.HabInfo::id).toList(),
+            ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), "o HUD recebe só o que está equipado");
+        // Escolhe a fumaça e troca o espaço 1: a escolha continua na fumaça.
+        Habilidades.selecionar(p, 5);
+        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 0, "lancador_rede");
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(0), "lancador_rede", "rede no espaço 1");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "batarangue"), "batarangue foi para o Batcomputador");
+        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(p, bat);
+        h.assertValueEqual(habs.get(e.selecionada()).id(), "bomba_fumaca", "continua escolhida a fumaça");
+        h.assertTrue(Guia.concluida(p, "cinto"), "tarefa do cinto");
+        // Pôr a rede no espaço 2 troca os dois de lugar; "" esvazia; o que não é gadget não entra.
+        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "lancador_rede");
+        var slots = com.danrod.dcuniverse.character.Cinto.slots(p, bat);
+        h.assertValueEqual(slots.subList(0, 2), List.of("batarangue_explosivo", "lancador_rede"), "trocaram de lugar");
+        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "");
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat).size(), 7, "espaço vazio sai do menu");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 1, "batwing"), "a suprema não vai no cinto");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 1, "gancho"), "o gancho é fixo");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 9, "disruptor"), "espaço que não existe");
+        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "disruptor");
+        // Sobrevive à destransformação.
+        Transformacao.destransformar(p);
+        Transformacao.transformar(p, BATMAN, true);
+        bat = EstadoJogador.de(p).personagem();
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(1), "disruptor", "cinto guardado");
+        // Só o que está no cinto é fabricado.
+        e = EstadoJogador.de(p);
+        e.setCargas("batarangue", 0);
+        e.setCargas("disruptor", 0);
+        com.danrod.dcuniverse.ability.Cargas.tick(p, bat);
+        h.assertValueEqual(e.proximaCarga("batarangue"), 0L, "fora do cinto não fabrica");
+        h.assertTrue(e.proximaCarga("disruptor") > 0, "no cinto fabrica");
+        com.danrod.dcuniverse.character.Cinto.resetar(p);
+        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(0), "batarangue", "resetar volta ao padrão");
+        h.succeed();
+    }
+
+    /**
+     * Gadgets novos: o disruptor desarma o esqueleto e tira o pavio do creeper na hora; a rede prende o mob em teias
+     * (que somem sem deixar linha); o congelante e o sônico ficam em Testes#batarangues.
+     */
+    static void gadgetsNovos(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        p.setYRot(0);
+        p.setXRot(0);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        // Disruptor no esqueleto: o arco queima.
+        var esq = h.spawn(net.minecraft.world.entity.EntityTypes.SKELETON, new net.minecraft.core.BlockPos(1, 1, 6));
+        esq.setNoAi(true);
+        esq.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+        mirar(p, esq.getBoundingBox().getCenter());
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("disruptor")), "disruptor dispara");
+        h.assertTrue(esq.getMainHandItem().isEmpty(), "esqueleto desarmado");
+        esq.discard();
+        // Disruptor no creeper: sem pavio.
+        var creeper = h.spawn(net.minecraft.world.entity.EntityTypes.CREEPER, new net.minecraft.core.BlockPos(1, 1, 6));
+        creeper.setNoAi(true);
+        mirar(p, creeper.getBoundingBox().getCenter());
+        e.setProntaEm("disruptor", 0);
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("disruptor")), "disruptor no creeper");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Disruptor.semPavio(creeper), "creeper sem pavio");
+        creeper.discard();
+        e.setProntaEm("disruptor", 0);
+        h.assertFalse(Habilidades.executar(p, bat, bat.habilidade("disruptor")), "sem alvo não gasta");
+        // Rede no vindicador parado.
+        var alvo = h.spawn(net.minecraft.world.entity.EntityTypes.VINDICATOR, new net.minecraft.core.BlockPos(1, 1, 5));
+        alvo.setNoAi(true);
+        mirar(p, alvo.getBoundingBox().getCenter());
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("lancador_rede")), "lança a rede");
+        h.succeedWhen(() -> {
+            var pe = alvo.blockPosition();
+            h.assertTrue(h.getLevel().getBlockState(pe).is(net.minecraft.world.level.block.Blocks.COBWEB), "mob preso na teia");
+            h.assertTrue(com.danrod.dcuniverse.content.Teias.temporaria(h.getLevel(), pe), "teia temporária");
+            com.danrod.dcuniverse.content.Teias.tirar(h.getLevel(), pe);
+            h.assertTrue(h.getLevel().getBlockState(pe).isAir(), "teia saiu sem deixar nada");
+            alvo.discard();
+        });
+    }
+
+    /** Congelante e sônico, separados para não cruzar com a rede. */
+    static void batarangues(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        var alvo = h.spawn(net.minecraft.world.entity.EntityTypes.VINDICATOR, new net.minecraft.core.BlockPos(1, 1, 5));
+        alvo.setNoAi(true);
+        mirar(p, alvo.getBoundingBox().getCenter());
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("batarangue_congelante")), "arremessa o congelante");
+        h.setBlock(1, 2, 9, net.minecraft.world.level.block.Blocks.GLASS);
+        boolean[] sonico = {false};
+        h.succeedWhen(() -> {
+            if (!sonico[0]) {
+                h.assertTrue(com.danrod.dcuniverse.ability.Congelamento.congelado(alvo), "mob no gelo");
+                sonico[0] = true;
+                alvo.discard();
+                mirar(p, h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2.5, 9.5)));
+                h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("batarangue_sonico")), "arremessa o sônico");
+            }
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.AIR, 1, 2, 9);
+        });
+    }
+
+    /** Gancho: crava no bloco mirado e solta ao usar de novo; o batarangue sai voando. */
+    static void gancho(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        h.setBlock(1, 8, 1, net.minecraft.world.level.block.Blocks.STONE);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        p.setXRot(-90);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("gancho")), "dispara o gancho para cima");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Gancho.ativo(p), "cabo preso no bloco");
+        h.assertTrue(Guia.concluida(p, "gancho"), "tarefa do gancho");
+        com.danrod.dcuniverse.ability.active.Gancho.soltar(p);
+        h.assertFalse(com.danrod.dcuniverse.ability.active.Gancho.ativo(p), "soltou o cabo");
+        p.setXRot(0);
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("batarangue")), "arremessa o batarangue");
+        var lista = h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.BatarangueEntidade.class, p.getBoundingBox().inflate(8));
+        h.assertValueEqual(lista.size(), 1, "um batarangue no ar");
+        h.assertTrue(Guia.concluida(p, "batarangue"), "tarefa do batarangue");
+        lista.forEach(x -> x.discard());
+        h.succeed();
+    }
+
+    /** Batwing: a suprema invoca o jato do dono, ele embarca e o jato vai embora quando o Batman destransforma. */
+    static void batwing(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        Personagem.Habilidade sup = bat.suprema();
+        h.assertValueEqual(sup.id(), "batwing", "a suprema é o Batwing");
+        h.assertTrue(Habilidades.executar(p, bat, sup), "invoca o Batwing");
+        h.assertValueEqual(e.energia(), bat.energia().max() * 0.25f, "custa 75% da energia");
+        var bw = (com.danrod.dcuniverse.content.BatwingEntidade) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+        h.assertTrue(bw != null && bw.isAlive(), "Batwing no mundo");
+        // (Embarcar teleporta o jogador, o que o jogador de teste não suporta: testado no jogo.)
+        Transformacao.destransformar(p);
+        h.assertValueEqual(bw.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "o Batwing vai embora");
+        bw.discard();
+        com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        h.succeed();
+    }
+
+    /**
+     * Garagem: o veículo escolhido no Batcomputador é o que a suprema chama; chamar de novo o mesmo não gasta nada;
+     * o Batbarco precisa de água funda e, quando vem, o veículo antigo vai embora.
+     */
+    static void garagem(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        h.assertTrue(com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "batmoto"), "escolhe a Batmoto");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "gancho"), "o gancho não é veículo");
+        Personagem.Habilidade sup = com.danrod.dcuniverse.character.Cinto.suprema(p, bat);
+        h.assertValueEqual(sup.id(), "batmoto", "a suprema agora é a Batmoto");
+        var equipadas = com.danrod.dcuniverse.character.Cinto.equipadas(p, bat);
+        h.assertValueEqual(equipadas.get(equipadas.size() - 1).id(), "batmoto", "no menu radial vai a Batmoto");
+        e.setEnergia(bat.energia().max());
+        h.assertTrue(Habilidades.executar(p, bat, sup), "chama a Batmoto");
+        var moto = com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+        h.assertTrue(moto instanceof com.danrod.dcuniverse.content.VeiculoBat v && v.modelo().equals("batmoto"), "Batmoto no mundo");
+        float depois = e.energia();
+        h.assertTrue(depois < bat.energia().max(), "a primeira chamada custa");
+        Habilidades.executar(p, bat, sup);
+        h.assertValueEqual(e.energia(), depois, "chamar de novo a mesma não custa");
+        // Batbarco sem água: não vem, e a Batmoto fica.
+        com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "batbarco");
+        Personagem.Habilidade barco = com.danrod.dcuniverse.character.Cinto.suprema(p, bat);
+        e.setProntaEm(barco.id(), 0);
+        e.setEnergia(bat.energia().max());
+        h.assertFalse(Habilidades.executar(p, bat, barco), "sem água o Batbarco não vem");
+        h.assertValueEqual(e.energia(), bat.energia().max(), "e não gasta");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Veiculo.de(p) == moto, "a Batmoto continua");
+        // Com um lago do lado, ele emerge e a Batmoto vai embora.
+        for (int x = 3; x <= 7; x++)
+            for (int z = 0; z <= 4; z++)
+                for (int y = -2; y <= 0; y++) h.setBlock(x, 1 + y, z, net.minecraft.world.level.block.Blocks.WATER);
+        h.assertTrue(Habilidades.executar(p, bat, barco), "com água o Batbarco vem");
+        var b = com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+        h.assertTrue(b instanceof com.danrod.dcuniverse.content.VeiculoBat v && v.modelo().equals("batbarco"), "Batbarco no mundo");
+        h.assertValueEqual(((com.danrod.dcuniverse.content.VeiculoDono) moto).estado(), com.danrod.dcuniverse.content.VeiculoDono.INDO, "a Batmoto vai embora");
+        Transformacao.destransformar(p);
+        h.assertValueEqual(((com.danrod.dcuniverse.content.VeiculoDono) b).estado(), com.danrod.dcuniverse.content.VeiculoDono.INDO, "o Batbarco vai embora");
+        moto.discard();
+        b.discard();
+        com.danrod.dcuniverse.character.Cinto.resetar(p);
+        com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        h.succeed();
+    }
+
+
+    /** Modo Detetive: liga gastando energia, drena por segundo, desliga de graça e ao destransformar. */
+    static void detetive(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        Personagem.Habilidade d = bat.habilidade("modo_detetive");
+        e.setEnergia(100);
+        h.assertTrue(Habilidades.executar(p, bat, d), "liga o modo detetive");
+        h.assertTrue(e.detetive(), "ligado");
+        h.assertValueEqual(e.energia(), 95f, "ligar custa 5");
+        h.assertValueEqual(com.danrod.dcuniverse.core.Rede.montarAparencia(p).efeito(), "detective_vision", "lentes acesas para os outros");
+        for (int i = 0; i < 20; i++) com.danrod.dcuniverse.ability.active.Detetive.tick(p, bat);
+        h.assertTrue(Math.abs(e.energia() - 93.5f) < 0.01f, "drena 1,5 por segundo");
+        h.assertTrue(Habilidades.executar(p, bat, d), "desliga mesmo em recarga");
+        h.assertFalse(e.detetive(), "desligado");
+        h.assertTrue(Math.abs(e.energia() - 93.5f) < 0.01f, "desligar não custa");
+        e.setProntaEm(d.id(), 0);
+        Habilidades.executar(p, bat, d);
+        e.setEnergia(0.01f);
+        com.danrod.dcuniverse.ability.active.Detetive.tick(p, bat);
+        h.assertFalse(e.detetive(), "sem energia desliga sozinho");
+        e.setEnergia(100);
+        e.setProntaEm(d.id(), 0);
+        Habilidades.executar(p, bat, d);
+        Transformacao.destransformar(p);
+        h.assertFalse(e.detetive(), "destransformar desliga");
+        h.assertTrue(Guia.concluida(p, "detetive"), "tarefa do modo detetive");
+        h.succeed();
+    }
+
+    /** Bomba de fumaça: cega e tira o alvo do mob dentro da nuvem; quem jogou fica invisível e rápido. */
+    static void fumaca(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(3, 1, 1));
+        zumbi.setTarget(p);
+        h.assertTrue(Habilidades.executar(p, bat, bat.habilidade("bomba_fumaca")), "estoura a fumaça");
+        h.assertTrue(zumbi.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS), "mob cego");
+        h.assertTrue(zumbi.getTarget() == null, "mob perdeu o alvo");
+        h.assertValueEqual(com.danrod.dcuniverse.ability.Cargas.atuais(p, bat.habilidade("bomba_fumaca")), 2, "gastou uma carga");
+        h.assertTrue(Guia.concluida(p, "fumaca"), "tarefa da fumaça");
+        zumbi.discard();
+        com.danrod.dcuniverse.ability.active.Fumaca.limpar();
+        h.succeed();
+    }
+
+    /** Gel explosivo: cola na parede mirada, agachado detona e o bloco quebra; obsidiana resiste. */
+    static void gel(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        p.setYRot(0);
+        p.setXRot(0);
+        // Corredor limpo até a parede (os testes vizinhos podem deixar blocos por perto).
+        for (int x = 0; x <= 2; x++) for (int y = 1; y <= 3; y++) for (int z = 1; z <= 3; z++) h.setBlock(x, y, z, net.minecraft.world.level.block.Blocks.AIR);
+        h.setBlock(1, 2, 4, net.minecraft.world.level.block.Blocks.STONE);
+        h.setBlock(1, 2, 5, net.minecraft.world.level.block.Blocks.OBSIDIAN);
+        Transformacao.transformar(p, BATMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem bat = e.personagem();
+        e.setEnergia(bat.energia().max());
+        Personagem.Habilidade g = bat.habilidade("gel_explosivo");
+        h.assertTrue(Habilidades.executar(p, bat, g), "cola o gel na pedra");
+        h.assertValueEqual(com.danrod.dcuniverse.content.GelEntidade.level(p).size(), 1, "um gel colado");
+        p.setShiftKeyDown(true);
+        h.assertTrue(Habilidades.executar(p, bat, g), "agachado detona (mesmo em recarga)");
+        p.setShiftKeyDown(false);
+        h.assertTrue(Guia.concluida(p, "gel") && Guia.concluida(p, "gel_detonar"), "tarefas do gel");
+        h.runAfterDelay(com.danrod.dcuniverse.content.GelEntidade.PAVIO + 4, () -> {
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.AIR, 1, 2, 4);
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.OBSIDIAN, 1, 2, 5);
+            h.succeed();
+        });
+    }
+
+    /** Contra-ataque: agachar na hora anula o golpe e devolve; fora da janela o golpe entra. */
+    static void contraAtaque(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, BATMAN, true);
+        Personagem bat = EstadoJogador.de(p).personagem();
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(2, 1, 1));
+        float vidaZumbi = zumbi.getHealth();
+        p.setShiftKeyDown(true);
+        // Só a passiva do contra-ataque (a visão noturna manda pacote, que o jogador de teste não tem).
+        com.danrod.dcuniverse.ability.TiposPassiva.TIPOS.get("counter").tick(p, bat.passiva("counter").params());
+        // (O jogador de teste não pode levar dano: chama direto o que o LivingAttackEvent chama.)
+        h.assertTrue(com.danrod.dcuniverse.ability.passive.ContraAtaque.defender(p, zumbi, zumbi), "golpe anulado");
+        h.assertTrue(zumbi.getHealth() < vidaZumbi, "devolveu o golpe");
+        h.assertTrue(zumbi.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "atordoado");
+        h.assertTrue(Guia.concluida(p, "contra_ataque"), "tarefa do contra-ataque");
+        // Segundo golpe sem novo agachar: a janela já fechou.
+        h.assertFalse(com.danrod.dcuniverse.ability.passive.ContraAtaque.defender(p, zumbi, zumbi), "fora da janela o golpe entra");
+        zumbi.discard();
+        h.succeed();
+    }
+
+    /**
+     * Lote de itens da v0.2: prométio no mundo e na fornalha, Batcomputador (fabricar do inventário, análise de
+     * amostra com família, recarga do cinto) e a Capa Planadora dando o planar sem transformação.
+     */
+    static void loteItens(GameTestHelper h) {
+        var level = h.getLevel();
+        var minerio = net.minecraft.resources.ResourceKey.create(Registries.PLACED_FEATURE,
+            Identifier.fromNamespaceAndPath(DCUniverse.MODID, "minerio_prometio"));
+        h.assertTrue(level.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE).get(minerio).isPresent(), "veios de prométio no mundo");
+        var rm = level.getServer().getRecipeManager();
+        for (String r : List.of("lingote_prometio", "lingote_prometio_alto_forno", "batcomputador", "carregador_tecnologico", "cinto_batman")) {
+            h.assertTrue(rm.byKey(net.minecraft.resources.ResourceKey.create(Registries.RECIPE,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, r))).isPresent(), "receita " + r);
+        }
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        var pos = h.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1));
+        // Fabricar: o Componente Tecnológico sai direto do inventário, gastando só o que a receita pede.
+        var inv = p.getInventory();
+        inv.add(new ItemStack(Items.IRON_INGOT, 6));
+        inv.add(new ItemStack(Itens.PLACA_CIRCUITO.get(), 2));
+        inv.add(new ItemStack(Items.REDSTONE, 2));
+        inv.add(new ItemStack(Items.COMPARATOR));
+        com.danrod.dcuniverse.content.Batcomputador.fabricar(p, pos, "componente_tecnologico");
+        h.assertTrue(inv.countItem(Itens.COMPONENTE_TECNOLOGICO.get()) == 1, "fabricou o componente");
+        h.assertTrue(inv.countItem(Items.IRON_INGOT) == 2 && inv.countItem(Items.COMPARATOR) == 0, "gastou os ingredientes");
+        com.danrod.dcuniverse.content.Batcomputador.fabricar(p, pos, "componente_tecnologico");
+        h.assertTrue(inv.countItem(Itens.COMPONENTE_TECNOLOGICO.get()) == 1, "sem ingredientes não fabrica");
+        // Análise: carne podre registra o zumbi, e a família inteira (o zumbi do deserto também) fica analisada.
+        inv.add(new ItemStack(Items.ROTTEN_FLESH));
+        com.danrod.dcuniverse.content.Batcomputador.analisar(p, pos, "minecraft:rotten_flesh");
+        h.assertTrue(com.danrod.dcuniverse.content.Batcomputador.analisados(p).contains("minecraft:zombie"), "zumbi analisado");
+        h.assertTrue(inv.countItem(Items.ROTTEN_FLESH) == 0, "a amostra foi usada");
+        h.assertTrue(com.danrod.dcuniverse.content.Batcomputador.familia(net.minecraft.world.entity.EntityTypes.HUSK)
+            == net.minecraft.world.entity.EntityTypes.ZOMBIE, "família do zumbi");
+        h.assertTrue(Guia.concluida(p, "batcomputador"), "tarefa do Batcomputador");
+        // Capa Planadora: sem herói, só plana com a capa vestida.
+        h.assertTrue(Rede.montar(p).planar() == 0, "sem capa não plana");
+        p.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Itens.CAPA_PLANADOR.get()));
+        h.assertTrue(Rede.montar(p).planar() == com.danrod.dcuniverse.content.Equipamentos.CAPA_VELOCIDADE, "a capa dá o planar");
+        p.setOnGround(false);
+        com.danrod.dcuniverse.ability.passive.Planar.definir(p, com.danrod.dcuniverse.ability.passive.Planar.ABERTA);
+        h.assertTrue(EstadoJogador.de(p).planar() == com.danrod.dcuniverse.ability.passive.Planar.ABERTA, "abriu a capa no ar");
+        com.danrod.dcuniverse.ability.passive.Planar.definir(p, com.danrod.dcuniverse.ability.passive.Planar.FECHADA);
+        p.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+        p.setOnGround(false);
+        com.danrod.dcuniverse.ability.passive.Planar.definir(p, com.danrod.dcuniverse.ability.passive.Planar.ABERTA);
+        h.assertTrue(EstadoJogador.de(p).planar() == com.danrod.dcuniverse.ability.passive.Planar.FECHADA, "sem a capa não abre");
+        // Recarga do Batcomputador: enche a energia do Batman na hora, e só de novo depois do intervalo.
+        Transformacao.transformar(p, BATMAN, true);
+        Personagem bat = EstadoJogador.de(p).personagem();
+        EstadoJogador.de(p).setEnergia(0);
+        com.danrod.dcuniverse.content.Batcomputador.recarregar(p, pos);
+        h.assertTrue(EstadoJogador.de(p).energia() == bat.energia().max(), "energia cheia");
+        EstadoJogador.de(p).setEnergia(0);
+        com.danrod.dcuniverse.content.Batcomputador.recarregar(p, pos);
+        h.assertTrue(EstadoJogador.de(p).energia() == 0, "só recarrega de novo depois do intervalo");
+        com.danrod.dcuniverse.content.Batcomputador.resetar(p);
+        h.succeed();
     }
 }

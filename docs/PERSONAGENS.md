@@ -147,14 +147,14 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 #### 2. Batman (Bruce Wayne)
 *Preparação, equipamento e estratégia: você vence porque planejou, não porque é mais forte.*
 
-- **Naturais (ativam pela ação):** Planar com a capa (segurar pulo caindo); Visão noturna no capuz; Furtividade: mobs detectam mais tarde ao agachar no escuro; Contra-ataque: bloquear no momento certo devolve o golpe
+- **Naturais (ativam pela ação):** Planar com a capa (pulo no ar abre; mergulho, arremetida, freio, giros e impulso); Visão noturna no capuz; Furtividade: mobs detectam mais tarde ao agachar no escuro; Contra-ataque: bloquear no momento certo devolve o golpe
 - **Poderes e combate (menu radial):** Modo Detetive (destaca mobs, rastros de jogadores, pontos fracos e blocos interativos); Batarangue (ricocheteia, corta cordas/teias, atordoa); Gancho de escalada (puxa até o bloco mirado); Bomba de fumaça (cegueira em área + fuga); Gel explosivo (marca uma parede e detona depois)
-- **Armas, ferramentas e invocações:** Cinto de utilidades com slots configuráveis (escolhe quais gadgets levar); Batcomputador (bloco) para fabricar gadgets e analisar amostras; Invocar o Batmóvel/Batwing (veículos craftados)
+- **Armas, ferramentas e invocações:** Cinto de utilidades com slots configuráveis (escolhe quais gadgets levar); Batcomputador (bloco) para fabricar gadgets e analisar amostras; Garagem no Batcomputador: escolhe o veículo que a suprema chama (Batwing, Batmóvel, Batmoto ou Batbarco)
 - **Utilidade no survival:** Gadgets craftáveis com materiais do jogo (o preparo é o loop de progressão); Gancho para escalar e explorar cavernas; Gel explosivo para mineração controlada; Batcaverna: base com bancada de pesquisa
 - **Item de transformação:** Cinto de Utilidades (O cinto também guarda os gadgets escolhidos no Batcomputador.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).
 - **Energia:** Recursos do Cinto: cada gadget tem cargas; recarrega no Batcomputador ou craftando munição
 - **Ficha:** Nível 1 · Vida ♥ 14 · Armadura 14 · Dano ♥ 3 · Energia 200 · Regen/s 0,5 · Corrida 6 · Nado 4 · Planar 11
-- ⭐ **Habilidade suprema (Veículo): Batwing.** Invoca o Batwing: jato pilotável com assento para um passageiro, metralhadoras, mísseis teleguiados e modo furtivo. Pode descer e embarcar o Batman de volta com gancho.
+- ⭐ **Habilidade suprema (Veículo): Batwing.** Invoca o veículo escolhido na Garagem do Batcomputador. Batwing: jato pilotável com assento para um passageiro, metralhadoras, mísseis teleguiados e modo furtivo; o gancho embarca o Batman de volta. Batmóvel: blindado que derrapa no freio de mão, atropela, lança mísseis do teto e eletrifica o casco. Batmoto: a mais rápida no chão, salta, lança batarangues e solta fumaça. Batbarco: lancha que plana e mergulha, com torpedos.
 
 #### 3. Mulher-Maravilha (Diana)
 *Guerreira divina: combate corpo a corpo honrado, defesa impecável e liderança.*
