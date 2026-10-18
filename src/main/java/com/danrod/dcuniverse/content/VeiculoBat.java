@@ -695,7 +695,7 @@ public class VeiculoBat extends Entity implements VeiculoDono {
 
     private void armas(ServerLevel level, Entity dono) {
         float calor = calor();
-        boolean pode = estado() == PILOTADO && dono instanceof ServerPlayer && !(modelo == BATBARCO && submerso());
+        boolean pode = estado() == PILOTADO && dono instanceof ServerPlayer;
         if (pode && atirando && !superaquecido) {
             if (tickCount % 2 == 0) tiro(level, (ServerPlayer) dono);
             calor += prm.f("gun_heat", 0.022f);
@@ -749,6 +749,15 @@ public class VeiculoBat extends Entity implements VeiculoDono {
             acerto = ent.getLocation();
             Alvos.ferir(piloto, ent.getEntity(), damageSources().thrown(this, piloto), (float) prm.d("gun_damage", 1) * 2);
             ent.getEntity().invulnerableTime = 0;
+        }
+        if (level.getFluidState(BlockPos.containing(de)).is(FluidTags.WATER)) {
+            // Debaixo d'água o tiro deixa um rastro de bolhas.
+            Vec3 passo = acerto.subtract(de);
+            int n = Math.min(24, (int) (passo.length() / 1.2));
+            for (int i = 1; i <= n; i++) {
+                Vec3 q = de.add(passo.scale(i / (double) n));
+                level.sendParticles(ParticleTypes.BUBBLE, q.x, q.y, q.z, 2, 0.05, 0.05, 0.05, 0.02);
+            }
         }
         Rede.efeito(level, de.x, de.y, de.z, "tiro", (float) (acerto.x - de.x), (float) (acerto.z - de.z), Float.floatToIntBits((float) (acerto.y - de.y)));
         if (tiros % 2 == 0) {
@@ -808,18 +817,21 @@ public class VeiculoBat extends Entity implements VeiculoDono {
                 // Torpedo: sai por baixo da proa e persegue o alvo travado.
                 Vector3f p = rotacao(1).transform(new Vector3f(n % 2 == 0 ? 0.5f : -0.5f, 0.1f, 1.6f));
                 Vec3 de = position().add(p.x, p.y, p.z);
-                Vec3 dir = mira(piloto, prm.d("lock_range", 64)).subtract(de).normalize();
+                Vec3 ponto = mira(piloto, prm.d("lock_range", 64));
+                Vec3 dir = ponto.subtract(de).normalize();
                 level.addFreshEntity(new MissilEntidade(level, piloto, de, dir, vel.length(), procurarAlvo(piloto),
-                    (float) prm.d("rounds_damage", 7) * 2, prm.f("rounds_radius", 3)));
+                    (float) prm.d("rounds_damage", 7) * 2, prm.f("rounds_radius", 3)).mirando(ponto));
                 level.playSound(null, de.x, de.y, de.z, Sons.BATBARCO_TORPEDO.get(), SoundSource.PLAYERS, 1.4f, 1f);
             }
             default -> {
                 // Mísseis do teto, alternando os lados.
                 Vector3f p = rotacao(1).transform(new Vector3f(n % 2 == 0 ? 0.55f : -0.55f, 1.25f, -0.9f));
                 Vec3 de = position().add(p.x, p.y, p.z);
-                Vec3 dir = mira(piloto, prm.d("lock_range", 64)).subtract(de).normalize().add(0, 0.25, 0).normalize();
+                // Sobe um pouco ao sair do lançador e depois vai até onde a mira aponta (ou atrás do alvo travado).
+                Vec3 ponto = mira(piloto, prm.d("lock_range", 64));
+                Vec3 dir = ponto.subtract(de).normalize().add(0, 0.25, 0).normalize();
                 level.addFreshEntity(new MissilEntidade(level, piloto, de, dir, Math.max(0.6, vel.length()), procurarAlvo(piloto),
-                    (float) prm.d("rounds_damage", 6) * 2, prm.f("rounds_radius", 3)));
+                    (float) prm.d("rounds_damage", 6) * 2, prm.f("rounds_radius", 3)).mirando(ponto));
                 level.playSound(null, de.x, de.y, de.z, Sons.BATWING_MISSIL.get(), SoundSource.PLAYERS, 1.5f, 1.05f);
             }
         }
@@ -832,7 +844,6 @@ public class VeiculoBat extends Entity implements VeiculoDono {
             boolean novo = !submerso();
             if (novo && !isInWater()) return;
             entityData.set(SUBMERSO, novo);
-            atirando = false;
             level.playSound(null, getX(), getY(), getZ(), novo ? Sons.BATBARCO_MERGULHA.get() : Sons.BATBARCO_EMERGE.get(), SoundSource.PLAYERS, 1.3f, 1f);
             level.sendParticles(novo ? ParticleTypes.BUBBLE : ParticleTypes.SPLASH, getX(), getY() + 0.6, getZ(), 40, 1.4, 0.3, 1.4, 0.15);
             return;

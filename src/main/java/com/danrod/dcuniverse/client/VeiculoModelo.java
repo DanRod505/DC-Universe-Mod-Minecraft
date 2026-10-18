@@ -263,7 +263,8 @@ public final class VeiculoModelo {
         };
         loft(k.corpo, s, 2.8f, -2.8f);
         // Cabine de vidro escuro e as aletas de morcego atrás.
-        cupula(k.vidro, 0.15f, 1.02f, 0.6f, 0.95f, 0.55f, 1.5f);
+        // A base fica abaixo do capô (some dentro da lataria): sem fresta entre o vidro e o corpo vista de dentro.
+        cupula(k.vidro, 0.15f, 0.72f, 0.72f, 0.98f, 0.85f, 1.5f);
         for (int lado = -1; lado <= 1; lado += 2) {
             float x = 0.78f * lado;
             Vector3f bf = new Vector3f(x, 0.92f, -1.3f), bt = new Vector3f(x, 0.88f, -2.6f);

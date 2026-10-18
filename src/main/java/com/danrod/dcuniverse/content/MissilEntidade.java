@@ -25,12 +25,14 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Míssil teleguiado do Batwing: cai um instante da asa, acende o motor e persegue o alvo travado (ou segue reto).
+ * Míssil teleguiado do Batwing: cai um instante da asa, acende o motor e persegue o alvo travado (ou vai até o ponto
+ * mirado, ou segue reto).
  * Explode ao bater ou no fim do combustível: fere e empurra em volta, sem quebrar blocos.
  */
 public class MissilEntidade extends Projectile {
     private final InterpolationHandler interpolacao = new InterpolationHandler(this, 1);
     private Entity alvo;
+    private Vec3 ponto;
     private float dano = 14, raio = 3.5f, vel;
 
     public MissilEntidade(EntityType<? extends MissilEntidade> tipo, Level level) {
@@ -48,6 +50,12 @@ public class MissilEntidade extends Projectile {
         setPos(de);
         setDeltaMovement(dir.scale(vel));
         apontar(getDeltaMovement());
+    }
+
+    /** Sem alvo travado, vai até este ponto (onde a mira do piloto apontava) em vez de seguir reto. */
+    public MissilEntidade mirando(Vec3 ponto) {
+        this.ponto = ponto;
+        return this;
     }
 
     @Override
@@ -95,6 +103,7 @@ public class MissilEntidade extends Projectile {
             vel = Math.min(2.8f, vel + 0.12f);
             Vec3 quer = v.normalize();
             if (alvo != null && alvo.isAlive()) quer = alvo.getBoundingBox().getCenter().subtract(position()).normalize();
+            else if (ponto != null && position().distanceToSqr(ponto) > 1) quer = ponto.subtract(position()).normalize();
             Vec3 dir = v.normalize().lerp(quer, 0.2).normalize();
             v = dir.scale(vel);
         }

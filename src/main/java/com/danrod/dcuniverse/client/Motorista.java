@@ -79,6 +79,9 @@ public final class Motorista {
             if (!(e.getState() instanceof AvatarRenderState s)) return false;
             Minecraft mc = Minecraft.getInstance();
             if (mc.level == null || !(mc.level.getEntity(s.id) instanceof Entity p) || !(p.getVehicle() instanceof VeiculoBat v)) return false;
+            // O Batmóvel é baixo demais para um corpo inteiro: quem vai dentro some atrás do vidro escuro, em vez de
+            // atravessar a lataria e o teto.
+            if (v.forma() == VeiculoBat.BATMOVEL) return true;
             var ps = e.getPoseStack();
             ps.pushPose();
             ps.translate(0, ASSENTO, 0);
@@ -338,9 +341,14 @@ public final class Motorista {
             v.arfagem += Mth.clamp(alvo - v.arfagem, -3, 3);
             alvoArf = v.arfagem;
             vy = -Mth.sin(v.arfagem * Mth.DEG_TO_RAD) * vel + (pulo ? 0.12 : 0);
-            // Não fura a superfície: com o casco quase todo fora, só desce.
-            double fh = v.getFluidHeight(FluidTags.WATER);
-            if (fh < v.getBbHeight() + 0.25 && vy > 0) vy = Math.min(vy, (fh - v.getBbHeight() - 0.25) * 0.2);
+            // Não fura a superfície: perto dela só para de subir. (A altura da água medida na caixa do casco não serve
+            // aqui: ela só conta os blocos que a caixa toca, então fundo parece raso e o pulo não subia.)
+            double topo = v.getY() + v.getBbHeight();
+            boolean aguaAcima = v.level().getFluidState(net.minecraft.core.BlockPos.containing(v.getX(), topo + 0.35, v.getZ())).is(FluidTags.WATER);
+            if (!aguaAcima && vy > 0) {
+                double fh = v.getFluidHeight(FluidTags.WATER);
+                vy = Math.min(vy, (fh - v.getBbHeight() - 0.25) * 0.2);
+            }
         } else if (agua) {
             // Boia: mola até a linha d'água, mais alta quanto mais rápido (a proa sobe para planar).
             double fh = v.getFluidHeight(FluidTags.WATER);
