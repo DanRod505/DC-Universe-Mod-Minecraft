@@ -265,13 +265,18 @@ def verificar_guia(raiz, recursos, erros):
     registrados = set(re.findall(r'(?:item|blocoComItem)\("([a-z0-9_]+)"', java_todo))  # bloco() sozinho não tem item
     no_guia = {x["id"] for x in dados["itens"]}
     erros.extend(f"Guia: {x} registrado sem página no capítulo Itens" for x in sorted(registrados - no_guia))
-    # Abas do criativo (content/Itens.Aba): toda categoria de item cai numa aba de verdade, com nome nos dois idiomas.
+    # Abas do criativo (content/Itens.Aba): cada aba lê a tag dcuniverse:aba/<nome> que tools/gerar_conteudo.py grava;
+    # todo item do Guia está em exatamente uma delas, e cada aba tem nome nos dois idiomas.
     itens_java = (raiz / JAVA / "content/Itens.java").read_text(encoding="utf-8")
-    abas = re.findall(r'^\s+[A-Z]+\("(dcuniverse[a-z_]*)", "[a-z0-9_]+"((?:, "[a-z]+")+)\)', itens_java, re.M)
-    cats_abas = {c for _, cs in abas for c in re.findall(r'"([a-z]+)"', cs)}
+    abas = re.findall(r'^\s+[A-Z]+\("(dcuniverse[a-z_]*)", "([a-z]+)", "[a-z0-9_]+"\)', itens_java, re.M)
+    pasta_abas = raiz / "src/generated/resources/data/dcuniverse/tags/item/aba"
+    onde = defaultdict(list)
+    for _, tag in abas:
+        for v in (ler_json(pasta_abas / f"{tag}.json", erros) or {}).get("values", []):
+            onde[v.split(":")[1]].append(tag)
     for x in dados["itens"]:
-        if x["cat"] not in cats_abas:
-            erros.append(f"criativo: categoria {x['cat']} de {x['id']} sem aba em Itens.Aba")
+        if len(onde[x["id"]]) != 1:
+            erros.append(f"criativo: {x['id']} em {len(onde[x['id']])} abas (tags dcuniverse:aba/*), devia estar em 1")
     for i in IDIOMAS:
         lang = ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {}
         erros.extend(f"criativo: falta itemGroup.{a} em {i}.json" for a, _ in abas if f"itemGroup.{a}" not in lang)
@@ -331,10 +336,17 @@ def verificar_npcs(raiz, recursos, erros):
     npcs = {a.stem: ler_json(a, erros) or {} for a in sorted(recursos.glob("data/dcuniverse/npc/*.json"))}
     missoes = {a.stem: ler_json(a, erros) or {} for a in sorted(recursos.glob("data/dcuniverse/missao/*.json"))}
 
+    tags = {a.relative_to(pasta / "data/dcuniverse/tags/item").with_suffix("").as_posix()
+            for pasta in (recursos, raiz / "src/generated/resources")
+            for a in pasta.glob("data/dcuniverse/tags/item/**/*.json")}
+    cenas = set(re.findall(r'"([a-z_]+)"\.equals\(evento\)', (raiz / JAVA / "missao/Cenas.java").read_text(encoding="utf-8")))
+
     def item(onde, ref):
         ns, _, nome = ref.lstrip("#").rpartition(":")
         if ns == "dcuniverse" and not ref.startswith("#") and nome not in itens:
             erros.append(f"{onde}: item {ref} inexistente")
+        if ns == "dcuniverse" and ref.startswith("#") and nome not in tags:
+            erros.append(f"{onde}: tag de item {ref} inexistente")
 
     def chave(onde, k):
         for l, d in zip(("pt_br", "en_us"), langs):
@@ -375,6 +387,10 @@ def verificar_npcs(raiz, recursos, erros):
             item(onde, x["item"])
         for k in ("", ".desc", ".pedido", ".fim"):
             chave(onde, f"dcuniverse.missao.{mid}{k}")
+        if m.get("chapter"):
+            chave(onde, f"dcuniverse.capitulo.{m['chapter']}")
+        for g in m.get("rewards", {}).get("affinity_groups", {}):
+            chave(onde, f"dcuniverse.npc.grupo.{g}")
         for n, o in enumerate(m["objectives"]):
             if "item" in o:
                 item(onde, o["item"])
@@ -387,6 +403,10 @@ def verificar_npcs(raiz, recursos, erros):
                     erros.append(f"{onde}: entidade {t} inexistente")
             if o["type"] == "go":
                 chave(onde, f"dcuniverse.ponto.{o['local']}.{o['point']}")
+            if o.get("event") and o["event"] not in cenas:
+                erros.append(f"{onde}: cena {o['event']} inexistente (missao/Cenas.java)")
+            if o.get("event"):
+                chave(onde, f"dcuniverse.cena.{o['event']}")
 
 def verificar_sons(raiz, recursos, erros):
     java = (raiz / JAVA / "content/Sons.java").read_text(encoding="utf-8")

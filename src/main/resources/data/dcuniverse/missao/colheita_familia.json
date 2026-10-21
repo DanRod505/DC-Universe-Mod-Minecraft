@@ -1,0 +1,37 @@
+{
+  "npc": "dcuniverse:martha_kent",
+  "requires": [
+    "dcuniverse:meteoro_smallville"
+  ],
+  "repeatable": true,
+  "interval": 1,
+  "objectives": [
+    {
+      "type": "collect",
+      "item": "minecraft:wheat",
+      "count": 32
+    },
+    {
+      "type": "collect",
+      "item": "minecraft:pumpkin",
+      "count": 8
+    },
+    {
+      "type": "deliver",
+      "npc": "dcuniverse:martha_kent"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:golden_carrot",
+        "count": 4
+      }
+    ],
+    "xp": 40,
+    "affinity": 5,
+    "affinity_groups": {
+      "cidadaos": 3
+    }
+  }
+}

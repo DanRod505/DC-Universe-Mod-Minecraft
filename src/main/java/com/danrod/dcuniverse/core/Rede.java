@@ -378,9 +378,10 @@ public final class Rede {
     /** Uma missão ativa como o cliente vê: objetivo atual, progresso nele e para onde a seta aponta. */
     public record MissaoVista(String id, int objetivo, int progresso, boolean temAlvo, int x, int y, int z) {}
 
-    /** Diário do jogador: ativas, concluídas, a rastreada, afinidade por grupo e NPCs conhecidos. */
-    public record DiarioSync(List<MissaoVista> ativas, List<String> concluidas, String rastreada, Map<String, Integer> afinidades, List<String> conhecidos) {
-        public static final DiarioSync VAZIO = new DiarioSync(List.of(), List.of(), "", Map.of(), List.of());
+    /** Diário do jogador: ativas, concluídas, a rastreada, afinidade por grupo, NPCs conhecidos e missões que já podem ser aceitas. */
+    public record DiarioSync(List<MissaoVista> ativas, List<String> concluidas, String rastreada, Map<String, Integer> afinidades, List<String> conhecidos,
+                             List<String> disponiveis) {
+        public static final DiarioSync VAZIO = new DiarioSync(List.of(), List.of(), "", Map.of(), List.of(), List.of());
 
         public static void encode(DiarioSync m, FriendlyByteBuf b) {
             b.writeCollection(m.ativas, (buf, a) -> {
@@ -396,14 +397,25 @@ public final class Rede {
             b.writeUtf(m.rastreada);
             b.writeMap(m.afinidades, FriendlyByteBuf::writeUtf, FriendlyByteBuf::writeVarInt);
             b.writeCollection(m.conhecidos, FriendlyByteBuf::writeUtf);
+            b.writeCollection(m.disponiveis, FriendlyByteBuf::writeUtf);
         }
 
         public static DiarioSync decode(FriendlyByteBuf b) {
             return new DiarioSync(List.copyOf(b.readList(buf -> new MissaoVista(buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readBoolean(),
                 buf.readInt(), buf.readInt(), buf.readInt()))), List.copyOf(b.readList(FriendlyByteBuf::readUtf)), b.readUtf(),
-                Map.copyOf(b.readMap(FriendlyByteBuf::readUtf, FriendlyByteBuf::readVarInt)), List.copyOf(b.readList(FriendlyByteBuf::readUtf)));
+                Map.copyOf(b.readMap(FriendlyByteBuf::readUtf, FriendlyByteBuf::readVarInt)), List.copyOf(b.readList(FriendlyByteBuf::readUtf)),
+                List.copyOf(b.readList(FriendlyByteBuf::readUtf)));
         }
     }
+
+    /** Aliado vinculado pelo Comunicador da Liga, na mesma dimensão. */
+    public record Aliado(java.util.UUID id, String nome, double x, double y, double z) {}
+
+    /** Comunicador da Liga: aliados vinculados que também carregam um (lista vazia = esconder). */
+    public record LigaSync(List<Aliado> aliados) {}
+
+    /** Ponto de encontro marcado por um aliado (ou por você). */
+    public record LigaPonto(String quem, int x, int y, int z) {}
 
     /** Aviso de missão para o cliente mostrar (tipo "nova" ou "concluida"). */
     public record MissaoAviso(String tipo, String missao) {}
@@ -550,6 +562,27 @@ public final class Rede {
             .direction(PacketFlow.CLIENTBOUND)
             .encoder(DiarioSync::encode).decoder(DiarioSync::decode)
             .consumerMainThread((m, ctx) -> EstadoCliente.diario = m)
+            .add();
+        CANAL.messageBuilder(LigaSync.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeCollection(m.aliados(), (buf, a) -> {
+                buf.writeUUID(a.id());
+                buf.writeUtf(a.nome());
+                buf.writeDouble(a.x());
+                buf.writeDouble(a.y());
+                buf.writeDouble(a.z());
+            })).decoder(b -> new LigaSync(List.copyOf(b.readList(buf -> new Aliado(buf.readUUID(), buf.readUtf(), buf.readDouble(), buf.readDouble(), buf.readDouble())))))
+            .consumerMainThread((m, ctx) -> EstadoCliente.liga = m)
+            .add();
+        CANAL.messageBuilder(LigaPonto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> {
+                b.writeUtf(m.quem());
+                b.writeInt(m.x());
+                b.writeInt(m.y());
+                b.writeInt(m.z());
+            }).decoder(b -> new LigaPonto(b.readUtf(), b.readInt(), b.readInt(), b.readInt()))
+            .consumerMainThread((m, ctx) -> EstadoCliente.pontoLiga(m))
             .add();
         CANAL.messageBuilder(MissaoAviso.class)
             .direction(PacketFlow.CLIENTBOUND)
@@ -706,5 +739,15 @@ public final class Rede {
     public static void missaoAviso(ServerPlayer player, String tipo, String missao) {
         if (player.connection == null) return;
         CANAL.send(new MissaoAviso(tipo, missao), PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void liga(ServerPlayer player, LigaSync m) {
+        if (player.connection == null) return;
+        CANAL.send(m, PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void ligaPonto(ServerPlayer player, LigaPonto m) {
+        if (player.connection == null) return;
+        CANAL.send(m, PacketDistributor.PLAYER.with(player));
     }
 }

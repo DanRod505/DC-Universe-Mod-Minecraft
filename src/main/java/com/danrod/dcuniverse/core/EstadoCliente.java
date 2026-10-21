@@ -39,6 +39,18 @@ public final class EstadoCliente {
     /** Diário de Missões do jogador local. */
     public static volatile Rede.DiarioSync diario = Rede.DiarioSync.VAZIO;
     /** Missões aceitas ou concluídas que o cliente ainda vai anunciar. */
+    /** Comunicador da Liga: aliados à vista e o último ponto de encontro (com o tempo de jogo em que chegou). */
+    public static volatile Rede.LigaSync liga = new Rede.LigaSync(java.util.List.of());
+    public static volatile Rede.LigaPonto ponto;
+    public static volatile long pontoEm;
+    public static volatile java.util.function.Consumer<Rede.LigaPonto> aoPonto = m -> {};
+
+    public static void pontoLiga(Rede.LigaPonto m) {
+        ponto = m;
+        pontoEm = System.currentTimeMillis();
+        aoPonto.accept(m);
+    }
+
     public static final java.util.Queue<Rede.MissaoAviso> AVISOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
     /** Abre a conversa com um NPC (client/npc/DialogoScreen::receber). */
     public static volatile java.util.function.Consumer<Rede.NpcAbrir> npcAbrir = m -> {};
@@ -120,6 +132,8 @@ public final class EstadoCliente {
         missoes = Map.of();
         diario = Rede.DiarioSync.VAZIO;
         AVISOS.clear();
+        liga = new Rede.LigaSync(java.util.List.of());
+        ponto = null;
         APARENCIAS.clear();
         TRANSFORMOU.clear();
         MANOBRAS.clear();

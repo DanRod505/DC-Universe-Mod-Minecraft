@@ -53,6 +53,26 @@ public final class NpcsCliente {
     }
 
     /** Skin de um NPC (índice da lista "skins" do JSON). */
+    /**
+     * Marcador sobre o NPC para este jogador: '?' quando uma missão ativa espera falar ou entregar a ele, '!' quando
+     * ele tem missão para oferecer, 0 quando nenhum.
+     */
+    public static char marcador(Identifier npc) {
+        if (npc == null) return 0;
+        var d = EstadoCliente.diario;
+        for (var a : d.ativas()) {
+            DefMissao m = missao(Identifier.tryParse(a.id()));
+            if (m == null || a.objetivo() >= m.objetivos().size()) continue;
+            var o = m.objetivos().get(a.objetivo());
+            if ((o.tipo() == DefMissao.Tipo.TALK || o.tipo() == DefMissao.Tipo.DELIVER) && npc.equals(o.npc())) return '?';
+        }
+        for (String id : d.disponiveis()) {
+            DefMissao m = missao(Identifier.tryParse(id));
+            if (m != null && npc.equals(m.npc())) return '!';
+        }
+        return 0;
+    }
+
     public static PlayerSkin skin(DefNpc d, int i) {
         String tex = d.skins().get(Math.floorMod(i, d.skins().size()));
         return SKINS.computeIfAbsent(tex + (d.slim() ? "#slim" : ""), k -> {

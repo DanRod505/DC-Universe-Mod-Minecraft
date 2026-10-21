@@ -148,6 +148,7 @@ public final class Diario {
         if (m.recompensa().xp() > 0) p.giveExperiencePoints(m.recompensa().xp());
         DefNpc npc = Npcs.npc(m.npc());
         if (npc != null) Afinidade.mudar(p, npc.grupo(), m.recompensa().afinidade());
+        m.recompensa().grupos().forEach((grupo, n) -> Afinidade.mudar(p, grupo, n));
         p.level().playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 1.1f);
         Rede.npcFala(p, -1, m.npc().toString(), m.chave() + ".fim", List.of());
         Rede.missaoAviso(p, "concluida", id.toString());
@@ -160,6 +161,18 @@ public final class Diario {
     /** Uma vez por segundo: itens no inventário, lugares visitados e transformação. */
     public static void tickSegundo(ServerPlayer p) {
         verificar(p);
+        // Missões repetíveis voltam com o dia: avisa o cliente quando a lista de disponíveis muda (marcadores "!").
+        if (p.tickCount % 200 == 0 && !disponiveis(p).equals(ENVIADAS.get(p.getUUID()))) sincronizar(p);
+    }
+
+    private static final Map<java.util.UUID, List<String>> ENVIADAS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Missões que algum NPC pode oferecer agora a este jogador (o cliente desenha "!" sobre quem as dá). */
+    public static List<String> disponiveis(ServerPlayer p) {
+        List<String> out = new ArrayList<>();
+        for (DefMissao m : Npcs.missoes()) if (disponivel(p, m)) out.add(m.id().toString());
+        out.sort(null);
+        return out;
     }
 
     /** Avança tudo o que já está cumprido (em cascata: dois "collect" seguidos podem fechar juntos). */
@@ -177,7 +190,7 @@ public final class Diario {
                         agora = Math.min(o.qtd(), o.item().conta(p));
                         yield agora >= o.qtd();
                     }
-                    case GO -> pr.alvo() != null && p.blockPosition().distSqr(pr.alvo()) <= (double) o.raio() * o.raio()
+                    case GO -> pr.alvo() != null && chegou(p.blockPosition(), pr.alvo(), o.raio())
                         || pr.alvo() == null && !o.local().isEmpty() && o.ponto().isEmpty() && o.local().equals(Chegada.localEm(p));
                     case TRANSFORM -> {
                         Identifier atual = EstadoJogador.de(p).personagemId();
@@ -200,6 +213,12 @@ public final class Diario {
             }
         }
         if (mudou) sincronizar(p);
+    }
+
+    /** Chegou ao lugar: raio medido no plano, com folga na altura para quem chega voando. */
+    static boolean chegou(BlockPos p, BlockPos alvo, int raio) {
+        double dx = p.getX() - alvo.getX(), dz = p.getZ() - alvo.getZ();
+        return dx * dx + dz * dz <= (double) raio * raio && Math.abs(p.getY() - alvo.getY()) <= raio * 2;
     }
 
     /** O jogador abriu a conversa com o NPC: cumpre "talk" e devolve a fala da missão (ou vazio). */
@@ -299,6 +318,11 @@ public final class Diario {
 
     /** Fecha o objetivo {@code atual}; depois do último, conclui. @return o novo progresso (null = concluída) */
     private static Progresso avancar(ServerPlayer p, DefMissao m, int atual) {
+        String evento = m.objetivos().get(atual).evento();
+        if (!evento.isEmpty()) {
+            Progresso pr = ativas(p).get(m.id());
+            Cenas.iniciar(p, evento, pr == null || pr.alvo() == null ? p.blockPosition() : pr.alvo());
+        }
         int prox = atual + 1;
         if (prox >= m.objetivos().size()) {
             concluir(p, m.id());
@@ -358,7 +382,9 @@ public final class Diario {
         List<Rede.MissaoVista> ativas = new ArrayList<>();
         ativas(p).forEach((id, pr) -> ativas.add(new Rede.MissaoVista(id.toString(), pr.objetivo(), pr.progresso(),
             pr.alvo() != null, pr.alvo() == null ? 0 : pr.alvo().getX(), pr.alvo() == null ? 0 : pr.alvo().getY(), pr.alvo() == null ? 0 : pr.alvo().getZ())));
-        return new Rede.DiarioSync(List.copyOf(ativas), concluidas(p), rastreada(p), Afinidade.todas(p), Afinidade.conhecidos(p));
+        List<String> disp = disponiveis(p);
+        ENVIADAS.put(p.getUUID(), disp);
+        return new Rede.DiarioSync(List.copyOf(ativas), concluidas(p), rastreada(p), Afinidade.todas(p), Afinidade.conhecidos(p), disp);
     }
 
     private static CompoundTag ler(ServerPlayer p) {

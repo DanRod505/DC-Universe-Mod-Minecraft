@@ -124,6 +124,10 @@
     "osso_cristal": {
       "desc": "An ordinary bone wrapped in a Kryptonian crystal that glows from within. It is the only treat Krypto the Superdog accepts: give him one to tame him (one Krypto per player). If he is hurt, another bone heals him completely.",
       "obter": "Crafted from a Bone and a Kryptonian Crystal. Martha Kent also gives you one when you accept the mission \"A Four-Legged Friend\"."
+    },
+    "comunicador_liga": {
+      "desc": "Pocket radio bearing the Justice League symbol. Right-click another player to link the two of you (again to unlink). Linked allies who also carry a communicator show at the top of the screen with direction and distance. Right-click in the air to mark a meeting point where you aim (up to 160 blocks): it shows for you and your allies.",
+      "obter": "Crafted from a Circuit Board, two Copper Ingots and an Ender Pearl. Martha Kent also gives one when you finish the mission \"The First Emblem\"."
     }
   }
 }

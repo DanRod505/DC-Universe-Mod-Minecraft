@@ -29,6 +29,9 @@ import versoes as V  # noqa: E402
 
 NS = "dcuniverse"
 CATS_BLOCO = {"minerio", "bloco", "decoracao"}
+# Abas do inventário criativo (content/Itens.Aba): cada uma vira a tag de item dcuniverse:aba/<nome>.
+ABAS = {"herois": {"transformacao"}, "equipamentos": {"ferramenta", "equipamento"}, "utilidades": {"utilidade", "missao", "trofeu"},
+        "recursos": {"minerio", "recurso"}, "componentes": {"componente"}, "blocos": {"bloco", "decoracao"}}
 
 
 def ler(arq):
@@ -130,6 +133,20 @@ def main():
     guia.parent.mkdir(parents=True, exist_ok=True)
     guia.write_text(json.dumps({"itens": lista, "receitas": [ler(a) for a in todas]}, indent=1, ensure_ascii=False) + "\n",
                     encoding="utf-8")
+    tags = raiz / f"src/generated/resources/data/{NS}/tags/item/aba"
+    shutil.rmtree(tags, ignore_errors=True)
+    tags.mkdir(parents=True)
+    sem_aba = [x["id"] for x in lista if not any(x["cat"] in c for c in ABAS.values())]
+    if sem_aba:
+        sys.exit(f"categoria sem aba do criativo (ABAS em tools/gerar_conteudo.py): {sem_aba}")
+    for nome, cats in ABAS.items():
+        valores = [f"{NS}:{x['id']}" for x in lista if x["cat"] in cats]
+        (tags / f"{nome}.json").write_text(json.dumps({"values": valores}, indent=2) + "\n", encoding="utf-8")
+    # Itens de transformação por nível do personagem (missão "O Primeiro Emblema" pede um de nível 1).
+    for nivel in range(1, 5):
+        valores = [f"{NS}:{p['transformacao']['id']}" for p in personagens
+                   if p["ficha"]["nivel"] == nivel and p["transformacao"]["id"] in ids]
+        (tags.parent / f"transformacao_nivel_{nivel}.json").write_text(json.dumps({"values": valores}, indent=2) + "\n", encoding="utf-8")
     print(f"conteúdo {atual}: {len(ids)} itens, {feitas} receitas")
 
 

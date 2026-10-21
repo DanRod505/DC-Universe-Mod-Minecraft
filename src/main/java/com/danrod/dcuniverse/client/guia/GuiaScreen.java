@@ -566,6 +566,7 @@ public final class GuiaScreen extends Screen {
         }
         Rede.MissaoVista v = vista(id);
         boolean feita = v == null;
+        if (!m.capitulo().isEmpty()) texto(out, Component.translatable("dcuniverse.capitulo." + m.capitulo()).withStyle(ChatFormatting.ITALIC), OURO, 2);
         titulos(out, TextoMissao.nome(m));
         texto(out, Component.translatable("dcuniverse.guia.missoes.de", NpcsCliente.nome(m.npc())), SUAVE, 4);
         if (Language.getInstance().has(m.chave() + ".desc")) texto(out, Component.translatable(m.chave() + ".desc"), TINTA, 4);
@@ -586,7 +587,7 @@ public final class GuiaScreen extends Screen {
             }));
         }
         DefMissao.Recompensa r = m.recompensa();
-        if (!r.itens().isEmpty() || r.xp() > 0 || r.afinidade() > 0) {
+        if (!r.itens().isEmpty() || r.xp() > 0 || r.afinidade() > 0 || !r.grupos().isEmpty()) {
             out.add(espaco(3));
             out.add(secao("dcuniverse.guia.missoes.recompensas"));
             for (var it : r.itens()) {
@@ -598,6 +599,8 @@ public final class GuiaScreen extends Screen {
             if (r.afinidade() > 0 && dono != null) {
                 out.add(item(Component.translatable("dcuniverse.guia.missoes.afinidade", r.afinidade(), Component.translatable("dcuniverse.npc.grupo." + dono.grupo()))));
             }
+            r.grupos().forEach((grupo, n) -> out.add(item(Component.translatable("dcuniverse.guia.missoes.afinidade", n,
+                Component.translatable("dcuniverse.npc.grupo." + grupo)))));
         }
         if (m.repetivel()) {
             out.add(espaco(2));

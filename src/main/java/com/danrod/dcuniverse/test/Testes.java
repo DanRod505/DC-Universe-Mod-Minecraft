@@ -27,6 +27,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -75,6 +76,10 @@ public final class Testes {
         FUNCOES.register("smallville", () -> Testes::smallville);
         FUNCOES.register("npcs", () -> Testes::npcs);
         FUNCOES.register("pets", () -> Testes::mascotes);
+        FUNCOES.register("creative_tabs", () -> Testes::abas);
+        FUNCOES.register("prologue", () -> Testes::prologo);
+        FUNCOES.register("meteor_shower", () -> Testes::chuvaMeteoros);
+        FUNCOES.register("league_communicator", () -> Testes::comunicador);
     }
 
     private Testes() {}
@@ -1028,6 +1033,106 @@ public final class Testes {
         h.getLevel().addFreshEntity(n);
         p.snapTo(pos.getX() + 1.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
         return n;
+    }
+
+    /**
+     * Missões do Prólogo (v0.3 etapa 3): a ordem (Meteoro abre O Primeiro Emblema e Colheita em Família), a afinidade
+     * extra com os cidadãos, fabricar pela tag de transformação de nível 1, transformar e o Comunicador de recompensa.
+     */
+    static void prologo(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Identifier meteoro = dcu("meteoro_smallville"), emblema = dcu("primeiro_emblema"), colheita = dcu("colheita_familia");
+        var mEmblema = com.danrod.dcuniverse.npc.Npcs.missao(emblema);
+        h.assertTrue(com.danrod.dcuniverse.npc.Npcs.missao(meteoro) != null && mEmblema != null && com.danrod.dcuniverse.npc.Npcs.missao(colheita) != null, "missões do Prólogo carregadas");
+        h.assertValueEqual(mEmblema.capitulo(), "prologo", "capítulo do Prólogo");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.disponivel(p, com.danrod.dcuniverse.npc.Npcs.missao(meteoro)), "Meteoro em Smallville abre a campanha");
+        h.assertTrue(!com.danrod.dcuniverse.missao.Diario.disponivel(p, mEmblema), "O Primeiro Emblema pede o Meteoro antes");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.disponiveis(p).contains(meteoro.toString()), "Martha mostra ! com o Meteoro");
+        com.danrod.dcuniverse.missao.Diario.aceitar(p, meteoro);
+        com.danrod.dcuniverse.missao.Diario.concluir(p, meteoro);
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "cidadaos"), 5, "Meteoro dá +5 com os cidadãos");
+        h.assertTrue(p.getInventory().countItem(com.danrod.dcuniverse.content.Itens.FRAGMENTO_ALIENIGENA.get()) >= 4, "recompensa: fragmentos alienígenas");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.disponivel(p, mEmblema), "Meteoro libera O Primeiro Emblema");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.disponivel(p, com.danrod.dcuniverse.npc.Npcs.missao(colheita)), "Meteoro libera a Colheita em Família");
+
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.aceitar(p, emblema), "aceitar O Primeiro Emblema");
+        h.assertTrue(p.getInventory().countItem(com.danrod.dcuniverse.content.Itens.TECIDO_TATICO.get()) >= 2, "Martha dá o tecido ao aceitar");
+        com.danrod.dcuniverse.missao.Diario.fabricou(p, new ItemStack(com.danrod.dcuniverse.content.Itens.CINTO_BATMAN.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(emblema).objetivo(), 0, "o cinto não conta antes do núcleo");
+        com.danrod.dcuniverse.missao.Diario.fabricou(p, new ItemStack(com.danrod.dcuniverse.content.Itens.NUCLEO_META_1.get()));
+        com.danrod.dcuniverse.missao.Diario.fabricou(p, new ItemStack(com.danrod.dcuniverse.content.Itens.CRISTAL_SUPERMAN.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(emblema).objetivo(), 1, "o cristal do Superman não é de nível 1");
+        com.danrod.dcuniverse.missao.Diario.fabricou(p, new ItemStack(com.danrod.dcuniverse.content.Itens.CINTO_BATMAN.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(emblema).objetivo(), 2, "o cinto vale pela tag de nível 1");
+        Transformacao.transformar(p, BATMAN, true);
+        com.danrod.dcuniverse.missao.Diario.verificar(p);
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(emblema).objetivo(), 3, "transformar-se cumpre o objetivo");
+        Transformacao.destransformar(p);
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.falou(p, dcu("martha_kent")).isPresent(), "falar com a Martha fecha a missão");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.concluida(p, emblema), "O Primeiro Emblema concluída");
+        h.assertTrue(com.danrod.dcuniverse.liga.Liga.carrega(p), "recompensa: Comunicador da Liga");
+        h.assertTrue(!com.danrod.dcuniverse.missao.Diario.disponiveis(p).contains(emblema.toString()), "missão única não volta");
+        p.discard();
+        h.succeed();
+    }
+
+    /** Chuva de meteoros: três meteoros caem em volta do ponto e cada um deixa um Meteorito que solta fragmentos. */
+    static void chuvaMeteoros(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        BlockPos centro = h.absolutePos(new BlockPos(1, 1, 1));
+        var pontos = com.danrod.dcuniverse.missao.Cenas.chuvaMeteoros(p, centro);
+        h.assertValueEqual(pontos.size(), 3, "três meteoros");
+        h.runAfterDelay(140, () -> {
+            var level = h.getLevel();
+            for (BlockPos b : pontos) h.assertTrue(level.getBlockState(b).is(com.danrod.dcuniverse.content.Blocos.METEORITO.get()), "meteorito caiu em " + b);
+            var drops = net.minecraft.world.level.block.Block.getDrops(level.getBlockState(pontos.get(0)), level, pontos.get(0), null);
+            h.assertTrue(drops.stream().anyMatch(s -> s.is(com.danrod.dcuniverse.content.Itens.FRAGMENTO_ALIENIGENA.get())), "meteorito solta fragmentos alienígenas");
+            for (BlockPos b : pontos) level.removeBlock(b, false);
+            p.discard();
+            h.succeed();
+        });
+    }
+
+    /** Comunicador da Liga: vínculo dos dois lados (e desfazer), só aparece quem carrega um, e o ponto de encontro. */
+    static void comunicador(GameTestHelper h) {
+        ServerPlayer a = jogador(h), b = jogador(h);
+        h.assertTrue(com.danrod.dcuniverse.liga.Liga.alternar(a, b), "vincular");
+        h.assertTrue(com.danrod.dcuniverse.liga.Liga.aliados(a).containsKey(b.getUUID().toString())
+            && com.danrod.dcuniverse.liga.Liga.aliados(b).containsKey(a.getUUID().toString()), "vínculo dos dois lados");
+        a.getInventory().add(new ItemStack(com.danrod.dcuniverse.content.Itens.COMUNICADOR_LIGA.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.liga.Liga.marcar(a, a.blockPosition(), List.of(a, b)), 0, "aliado sem comunicador não recebe o ponto");
+        b.getInventory().add(new ItemStack(com.danrod.dcuniverse.content.Itens.COMUNICADOR_LIGA.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.liga.Liga.marcar(a, a.blockPosition(), List.of(a, b)), 1, "aliado com comunicador recebe o ponto");
+        com.danrod.dcuniverse.liga.Liga.tick(h.getLevel().getServer());
+        h.assertTrue(!com.danrod.dcuniverse.liga.Liga.alternar(a, b), "desvincular");
+        h.assertTrue(com.danrod.dcuniverse.liga.Liga.aliados(a).isEmpty() && com.danrod.dcuniverse.liga.Liga.aliados(b).isEmpty(), "vínculo desfeito dos dois lados");
+        a.discard();
+        b.discard();
+        h.succeed();
+    }
+
+    /**
+     * Abas do criativo: montadas com as tags do servidor, todo item do mod (menos as peças do traje, que só existem
+     * transformado) aparece em exatamente uma aba, e cada aba do mod tem o item dela.
+     */
+    static void abas(GameTestHelper h) {
+        var params = new net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters(
+            h.getLevel().enabledFeatures(), true, h.getLevel().registryAccess());
+        java.util.Map<net.minecraft.world.item.Item, String> onde = new java.util.HashMap<>();
+        for (var a : com.danrod.dcuniverse.content.Itens.Aba.values()) {
+            a.get().buildContents(params);
+            h.assertTrue(!a.get().getDisplayItems().isEmpty(), "aba " + a.id + " vazia");
+            for (ItemStack s : a.get().getDisplayItems()) {
+                String antes = onde.put(s.getItem(), a.id);
+                h.assertTrue(antes == null, s.getItem() + " em duas abas: " + antes + " e " + a.id);
+            }
+        }
+        for (var r : com.danrod.dcuniverse.content.Itens.ITEMS.getEntries()) {
+            if (r.get() instanceof com.danrod.dcuniverse.suit.TrajeItem) continue;
+            h.assertTrue(onde.containsKey(r.get()), "item fora do criativo: " + r.getId());
+        }
+        h.assertTrue("dcuniverse_blocos".equals(onde.get(com.danrod.dcuniverse.content.Blocos.CAMARA_SOLAR.get().asItem())), "Câmara Solar na aba Blocos");
+        h.succeed();
     }
 
     /**

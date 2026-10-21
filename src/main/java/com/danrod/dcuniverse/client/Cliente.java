@@ -57,6 +57,8 @@ public final class Cliente {
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "veiculo"), Motorista::desenhar);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "rastreio"), com.danrod.dcuniverse.client.npc.Rastreio::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "liga"), LigaHud::desenhar);
         });
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> {
             e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new);
@@ -104,6 +106,8 @@ public final class Cliente {
         Saltador.registrar();
         Piloto.registrar();
         Motorista.registrar();
+        LigaHud.registrar();
+        com.danrod.dcuniverse.client.npc.NpcRenderer.registrar();
     }
 
     private static void tick() {
@@ -116,6 +120,7 @@ public final class Cliente {
         while (Teclas.DIARIO.consumeClick()) {
             if (livre) GuiaScreen.abrirDiario();
         }
+        LigaHud.tick(mc);
         for (Rede.MissaoAviso a; (a = EstadoCliente.AVISOS.poll()) != null; ) {
             mc.gui.toastManager().addToast(new com.danrod.dcuniverse.client.npc.MissaoToast(a.tipo(), a.missao()));
         }

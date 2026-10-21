@@ -13,14 +13,10 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-import com.google.gson.JsonParser;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
 
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 /** Itens do mod. O lote de itens da versão (minérios, cristais, núcleos) entra na última etapa dela. */
@@ -73,57 +69,45 @@ public final class Itens {
 
     // Utilidades
     public static final RegistryObject<Item> OSSO_CRISTAL = item("osso_cristal", p -> new Item(p.stacksTo(16).rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> COMUNICADOR_LIGA = item("comunicador_liga", p -> new com.danrod.dcuniverse.liga.ComunicadorItem(p.stacksTo(1).rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> GUIA_HEROI = item("guia_heroi", p -> new GuiaItem(p.stacksTo(1)));
 
     /**
-     * Abas do inventário criativo, uma por tipo de item. O tipo é o "cat" de docs/dados (o mesmo dos grupos do Guia),
-     * lido de assets/dcuniverse/guia/itens.json, que tools/gerar_conteudo.py gera; item sem categoria cai em Utilidades.
+     * Abas do inventário criativo, uma por tipo de item. O tipo é o "cat" de docs/dados (o mesmo dos grupos do Guia):
+     * tools/gerar_conteudo.py grava cada aba como a tag de item dcuniverse:aba/&lt;nome&gt;, que chega ao cliente com as
+     * outras tags ao entrar no mundo. Item sem tag cai em Utilidades; o GameTest "abas" confere que nada fica de fora.
      */
     public enum Aba {
-        HEROIS("dcuniverse", "cristal_superman", "transformacao"),
-        EQUIPAMENTOS("dcuniverse_equipamentos", "batarangue_simples", "ferramenta", "equipamento"),
-        UTILIDADES("dcuniverse_utilidades", "guia_heroi", "utilidade", "missao", "trofeu"),
-        RECURSOS("dcuniverse_recursos", "fragmento_kryptonita", "minerio", "recurso"),
-        COMPONENTES("dcuniverse_componentes", "nucleo_meta_1", "componente"),
-        BLOCOS("dcuniverse_blocos", "batcomputador", "bloco", "decoracao");
+        HEROIS("dcuniverse", "herois", "cristal_superman"),
+        EQUIPAMENTOS("dcuniverse_equipamentos", "equipamentos", "batarangue_simples"),
+        UTILIDADES("dcuniverse_utilidades", "utilidades", "guia_heroi"),
+        RECURSOS("dcuniverse_recursos", "recursos", "fragmento_kryptonita"),
+        COMPONENTES("dcuniverse_componentes", "componentes", "nucleo_meta_1"),
+        BLOCOS("dcuniverse_blocos", "blocos", "batcomputador");
 
         public final String id;
+        public final TagKey<Item> tag;
         final String icone;
-        final List<String> cats;
         RegistryObject<CreativeModeTab> aba;
 
-        Aba(String id, String icone, String... cats) {
+        Aba(String id, String tag, String icone) {
             this.id = id;
+            this.tag = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(DCUniverse.MODID, "aba/" + tag));
             this.icone = icone;
-            this.cats = List.of(cats);
         }
 
-        static Aba de(String itemId) {
-            String cat = categorias().getOrDefault(itemId, "utilidade");
-            for (Aba a : values()) if (a.cats.contains(cat)) return a;
+        public CreativeModeTab get() {
+            return aba.get();
+        }
+
+        /** A aba do item: a primeira tag de aba que ele tem, ou Utilidades. */
+        static Aba de(HolderLookup.Provider registros, Item item) {
+            var itens = registros.lookupOrThrow(Registries.ITEM);
+            for (Aba a : values()) {
+                if (a != UTILIDADES && itens.get(a.tag).map(t -> t.contains(item.builtInRegistryHolder())).orElse(false)) return a;
+            }
             return UTILIDADES;
         }
-    }
-
-    private static Map<String, String> categorias;
-
-    private static synchronized Map<String, String> categorias() {
-        if (categorias == null) {
-            Map<String, String> m = new HashMap<>();
-            try (var in = Itens.class.getResourceAsStream("/assets/dcuniverse/guia/itens.json")) {
-                if (in != null) {
-                    var raiz = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
-                    for (var e : raiz.getAsJsonArray("itens")) {
-                        var o = e.getAsJsonObject();
-                        m.put(o.get("id").getAsString(), o.get("cat").getAsString());
-                    }
-                }
-            } catch (Exception ex) {
-                DCUniverse.LOGGER.error("Abas do criativo: não deu para ler as categorias dos itens", ex);
-            }
-            categorias = Map.copyOf(m);
-        }
-        return categorias;
     }
 
     static {
@@ -136,7 +120,7 @@ public final class Itens {
                     .icon(() -> new ItemStack(ITEMS.getEntries().stream().filter(r -> r.getId().getPath().equals(a.icone))
                         .findFirst().map(RegistryObject::get).orElse(CRISTAL_SUPERMAN.get())))
                     .displayItems((params, out) -> ITEMS.getEntries().stream()
-                        .filter(r -> !(r.get() instanceof TrajeItem) && Aba.de(r.getId().getPath()) == a)
+                        .filter(r -> !(r.get() instanceof TrajeItem) && Aba.de(params.holders(), r.get()) == a)
                         .forEach(r -> out.accept(r.get())));
                 if (anterior != null) b.withTabsBefore(Identifier.fromNamespaceAndPath(DCUniverse.MODID, anterior.id));
                 return b.build();

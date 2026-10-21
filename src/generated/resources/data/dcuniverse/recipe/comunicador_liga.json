@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "E": "minecraft:ender_pearl",
+    "P": "dcuniverse:placa_circuito"
+  },
+  "pattern": [
+    " P ",
+    "CEC"
+  ],
+  "result": {
+    "id": "dcuniverse:comunicador_liga"
+  }
+}

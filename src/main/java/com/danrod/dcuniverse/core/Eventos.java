@@ -107,6 +107,9 @@ public final class Eventos {
             Onda.tick();
             com.danrod.dcuniverse.ability.Congelamento.tick();
             Fortaleza.tick();
+            com.danrod.dcuniverse.missao.Cenas.tick();
+            com.danrod.dcuniverse.missao.Cenas.tickFumaca();
+            com.danrod.dcuniverse.liga.Liga.tick(e.server());
             com.danrod.dcuniverse.ability.active.Gancho.tick();
             com.danrod.dcuniverse.ability.active.Fumaca.tick(e.server());
             com.danrod.dcuniverse.ability.active.Disruptor.tick();
@@ -116,6 +119,7 @@ public final class Eventos {
             Onda.limpar();
             com.danrod.dcuniverse.ability.Congelamento.limpar();
             Fortaleza.limpar();
+            com.danrod.dcuniverse.missao.Cenas.limpar();
             com.danrod.dcuniverse.ability.active.Gancho.limpar();
             com.danrod.dcuniverse.ability.active.Veiculo.limpar();
             com.danrod.dcuniverse.ability.active.Fumaca.limpar();
