@@ -51,6 +51,27 @@ Batman (v0.2):
 - veiculo_pneu.ogg      pneu derrapando (laço)
 - veiculo_turbo.ogg     pós-combustor acendendo
 - veiculo_atropela.ogg  pancada do veículo atingindo alguém
+Supergirl e Superboy (v0.3):
+- investida.ogg         investida aérea da Supergirl: estalo sônico seco e o ar rasgando para longe (Doppler)
+- telecinese_ergue.ogg  telecinese tátil arrancando blocos do chão: terra rachando e moendo, cascalho escorrendo e o
+                        zumbido telecinético crescendo por baixo
+- telecinese_lanca.ogg  os blocos arremessados: massa pesada passando e o pulso telecinético de liberação
+- telecinese_pousa.ogg  os blocos pousados com cuidado: baques macios e pesados assentando, o zumbido sumindo
+- escudo_tk_liga.ogg    bolha telecinética se formando: "whoomp" grave e um zumbido arejado e cintilante subindo
+- escudo_tk_desliga.ogg a bolha desfazendo: zumbido caindo de tom e um "pop" macio
+- escudo_tk_impacto.ogg golpe batendo na bolha: baque surdo e um anel brilhante ondulando
+- ilha_arranca.ogg      disco de terreno arrancado do chão: ronco muito grave, rachaduras, raízes partindo e terra e
+                        pedras despencando, crescendo
+- ilha_motor.ogg        ilha flutuando: zumbido telecinético grave e constante, rangidos de pedra e ar (laço sem emenda;
+                        volume e tom variam no código)
+- ilha_pousa.ogg        a ilha assentando de vez: baque fundo e pesado, ronco e o cascalho acomodando
+- nave_chega.ogg        nave de cristal kryptoniana descendo do céu: sopro liso, acorde de cristal e um freio macio
+- nave_motor.ogg        motor da nave: zumbido de cristal liso com cintilação e ar correndo (laço; o tom sobe com a
+                        velocidade)
+- nave_canhao.ogg       canhão solar: raio de energia quente e brilhante, zumbindo e estalando (laço, toca enquanto segura)
+- nave_orbe.ogg         orbe solar lançado: sopro subindo e um estouro de energia brilhante
+- nave_escudo_liga.ogg  escudo da nave ligando: sinos de cristal crescendo e o zumbido
+- nave_escudo_desliga.ogg  escudo da nave desligando: sinos descendo e sumindo
 
 Uso: python3 tools/arte/sons.py --raiz .  (precisa de numpy, scipy e ffmpeg)
 """
@@ -789,6 +810,414 @@ def veiculo_atropela():
     return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.9), 0.1)
 
 
+# ---------------------------------------------------------------- Supergirl e Superboy (v0.3)
+
+def faixa_movel(x, centro, oitavas=1.0, passo=1 / 3):
+    """Passa `x` por uma faixa cujo centro anda com o tempo (`centro` em Hz, um valor por amostra): banco de
+    faixas fixas cruzadas suavemente na escala de oitavas, sem o estalo de trocar o filtro no meio."""
+    lc = np.log2(np.clip(centro, 40, SR / 3))
+    out = np.zeros(len(x))
+    for c in np.arange(lc.min() - passo, lc.max() + passo * 1.01, passo):
+        peso = np.clip(1 - np.abs(lc - c) / passo, 0, 1)
+        if peso.max() <= 0:
+            continue
+        fc = 2 ** c
+        out += filtro(x, "bandpass", [max(fc * 2 ** (-oitavas / 2), 20), min(fc * 2 ** (oitavas / 2), SR / 2.2)]) * peso
+    return out
+
+
+def tremor(seg, taxa, fundo=0.3):
+    """Envelope irregular (atrito, turbulência, ronco): ruído lento retificado, entre `fundo` e 1."""
+    e = np.abs(filtro(ruido(seg), "lowpass", taxa))
+    e = np.clip(e / (np.percentile(e, 97) + 1e-9), 0, 1)
+    return fundo + (1 - fundo) * e
+
+
+def suave(t, ini, fim):
+    """Rampa suave (smoothstep) de 0 em `ini` a 1 em `fim`."""
+    u = np.clip((t - ini) / (fim - ini), 0, 1)
+    return u * u * (3 - 2 * u)
+
+
+def cascalho(seg, n, densidade, banda=(500, 4000), dur=(0.005, 0.03), ganho=(0.1, 0.4)):
+    """Terra e pedrinhas caindo: `n` grãos curtos espalhados no tempo conforme `densidade` (um peso por amostra)."""
+    total = int(round(seg * SR))
+    out = np.zeros(total)
+    cdf = np.cumsum(densidade)
+    cdf /= cdf[-1]
+    for _ in range(n):
+        i = int(np.searchsorted(cdf, RNG.random()))
+        m = int(RNG.uniform(*dur) * SR)
+        if i + m >= total:
+            continue
+        lo = RNG.uniform(banda[0], banda[0] * 1.8)
+        hi = max(RNG.uniform(banda[1] * 0.5, banda[1]), lo * 1.6)
+        g = filtro(RNG.standard_normal(m), "bandpass", [lo, hi]) * np.exp(-np.arange(m) / (m / 5))
+        out[i:i + m] += g * RNG.uniform(*ganho) * np.clip(np.arange(m) / (0.0005 * SR), 0, 1)
+    return out
+
+
+def racha(seg=0.3, grave=110, brilho=1.0):
+    """Rachadura de pedra: rajada de micro-estalos, o corpo da pedra soando e um baque grave."""
+    n = int(round(seg * SR))
+    estalos = np.zeros(n)
+    for _ in range(RNG.integers(5, 10)):
+        i = int(RNG.exponential(0.012) * SR)
+        m = int(0.004 * SR)
+        if i + m < n:
+            estalos[i:i + m] += filtro(RNG.standard_normal(m), "highpass", 1800) * np.exp(-np.arange(m) / (0.0008 * SR)) \
+                * RNG.uniform(0.4, 1) * brilho
+    corpo = filtro(ruido(seg), "bandpass", [450, 2400]) * env(n, 0.001, 0.035) * 0.8
+    baque = varredura(grave, grave * 0.4, seg, 0.5) * env(n, 0.002, seg / 5) * 0.9
+    return estalos + corpo + baque
+
+
+def raiz_estala(seg=0.12):
+    """Raiz partindo: estalo lenhoso seco, a madeira ressoando curto e as fibras rasgando logo depois."""
+    n = int(round(seg * SR))
+    t = np.arange(n) / SR
+    estalo = filtro(ruido(seg), "bandpass", [1200, 6000]) * np.exp(-t / 0.0015) * 1.4
+    f = RNG.uniform(600, 1300)
+    madeira = (np.sin(2 * np.pi * f * t) + 0.5 * np.sin(2 * np.pi * f * 2.31 * t)) * np.exp(-t / 0.012) * 0.5
+    fibras = np.zeros(n)
+    for _ in range(6):
+        i = int(RNG.uniform(0.005, 0.06) * SR)
+        m = int(0.002 * SR)
+        fibras[i:i + m] += filtro(RNG.standard_normal(m), "highpass", 2500) * np.exp(-np.arange(m) / (0.0005 * SR)) \
+            * RNG.uniform(0.2, 0.6)
+    return estalo + madeira + fibras
+
+
+def rangido(seg, taxa=(40, 70), tons=(380, 870)):
+    """Pedra rangendo contra pedra: atrito agarra-solta (trem de pulsos irregular) passando por ressonâncias."""
+    n = int(round(seg * SR))
+    pulsos = np.zeros(n)
+    pos = 0.0
+    while True:
+        pos += RNG.uniform(0.6, 1.4) / (taxa[0] + (taxa[1] - taxa[0]) * pos / seg)
+        i = int(pos * SR)
+        if i >= n:
+            break
+        pulsos[i] = RNG.uniform(0.4, 1)
+    tt = t_(0.03)
+    ir = sum(np.sin(2 * np.pi * f * tt) * np.exp(-tt / 0.006) for f in tons)
+    return fftconvolve(pulsos, ir)[:n] * np.sin(np.pi * np.arange(n) / n) ** 0.7
+
+
+def zumbido_tk(t, f, brilho=0.5):
+    """Zumbido telecinético: fundamental grave, a oitava de baixo e o dobro/triplo levemente desafinados (batimento
+    lento que dá a sensação de pressão). `f` pode variar no tempo; num laço use múltiplos de 1/duração."""
+    fase = 2 * np.pi * np.cumsum(np.broadcast_to(f, t.shape)) / SR
+    x = np.sin(fase) + 0.3 * np.sin(fase / 2)
+    x += 0.3 * (np.sin(2 * fase + 2 * np.pi * 0.5 * t) + np.sin(2 * fase - 2 * np.pi * 0.5 * t + 1))
+    x += brilho * 0.18 * np.sin(3 * fase + 2 * np.pi * 0.25 * t)
+    return x
+
+
+def vidro(t, f, brilho=0.5, desafina=0.5):
+    """Tom de cristal sustentado: parciais harmônicas suaves, cada uma num par levemente desafinado (o brilho vivo
+    do cristal). `f` pode variar no tempo; num laço use f e `desafina` múltiplos de 1/duração."""
+    fase = 2 * np.pi * np.cumsum(np.broadcast_to(f, t.shape)) / SR
+    fmax = np.max(f)
+    out = np.zeros(len(t))
+    for k, g in ((1, 1), (2, 0.7 * brilho), (3, 0.4 * brilho), (4, 0.22 * brilho), (6, 0.1 * brilho)):
+        if fmax * k < SR / 2.5:
+            out += g * 0.7 * (np.sin(k * fase + RNG.random() * 6) + 0.4 * np.sin(k * fase + 2 * np.pi * desafina * t + RNG.random() * 6))
+    return out
+
+
+def nota(m):
+    return 440 * 2 ** ((m - 69) / 12)
+
+
+def investida():
+    seg = 1.2
+    t = t_(seg)
+    # Estalo da barreira do som com o grave seguindo...
+    estalo = filtro(ruido(0.025), "highpass", 1200) * env(int(0.025 * SR), 0.0003, 0.004) * 1.1
+    estouro = filtro(ruido(0.12), "bandpass", [150, 2500]) * env(int(0.12 * SR), 0.001, 0.025)
+    grave = varredura(130, 38, 0.6, 0.5) * env(int(0.6 * SR), 0.002, 0.13) * 1.1
+    # ...e o ar rasgando para longe: a faixa desce (Doppler) enquanto some.
+    centro = 3400 * (650 / 3400) ** np.clip(t / 0.9, 0, 1)
+    rasgo = faixa_movel(ruido(seg), centro, 1.4) * env(len(t), 0.03, 0.42) * tremor(seg, 60, 0.55) * 1.4
+    corpo = filtro(ruido(seg), "bandpass", [120, 900]) * env(len(t), 0.02, 0.3)
+    assobio = np.sin(2 * np.pi * np.cumsum(1500 * (0.55 + 0.45 * np.exp(-t / 0.25))) / SR) * env(len(t), 0.01, 0.3) * 0.1
+    x = misturar((0, estalo), (0.002, estouro), (0, grave), (0.008, rasgo * 0.9), (0.005, corpo), (0.01, assobio))
+    x = eco(x, 1.0, 0.2, 5000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.92), 0.2)
+
+
+def telecinese_ergue():
+    seg = 1.6
+    t = t_(seg)
+    # Por baixo, o zumbido telecinético cresce e sobe um pouco de tom enquanto o bloco se solta.
+    tk = zumbido_tk(t, 50 + 8 * suave(t, 0.1, 1.4)) * suave(t, 0.0, 1.1) * 0.3
+    pressao = filtro(ruido(seg), "bandpass", [40, 220]) * suave(t, 0.0, 0.9) * tremor(seg, 5, 0.6) * 0.55
+    # A terra rachando e moendo.
+    arranque = racha(0.4, 95, 1.2)
+    estalos = [(0.32, racha(0.25, 140) * 0.55), (0.62, racha(0.25, 120) * 0.4), (0.9, racha(0.2, 160) * 0.3)]
+    moe = rangido(1.2, (30, 55), (240, 610, 980)) * 0.35
+    atrito = filtro(ruido(seg), "bandpass", [180, 1200]) * tremor(seg, 25, 0.15) * env(len(t), 0.06, 0.45) * 0.55
+    terra = filtro(ruido(seg), "lowpass", 140) * env(len(t), 0.01, 0.35) * 1.3
+    # Pedrinhas e terra escorrendo do bloco que sobe.
+    cai = cascalho(seg, 70, suave(t, 0.15, 0.4) * np.exp(-np.maximum(t - 0.4, 0) / 0.5), (450, 4200), ganho=(0.08, 0.3))
+    areia = filtro(ruido(seg), "bandpass", [1500, 6000]) * tremor(seg, 45, 0.0) * suave(t, 0.15, 0.4) \
+        * np.exp(-np.maximum(t - 0.4, 0) / 0.4) * 0.12
+    x = misturar((0, tk), (0, pressao), (0, arranque), *estalos, (0.02, moe), (0, atrito), (0, terra), (0, cai), (0, areia))
+    x = eco(x, 1.2, 0.22, 3500)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.9), 0.3)
+
+
+def telecinese_lanca():
+    seg = 1.0
+    t = t_(seg)
+    # Pulso de liberação: o zumbido sobe de golpe e corta, com um "wub" grave empurrando.
+    pulso = zumbido_tk(t, 55 + 45 * suave(t, 0, 0.12)) * env(len(t), 0.008, 0.1) * 0.3
+    wub = varredura(85, 38, seg, 0.4) * env(len(t), 0.004, 0.14) * 1.0
+    empurra = filtro(ruido(seg), "lowpass", 260) * env(len(t), 0.004, 0.06) * 1.0
+    # A massa passando pesada: faixa larga que sobe e volta a descer (Doppler), com turbulência.
+    perto = np.exp(-((t - 0.24) / 0.16) ** 2)
+    centro = 260 + 700 * np.exp(-((t - 0.2) / 0.14) ** 2) + 200 * np.clip(1 - t / 0.6, 0, 1)
+    massa = faixa_movel(ruido(seg), centro, 1.6) * perto * tremor(seg, 35, 0.45) * 1.1
+    baixo = filtro(ruido(seg), "bandpass", [55, 300]) * perto * 0.9
+    cai = cascalho(seg, 18, np.exp(-t / 0.25), (500, 3500), ganho=(0.05, 0.18))
+    x = misturar((0, pulso), (0, wub), (0, empurra), (0.02, massa), (0.02, baixo), (0.03, cai))
+    x = eco(x, 0.9, 0.2, 3500)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.9), 0.25)
+
+
+def telecinese_pousa():
+    seg = 1.0
+    t = t_(seg)
+
+    def baque(g):
+        n = int(round(0.4 * SR))
+        corpo = filtro(ruido(0.4), "lowpass", 280) * env(n, 0.004, 0.05) * 1.4
+        soco = varredura(68, 34, 0.4, 0.5) * env(n, 0.004, 0.09)
+        return (corpo + soco) * g
+    # Baques pesados e macios, um assentando depois do outro.
+    baques = [(0, baque(1.0)), (0.12, baque(0.55)), (0.29, baque(0.3))]
+    grao = cascalho(seg, 30, np.exp(-t / 0.2) + 0.5 * np.exp(-np.maximum(t - 0.12, 0) / 0.15) * (t > 0.12),
+                    (300, 2200), ganho=(0.05, 0.2))
+    tk = zumbido_tk(t, 55 - 9 * t) * np.exp(-t / 0.22) * 0.18
+    x = misturar(*baques, (0.01, grao), (0, tk))
+    x = eco(x, 0.8, 0.18, 2500)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.88), 0.2)
+
+
+def coro(t, notas_hz, sobe, vozes=3, espalha=0.7):
+    """Acorde de senos em coro (vozes desafinadas), com o tom multiplicado por `sobe` (fator por amostra)."""
+    out = np.zeros(len(t))
+    for f in notas_hz:
+        for v in range(vozes):
+            d = (v - (vozes - 1) / 2) * espalha
+            out += np.sin(2 * np.pi * np.cumsum((f + d) * sobe) / SR + RNG.random() * 6) / vozes
+    return out
+
+
+def escudo_tk_liga():
+    seg = 1.2
+    t = t_(seg)
+    # "Whoomp": grave que incha (sobe de tom) e um sopro abafado de pressão.
+    whoomp = np.sin(2 * np.pi * np.cumsum(36 + 40 * suave(t, 0, 0.14)) / SR) * env(len(t), 0.05, 0.22) * 1.1
+    sopro = filtro(ruido(seg), "lowpass", 380) * env(len(t), 0.06, 0.1) * 1.0
+    # A bolha: coro arejado subindo, com cintilação e um brilho de ar no alto.
+    sobe = 0.82 + 0.18 * suave(t, 0.05, 0.8)
+    bolha = coro(t, (196, 294, 392), sobe) * (0.85 + 0.15 * np.sin(2 * np.pi * 9 * t))
+    brilho = coro(t, (784, 1175), sobe, 2, 1.5) * (0.5 + 0.5 * np.sin(2 * np.pi * 13 * t + 1)) * 0.25
+    corpo = (bolha + brilho) * suave(t, 0.04, 0.45) * np.exp(-np.maximum(t - 0.45, 0) / 0.55) * 0.35
+    ar = filtro(ruido(seg), "bandpass", [2500, 7500]) * tremor(seg, 20, 0.3) * suave(t, 0.05, 0.5) \
+        * np.exp(-np.maximum(t - 0.5, 0) / 0.4) * 0.12
+    x = whoomp + sopro + corpo + ar
+    x = eco(x, 1.4, 0.32, 7000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.85), 0.3)
+
+
+def escudo_tk_desliga():
+    seg = 0.8
+    t = t_(seg)
+    # O zumbido da bolha caindo de tom e sumindo; no fim, um "pop" macio.
+    desce = 1.0 - 0.45 * suave(t, 0, 0.5)
+    corpo = coro(t, (196, 294, 392), desce) * np.exp(-t / 0.25) * 0.35
+    ar = faixa_movel(ruido(seg), 5500 * (0.25 + 0.75 * desce ** 3), 1.2) * np.exp(-t / 0.2) * 0.12
+    n = int(round(0.08 * SR))
+    pop = varredura(230, 85, 0.08, 0.5) * env(n, 0.001, 0.022) * 0.9 \
+        + filtro(ruido(0.08), "lowpass", 1400) * env(n, 0.0005, 0.006) * 0.5
+    x = misturar((0, corpo), (0, ar), (0.44, pop))
+    x = eco(x, 0.9, 0.28, 5000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.8), 0.15)
+
+
+def escudo_tk_impacto():
+    seg = 0.6
+    t = t_(seg)
+    # Baque surdo do golpe...
+    n = int(round(0.3 * SR))
+    baque = filtro(ruido(0.3), "lowpass", 260) * env(n, 0.001, 0.035) * 1.5 + varredura(95, 48, 0.3, 0.5) * env(n, 0.001, 0.07)
+    toque = filtro(ruido(0.01), "bandpass", [900, 5000]) * 0.6
+    # ...e a bolha soando: anel brilhante que ondula (tom e volume tremendo enquanto morre).
+    onda = 1 + 0.015 * np.sin(2 * np.pi * 22 * t) * np.exp(-t / 0.15)
+    anel = sum(g * np.sin(2 * np.pi * np.cumsum(f * onda) / SR) * np.exp(-t / q)
+               for f, g, q in ((1180, 1, 0.2), (1790, 0.6, 0.15), (2650, 0.4, 0.1), (3560, 0.25, 0.07)))
+    anel *= (0.65 + 0.35 * np.sin(2 * np.pi * 28 * t)) * np.clip(t / 0.003, 0, 1) * 0.35
+    x = misturar((0, baque), (0, toque), (0.002, anel))
+    x = eco(x, 0.8, 0.3, 7000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.88), 0.12)
+
+
+def ilha_arranca():
+    seg = 3.5
+    t = t_(seg)
+    cresce = suave(t, 0, 3.2)
+    # Ronco muito grave da terra cedendo, crescendo até o disco se soltar.
+    ronco = filtro(ruido(seg), "lowpass", 90) * tremor(seg, 6, 0.5) * (0.45 + 0.55 * cresce) * 2.2
+    sub = np.sin(2 * np.pi * np.cumsum(30 + 12 * cresce) / SR) * cresce * 0.5
+    moe = rangido(3.3, (22, 60), (210, 520, 830)) * (0.3 + 0.7 * cresce[: int(3.3 * SR)]) * 0.4
+    atrito = filtro(ruido(seg), "bandpass", [150, 700]) * tremor(seg, 18, 0.2) * (0.2 + 0.8 * cresce) * 0.7
+    # Rachaduras grandes e raízes partindo pelo caminho.
+    rachas = [(i, racha(0.45, g, 1.2) * a * 0.75) for i, g, a in
+              ((0.1, 90, 1.0), (0.85, 110, 0.75), (1.5, 80, 1.0), (2.15, 120, 0.8), (2.7, 70, 1.1))]
+    raizes = [(RNG.uniform(0.6, 3.0), raiz_estala() * RNG.uniform(0.25, 0.55)) for _ in range(11)]
+    # Terra e pedras despencando cada vez mais.
+    cai = cascalho(seg, 260, 0.05 + cresce ** 1.5, (400, 4500), ganho=(0.06, 0.32))
+    areia = filtro(ruido(seg), "bandpass", [800, 5000]) * tremor(seg, 40, 0.1) * cresce ** 2 * 0.22
+    tk = zumbido_tk(t, 45 + 10 * cresce) * suave(t, 1.2, 3.4) * 0.35
+    x = misturar((0, ronco), (0, sub), (0.1, moe), (0, atrito), *rachas, *raizes, (0, cai), (0, areia), (0, tk))
+    x = eco(x, 1.8, 0.3, 3000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.95), 0.25)
+
+
+def ilha_motor():
+    seg = 4.25
+    t = t_(seg)
+    # Laço de 4 s: todas as frequências e ondulações são múltiplas de 1/4 Hz para fechar sem emenda.
+    tk = zumbido_tk(t, 55, 0.4) * (0.85 + 0.15 * np.sin(2 * np.pi * 0.5 * t)) * 0.5
+    pressao = filtro(ruido(seg), "lowpass", 160) * (0.8 + 0.2 * np.sin(2 * np.pi * 0.25 * t + 1)) * 0.9
+    ar = filtro(ruido(seg), "bandpass", [250, 2500]) * (0.6 + 0.4 * np.sin(2 * np.pi * 0.25 * t + 2.5)) * 0.18
+    # Pedras rangendo de leve e uma ou outra pedrinha caindo.
+    rangidos = [(RNG.uniform(0.1, 3.4), rangido(RNG.uniform(0.3, 0.6), (25, 50), (RNG.uniform(250, 400), RNG.uniform(650, 950)))
+                 * RNG.uniform(0.15, 0.25)) for _ in range(3)]
+    cai = cascalho(seg, 12, np.ones(len(t)), (500, 3500), ganho=(0.03, 0.08))
+    x = misturar((0, tk), (0, pressao), (0, ar), *rangidos, (0, cai))
+    return normalizar(laco(x, 0.25), 0.58)
+
+
+def ilha_pousa():
+    seg = 2.0
+    t = t_(seg)
+    # Baque fundo e pesado, um quique menor assentando, o ronco e o cascalho acomodando.
+    def baque(g, dur=0.9):
+        n = int(round(dur * SR))
+        return (varredura(58, 24, dur, 0.6) * env(n, 0.003, 0.2) * 1.3
+                + filtro(ruido(dur), "lowpass", 240) * env(n, 0.002, 0.08) * 1.6
+                + filtro(ruido(dur), "bandpass", [200, 900]) * env(n, 0.001, 0.04) * 0.6) * g
+    ronco = filtro(ruido(seg), "lowpass", 110) * env(len(t), 0.04, 0.55) * tremor(seg, 8, 0.5) * 1.6
+    cai = cascalho(seg, 100, np.exp(-np.maximum(t - 0.05, 0) / 0.45) * (t > 0.04), (350, 3800), ganho=(0.05, 0.28))
+    tk = zumbido_tk(t, 55 - 15 * suave(t, 0, 0.3)) * np.exp(-t / 0.12) * 0.3
+    x = misturar((0, baque(1.0)), (0.005, racha(0.35, 75, 0.8) * 0.6), (0.19, baque(0.35, 0.6)), (0, ronco), (0, cai), (0, tk))
+    x = eco(x, 1.3, 0.25, 2500)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.95), 0.4)
+
+
+# Acorde "kryptoniano" (Ré lídio, como o da Fortaleza): Ré, Lá, Mi e Fá# em várias oitavas.
+ACORDE_KRYPTON = (50, 62, 69, 76, 78)
+
+
+def nave_chega():
+    seg = 2.5
+    t = t_(seg)
+    # Desce do céu: sopro liso que cresce e baixa de tom ao passar (Doppler) até pairar.
+    perto = suave(t, 0, 1.3) * (1 - 0.6 * suave(t, 1.35, 1.9))
+    centro = 900 + 3600 * (1 - suave(t, 0.3, 1.5))
+    sopro = faixa_movel(ruido(seg), centro, 1.3) * perto * 0.55
+    grave = filtro(ruido(seg), "lowpass", 280) * perto * 0.7
+    # O acorde de cristal, um pouco mais agudo ao vir (Doppler) e assentando na afinação.
+    bend = 1.035 - 0.035 * suave(t, 0.6, 1.6)
+    acorde = sum(vidro(t, nota(m) * bend, 0.45, 0.6 + 0.2 * i) * (1.0 if m < 70 else 0.5)
+                 for i, m in enumerate(ACORDE_KRYPTON)) * suave(t, 0.2, 1.4) * 0.12
+    # Freio macio: lufada abafada e o zumbido baixando ao parar.
+    lufada = np.exp(-((t - 1.6) / 0.18) ** 2)
+    freio = filtro(ruido(seg), "bandpass", [250, 1400]) * lufada * 0.45 + filtro(ruido(seg), "lowpass", 200) * lufada * 0.35
+    para = np.sin(2 * np.pi * np.cumsum(150 - 55 * suave(t, 1.5, 2.1)) / SR) * suave(t, 1.3, 1.6) * 0.18
+    brilho = misturar(*[(RNG.uniform(1.3, 2.1), sino(nota(RNG.choice((86, 88, 90, 93))), 0.6, 0.25, 0.6) * RNG.uniform(0.05, 0.1))
+                        for _ in range(5)])
+    x = misturar((0, sopro), (0, grave), (0, acorde), (0, freio), (0, para), (0, brilho))
+    x = eco(x, 2.0, 0.35, 8000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.85), 0.45)
+
+
+def nave_motor():
+    seg = 4.25
+    t = t_(seg)
+    # Laço de 4 s (frequências e ondulações múltiplas de 1/4 Hz): zumbido de cristal liso, nada de turbina.
+    hum = vidro(t, 110, 0.6, 0.5) * 0.6 + vidro(t, 165, 0.4, 0.75) * 0.3 + np.sin(2 * np.pi * 55 * t) * 0.35
+    cintila = vidro(t, 440, 0.3, 0.75) * (0.6 + 0.4 * np.sin(2 * np.pi * 0.75 * t)) * 0.14 \
+        + vidro(t, 660, 0.2, 1.25) * (0.5 + 0.5 * np.sin(2 * np.pi * 1.25 * t + 2)) * 0.08
+    fluxo = filtro(ruido(seg), "bandpass", [600, 5000]) * (0.7 + 0.3 * np.sin(2 * np.pi * 0.5 * t)) * 0.2
+    sopro = filtro(ruido(seg), "bandpass", [5000, 11000]) * (0.5 + 0.5 * np.sin(2 * np.pi * 3 * t)) * 0.05
+    x = hum + cintila + fluxo + sopro
+    return normalizar(laco(x, 0.25), 0.65)
+
+
+def nave_canhao():
+    seg = 2.25
+    t = t_(seg)
+    # Laço de 2 s (tudo múltiplo de 1/2 Hz): zumbido quente em dente de serra, tom sustentado brilhante e estalos.
+    serra = sum(np.sin(2 * np.pi * 110 * k * t) / k + 0.6 * np.sin(2 * np.pi * 110.5 * k * t + k) / k for k in range(1, 24))
+    zumbido = filtro(serra, "lowpass", 3200) * (0.8 + 0.2 * np.sin(2 * np.pi * 8 * t))
+    tom = (np.sin(2 * np.pi * 880 * t) + 0.5 * np.sin(2 * np.pi * 1320 * t) + 0.25 * np.sin(2 * np.pi * 1760.5 * t)) \
+        * (0.75 + 0.25 * np.sin(2 * np.pi * 24 * t))
+    energia = filtro(ruido(seg), "bandpass", [1500, 6500]) * (0.6 + 0.4 * np.sin(2 * np.pi * 12 * t + 1)) * 0.35
+    calor = np.sin(2 * np.pi * 55 * t) * 0.35
+    estalos = np.zeros(len(t))
+    for _ in range(36):
+        i = RNG.integers(0, len(t) - 600)
+        estalos[i:i + 600] += filtro(ruido(600 / SR), "highpass", 2500) * np.exp(-np.arange(600) / 70) * RNG.uniform(0.3, 1)
+    x = 0.4 * zumbido + 0.16 * tom + energia + calor + 0.45 * estalos
+    return normalizar(laco(x, 0.25), 0.8)
+
+
+def nave_orbe():
+    seg = 1.0
+    t = t_(seg)
+    # Sobe zunindo até estourar num brilho de energia.
+    sobe = suave(t, 0, 0.32) ** 2 * np.exp(-np.maximum(t - 0.32, 0) / 0.05)
+    centro = 400 * 10 ** suave(t, 0, 0.34)
+    sopro = faixa_movel(ruido(seg), centro, 1.2) * sobe * 1.4
+    tom = (np.sin(2 * np.pi * np.cumsum(centro * 0.6) / SR) + 0.4 * np.sin(2 * np.pi * np.cumsum(centro * 1.2) / SR)) * sobe * 0.35
+    n = int(round(0.6 * SR))
+    pop = (filtro(ruido(0.6), "highpass", 2000) * env(n, 0.0005, 0.008) * 0.8
+           + sino(1760, 0.6, 0.3, 1.0) * 0.45 + sino(2637, 0.6, 0.25, 0.8) * 0.3
+           + varredura(170, 60, 0.6, 0.5) * env(n, 0.001, 0.05) * 0.8
+           + filtro(ruido(0.6), "bandpass", [800, 3200]) * env(n, 0.004, 0.1) * 0.45)
+    x = misturar((0, sopro), (0, tom), (0.32, pop))
+    x = eco(x, 1.0, 0.3, 8000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.85), 0.2)
+
+
+def nave_escudo_liga():
+    seg = 1.0
+    t = t_(seg)
+    # Sinos de cristal subindo depressa, crescendo, e o zumbido do escudo enchendo por baixo.
+    sinos = [(i * 0.06, sino(nota(m), 0.9, 0.5, 0.8) * (0.22 + 0.06 * i)) for i, m in enumerate((74, 78, 81, 86, 90))]
+    hum = (vidro(t, 220, 0.5, 1.5) * 0.35 + vidro(t, 330, 0.4, 2.0) * 0.2) * suave(t, 0.02, 0.4) * np.exp(-np.maximum(t - 0.4, 0) / 0.5)
+    ar = filtro(ruido(seg), "highpass", 3000) * suave(t, 0, 0.28) ** 2 * np.exp(-np.maximum(t - 0.28, 0) / 0.08) * 0.15
+    x = misturar(*sinos, (0, hum), (0, ar))
+    x = eco(x, 1.5, 0.4, 8000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.8), 0.25)
+
+
+def nave_escudo_desliga():
+    seg = 0.8
+    t = t_(seg)
+    # Sinos descendo e o zumbido do escudo caindo de tom até sumir.
+    sinos = [(i * 0.05, sino(nota(m), 0.7, 0.25, 0.7) * (0.4 - 0.04 * i)) for i, m in enumerate((90, 86, 81, 78, 74))]
+    hum = vidro(t, 330 - 165 * suave(t, 0, 0.5), 0.5, 1.5) * np.exp(-t / 0.22) * 0.35
+    x = misturar(*sinos, (0, hum))
+    x = eco(x, 1.2, 0.4, 7000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.78), 0.2)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -807,6 +1236,11 @@ SONS = {
     "batmoto_chega": batmoto_chega, "batbarco_motor": batbarco_motor, "batbarco_emerge": batbarco_emerge,
     "batbarco_mergulha": batbarco_mergulha, "batbarco_torpedo": batbarco_torpedo, "veiculo_pneu": veiculo_pneu,
     "veiculo_turbo": veiculo_turbo, "veiculo_atropela": veiculo_atropela,
+    "investida": investida, "telecinese_ergue": telecinese_ergue, "telecinese_lanca": telecinese_lanca,
+    "telecinese_pousa": telecinese_pousa, "escudo_tk_liga": escudo_tk_liga, "escudo_tk_desliga": escudo_tk_desliga,
+    "escudo_tk_impacto": escudo_tk_impacto, "ilha_arranca": ilha_arranca, "ilha_motor": ilha_motor,
+    "ilha_pousa": ilha_pousa, "nave_chega": nave_chega, "nave_motor": nave_motor, "nave_canhao": nave_canhao,
+    "nave_orbe": nave_orbe, "nave_escudo_liga": nave_escudo_liga, "nave_escudo_desliga": nave_escudo_desliga,
 }
 
 

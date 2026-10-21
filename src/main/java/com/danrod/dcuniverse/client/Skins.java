@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 /**
  * Troca a skin de quem está transformado: textures/skin/<personagem>.png (128x128) e, se existir,
  * textures/skin/<personagem>_capa.png, desenhada pela camada de capa do próprio jogo.
+ * Os braços são largos, a não ser que assets/<ns>/skins/<personagem>.json diga "slim": true (Supergirl).
  * Vale para todos os jogadores visíveis (o servidor manda o personagem de cada um).
  */
 public final class Skins {
@@ -101,6 +102,6 @@ public final class Skins {
         boolean temCapa = recursos.getResource(capa.withPath(p -> "textures/" + p + ".png")).isPresent()
             && !Pecas.temCapa(personagem);
         return PlayerSkin.insecure(new ClientAsset.ResourceTexture(corpo), temCapa ? new ClientAsset.ResourceTexture(capa) : null,
-            null, PlayerModelType.WIDE);
+            null, Pecas.fino(personagem) ? PlayerModelType.SLIM : PlayerModelType.WIDE);
     }
 }

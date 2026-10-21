@@ -1009,7 +1009,13 @@ public final class GuiaScreen extends Screen {
             out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.armas", fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 64)),
                 prm.i("missiles", 4), fmt(prm.d("missile_damage", 7)), fmt(prm.d("missile_radius", 3.5)), fmt(prm.d("missile_reload", 5)))));
         }
-        if (prm.json().has("model") && !prm.s("model", "").equals("batwing")) {
+        if (prm.s("model", "").equals("nave_kryptoniana")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.voo", fmt(prm.d("speed", 34)), fmt(prm.d("boost_speed", 72)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.nave.canhao", fmt(prm.d("beam_damage", 2.5)), fmt(prm.d("beam_range", 48)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.nave.orbes", prm.i("orbs", 3), fmt(prm.d("orb_damage", 8)),
+                fmt(prm.d("orb_radius", 3.5)), fmt(prm.d("orb_reload", 6)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.nave.escudo", fmt(prm.d("shield_time", 12)), fmt(prm.d("shield_recharge", 18)))));
+        } else if (prm.json().has("model") && !prm.s("model", "").equals("batwing")) {
             String m = prm.s("model", "");
             out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.velocidade", fmt(prm.d("speed", 26)), fmt(prm.d("boost_speed", 42)))));
             out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.armas." + m, fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 48)),
@@ -1018,6 +1024,18 @@ public final class GuiaScreen extends Screen {
             out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.especial." + m, fmt(prm.d("special_radius", 5)),
                 fmt(prm.d("special_damage", 4)), fmt(prm.d("stun", 3)), fmt(prm.d("special_cooldown", 12)), fmt(prm.d("special_duration", 6)),
                 fmt(prm.d("dive_speed", 14)))));
+        }
+        if (prm.json().has("reduction")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.escudo_tk", Math.round(prm.d("reduction", 0.75) * 100), fmt(prm.d("shield_radius", 2.6)))));
+        }
+        if (prm.json().has("throw_speed")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.telecinese", prm.i("max_blocks", 18), fmt(prm.d("hold", 30)))));
+        }
+        if (prm.json().has("max_blocks") && prm.json().has("depth") && prm.json().has("speed")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.ilha", prm.i("max_blocks", 420), fmt(prm.d("speed", 8)))));
+        }
+        if (prm.b("breaks_soft", false)) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.investida", fmt(prm.d("speed", 3.2) * 20), fmt(prm.d("knockback", 2)))));
         }
         if (prm.json().has("drain")) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.dreno", fmt(prm.d("drain", 1.5)),

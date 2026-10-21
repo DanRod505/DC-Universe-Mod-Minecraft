@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "dcuniverse:cristal_kryptoniano",
+    "B": "dcuniverse:tecido_tatico",
+    "C": "minecraft:feather",
+    "N": "dcuniverse:nucleo_meta_4"
+  },
+  "pattern": [
+    "BCB",
+    "ANA",
+    "BAB"
+  ],
+  "result": {
+    "id": "dcuniverse:cristal_supergirl"
+  }
+}

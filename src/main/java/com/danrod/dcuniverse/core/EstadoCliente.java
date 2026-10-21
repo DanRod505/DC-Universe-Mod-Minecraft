@@ -9,6 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * ser escrita pelo handler do pacote em qualquer lado; só o código de cliente lê.
  */
 public final class EstadoCliente {
+    /** Blocos das Ilhas Telecinéticas por id da entidade (chegam logo depois da entidade). */
+    public static final java.util.Map<Integer, Rede.IlhaBlocos> ILHAS = new java.util.concurrent.ConcurrentHashMap<>();
+
     public static volatile Rede.Sync atual = Rede.Sync.VAZIO;
     /** JSON de cada personagem do servidor (id -> JSON), para o Guia. */
     public static volatile Map<String, String> catalogo = Map.of();
@@ -123,6 +126,7 @@ public final class EstadoCliente {
     }
 
     public static void limpar() {
+        ILHAS.clear();
         atual = Rede.Sync.VAZIO;
         catalogo = Map.of();
         passivasDe = "";

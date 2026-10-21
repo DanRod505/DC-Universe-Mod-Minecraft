@@ -53,6 +53,7 @@ public final class Veiculo implements TipoHabilidade {
     private static Entity invocar(ServerPlayer player, Personagem.Habilidade h) {
         String modelo = h.params().s("model", "batwing");
         if (modelo.equals("batwing")) return BatwingEntidade.invocar(player, h.params());
+        if (modelo.equals("nave_kryptoniana")) return com.danrod.dcuniverse.content.NaveKryptoniana.invocar(player, h.params());
         VeiculoBat v = VeiculoBat.invocar(player, modelo, h.params());
         if (v == null && modelo.equals("batbarco")) {
             com.danrod.dcuniverse.character.Transformacao.avisar(player, Component.translatable("dcuniverse.msg.batbarco_sem_agua"));
@@ -61,6 +62,7 @@ public final class Veiculo implements TipoHabilidade {
     }
 
     private static String modelo(Entity e) {
+        if (e instanceof com.danrod.dcuniverse.content.NaveKryptoniana) return "nave_kryptoniana";
         return e instanceof VeiculoBat v ? v.modelo() : "batwing";
     }
 

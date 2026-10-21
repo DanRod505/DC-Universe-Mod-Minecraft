@@ -29,7 +29,8 @@ public final class Guia {
         "detetive", "fumaca", "gel", "gel_detonar", "contra_ataque", "furtivo",
         "capa_planador", "visor_tatico", "batcomputador", "cinto", "garagem",
         "smallville", "nave_kalel",
-        "conversar_npc", "missao_aceitar", "missao_concluir", "trocar_npc", "presente_npc", "domar_krypto", "domar_streaky", "liga_vincular", "liga_ponto");
+        "conversar_npc", "missao_aceitar", "missao_concluir", "trocar_npc", "presente_npc", "domar_krypto", "domar_streaky", "liga_vincular", "liga_ponto",
+        "investida", "nave", "telecinese", "ilha");
     /** Segundos recarregando ao sol para ganhar o visto de "sol". */
     public static final int SEGUNDOS_SOL = 5;
 

@@ -423,6 +423,9 @@ public final class Rede {
     /** Pedido do Diário: 0 rastrear (arg = id, "" para nenhuma), 1 abandonar. */
     public record DiarioAcao(int tipo, String arg) {}
 
+    /** Os blocos de uma Ilha Telecinética (content/IlhaTelecinetica): posição local empacotada e estado de cada um. */
+    public record IlhaBlocos(int entidade, int[] pos, int[] estados) {}
+
     private Rede() {}
 
     public static void registrar() {
@@ -583,6 +586,15 @@ public final class Rede {
                 b.writeInt(m.z());
             }).decoder(b -> new LigaPonto(b.readUtf(), b.readInt(), b.readInt(), b.readInt()))
             .consumerMainThread((m, ctx) -> EstadoCliente.pontoLiga(m))
+            .add();
+        CANAL.messageBuilder(IlhaBlocos.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> {
+                b.writeVarInt(m.entidade());
+                b.writeVarIntArray(m.pos());
+                b.writeVarIntArray(m.estados());
+            }).decoder(b -> new IlhaBlocos(b.readVarInt(), b.readVarIntArray(4096), b.readVarIntArray(4096)))
+            .consumerMainThread((m, ctx) -> EstadoCliente.ILHAS.put(m.entidade(), m))
             .add();
         CANAL.messageBuilder(MissaoAviso.class)
             .direction(PacketFlow.CLIENTBOUND)
@@ -747,6 +759,12 @@ public final class Rede {
     }
 
     public static void ligaPonto(ServerPlayer player, LigaPonto m) {
+        if (player.connection == null) return;
+        CANAL.send(m, PacketDistributor.PLAYER.with(player));
+    }
+
+    /** Os blocos da ilha para quem passou a ver a entidade. */
+    public static void ilha(ServerPlayer player, IlhaBlocos m) {
         if (player.connection == null) return;
         CANAL.send(m, PacketDistributor.PLAYER.with(player));
     }

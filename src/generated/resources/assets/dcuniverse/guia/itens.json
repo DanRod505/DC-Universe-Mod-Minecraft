@@ -134,6 +134,16 @@
    "id": "cinto_batman",
    "cat": "transformacao",
    "obter": false
+  },
+  {
+   "id": "cristal_supergirl",
+   "cat": "transformacao",
+   "obter": false
+  },
+  {
+   "id": "jaqueta_conner",
+   "cat": "transformacao",
+   "obter": false
   }
  ],
  "receitas": [
@@ -285,6 +295,23 @@
    "key": {
     "A": "dcuniverse:cristal_kryptoniano",
     "B": "dcuniverse:tecido_tatico",
+    "C": "minecraft:feather",
+    "N": "dcuniverse:nucleo_meta_4"
+   },
+   "pattern": [
+    "BCB",
+    "ANA",
+    "BAB"
+   ],
+   "result": {
+    "id": "dcuniverse:cristal_supergirl"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "A": "dcuniverse:cristal_kryptoniano",
+    "B": "dcuniverse:tecido_tatico",
     "C": "minecraft:sunflower",
     "N": "dcuniverse:nucleo_meta_4"
    },
@@ -332,6 +359,23 @@
    ],
    "result": {
     "id": "dcuniverse:guia_heroi"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "A": "dcuniverse:cristal_kryptoniano",
+    "B": "minecraft:leather",
+    "C": "minecraft:black_dye",
+    "N": "dcuniverse:nucleo_meta_3"
+   },
+   "pattern": [
+    "BCB",
+    "ANA",
+    "BAB"
+   ],
+   "result": {
+    "id": "dcuniverse:jaqueta_conner"
    }
   },
   {

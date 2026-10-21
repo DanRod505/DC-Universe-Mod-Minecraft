@@ -1,0 +1,39 @@
+{
+  "n": 17,
+  "category": "heroi",
+  "level": 4,
+  "color": "#4FA3FF",
+  "scale": 0.89,
+  "stats": { "vida": 34, "armadura": 20, "dano": 10, "terra": 6.6 },
+  "energy": {
+    "max": 280,
+    "regen": 1.6,
+    "recharge": [
+      { "type": "sunlight", "per_second": 3.0 },
+      { "type": "kryptonite", "per_second": -12.0, "ore_radius": 6, "block_radius": 10 }
+    ]
+  },
+  "suit": [ "chest", "legs", "feet" ],
+  "passives": [
+    { "type": "flight", "speed": 60, "drain": 0.5, "boost_drain": 2.8, "dash_cost": 12,
+      "trail_color": "#4FA8FF", "trail_color2": "#FF3A4E", "trail_color3": "#FFD84A" },
+    { "type": "fall_immunity" },
+    { "type": "fire_immunity" },
+    { "type": "super_strength", "speed": 8, "max_hardness": 30 },
+    { "type": "projectile_resistance", "max_damage": 9 },
+    { "type": "super_jump", "power": 2.0, "charge": 0.9 }
+  ],
+  "abilities": [
+    { "id": "visao_de_calor", "type": "projectile_beam", "mode": "hold", "cost": 12, "cooldown": 2,
+      "range": 24, "damage_mult": 0.4, "color": "#FF3A2A", "sets_fire": true, "melts": true },
+    { "id": "sopro_congelante", "type": "area_cone", "mode": "hold", "cost": 10, "cooldown": 3,
+      "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze" },
+    { "id": "investida_aerea", "type": "air_dash", "cost": 25, "cooldown": 5,
+      "range": 24, "speed": 3.2, "damage_mult": 1.6, "knockback": 2.0, "hit_radius": 1.6, "breaks_soft": true },
+    { "id": "visao_raio_x", "type": "vision", "mode": "xray", "cost": 20, "cooldown": 12,
+      "duration": 12, "range": 28, "color": "#8FD8FF" },
+    { "id": "nave_kryptoniana", "type": "vehicle", "model": "nave_kryptoniana", "supreme": true, "cost_pct": 70, "cooldown": 150,
+      "duration": 90, "speed": 34, "boost_speed": 72, "beam_damage": 2.5, "beam_range": 48,
+      "orbs": 3, "orb_damage": 8, "orb_radius": 3.5, "orb_reload": 6, "shield_time": 12, "shield_recharge": 18 }
+  ]
+}

@@ -95,6 +95,9 @@ public final class Eventos {
             }
         });
         PlayerEvent.StartTracking.BUS.addListener(e -> {
+            if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof com.danrod.dcuniverse.content.IlhaTelecinetica ilha) {
+                Rede.ilha(quem, ilha.pacote());
+            }
             if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof ServerPlayer alvo) {
                 Rede.aparenciaPara(quem, alvo);
                 // Ver outro jogador transformado também libera a página do personagem no Guia.
@@ -113,6 +116,10 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.active.Gancho.tick();
             com.danrod.dcuniverse.ability.active.Fumaca.tick(e.server());
             com.danrod.dcuniverse.ability.active.Disruptor.tick();
+            com.danrod.dcuniverse.ability.active.Investida.tick();
+            com.danrod.dcuniverse.ability.active.Telecinese.tick(e.server());
+            com.danrod.dcuniverse.ability.active.EscudoTk.tick();
+            com.danrod.dcuniverse.ability.active.Ilha.tick();
             for (var level : e.server().getAllLevels()) com.danrod.dcuniverse.content.Teias.tick(level);
         });
         ServerStoppingEvent.BUS.addListener(e -> {
@@ -124,16 +131,22 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.active.Veiculo.limpar();
             com.danrod.dcuniverse.ability.active.Fumaca.limpar();
             com.danrod.dcuniverse.ability.active.Disruptor.limpar();
+            com.danrod.dcuniverse.ability.active.Investida.limpar();
+            com.danrod.dcuniverse.ability.active.Telecinese.limpar();
+            com.danrod.dcuniverse.ability.active.EscudoTk.limpar();
+            com.danrod.dcuniverse.ability.active.Ilha.limpar();
             com.danrod.dcuniverse.content.Teias.limpar();
         });
         Naturais.registrar();
         com.danrod.dcuniverse.content.Batcomputador.registrar();
         com.danrod.dcuniverse.content.Teias.registrar();
         com.danrod.dcuniverse.content.BatwingEntidade.registrar();
+        com.danrod.dcuniverse.content.NaveKryptoniana.registrar();
         com.danrod.dcuniverse.ability.Congelamento.registrar();
         com.danrod.dcuniverse.ability.active.Detetive.registrar();
         com.danrod.dcuniverse.ability.passive.Furtividade.registrar();
         com.danrod.dcuniverse.ability.passive.ContraAtaque.registrar();
+        com.danrod.dcuniverse.ability.active.EscudoTk.registrar();
     }
 
     static void tick(ServerPlayer player) {

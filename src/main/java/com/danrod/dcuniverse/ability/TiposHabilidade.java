@@ -25,7 +25,11 @@ public final class TiposHabilidade {
         Map.entry("smoke", new com.danrod.dcuniverse.ability.active.Fumaca()),
         Map.entry("explosive_gel", new com.danrod.dcuniverse.ability.active.Gel()),
         Map.entry("net", new com.danrod.dcuniverse.ability.active.Lancador()),
-        Map.entry("disruptor", new com.danrod.dcuniverse.ability.active.Disruptor())
+        Map.entry("disruptor", new com.danrod.dcuniverse.ability.active.Disruptor()),
+        Map.entry("air_dash", new com.danrod.dcuniverse.ability.active.Investida()),
+        Map.entry("telekinesis", new com.danrod.dcuniverse.ability.active.Telecinese()),
+        Map.entry("tk_shield", new com.danrod.dcuniverse.ability.active.EscudoTk()),
+        Map.entry("floating_island", new com.danrod.dcuniverse.ability.active.Ilha())
     ));
 
     private TiposHabilidade() {}

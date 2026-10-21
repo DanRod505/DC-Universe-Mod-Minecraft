@@ -81,12 +81,12 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
     private final InterpolationHandler interpolacao = new InterpolationHandler(this, 3);
 
     // Parâmetros (do JSON da habilidade) e estado do servidor.
-    private Params prm = Params.EMPTY;
-    private int duracao = 1800;
-    private boolean atirando, superaquecido;
-    private int tiros;
-    private Vec3 chegada = Vec3.ZERO, origemChegada = Vec3.ZERO;
-    private int tempoEstado;
+    protected Params prm = Params.EMPTY;
+    protected int duracao = 1800;
+    protected boolean atirando, superaquecido;
+    protected int tiros;
+    protected Vec3 chegada = Vec3.ZERO, origemChegada = Vec3.ZERO;
+    protected int tempoEstado;
     private boolean donoABordo;
 
     /** Velocidade (blocos/tick) e inclinação lateral visual, mantidas no cliente. */
@@ -99,8 +99,12 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
 
     /** Invoca o Batwing para o dono: desce do céu atrás dele, ou aparece no lugar se não houver céu aberto. */
     public static BatwingEntidade invocar(ServerPlayer dono, Params prm) {
+        return preparar(new BatwingEntidade(Entidades.BATWING.get(), dono.level()), dono, prm);
+    }
+
+    /** Põe no mundo um veículo voador já criado (este ou uma variação, como a nave kryptoniana): ele desce até o dono. */
+    protected static <T extends BatwingEntidade> T preparar(T b, ServerPlayer dono, Params prm) {
         ServerLevel level = dono.level();
-        BatwingEntidade b = new BatwingEntidade(Entidades.BATWING.get(), level);
         b.prm = prm;
         b.duracao = Math.round(prm.f("duration", 90) * 20);
         b.entityData.set(DONO, dono.getId());
@@ -117,8 +121,51 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
         b.noPhysics = true;
         level.addFreshEntity(b);
         if (!ceu) b.embarcar(dono);
-        level.playSound(null, dono.getX(), dono.getY(), dono.getZ(), Sons.BATWING_CHEGA.get(), SoundSource.PLAYERS, 1.6f, 1f);
+        level.playSound(null, dono.getX(), dono.getY(), dono.getZ(), b.somChegada(), SoundSource.PLAYERS, 1.6f, 1f);
+        b.aoInvocar();
         return b;
+    }
+
+    // ------------------------------------------------------------------ o que muda nas variações
+
+    /** Escala do desenho e das medidas da cabine. */
+    public float escala() {
+        return ESCALA;
+    }
+
+    /** Altura do pivô do desenho (antes da escala). */
+    public float pivo() {
+        return PIVO;
+    }
+
+    /** Altura do assento acima dos pés da entidade. */
+    protected double assentoY() {
+        return ASSENTO_Y;
+    }
+
+    /** Posição do assento para a frente (antes da escala): piloto na frente, passageiro atrás. */
+    protected float assentoZ(boolean piloto) {
+        return piloto ? 0.75f : 0.2f;
+    }
+
+    protected net.minecraft.sounds.SoundEvent somChegada() {
+        return Sons.BATWING_CHEGA.get();
+    }
+
+    /** Tarefa do Guia concluída ao embarcar. */
+    protected String tarefa() {
+        return "batwing";
+    }
+
+    protected void aoInvocar() {}
+
+    /** Ronco contínuo do motor (client/Piloto). */
+    public net.minecraft.sounds.SoundEvent somMotor() {
+        return Sons.BATWING_MOTOR.get();
+    }
+
+    protected void definirEstado(int estado) {
+        entityData.set(ESTADO, estado);
     }
 
     @Override
@@ -224,8 +271,8 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
         boolean piloto = passageiro.getId() == donoId();
         // O assento gira com o jato inteiro (rumo, nariz e inclinação), em volta do mesmo pivô do desenho:
         // assim quem está sentado acompanha a cabine nas curvas em vez de ficar parado onde ela estava.
-        float pivo = PIVO * ESCALA;
-        Vector3f v = rotacao(1).transform(new Vector3f(0, (float) ASSENTO_Y - pivo, (piloto ? 0.75f : 0.2f) * ESCALA));
+        float pivo = pivo() * escala();
+        Vector3f v = rotacao(1).transform(new Vector3f(0, (float) assentoY() - pivo, assentoZ(piloto) * escala()));
         return new Vec3(v.x, v.y + pivo, v.z);
     }
 
@@ -256,7 +303,7 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
         // Salta por baixo da asa, já no ar; perto do chão, desce pelo lado.
         Vec3 baixo = position().add(0, -passageiro.getBbHeight() - 0.1, 0);
         if (level().noCollision(passageiro, passageiro.getDimensions(passageiro.getPose()).makeBoundingBox(baixo))) return baixo;
-        Vec3 lado = position().add(new Vec3(-3.6 * ESCALA, 0.2, 0).yRot(-getYRot() * Mth.DEG_TO_RAD));
+        Vec3 lado = position().add(new Vec3(-3.6 * escala(), 0.2, 0).yRot(-getYRot() * Mth.DEG_TO_RAD));
         if (level().noCollision(passageiro, passageiro.getDimensions(passageiro.getPose()).makeBoundingBox(lado))) return lado;
         return super.getDismountLocationForPassenger(passageiro);
     }
@@ -288,8 +335,8 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
         velocidade = 0.5f;
         dono.resetFallDistance();
         var cam = dono.getAttribute(Attributes.CAMERA_DISTANCE);
-        if (cam != null) cam.addOrUpdateTransientModifier(new AttributeModifier(CAMERA, 6 * ESCALA, AttributeModifier.Operation.ADD_VALUE));
-        Guia.concluir(dono, "batwing");
+        if (cam != null) cam.addOrUpdateTransientModifier(new AttributeModifier(CAMERA, 6 * escala(), AttributeModifier.Operation.ADD_VALUE));
+        Guia.concluir(dono, tarefa());
     }
 
     private static void tirarCamera(Entity e) {
@@ -363,10 +410,10 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
         tickServidor((ServerLevel) level());
     }
 
-    private void particulas() {
+    protected void particulas() {
         if (oculto() || estado() == CHEGANDO && tickCount < 3) return;
         Vec3 tras = Vec3.directionFromRotation(getXRot(), getYRot()).scale(-1);
-        Vec3 bocal = position().add(0, 0.45 * ESCALA, 0).add(tras.scale(1.6 * ESCALA));
+        Vec3 bocal = position().add(0, 0.45 * escala(), 0).add(tras.scale(1.6 * escala()));
         if (random.nextInt(2) == 0) level().addParticle(ParticleTypes.SMOKE, bocal.x, bocal.y, bocal.z, tras.x * 0.1, 0.01, tras.z * 0.1);
     }
 
@@ -455,7 +502,7 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
         tempoEstado = 0;
         noPhysics = true;
         atirando = false;
-        level().playSound(null, getX(), getY(), getZ(), Sons.BATWING_CHEGA.get(), SoundSource.PLAYERS, 1.4f, 1.2f);
+        level().playSound(null, getX(), getY(), getZ(), somChegada(), SoundSource.PLAYERS, 1.4f, 1.2f);
     }
 
     // ------------------------------------------------------------------ armas
@@ -482,7 +529,7 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
         }
     }
 
-    private void revelar() {
+    protected void revelar() {
         if (!oculto()) return;
         entityData.set(OCULTO, false);
         level().playSound(null, getX(), getY(), getZ(), Sons.BATWING_REVELA.get(), SoundSource.PLAYERS, 1f, 1f);
@@ -496,7 +543,7 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
         }
     }
 
-    private void armas(ServerLevel level, Entity dono) {
+    protected void armas(ServerLevel level, Entity dono) {
         float calor = calor();
         boolean pode = estado() == PILOTADO && dono instanceof ServerPlayer;
         if (pode && atirando && !superaquecido) {

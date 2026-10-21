@@ -28,7 +28,9 @@
     "tecido_tatico": "Tactical Fabric",
     "torta_martha": "Martha's Pie",
     "visor_tatico": "Tactical Visor",
-    "osso_cristal": "Kryptonian Crystal Bone"
+    "osso_cristal": "Kryptonian Crystal Bone",
+    "cristal_supergirl": "Crystal of the House of Zor-El",
+    "jaqueta_conner": "Conner's Leather Jacket"
   },
   "personagens": {
     "1": {
@@ -36,6 +38,12 @@
     },
     "2": {
       "exp": "Preparation, gear and strategy: you win because you planned, not because you are stronger."
+    },
+    "17": {
+      "exp": "A faster, more impulsive Kryptonian: more speed and aerial combat, less brute strength."
+    },
+    "48": {
+      "exp": "Half Kryptonian: tactile telekinesis instead of heat vision."
     }
   },
   "guia": {
@@ -128,6 +136,12 @@
     "comunicador_liga": {
       "desc": "Pocket radio bearing the Justice League symbol. Right-click another player to link the two of you (again to unlink). Linked allies who also carry a communicator show at the top of the screen with direction and distance. Right-click in the air to mark a meeting point where you aim (up to 160 blocks): it shows for you and your allies.",
       "obter": "Crafted from a Circuit Board, two Copper Ingots and an Ender Pearl. Martha Kent also gives one when you finish the mission \"The First Emblem\"."
+    },
+    "cristal_supergirl": {
+      "desc": "Right-click to put on Supergirl's suit and gain her powers. Press H to turn back to normal."
+    },
+    "jaqueta_conner": {
+      "desc": "Right-click to put on Superboy's suit and gain his powers. Press H to turn back to normal."
     }
   }
 }

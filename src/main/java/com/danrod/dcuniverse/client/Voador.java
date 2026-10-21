@@ -80,6 +80,11 @@ public final class Voador {
     /** Manobra do jogador local em andamento (-1 = nenhuma) e há quantos ticks começou. */
     private static int manobra = -1, manobraT, ultimaManobra = -100;
     private static final Toque ESQ = new Toque(), DIR = new Toque(), TRAS = new Toque(), FRENTE = new Toque();
+    /** Investida aérea do jogador local (ability/active/Investida): ticks que faltam e velocidade (blocos/tick). */
+    private static int investida;
+    private static double investidaVel;
+    /** Quem está numa investida agora (id da entidade → ticks que faltam), para a cauda luminosa. */
+    private static final Map<Integer, Integer> INVESTINDO = new HashMap<>();
     /** Pose de voo de cada jogador visível que está voando (id da entidade). */
     private static final Map<Integer, Pose> POSES = new HashMap<>();
 
@@ -144,6 +149,10 @@ public final class Voador {
         if (p == null || mc.isPaused()) return;
         ticks++;
         boolean livre = mc.gui.screen() == null;
+        if (investida > 0) {
+            investir(p);
+            return;
+        }
         if (!voando(p)) {
             vel = null;
             armado = true;
@@ -207,6 +216,35 @@ public final class Voador {
             Trilha.VOO.impacto(mc);
             Rede.CANAL.send(new Rede.Estrondo(), PacketDistributor.SERVER.noArg());
         }
+    }
+
+    /**
+     * Investida aérea (Rede.Efeito "investida"): quem investe dispara para onde olha; o cliente dele faz o
+     * movimento e todos veem a cauda luminosa e o anel de ar. a = duração (ticks), b = velocidade, cor = entidade.
+     */
+    public static void investida(Minecraft mc, Rede.Efeito e) {
+        if (mc.level == null) return;
+        INVESTINDO.put(e.cor(), Math.round(e.a()) + 2);
+        if (mc.level.getEntity(e.cor()) instanceof Player pl) arrancada(mc.level, pl);
+        if (mc.player == null || mc.player.getId() != e.cor()) return;
+        investida = Math.round(e.a());
+        investidaVel = e.b();
+        soco = 0.35f;
+        tremor = Math.max(tremor, 9);
+    }
+
+    /** Um tick da investida do jogador local: segue o olhar (dá para virar de leve) na velocidade da investida. */
+    private static void investir(LocalPlayer p) {
+        Vec3 alvo = p.getLookAngle().scale(investidaVel);
+        Vec3 atual = p.getDeltaMovement();
+        Vec3 nova = atual.lengthSqr() < investidaVel * investidaVel * 0.25 ? alvo : atual.lerp(alvo, 0.45).normalize().scale(investidaVel);
+        investida--;
+        // No fim, quem voa continua voando rápido; quem estava a pé perde o embalo aos poucos.
+        if (investida == 0 && !voando(p)) nova = nova.scale(0.35);
+        p.setDeltaMovement(nova);
+        if (voando(p)) vel = nova;
+        p.resetFallDistance();
+        if (p.horizontalCollision && investida < 6) investida = 0;
     }
 
     /** Toque duplo em A/D gira de lado (esquiva), em S dá meia-volta mantendo a velocidade e em W arranca. */
@@ -318,7 +356,19 @@ public final class Voador {
             boolean visivel = !pl.isInvisible() && !(pl == mc.player && mc.options.getCameraType().isFirstPerson());
             cauda(level, pl, ps, d, visivel);
         }
-        Cauda.tick(level, POSES.keySet());
+        // Investida: a cauda acende no caminho de quem investe, voando ou não.
+        INVESTINDO.entrySet().removeIf(en -> {
+            if (!(level.getEntity(en.getKey()) instanceof Player pl)) return true;
+            if (!POSES.containsKey(pl.getId())) {
+                boolean visivel = !pl.isInvisible() && !(pl == mc.player && mc.options.getCameraType().isFirstPerson());
+                Cauda.ponto(level, pl, pl.position().add(0, 0.8, 0), true, 1f, visivel);
+            }
+            en.setValue(en.getValue() - 1);
+            return en.getValue() < 0;
+        });
+        java.util.Set<Integer> comCauda = new java.util.HashSet<>(POSES.keySet());
+        comCauda.addAll(INVESTINDO.keySet());
+        Cauda.tick(level, comCauda);
         LocalPlayer p = mc.player;
         boolean voa = p != null && voando(p) && vel != null;
         Trilha.VOO.tick(mc, voa ? trilha(vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo())) : null);
@@ -339,7 +389,7 @@ public final class Voador {
         Vec3 n = d.lengthSqr() < 1e-8 ? pl.getLookAngle() : d.normalize();
         Vec3 base = pl.position().add(0, 0.3 + 0.6 * (1 - ps.deitado), 0).subtract(n.scale(0.15 * ps.deitado));
         float forca = (float) Mth.clamp((ps.blocosPorSeg - RASTRO) / 35.0, 0, 1);
-        boolean boost = pl.isSprinting() || ps.manobra == Voo.ARRANCADA;
+        boolean boost = pl.isSprinting() || ps.manobra == Voo.ARRANCADA || INVESTINDO.containsKey(pl.getId());
         Cauda.ponto(level, pl, base, boost && ps.blocosPorSeg >= RASTRO, forca, visivel);
     }
 
@@ -528,6 +578,8 @@ public final class Voador {
     }
 
     public static void limpar() {
+        investida = 0;
+        INVESTINDO.clear();
         vel = null;
         armado = true;
         tremor = 0;

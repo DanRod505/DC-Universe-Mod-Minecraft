@@ -59,6 +59,8 @@ public final class Cliente {
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "rastreio"), com.danrod.dcuniverse.client.npc.Rastreio::desenhar);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "liga"), LigaHud::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "ilha"), Ilhas::desenhar);
         });
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> {
             e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new);
@@ -74,6 +76,10 @@ public final class Cliente {
             e.registerEntityRenderer(Entidades.NPC_SLIM.get(), com.danrod.dcuniverse.client.npc.NpcRenderer::fino);
             e.registerEntityRenderer(Entidades.KRYPTO.get(), com.danrod.dcuniverse.client.npc.KryptoRenderer::new);
             e.registerEntityRenderer(Entidades.STREAKY.get(), com.danrod.dcuniverse.client.npc.StreakyRenderer::new);
+            e.registerEntityRenderer(Entidades.BLOCO_TK.get(), com.danrod.dcuniverse.client.render.BlocoTkRenderer::new);
+            e.registerEntityRenderer(Entidades.ILHA.get(), com.danrod.dcuniverse.client.render.IlhaRenderer::new);
+            e.registerEntityRenderer(Entidades.NAVE_KRYPTONIANA.get(), com.danrod.dcuniverse.client.render.NaveKryptonianaRenderer::new);
+            e.registerEntityRenderer(Entidades.ORBE_SOLAR.get(), com.danrod.dcuniverse.client.render.OrbeRenderer::new);
         });
         TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
         ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> {
@@ -89,6 +95,7 @@ public final class Cliente {
             Gancheador.limpar();
             Piloto.limpar();
             Motorista.limpar();
+            Ilhas.limpar();
             usando = false;
         });
         GuiaItem.abrir = GuiaScreen::abrir;
@@ -106,6 +113,7 @@ public final class Cliente {
         Saltador.registrar();
         Piloto.registrar();
         Motorista.registrar();
+        Ilhas.registrar();
         LigaHud.registrar();
         com.danrod.dcuniverse.client.npc.NpcRenderer.registrar();
     }

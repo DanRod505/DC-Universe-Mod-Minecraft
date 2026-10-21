@@ -1,0 +1,5 @@
+{
+  "slim": true,
+  "pieces": ["capa", "cabelo_longo", "saia", "brilho"],
+  "glow": { "projectile_beam": "supergirl_olhos" }
+}

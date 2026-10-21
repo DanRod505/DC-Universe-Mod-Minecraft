@@ -3,6 +3,7 @@ package com.danrod.dcuniverse.client;
 import com.danrod.dcuniverse.DCUniverse;
 import com.danrod.dcuniverse.character.Params;
 import com.danrod.dcuniverse.content.BatwingEntidade;
+import com.danrod.dcuniverse.content.NaveKryptoniana;
 import com.danrod.dcuniverse.content.Sons;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.core.Rede;
@@ -55,6 +56,7 @@ public final class Piloto {
     private static float rolagemCam;
     private static int batida;
     private static final Map<Integer, Motor> MOTORES = new HashMap<>();
+    private static final Map<Integer, Canhao> CANHOES = new HashMap<>();
     /** Jogadores desenhados agora girados junto com o Batwing (o Post desfaz o giro do Pre). */
     private static final Set<Integer> GIRADOS = new HashSet<>();
     /** Altura do assento acima dos pés de quem está montado (Avatar.DEFAULT_VEHICLE_ATTACHMENT). */
@@ -111,7 +113,7 @@ public final class Piloto {
         SoundInstance s = e.getSound();
         if (s == null || s.isRelative() || s instanceof Motor) return;
         Identifier id = s.getIdentifier();
-        if (!DCUniverse.MODID.equals(id.getNamespace()) || !id.getPath().startsWith("habilidade.batwing_")) return;
+        if (!DCUniverse.MODID.equals(id.getNamespace()) || !(id.getPath().startsWith("habilidade.batwing_") || id.getPath().startsWith("habilidade.nave_"))) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !(mc.player.getVehicle() instanceof BatwingEntidade b)) return;
         if (b.distanceToSqr(s.getX(), s.getY(), s.getZ()) > 20 * 20) return;
@@ -150,6 +152,7 @@ public final class Piloto {
     public static void limpar() {
         atirava = false;
         MOTORES.clear();
+        CANHOES.clear();
     }
 
     private static void enviar(int acao) {
@@ -199,6 +202,17 @@ public final class Piloto {
             }
         }
         MOTORES.values().removeIf(Motor::isStopped);
+        // O zumbido do canhão solar de cada nave atirando por perto.
+        for (Entity e : mc.level.entitiesForRendering()) {
+            if (!(e instanceof NaveKryptoniana n) || n.canhao() <= 0) continue;
+            Canhao c = CANHOES.get(n.getId());
+            if (c == null || c.isStopped()) {
+                c = new Canhao(n, mc.player.getVehicle() == n);
+                CANHOES.put(n.getId(), c);
+                mc.getSoundManager().play(c);
+            }
+        }
+        CANHOES.values().removeIf(Canhao::isStopped);
     }
 
     // ------------------------------------------------------------------ física
@@ -277,6 +291,10 @@ public final class Piloto {
         if (mc.player == null || mc.gui.hud.isHidden()) return;
         BatwingEntidade b = BatwingEntidade.pilotando(mc.player);
         if (b == null) return;
+        if (b instanceof NaveKryptoniana n) {
+            desenharNave(g, mc, n);
+            return;
+        }
         Font f = mc.font;
         Params prm = params();
         int w = 150, h = 97, x = g.guiWidth() - w - 6, y = g.guiHeight() - h - 30;
@@ -329,6 +347,91 @@ public final class Piloto {
         g.text(f, Component.translatable("dcuniverse.batwing.dica2"), x + 5, y + 85, 0xFF7F8898, false);
     }
 
+    private static final int DOURADO = 0xFFFFD84A, CRISTAL = 0xFF9FE0FF;
+
+    /** Painel da nave kryptoniana: tempo, velocidade, altitude, calor do canhão, orbes e carga do escudo. */
+    private static void desenharNave(GuiGraphicsExtractor g, Minecraft mc, NaveKryptoniana n) {
+        Font f = mc.font;
+        Params prm = params();
+        int w = 156, h = 104, x = g.guiWidth() - w - 6, y = g.guiHeight() - h - 30;
+        g.fill(x, y, x + w, y + h, 0xB0060C18);
+        g.fill(x, y, x + w, y + 1, CRISTAL);
+        g.fill(x, y + h - 1, x + w, y + h, 0x809FE0FF);
+        g.text(f, Component.translatable("dcuniverse.nave.titulo").withStyle(ChatFormatting.BOLD), x + 5, y + 4, CRISTAL, true);
+        int total = Math.round(prm.f("duration", 90) * 20);
+        float frac = Mth.clamp(n.restante() / (float) Math.max(1, total), 0, 1);
+        String seg = (n.restante() + 19) / 20 + " s";
+        g.text(f, seg, x + w - 5 - f.width(seg), y + 4, frac < 0.2f ? VERMELHO : 0xFFE8ECF4, true);
+        g.fill(x + 5, y + 14, x + w - 5, y + 16, 0xFF20242E);
+        g.fill(x + 5, y + 14, x + 5 + Math.round((w - 10) * frac), y + 16, frac < 0.2f ? VERMELHO : CRISTAL);
+        g.text(f, Component.translatable("dcuniverse.batwing.velocidade", Math.round(n.velocidade * 20)), x + 5, y + 21, 0xFFE8ECF4, true);
+        g.text(f, Component.translatable("dcuniverse.batwing.altitude", (int) Math.floor(n.getY())), x + 86, y + 21, 0xFFE8ECF4, true);
+        // Canhão solar: calor
+        float calor = n.calorCanhao();
+        g.text(f, Component.translatable("dcuniverse.nave.canhao"), x + 5, y + 34, CINZA, true);
+        int bx = x + 5, by = y + 44, bw = w - 10;
+        g.fill(bx, by, bx + bw, by + 4, 0xFF20242E);
+        g.fill(bx, by, bx + Math.round(bw * calor), by + 4, calor > 0.8f ? VERMELHO : calor > 0.5f ? 0xFFFF9A3A : DOURADO);
+        // Orbes
+        g.text(f, Component.translatable("dcuniverse.nave.orbes"), x + 5, y + 52, CINZA, true);
+        int max = prm.i("orbs", 3);
+        for (int i = 0; i < max; i++) {
+            int ox = x + 64 + i * 12, oy = y + 52;
+            boolean tem = i < n.orbes();
+            g.fill(ox + 1, oy + 1, ox + 7, oy + 7, tem ? DOURADO : 0xFF2A2F3A);
+            g.fill(ox, oy + 2, ox + 8, oy + 6, tem ? DOURADO : 0xFF2A2F3A);
+            if (tem) g.fill(ox + 2, oy + 2, ox + 5, oy + 5, 0xFFFFF6D0);
+            if (i == n.orbes() && n.orbes() < max) g.fill(ox, oy + 9, ox + Math.round(8 * n.recargaOrbe()), oy + 10, DOURADO);
+        }
+        // Escudo
+        boolean ligado = n.escudoAtivo();
+        g.text(f, Component.translatable(ligado ? "dcuniverse.nave.escudo_ligado" : "dcuniverse.nave.escudo"), x + 5, y + 64, ligado ? CRISTAL : CINZA, true);
+        g.fill(bx, y + 74, bx + bw, y + 78, 0xFF20242E);
+        g.fill(bx, y + 74, bx + Math.round(bw * n.escudo()), y + 78, ligado ? CRISTAL : n.escudo() < 0.15f ? VERMELHO : 0xFF5A8AB0);
+        if (n.alvoOrbe() >= 0 && n.orbes() > 0) {
+            boolean pisca = (mc.player.tickCount / 4) % 2 == 0;
+            Component c = Component.translatable("dcuniverse.batwing.travado");
+            g.text(f, c, x + w - 5 - f.width(c), y + 52, pisca ? VERMELHO : 0xFFFFB0A0, true);
+        }
+        g.text(f, Component.translatable("dcuniverse.nave.dica1"), x + 5, y + 83, 0xFF7F8898, false);
+        g.text(f, Component.translatable("dcuniverse.nave.dica2", Teclas.USAR.getTranslatedKeyMessage()), x + 5, y + 93, 0xFF7F8898, false);
+    }
+
+    /** Zumbido do canhão solar enquanto o raio está aceso. */
+    private static final class Canhao extends AbstractTickableSoundInstance {
+        private final NaveKryptoniana n;
+
+        Canhao(NaveKryptoniana n, boolean dentro) {
+            super(Sons.NAVE_CANHAO.get(), SoundSource.PLAYERS, n.getRandom());
+            this.n = n;
+            this.looping = true;
+            this.delay = 0;
+            this.volume = 0.9f;
+            if (dentro) {
+                this.relative = true;
+                this.attenuation = Attenuation.NONE;
+            } else {
+                Vec3 p = n.bocaCanhao(1);
+                this.x = p.x;
+                this.y = p.y;
+                this.z = p.z;
+            }
+        }
+
+        @Override
+        public void tick() {
+            if (n.isRemoved() || n.canhao() <= 0) {
+                stop();
+                return;
+            }
+            if (relative) return;
+            Vec3 p = n.bocaCanhao(1);
+            x = p.x;
+            y = p.y;
+            z = p.z;
+        }
+    }
+
     // ------------------------------------------------------------------ motor
 
     /**
@@ -341,7 +444,7 @@ public final class Piloto {
         final boolean dentro;
 
         Motor(BatwingEntidade b, boolean dentro) {
-            super(Sons.BATWING_MOTOR.get(), SoundSource.NEUTRAL, b.getRandom());
+            super(b.somMotor(), SoundSource.NEUTRAL, b.getRandom());
             this.b = b;
             this.dentro = dentro;
             this.looping = true;

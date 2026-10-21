@@ -45,6 +45,8 @@ public final class Testes {
 
     private static final Identifier SUPERMAN = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "superman");
     private static final Identifier BATMAN = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batman");
+    private static final Identifier SUPERGIRL = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "supergirl");
+    private static final Identifier SUPERBOY = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "superboy");
 
     static {
         FUNCOES.register("transform", () -> Testes::transforma);
@@ -80,6 +82,10 @@ public final class Testes {
         FUNCOES.register("prologue", () -> Testes::prologo);
         FUNCOES.register("meteor_shower", () -> Testes::chuvaMeteoros);
         FUNCOES.register("league_communicator", () -> Testes::comunicador);
+        FUNCOES.register("supergirl", () -> Testes::supergirl);
+        FUNCOES.register("kryptonian_ship", () -> Testes::nave);
+        FUNCOES.register("telekinesis", () -> Testes::telecinese);
+        FUNCOES.register("floating_island", () -> Testes::ilha);
     }
 
     private Testes() {}
@@ -1243,5 +1249,151 @@ public final class Testes {
         for (net.minecraft.core.BlockPos q : net.minecraft.core.BlockPos.betweenClosed(c.minX(), c.minY(), c.minZ(), c.maxX(), c.maxY(), c.maxZ()))
             if (teste.test(level.getBlockState(q))) return true;
         return false;
+    }
+
+    /**
+     * Supergirl: herda o kit do Superman (calor, sopro, raio X), a investida aérea derruba quem está no caminho e
+     * quebra o vidro, e a suprema chama a nave kryptoniana, que vai embora quando ela destransforma.
+     */
+    static void supergirl(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        h.assertTrue(Transformacao.transformar(p, SUPERGIRL, true), "transformar na Supergirl");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem kara = e.personagem();
+        for (String id : new String[] {"visao_de_calor", "sopro_congelante", "visao_raio_x", "investida_aerea"}) {
+            h.assertTrue(kara.habilidade(id) != null, "tem " + id);
+        }
+        e.setEnergia(kara.energia().max());
+        // Um zumbi e um vidro na frente (o jogador olha para o sul, +z).
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 2, 6));
+        zumbi.setNoAi(true);
+        var vidro = h.absolutePos(new net.minecraft.core.BlockPos(1, 3, 4));
+        h.getLevel().setBlockAndUpdate(vidro, net.minecraft.world.level.block.Blocks.GLASS.defaultBlockState());
+        float vida = zumbi.getHealth();
+        h.assertTrue(Habilidades.executar(p, kara, kara.habilidade("investida_aerea")), "investida aérea");
+        h.assertTrue(Guia.concluida(p, "investida"), "tarefa da investida");
+        // O movimento é do cliente: aqui o teste anda com o jogador como o cliente andaria (1,5 bloco por tick).
+        for (int t = 1; t <= 5; t++) {
+            int k = t;
+            h.runAfterDelay(t, () -> p.setPos(aqui.x, aqui.y, aqui.z + 1.5 * k));
+        }
+        h.runAfterDelay(12, () -> {
+            h.assertTrue(zumbi.getHealth() < vida || !zumbi.isAlive(), "o zumbi no caminho levou o golpe");
+            h.assertTrue(h.getLevel().getBlockState(vidro).isAir(), "o vidro se despedaçou");
+            Transformacao.destransformar(p);
+            zumbi.discard();
+            h.succeed();
+        });
+    }
+
+    /** Nave kryptoniana: a suprema chama a nave com orbes e escudo cheios; ela vai embora quando a Supergirl destransforma. */
+    static void nave(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, SUPERGIRL, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem kara = e.personagem();
+        e.setEnergia(kara.energia().max());
+        Personagem.Habilidade sup = kara.suprema();
+        h.assertValueEqual(sup.id(), "nave_kryptoniana", "a suprema é a nave");
+        h.assertTrue(Habilidades.executar(p, kara, sup), "chama a nave");
+        h.assertValueEqual(e.energia(), kara.energia().max() * 0.3f, "custa 70% da energia");
+        var nave = (com.danrod.dcuniverse.content.NaveKryptoniana) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+        h.assertTrue(nave != null && nave.isAlive(), "nave no mundo");
+        h.assertValueEqual(nave.orbes(), 3, "três orbes prontos");
+        h.assertValueEqual((double) nave.escudo(), 1.0, "escudo carregado");
+        Transformacao.destransformar(p);
+        h.assertValueEqual(nave.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "a nave vai embora");
+        nave.discard();
+        com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        h.succeed();
+    }
+
+    /**
+     * Telecinese tátil: arranca o pedaço mirado (os blocos viram blocos flutuantes), arremessa e eles assentam
+     * de volta como blocos; o escudo telecinético corta 75% do dano.
+     */
+    static void telecinese(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var level = h.getLevel();
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dz = -3; dz <= 6; dz++) {
+                level.setBlockAndUpdate(h.absolutePos(new net.minecraft.core.BlockPos(2 + dx, 1, 2 + dz)), net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState());
+            }
+        }
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 2.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 70);
+        h.assertTrue(Transformacao.transformar(p, SUPERBOY, true), "transformar no Superboy");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem conner = e.personagem();
+        e.setEnergia(conner.energia().max());
+        Personagem.Habilidade tk = conner.habilidade("telecinese_tatil");
+        h.assertTrue(Habilidades.executar(p, conner, tk), "ergue o chão mirado");
+        var blocos = level.getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(10));
+        h.assertTrue(blocos.size() >= 4, "blocos flutuando (" + blocos.size() + ")");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Telecinese.segurando(p), "segurando");
+        h.assertTrue(Guia.concluida(p, "telecinese"), "tarefa da telecinese");
+        float antes = e.energia();
+        p.setXRot(10);
+        h.assertTrue(Habilidades.executar(p, conner, tk), "arremessa");
+        h.assertValueEqual(e.energia(), antes, "arremessar o que já está erguido não gasta");
+        h.assertFalse(com.danrod.dcuniverse.ability.active.Telecinese.segurando(p), "soltou");
+        // Escudo (ferir o jogador de teste não funciona: sem conexão).
+        Personagem.Habilidade esc = conner.habilidade("escudo_telecinetico");
+        h.assertTrue(Habilidades.executar(p, conner, esc), "liga o escudo");
+        h.assertValueEqual((double) com.danrod.dcuniverse.ability.active.EscudoTk.reducao(p), 0.75, "o escudo corta 75% do dano");
+        h.runAfterDelay(60, () -> {
+            long voando = level.getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(80)).size();
+            h.assertValueEqual(voando, 0L, "os blocos arremessados assentaram");
+            com.danrod.dcuniverse.ability.active.EscudoTk.limpar();
+            Transformacao.destransformar(p);
+            h.succeed();
+        });
+    }
+
+    /** Ilha telecinética: arranca um disco de terra com o que há em cima, flutua e assenta de novo como blocos. */
+    static void ilha(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var level = h.getLevel();
+        for (int dx = -6; dx <= 6; dx++) {
+            for (int dz = -6; dz <= 6; dz++) {
+                for (int y = 1; y <= 4; y++) {
+                    level.setBlockAndUpdate(h.absolutePos(new net.minecraft.core.BlockPos(7 + dx, y, 7 + dz)),
+                        (y == 4 ? net.minecraft.world.level.block.Blocks.GRASS_BLOCK : net.minecraft.world.level.block.Blocks.DIRT).defaultBlockState());
+                }
+            }
+        }
+        var flor = h.absolutePos(new net.minecraft.core.BlockPos(8, 5, 7));
+        level.setBlockAndUpdate(flor, net.minecraft.world.level.block.Blocks.POPPY.defaultBlockState());
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(7.5, 5, 7.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 90);
+        h.assertTrue(Transformacao.transformar(p, SUPERBOY, true), "transformar no Superboy");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem conner = e.personagem();
+        e.setEnergia(conner.energia().max());
+        Personagem.Habilidade sup = conner.suprema();
+        h.assertValueEqual(sup.id(), "ilha_telecinetica", "a suprema é a ilha");
+        var mira = com.danrod.dcuniverse.ability.Alvos.mirarBloco(p, 24, net.minecraft.world.level.ClipContext.Fluid.NONE);
+        h.assertTrue(Habilidades.executar(p, conner, sup), "arranca a ilha (mira " + mira.getType() + " " + mira.getBlockPos() + ", pé " + p.blockPosition()
+            + ", altura " + level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getBlockX(), p.getBlockZ()) + ")");
+        var ilhas = level.getEntitiesOfClass(com.danrod.dcuniverse.content.IlhaTelecinetica.class, p.getBoundingBox().inflate(16));
+        h.assertValueEqual(ilhas.size(), 1, "uma ilha no mundo");
+        var ilha = ilhas.get(0);
+        h.assertTrue(ilha.celulas().size() > 60, "disco com cúpula (" + ilha.celulas().size() + " blocos)");
+        h.assertTrue(level.getBlockState(flor).isAir() && level.getBlockState(flor.below()).isAir(), "a flor e o chão foram junto");
+        h.assertTrue(ilha.caixasPartes().size() > 10, "colunas de colisão");
+        // O jogador de teste não é achado pela ilha (level.getEntity), então ela assenta logo onde estava: confere
+        // que volta a ser blocos de verdade (a subida e a pilotagem são testadas no jogo).
+        var centro = net.minecraft.core.BlockPos.containing(ilha.getX(), ilha.getY(), ilha.getZ());
+        h.runAfterDelay(10, () -> {
+            h.assertFalse(ilha.isAlive(), "assentou");
+            h.assertTrue(level.getBlockState(centro.below()).is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK), "virou blocos de novo");
+            Transformacao.destransformar(p);
+            com.danrod.dcuniverse.ability.active.Ilha.limpar();
+            h.succeed();
+        });
     }
 }

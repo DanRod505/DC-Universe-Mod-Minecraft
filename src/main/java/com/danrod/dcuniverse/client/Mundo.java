@@ -55,6 +55,7 @@ public final class Mundo {
         Detetive.limpar();
         Furtivo.limpar();
         Gelo.limpar();
+        Bolha.limpar();
     }
 
     public static void tick(Minecraft mc) {
@@ -67,6 +68,7 @@ public final class Mundo {
             ATIVOS.removeIf(a -> tickAtivo(level, a, agora - a.inicio));
         }
         RaioX.tick(mc);
+        Bolha.tick(level);
         Detetive.tick(mc);
         Furtivo.tick(mc);
     }
@@ -93,6 +95,8 @@ public final class Mundo {
                 arcoInicio(level, e);
                 adicionar(e, agora);
             }
+            case "investida" -> Voador.investida(mc, e);
+            case "escudo_tk", "escudo_tk_golpe", "escudo_tk_fim" -> Bolha.efeito(mc, e);
             case "tiro" -> {
                 tiroInicio(level, e);
                 adicionar(e, agora);
@@ -267,6 +271,7 @@ public final class Mundo {
         Detetive.desenhar(ps, col, cam, pt);
         Efeitos.feixePrimeiraPessoa(ps, col, cam, pt);
         Gelo.desenhar(ps, col, cam, pt);
+        Bolha.desenhar(ps, col, cam, pt);
     }
 
     /** Anel claro que corre pelo chão, com um segundo anel mais fraco atrás. */
