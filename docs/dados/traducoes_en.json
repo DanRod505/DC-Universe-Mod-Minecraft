@@ -59,7 +59,8 @@
       "obter": "One per Meteor Crater, in the chest hidden inside the meteor at the bottom of the crater."
     },
     "cristal_superman": {
-      "desc": "Right-click to put on Superman's suit and gain his powers. Press H to turn back to normal."
+      "desc": "Right-click to put on Superman's suit and gain his powers. Press H to turn back to normal.",
+      "obter": "In Kal-El's ship, in the basement of the Kent Farm barn in Smallville: right-click it (one per player). It can also be your starting item or be crafted."
     },
     "fragmento_alienigena": {
       "desc": "A piece of the meteor veined with energy. Used to craft another Hero's Guide and, in future versions, alien technology.",
@@ -87,13 +88,14 @@
       "desc": "Tier III, with blaze rod, ender pearl and amethyst: base of tier 3 transformation items and of Core IV."
     },
     "nucleo_meta_4": {
-      "desc": "Tier IV, the strongest, with netherite and echo from the Ancient City: base of end-game transformation items such as Superman's. Does not burn in lava."
+      "desc": "Tier IV, the strongest, with netherite and crying obsidian from the Nether: base of end-game transformation items such as Superman's. Does not burn in lava."
     },
     "tecido_tatico": {
       "desc": "Tough fabric with a kevlar weave. The base of every hero suit."
     },
     "cinto_batman": {
-      "desc": "Right-click to put on Batman's suit and carry his gadgets. Press H to turn back to normal."
+      "desc": "Right-click to put on Batman's suit and carry his gadgets. Press H to turn back to normal.",
+      "obter": "Crafted (tier 1 recipe, no Nether needed). It can also be your starting item."
     },
     "minerio_prometio": {
       "desc": "Rare ore from the bottom of the world, locked in deepslate. It glows faintly in the dark and only drops with a diamond pickaxe.",
@@ -147,10 +149,12 @@
       "obter": "Crafted from a Circuit Board, two Copper Ingots and an Ender Pearl. Martha Kent also gives one when you finish the mission \"The First Emblem\"."
     },
     "cristal_supergirl": {
-      "desc": "Right-click to put on Supergirl's suit and gain her powers. Press H to turn back to normal."
+      "desc": "Right-click to put on Supergirl's suit and gain her powers. Press H to turn back to normal.",
+      "obter": "Reward of Lana Lang's mission \"Glowing Stones\" in Smallville. It can also be your starting item or be crafted."
     },
     "jaqueta_conner": {
-      "desc": "Right-click to put on Superboy's suit and gain his powers. Press H to turn back to normal."
+      "desc": "Right-click to put on Superboy's suit and gain his powers. Press H to turn back to normal.",
+      "obter": "Reward of Martha Kent's mission \"Family Harvest\" in Smallville. It can also be your starting item or be crafted."
     }
   }
 }

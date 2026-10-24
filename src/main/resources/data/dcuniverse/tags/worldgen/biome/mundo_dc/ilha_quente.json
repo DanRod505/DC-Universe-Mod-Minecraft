@@ -1,0 +1,15 @@
+{
+  "values": [
+    "minecraft:meadow",
+    "minecraft:plains",
+    "minecraft:flower_forest",
+    "minecraft:cherry_grove",
+    "minecraft:birch_forest",
+    "minecraft:beach",
+    "minecraft:stony_shore",
+    "minecraft:warm_ocean",
+    "minecraft:lukewarm_ocean",
+    "minecraft:deep_lukewarm_ocean",
+    "minecraft:river"
+  ]
+}

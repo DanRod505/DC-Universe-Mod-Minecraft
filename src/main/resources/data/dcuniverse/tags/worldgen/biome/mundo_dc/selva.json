@@ -1,0 +1,13 @@
+{
+  "values": [
+    "minecraft:jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:bamboo_jungle",
+    "minecraft:river",
+    "minecraft:beach",
+    "minecraft:warm_ocean",
+    "minecraft:lukewarm_ocean",
+    "minecraft:deep_lukewarm_ocean",
+    "minecraft:mangrove_swamp"
+  ]
+}

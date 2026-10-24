@@ -381,7 +381,7 @@ C D C
 A B A
 ```
 
-A = Quartzo do Nether; B = Redstone; C = Lingote de Cobre; D = Pepita de Ouro → 2 unidades
+A = Lápis-Lazúli; B = Redstone; C = Lingote de Cobre; D = Pepita de Ouro → 2 unidades
 
 **Usado em:** Anel da Legião, Capuz da Batgirl, Componente Tecnológico, Comunicador da Liga, Crânio de Coluan, Escaravelho Khaji Da, Jaqueta T, Mapa da Liga, Traje Bumblebee (núcleo), Visor Tático
 
@@ -395,7 +395,7 @@ C D C
 A B A
 ```
 
-A = Lingote de Ferro; B = Placa de Circuito; C = Redstone; D = Comparador de Redstone
+A = Lingote de Ferro; B = Placa de Circuito; C = Redstone; D = Repetidor de Redstone
 
 **Usado em:** Batcomputador, Cinto da Batwoman, Cinto de Massa Anã, Cinto de Utilidades, Núcleo Androide, Núcleo Cibernético, Núcleo Criogênico, Núcleo da Pistola de Frio, Núcleo de Energia, Tubo Zeta
 
@@ -471,15 +471,15 @@ A = Vara de Blaze; B = Pérola do Ender; C = Fragmento de Ametista; D = Núcleo 
 
 ### Núcleo Meta-Humano IV
 
-Base dos itens de transformação de nível 4 (fim de jogo: Cidade Ancestral e netherita).
+Base dos itens de transformação de nível 4 (fim de jogo: netherita e obsidiana chorona do Nether).
 
 ```
 A B A
-B C B
+A C A
 A B A
 ```
 
-A = Fragmento de Eco; B = Fragmento de Netherita; C = Núcleo Meta-Humano III
+A = Obsidiana Chorosa; B = Fragmento de Netherita; C = Núcleo Meta-Humano III
 
 **Usado em:** Amuleto de Kahndaq, Astro-Arnês, Capuz do Espectro, Cristal Bizarro, Cristal da Casa de El, Cristal da Casa de Zor-El, Cristal do General Zod, Elmo do Lobo da Estepe, Gancho de Czarnia, Insígnia Real de Atlântida, Medalhão Marciano, Osso de Apocalypse, Pedra de Apokolips, Pergaminho de Shazam, Semente do Verde, Tiara de Themyscira
 

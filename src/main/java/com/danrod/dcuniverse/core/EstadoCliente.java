@@ -62,6 +62,9 @@ public final class EstadoCliente {
     /** Escreve a fala de um NPC no chat (client/npc/DialogoScreen::falar). */
     public static volatile java.util.function.Consumer<Rede.NpcFala> npcFala = m -> {};
 
+    /** Abre a tela do início guiado ou o mapa do mundo (client/InicioScreen::receber). */
+    public static volatile java.util.function.Consumer<Rede.InicioAbrir> inicio = m -> {};
+
     private EstadoCliente() {}
 
     public static void npcCatalogo(Rede.NpcCatalogo c) {

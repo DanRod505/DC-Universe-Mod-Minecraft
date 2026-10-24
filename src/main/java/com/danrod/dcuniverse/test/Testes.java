@@ -76,6 +76,7 @@ public final class Testes {
         FUNCOES.register("freeze_sonic", () -> Testes::batarangues);
         FUNCOES.register("garage", () -> Testes::garagem);
         FUNCOES.register("smallville", () -> Testes::smallville);
+        FUNCOES.register("levelled_locations", () -> Testes::locaisNivelados);
         FUNCOES.register("npcs", () -> Testes::npcs);
         FUNCOES.register("pets", () -> Testes::mascotes);
         FUNCOES.register("creative_tabs", () -> Testes::abas);
@@ -87,6 +88,7 @@ public final class Testes {
         FUNCOES.register("telekinesis", () -> Testes::telecinese);
         FUNCOES.register("floating_island", () -> Testes::ilha);
         FUNCOES.register("batch_v03", () -> Testes::loteV03);
+        FUNCOES.register("guided_start", () -> Testes::inicioGuiado);
     }
 
     private Testes() {}
@@ -955,10 +957,10 @@ public final class Testes {
         inv.add(new ItemStack(Items.IRON_INGOT, 6));
         inv.add(new ItemStack(Itens.PLACA_CIRCUITO.get(), 2));
         inv.add(new ItemStack(Items.REDSTONE, 2));
-        inv.add(new ItemStack(Items.COMPARATOR));
+        inv.add(new ItemStack(Items.REPEATER));
         com.danrod.dcuniverse.content.Batcomputador.fabricar(p, pos, "componente_tecnologico");
         h.assertTrue(inv.countItem(Itens.COMPONENTE_TECNOLOGICO.get()) == 1, "fabricou o componente");
-        h.assertTrue(inv.countItem(Items.IRON_INGOT) == 2 && inv.countItem(Items.COMPARATOR) == 0, "gastou os ingredientes");
+        h.assertTrue(inv.countItem(Items.IRON_INGOT) == 2 && inv.countItem(Items.REPEATER) == 0, "gastou os ingredientes");
         com.danrod.dcuniverse.content.Batcomputador.fabricar(p, pos, "componente_tecnologico");
         h.assertTrue(inv.countItem(Itens.COMPONENTE_TECNOLOGICO.get()) == 1, "sem ingredientes não fabrica");
         // Análise: carne podre registra o zumbi, e a família inteira (o zumbi do deserto também) fica analisada.
@@ -1023,6 +1025,79 @@ public final class Testes {
                 && s.getFrontText().getMessage(1, false).getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
                 && t.getKey().startsWith("dcuniverse.placa.talon")) placaComTexto = true;
         h.assertTrue(placaComTexto, "placas do Talon com texto traduzível");
+        h.succeed();
+    }
+
+    /**
+     * Locais nivelados (v0.4): o traçado de cada local cabe no platô e no alcance das estruturas e sai igual de novo;
+     * o platô corta um morro, aterra um buraco, tira a água e faz a rampa sem degraus até o terreno natural.
+     */
+    static void locaisNivelados(GameTestHelper h) {
+        for (var e : com.danrod.dcuniverse.world.estrutura.Estruturas.LOCAIS.entrySet()) {
+            var l = e.getValue();
+            var c = new net.minecraft.world.level.ChunkPos(10, -20);
+            int[] r = com.danrod.dcuniverse.world.estrutura.LocalEstrutura.plato(l, c), m = com.danrod.dcuniverse.world.estrutura.LocalEstrutura.centro(l, c);
+            java.util.List<String> primeira = new java.util.ArrayList<>(), segunda = new java.util.ArrayList<>();
+            for (var lista : java.util.List.of(primeira, segunda)) {
+                var b = new net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder();
+                l.tracar(com.danrod.dcuniverse.world.estrutura.Local.Terreno.plano(70), new net.minecraft.core.BlockPos(m[0], 71, m[1]), b, e.getKey().hashCode());
+                var pecas = b.build().pieces();
+                var tudo = net.minecraft.world.level.levelgen.structure.BoundingBox.encapsulatingBoxes(pecas.stream().map(pc -> pc.getBoundingBox()).toList()).orElseThrow();
+                for (var pc : pecas) {
+                    var bb = pc.getBoundingBox();
+                    lista.add(bb.toString());
+                    h.assertTrue(bb.minX() >= r[0] && bb.maxX() <= r[2] && bb.minZ() >= r[1] && bb.maxZ() <= r[3],
+                        e.getKey() + ": peça " + (pc instanceof com.danrod.dcuniverse.world.estrutura.PecaObra po ? po.planta() : pc) + " " + bb + " cabe no platô "
+                            + java.util.Arrays.toString(r) + " (o traçado ocupa x " + (tudo.minX() - m[0]) + ".." + (tudo.maxX() - m[0]) + ", z " + (tudo.minZ() - m[1]) + ".." + (tudo.maxZ() - m[1]) + ")");
+                }
+            }
+            h.assertTrue(primeira.equals(segunda), e.getKey() + ": a planta sai igual de novo");
+            int alcance = 8 * 16 + 7, meioX = c.getMiddleBlockX(), meioZ = c.getMiddleBlockZ();
+            int[] rp = com.danrod.dcuniverse.world.estrutura.LocalEstrutura.rampa(l);
+            h.assertTrue(rp[0] >= 12 && rp[1] >= 12, e.getKey() + ": rampa de " + rp[0] + "x" + rp[1] + " blocos (área grande demais)");
+            h.assertTrue(r[0] - rp[0] >= meioX - alcance && r[2] + rp[0] <= meioX + alcance && r[1] - rp[1] >= meioZ - alcance && r[3] + rp[1] <= meioZ + alcance,
+                e.getKey() + ": platô com rampa no alcance de 8 chunks " + java.util.Arrays.toString(r));
+        }
+
+        // Terreno de teste longe da arena: chão em y0+2, um morro de 12 blocos, um buraco com água e uma árvore.
+        var level = h.getLevel();
+        net.minecraft.core.BlockPos o = h.absolutePos(net.minecraft.core.BlockPos.ZERO).offset(0, 0, 6000);
+        int y0 = o.getY() + 6, n = 60;
+        var pedra = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+        var grama = net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState();
+        var agua = net.minecraft.world.level.block.Blocks.WATER.defaultBlockState();
+        for (int x = 0; x < n; x++) {
+            for (int z = 0; z < n; z++) {
+                int topo = y0 + 2 + (x >= 30 && x < 40 && z >= 25 && z < 35 ? 12 : 0);
+                for (int y = y0 - 10; y <= topo + 14; y++) {
+                    var q = o.offset(x, 0, z).atY(y);
+                    level.setBlock(q, y < topo ? pedra : y == topo ? grama : net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+                }
+            }
+        }
+        for (int x = 22; x < 28; x++) for (int z = 22; z < 28; z++) for (int y = y0 - 6; y <= y0 + 2; y++) level.setBlock(o.offset(x, 0, z).atY(y), agua, 2);
+        for (int y = y0 + 3; y < y0 + 8; y++) level.setBlock(o.offset(20, 0, 34).atY(y), net.minecraft.world.level.block.Blocks.OAK_LOG.defaultBlockState(), 2);
+        var plato = new com.danrod.dcuniverse.world.estrutura.PecaPlato(o.getX() + 22, o.getZ() + 22, o.getX() + 37, o.getZ() + 37, y0, 20, 20, grama);
+        var caixa = new net.minecraft.world.level.levelgen.structure.BoundingBox(o.getX(), level.getMinY(), o.getZ(), o.getX() + n - 1, level.getMaxY(), o.getZ() + n - 1);
+        plato.acertar(level, caixa, y0 - 20, net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE);
+        java.util.function.BiFunction<Integer, Integer, Integer> chao = (x, z) -> level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, o.getX() + x, o.getZ() + z) - 1;
+        for (int x = 22; x <= 37; x++) {
+            for (int z = 22; z <= 37; z++) {
+                h.assertValueEqual(chao.apply(x, z), y0, "platô plano em " + x + "," + z);
+                h.assertTrue(level.getBlockState(o.offset(x, 0, z).atY(y0)).is(grama.getBlock()), "grama no platô em " + x + "," + z);
+                for (int y = y0 - 8; y <= y0 + 14; y++)
+                    h.assertTrue(level.getFluidState(o.offset(x, 0, z).atY(y)).isEmpty(), "sem água no platô em " + x + "," + y + "," + z);
+            }
+        }
+        h.assertTrue(level.getBlockState(o.offset(20, 0, 34).atY(y0 + 4)).isAir(), "árvore da rampa cortada");
+        // Rampa para oeste: sai do nível do platô e chega ao chão natural (y0 + 2) sem degrau de mais de 1 bloco.
+        int antes = chao.apply(22, 30);
+        for (int x = 21; x >= 0; x--) {
+            int agora = chao.apply(x, 30);
+            h.assertTrue(Math.abs(agora - antes) <= 1, "rampa sem degrau em x=" + x + " (" + antes + " -> " + agora + ")");
+            antes = agora;
+        }
+        h.assertValueEqual(chao.apply(1, 30), y0 + 2, "a rampa termina no chão natural");
         h.succeed();
     }
 
@@ -1296,24 +1371,35 @@ public final class Testes {
     /** Nave kryptoniana: a suprema chama a nave com orbes e escudo cheios; ela vai embora quando a Supergirl destransforma. */
     static void nave(GameTestHelper h) {
         ServerPlayer p = jogador(h);
-        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        // Bem acima da área: a nave precisa de céu aberto atrás do jogador para descer (sem céu ela já embarca o
+        // dono, e o jogador de teste, sem conexão, não pode desembarcar). Os testes vizinhos não chegam lá.
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 40, 1.5));
         p.setPos(aqui.x, aqui.y, aqui.z);
         Transformacao.transformar(p, SUPERGIRL, true);
-        EstadoJogador e = EstadoJogador.de(p);
-        Personagem kara = e.personagem();
-        e.setEnergia(kara.energia().max());
-        Personagem.Habilidade sup = kara.suprema();
-        h.assertValueEqual(sup.id(), "nave_kryptoniana", "a suprema é a nave");
-        h.assertTrue(Habilidades.executar(p, kara, sup), "chama a nave");
-        h.assertValueEqual(e.energia(), kara.energia().max() * 0.3f, "custa 70% da energia");
-        var nave = (com.danrod.dcuniverse.content.NaveKryptoniana) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
-        h.assertTrue(nave != null && nave.isAlive(), "nave no mundo");
-        h.assertValueEqual(nave.orbes(), 3, "três orbes prontos");
-        h.assertValueEqual((double) nave.escudo(), 1.0, "escudo carregado");
-        Transformacao.destransformar(p);
-        h.assertValueEqual(nave.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "a nave vai embora");
-        nave.discard();
-        com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        try {
+            EstadoJogador e = EstadoJogador.de(p);
+            Personagem kara = e.personagem();
+            e.setEnergia(kara.energia().max());
+            Personagem.Habilidade sup = kara.suprema();
+            h.assertValueEqual(sup.id(), "nave_kryptoniana", "a suprema é a nave");
+            h.assertTrue(Habilidades.executar(p, kara, sup), "chama a nave");
+            h.assertValueEqual(e.energia(), kara.energia().max() * 0.3f, "custa 70% da energia");
+            var nave = (com.danrod.dcuniverse.content.NaveKryptoniana) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+            h.assertTrue(nave != null && nave.isAlive(), "nave no mundo");
+            h.assertValueEqual(nave.orbes(), 3, "três orbes prontos");
+            h.assertValueEqual((double) nave.escudo(), 1.0, "escudo carregado");
+            Transformacao.destransformar(p);
+            h.assertValueEqual(nave.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "a nave vai embora");
+        } finally {
+            // O jogador de teste não tem conexão: nenhuma nave dele pode ficar no mundo para ir embora sozinha.
+            for (var n : h.getLevel().getEntities(com.danrod.dcuniverse.content.Entidades.NAVE_KRYPTONIANA.get(), x -> true)) {
+                if (n.distanceToSqr(p) < 64 * 64) {
+                    n.ejectPassengers();
+                    n.discard();
+                }
+            }
+            com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        }
         h.succeed();
     }
 
@@ -1448,6 +1534,43 @@ public final class Testes {
         p.interactOn(lobo, net.minecraft.world.InteractionHand.MAIN_HAND, lobo.position());
         h.assertValueEqual(outra.getCount(), 1, "não veste duas vezes");
         lobo.discard();
+        h.succeed();
+    }
+
+    /**
+     * Início guiado: os quatro personagens prontos aparecem para escolher; escolher dá o item uma vez só e lembra a
+     * escolha; local que não existe é recusado. A nave de Kal-El dá o cristal uma vez por jogador. O mapa monta a
+     * paleta com as cores achadas.
+     */
+    static void inicioGuiado(GameTestHelper h) {
+        var ids = com.danrod.dcuniverse.inicio.Inicio.personagens().stream().map(com.danrod.dcuniverse.core.Rede.Inicial::personagem).toList();
+        for (Identifier id : List.of(SUPERMAN, BATMAN, SUPERGIRL, SUPERBOY)) h.assertTrue(ids.contains(id.toString()), "dá para começar com " + id);
+        ServerPlayer p = jogador(h);
+        h.assertFalse(com.danrod.dcuniverse.inicio.Inicio.escolheu(p), "ainda não escolheu");
+        com.danrod.dcuniverse.inicio.Inicio.escolher(p, "gotham", BATMAN.toString());
+        h.assertFalse(com.danrod.dcuniverse.inicio.Inicio.escolheu(p), "Gotham ainda não existe: recusa");
+        com.danrod.dcuniverse.inicio.Inicio.escolher(p, com.danrod.dcuniverse.inicio.Inicio.NASCIMENTO, BATMAN.toString());
+        h.assertTrue(com.danrod.dcuniverse.inicio.Inicio.escolheu(p), "escolheu");
+        h.assertTrue(p.getInventory().contains(st -> st.is(Itens.CINTO_BATMAN.get())), "ganhou o Cinto de Utilidades");
+        h.assertTrue(Guia.descoberto(p, BATMAN), "Batman descoberto no Guia");
+        com.danrod.dcuniverse.inicio.Inicio.escolher(p, com.danrod.dcuniverse.inicio.Inicio.NASCIMENTO, SUPERMAN.toString());
+        h.assertFalse(p.getInventory().contains(st -> st.is(Itens.CRISTAL_SUPERMAN.get())), "só escolhe uma vez");
+
+        BlockPos nave = new BlockPos(1, 2, 1);
+        h.setBlock(nave, com.danrod.dcuniverse.content.Blocos.NAVE_KALEL.get());
+        var hit = new net.minecraft.world.phys.BlockHitResult(h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2.5, 1.5)), net.minecraft.core.Direction.UP,
+            h.absolutePos(nave), false);
+        for (int i = 0; i < 2; i++) h.getBlockState(nave).useWithoutItem(h.getLevel(), p, hit);
+        int cristais = 0;
+        for (int i = 0; i < p.getInventory().getContainerSize(); i++)
+            if (p.getInventory().getItem(i).is(Itens.CRISTAL_SUPERMAN.get())) cristais += p.getInventory().getItem(i).getCount();
+        h.assertValueEqual(cristais, 1, "a nave dá um cristal por jogador");
+
+        var mapa = com.danrod.dcuniverse.world.mundo.MapaMundo.calcular(new int[]{-1000, -500, 1000, 500}, (x, z) -> x < 0 ? 0x2E7D32 : 0x0B1B4A);
+        h.assertTrue(mapa.w() <= com.danrod.dcuniverse.world.mundo.MapaMundo.LADO && mapa.w() > com.danrod.dcuniverse.world.mundo.MapaMundo.LADO * 3 / 4 && mapa.h() == mapa.w() / 2, "lado maior com até LADO pixels e a proporção certa");
+        h.assertValueEqual(mapa.paleta().length, 2, "duas cores na paleta");
+        h.assertValueEqual(mapa.paleta()[mapa.pixels()[0]], 0x2E7D32, "oeste verde");
+        h.assertValueEqual(mapa.paleta()[mapa.pixels()[mapa.w() - 1]], 0x0B1B4A, "leste azul");
         h.succeed();
     }
 }

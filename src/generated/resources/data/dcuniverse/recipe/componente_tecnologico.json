@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "key": {
-    "C": "minecraft:comparator",
+    "C": "minecraft:repeater",
     "I": "minecraft:iron_ingot",
     "P": "dcuniverse:placa_circuito",
     "R": "minecraft:redstone"

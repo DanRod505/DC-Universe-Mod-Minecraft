@@ -3,11 +3,11 @@
   "key": {
     "K": "minecraft:netherite_scrap",
     "N": "dcuniverse:nucleo_meta_3",
-    "S": "minecraft:echo_shard"
+    "S": "minecraft:crying_obsidian"
   },
   "pattern": [
     "SKS",
-    "KNK",
+    "SNS",
     "SKS"
   ],
   "result": {

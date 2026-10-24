@@ -23,6 +23,8 @@ public final class Estruturas {
     public static final RegistryObject<StructureType<LocalEstrutura>> LOCAL = TIPOS.register("local", () -> () -> LocalEstrutura.CODEC);
     public static final RegistryObject<StructurePieceType> PECA_OBRA = PECAS.register("obra",
         () -> (StructurePieceType.ContextlessType) PecaObra::new);
+    public static final RegistryObject<StructurePieceType> PECA_PLATO = PECAS.register("plato",
+        () -> (StructurePieceType.ContextlessType) PecaPlato::new);
 
     public static final Map<String, Planta> PLANTAS = new HashMap<>();
     public static final Map<String, Local> LOCAIS = new HashMap<>();

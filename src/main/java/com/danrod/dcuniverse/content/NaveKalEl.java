@@ -59,6 +59,31 @@ public final class NaveKalEl extends HorizontalDirectionalBlock {
         return FORMAS.get(state.getValue(FACING));
     }
 
+    /**
+     * Clique direito: a cabine se abre e entrega o Cristal da Casa de El, uma vez para cada jogador (opção
+     * itensNosLocais do servidor). Depois disso a nave só brilha.
+     */
+    @Override
+    protected net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, net.minecraft.world.entity.player.Player player,
+                                                                   net.minecraft.world.phys.BlockHitResult hit) {
+        if (!(player instanceof net.minecraft.server.level.ServerPlayer sp)) return net.minecraft.world.InteractionResult.SUCCESS;
+        var dados = com.danrod.dcuniverse.core.Persistente.ler(sp, "dcuniverse_reliquias");
+        if (!com.danrod.dcuniverse.core.Config.ITENS_NOS_LOCAIS.get() || dados.getBooleanOr("nave_kalel", false)) {
+            if (sp.connection != null) sp.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("dcuniverse.nave_kalel.vazia").withStyle(net.minecraft.ChatFormatting.GRAY));
+            return net.minecraft.world.InteractionResult.SUCCESS;
+        }
+        dados.putBoolean("nave_kalel", true);
+        com.danrod.dcuniverse.core.Persistente.salvar(sp, "dcuniverse_reliquias", dados);
+        var cristal = new net.minecraft.world.item.ItemStack(Itens.CRISTAL_SUPERMAN.get());
+        if (!sp.getInventory().add(cristal)) sp.drop(cristal, false);
+        if (sp.connection != null) sp.sendSystemMessage(net.minecraft.network.chat.Component.translatable("dcuniverse.nave_kalel.cristal").withStyle(net.minecraft.ChatFormatting.AQUA));
+        level.playSound(null, pos, net.minecraft.sounds.SoundEvents.BEACON_ACTIVATE, net.minecraft.sounds.SoundSource.BLOCKS, 0.8f, 1.4f);
+        if (level instanceof net.minecraft.server.level.ServerLevel sl)
+            sl.sendParticles(new DustParticleOptions(0x7FD8FF, 1.2f), pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 40, 0.4, 0.3, 0.4, 0.02);
+        com.danrod.dcuniverse.guia.Guia.concluir(sp, "nave_kalel");
+        return net.minecraft.world.InteractionResult.SUCCESS;
+    }
+
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         // Faíscas azuis subindo da cabine e, de vez em quando, uma vermelha do motor.

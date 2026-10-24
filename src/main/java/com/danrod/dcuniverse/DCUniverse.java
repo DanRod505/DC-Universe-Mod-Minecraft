@@ -32,6 +32,7 @@ public final class DCUniverse {
         com.danrod.dcuniverse.world.Mundo.FEATURES.register(bus);
         com.danrod.dcuniverse.world.estrutura.Estruturas.TIPOS.register(bus);
         com.danrod.dcuniverse.world.estrutura.Estruturas.PECAS.register(bus);
+        com.danrod.dcuniverse.world.mundo.MundoDC.FONTES.register(bus);
         Testes.FUNCOES.register(bus);
         context.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
         FMLCommonSetupEvent.getBus(bus).addListener(e -> Rede.registrar());

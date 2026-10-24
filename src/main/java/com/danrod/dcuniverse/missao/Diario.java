@@ -144,7 +144,11 @@ public final class Diario {
             g.putString("rastreada", a.keySet().stream().findFirst().orElse(""));
         }
         salvar(p, g);
-        for (ItemRef r : m.recompensa().itens()) dar(p, r.pilha());
+        for (ItemRef r : m.recompensa().itens()) {
+            // Itens de transformação nas missões dos locais seguem a opção do servidor (itensNosLocais).
+            if (r.pilha().getItem() instanceof com.danrod.dcuniverse.content.TransformacaoItem && !com.danrod.dcuniverse.core.Config.ITENS_NOS_LOCAIS.get()) continue;
+            dar(p, r.pilha());
+        }
         if (m.recompensa().xp() > 0) p.giveExperiencePoints(m.recompensa().xp());
         DefNpc npc = Npcs.npc(m.npc());
         if (npc != null) Afinidade.mudar(p, npc.grupo(), m.recompensa().afinidade());

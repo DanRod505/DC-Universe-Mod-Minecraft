@@ -4,6 +4,7 @@
   "package": "com.danrod.dcuniverse.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "WorldCreationUiStateMixin",
     "AbstractClientPlayerMixin",
     "CameraMixin",
     "MusicManagerMixin",
@@ -16,6 +17,11 @@
     "defaultRequire": 0
   },
   "mixins": [
+    "ChunkAccessMixin",
+    "ChunkGeneratorStructureStateMixin",
+    "MappedRegistryMixin",
+    "TreeFeatureMixin",
+    "MultifaceGrowthFeatureMixin",
     "ServerGamePacketListenerImplAccessor",
     "ServerGamePacketListenerImplMixin"
   ]

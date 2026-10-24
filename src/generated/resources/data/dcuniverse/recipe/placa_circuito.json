@@ -3,13 +3,13 @@
   "key": {
     "C": "minecraft:copper_ingot",
     "G": "minecraft:gold_nugget",
-    "Q": "minecraft:quartz",
+    "L": "minecraft:lapis_lazuli",
     "R": "minecraft:redstone"
   },
   "pattern": [
-    "QRQ",
+    "LRL",
     "CGC",
-    "QRQ"
+    "LRL"
   ],
   "result": {
     "id": "dcuniverse:placa_circuito",

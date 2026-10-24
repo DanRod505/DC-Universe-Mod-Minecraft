@@ -148,6 +148,56 @@ public final class Comandos {
                         })
                         .executes(c -> irPara(c.getSource(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"),
                             com.mojang.brigadier.arguments.StringArgumentType.getString(c, "ponto"))))))
+            // Quanto de terra firme há em volta de um ponto: /dcu terreno 0 0 200
+            .then(Commands.literal("terreno")
+                .then(Commands.argument("x", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                    .then(Commands.argument("z", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                        .then(Commands.argument("r", com.mojang.brigadier.arguments.IntegerArgumentType.integer(32, 2000))
+                            .executes(c -> {
+                                String r = com.danrod.dcuniverse.world.mundo.MapaBiomas.terreno(c.getSource().getLevel(),
+                                    com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "x"), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "z"),
+                                    com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "r"));
+                                c.getSource().sendSuccess(() -> Component.literal(r), false);
+                                return 1;
+                            })))))
+            // Mapa de biomas visto de cima (PNG na pasta do servidor): /dcu mapa_biomas 6000 16 false (true = com relevo)
+            .then(Commands.literal("mapa_biomas")
+                .then(Commands.argument("raio", com.mojang.brigadier.arguments.IntegerArgumentType.integer(64, 20000))
+                    .then(Commands.argument("passo", com.mojang.brigadier.arguments.IntegerArgumentType.integer(4, 256))
+                        .then(Commands.argument("relevo", com.mojang.brigadier.arguments.BoolArgumentType.bool())
+                        .executes(c -> {
+                            var src = c.getSource();
+                            try {
+                                var arq = com.danrod.dcuniverse.world.mundo.MapaBiomas.gerar(src.getLevel(), 0, 0,
+                                    com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "raio"), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "passo"),
+                                    com.mojang.brigadier.arguments.BoolArgumentType.getBool(c, "relevo"));
+                                src.sendSuccess(() -> Component.literal(arq + " sem cor: " + com.danrod.dcuniverse.world.mundo.MapaBiomas.SEM_COR), false);
+                                return 1;
+                            } catch (java.io.IOException e) {
+                                src.sendFailure(Component.literal(e.toString()));
+                                return 0;
+                            }
+                        })))))
+            // Refaz o início guiado de um jogador (escolhe de novo onde começar e o personagem): /dcu inicio Dev
+            .then(Commands.literal("inicio")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .executes(c -> {
+                        ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                        com.danrod.dcuniverse.inicio.Inicio.resetar(alvo);
+                        c.getSource().sendSuccess(() -> Component.translatable("dcuniverse.inicio.resetado", alvo.getDisplayName()), true);
+                        return 1;
+                    })))
+            // Confere o nivelamento de um local gerado: /dcu conferir_local smallville
+            .then(Commands.literal("conferir_local")
+                .then(Commands.argument("local", com.mojang.brigadier.arguments.StringArgumentType.word())
+                    .suggests((c, b) -> SharedSuggestionProvider.suggest(com.danrod.dcuniverse.world.estrutura.Estruturas.LOCAIS.keySet(), b))
+                    .executes(c -> {
+                        var src = c.getSource();
+                        String r = com.danrod.dcuniverse.world.estrutura.Locais.conferir(src.getLevel(),
+                            com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"), net.minecraft.core.BlockPos.containing(src.getPosition()));
+                        src.sendSuccess(() -> Component.literal(r), false);
+                        return 1;
+                    })))
             // Afinidade com um grupo de NPC: /dcu afinidade Dev martha_kent 60
             .then(Commands.literal("afinidade")
                 .then(Commands.argument("jogador", EntityArgument.player())

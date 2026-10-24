@@ -104,7 +104,7 @@ def recursosProvisorios = tasks.register('recursosProvisorios', Exec) {
 }
 tasks.named('processResources') { dependsOn recursosProvisorios }
 
-// Perfil importável no CurseForge: manifest.json + overrides/mods/<jar>.
+// Perfil importável no CurseForge: manifest.json + overrides/mods/<jar> + overrides/server.properties (Mundo DC).
 def manifestoDir = layout.buildDirectory.dir('perfil')
 def manifesto = tasks.register('manifestoPerfil') {
     def saida = manifestoDir.map { it.file('manifest.json') }
@@ -137,6 +137,7 @@ tasks.register('perfilCurseForge', Zip) {
     destinationDirectory = layout.buildDirectory.dir('distributions')
     from(manifesto)
     from(tasks.named('jar')) { into 'overrides/mods' }
+    from('src/perfil') { into 'overrides' }
 }
 
 tasks.named('assemble') { dependsOn 'perfilCurseForge' }
