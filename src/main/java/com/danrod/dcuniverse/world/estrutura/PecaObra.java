@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
  * Peça genérica de estrutura: guarda só o id da planta, a origem, a rotação e a semente; a planta
  * (registrada em {@link Estruturas#PLANTAS}) redesenha tudo em cada chunk que a peça toca.
  */
-public final class PecaObra extends StructurePiece {
+public final class PecaObra extends StructurePiece implements net.minecraftforge.common.world.PieceBeardifierModifier {
     private final String planta;
     private final BlockPos origem;
     private final Rotation rot;
@@ -91,6 +91,22 @@ public final class PecaObra extends StructurePiece {
     /** Posição no mundo de um ponto local da planta. */
     public BlockPos mundo(int x, int y, int z) {
         return StructureTemplate.transform(new BlockPos(x, y, z), Mirror.NONE, rot, BlockPos.ZERO).offset(origem);
+    }
+
+    // O terreno do local é acertado só pelo platô (PecaPlato); as construções não mexem no ruído.
+    @Override
+    public BoundingBox getBeardifierBox() {
+        return getBoundingBox();
+    }
+
+    @Override
+    public net.minecraft.world.level.levelgen.structure.TerrainAdjustment getTerrainAdjustment() {
+        return net.minecraft.world.level.levelgen.structure.TerrainAdjustment.NONE;
+    }
+
+    @Override
+    public int getGroundLevelDelta() {
+        return 0;
     }
 
     @Override

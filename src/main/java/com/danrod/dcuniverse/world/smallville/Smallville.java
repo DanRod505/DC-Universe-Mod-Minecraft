@@ -50,7 +50,7 @@ public final class Smallville implements Local {
 
     @Override
     public int[] area() {
-        return new int[]{-124, -70, 94, 44};
+        return new int[]{-126, -73, 115, 45};
     }
 
     @Override

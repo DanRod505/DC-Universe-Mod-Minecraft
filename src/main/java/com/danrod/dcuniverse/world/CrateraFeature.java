@@ -36,6 +36,9 @@ public final class CrateraFeature extends Feature<NoneFeatureConfiguration> {
         // Só em terreno firme: nada de cair na água ou em cima de árvores.
         BlockState chao = level.getBlockState(centro.below());
         if (!chao.isSolid() || !level.getFluidState(centro).isEmpty() || !level.getFluidState(centro.below()).isEmpty()) return false;
+        // Nem dentro de um local do mod (Smallville já tem a cratera dela): o platô fica limpo.
+        for (var s : level.getChunk(centro).getAllReferences().keySet())
+            if (s instanceof com.danrod.dcuniverse.world.estrutura.LocalEstrutura) return false;
         int raio = 6 + rand.nextInt(3);
         int fundo = 4 + rand.nextInt(2);
         long semente = rand.nextLong();

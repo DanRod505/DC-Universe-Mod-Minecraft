@@ -180,7 +180,8 @@ public final class Obra {
                 if (d > margem + 0.5) continue;
                 // Chão natural: procura a partir do topo do terreno (morros mais altos que a obra também são cortados).
                 BlockPos w = mundo(x, 0, z);
-                int topoTerreno = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, w.getX(), w.getZ()) - w.getY();
+                int topoTerreno = Math.max(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, w.getX(), w.getZ()),
+                    level.getHeight(Heightmap.Types.WORLD_SURFACE, w.getX(), w.getZ())) - w.getY();
                 int g = chao(x, z, Math.min(Math.max(topoTerreno, alturaLivre + 8), 64), -30);
                 double f = d / (margem + 1.0);
                 f = f * f * (3 - 2 * f);

@@ -16,6 +16,9 @@
     "defaultRequire": 0
   },
   "mixins": [
+    "ChunkAccessMixin",
+    "TreeFeatureMixin",
+    "MultifaceGrowthFeatureMixin",
     "ServerGamePacketListenerImplAccessor",
     "ServerGamePacketListenerImplMixin"
   ]

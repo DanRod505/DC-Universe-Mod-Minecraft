@@ -76,6 +76,7 @@ public final class Testes {
         FUNCOES.register("freeze_sonic", () -> Testes::batarangues);
         FUNCOES.register("garage", () -> Testes::garagem);
         FUNCOES.register("smallville", () -> Testes::smallville);
+        FUNCOES.register("levelled_locations", () -> Testes::locaisNivelados);
         FUNCOES.register("npcs", () -> Testes::npcs);
         FUNCOES.register("pets", () -> Testes::mascotes);
         FUNCOES.register("creative_tabs", () -> Testes::abas);
@@ -1023,6 +1024,79 @@ public final class Testes {
                 && s.getFrontText().getMessage(1, false).getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
                 && t.getKey().startsWith("dcuniverse.placa.talon")) placaComTexto = true;
         h.assertTrue(placaComTexto, "placas do Talon com texto traduzível");
+        h.succeed();
+    }
+
+    /**
+     * Locais nivelados (v0.4): o traçado de cada local cabe no platô e no alcance das estruturas e sai igual de novo;
+     * o platô corta um morro, aterra um buraco, tira a água e faz a rampa sem degraus até o terreno natural.
+     */
+    static void locaisNivelados(GameTestHelper h) {
+        for (var e : com.danrod.dcuniverse.world.estrutura.Estruturas.LOCAIS.entrySet()) {
+            var l = e.getValue();
+            var c = new net.minecraft.world.level.ChunkPos(10, -20);
+            int[] r = com.danrod.dcuniverse.world.estrutura.LocalEstrutura.plato(l, c), m = com.danrod.dcuniverse.world.estrutura.LocalEstrutura.centro(l, c);
+            java.util.List<String> primeira = new java.util.ArrayList<>(), segunda = new java.util.ArrayList<>();
+            for (var lista : java.util.List.of(primeira, segunda)) {
+                var b = new net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder();
+                l.tracar(com.danrod.dcuniverse.world.estrutura.Local.Terreno.plano(70), new net.minecraft.core.BlockPos(m[0], 71, m[1]), b, e.getKey().hashCode());
+                var pecas = b.build().pieces();
+                var tudo = net.minecraft.world.level.levelgen.structure.BoundingBox.encapsulatingBoxes(pecas.stream().map(pc -> pc.getBoundingBox()).toList()).orElseThrow();
+                for (var pc : pecas) {
+                    var bb = pc.getBoundingBox();
+                    lista.add(bb.toString());
+                    h.assertTrue(bb.minX() >= r[0] && bb.maxX() <= r[2] && bb.minZ() >= r[1] && bb.maxZ() <= r[3],
+                        e.getKey() + ": peça " + (pc instanceof com.danrod.dcuniverse.world.estrutura.PecaObra po ? po.planta() : pc) + " " + bb + " cabe no platô "
+                            + java.util.Arrays.toString(r) + " (o traçado ocupa x " + (tudo.minX() - m[0]) + ".." + (tudo.maxX() - m[0]) + ", z " + (tudo.minZ() - m[1]) + ".." + (tudo.maxZ() - m[1]) + ")");
+                }
+            }
+            h.assertTrue(primeira.equals(segunda), e.getKey() + ": a planta sai igual de novo");
+            int alcance = 8 * 16 + 7, meioX = c.getMiddleBlockX(), meioZ = c.getMiddleBlockZ();
+            int[] rp = com.danrod.dcuniverse.world.estrutura.LocalEstrutura.rampa(l);
+            h.assertTrue(rp[0] >= 12 && rp[1] >= 12, e.getKey() + ": rampa de " + rp[0] + "x" + rp[1] + " blocos (área grande demais)");
+            h.assertTrue(r[0] - rp[0] >= meioX - alcance && r[2] + rp[0] <= meioX + alcance && r[1] - rp[1] >= meioZ - alcance && r[3] + rp[1] <= meioZ + alcance,
+                e.getKey() + ": platô com rampa no alcance de 8 chunks " + java.util.Arrays.toString(r));
+        }
+
+        // Terreno de teste longe da arena: chão em y0+2, um morro de 12 blocos, um buraco com água e uma árvore.
+        var level = h.getLevel();
+        net.minecraft.core.BlockPos o = h.absolutePos(net.minecraft.core.BlockPos.ZERO).offset(0, 0, 6000);
+        int y0 = o.getY() + 6, n = 60;
+        var pedra = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+        var grama = net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState();
+        var agua = net.minecraft.world.level.block.Blocks.WATER.defaultBlockState();
+        for (int x = 0; x < n; x++) {
+            for (int z = 0; z < n; z++) {
+                int topo = y0 + 2 + (x >= 30 && x < 40 && z >= 25 && z < 35 ? 12 : 0);
+                for (int y = y0 - 10; y <= topo + 14; y++) {
+                    var q = o.offset(x, 0, z).atY(y);
+                    level.setBlock(q, y < topo ? pedra : y == topo ? grama : net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+                }
+            }
+        }
+        for (int x = 22; x < 28; x++) for (int z = 22; z < 28; z++) for (int y = y0 - 6; y <= y0 + 2; y++) level.setBlock(o.offset(x, 0, z).atY(y), agua, 2);
+        for (int y = y0 + 3; y < y0 + 8; y++) level.setBlock(o.offset(20, 0, 34).atY(y), net.minecraft.world.level.block.Blocks.OAK_LOG.defaultBlockState(), 2);
+        var plato = new com.danrod.dcuniverse.world.estrutura.PecaPlato(o.getX() + 22, o.getZ() + 22, o.getX() + 37, o.getZ() + 37, y0, 20, 20, grama);
+        var caixa = new net.minecraft.world.level.levelgen.structure.BoundingBox(o.getX(), level.getMinY(), o.getZ(), o.getX() + n - 1, level.getMaxY(), o.getZ() + n - 1);
+        plato.acertar(level, caixa, y0 - 20, net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE);
+        java.util.function.BiFunction<Integer, Integer, Integer> chao = (x, z) -> level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, o.getX() + x, o.getZ() + z) - 1;
+        for (int x = 22; x <= 37; x++) {
+            for (int z = 22; z <= 37; z++) {
+                h.assertValueEqual(chao.apply(x, z), y0, "platô plano em " + x + "," + z);
+                h.assertTrue(level.getBlockState(o.offset(x, 0, z).atY(y0)).is(grama.getBlock()), "grama no platô em " + x + "," + z);
+                for (int y = y0 - 8; y <= y0 + 14; y++)
+                    h.assertTrue(level.getFluidState(o.offset(x, 0, z).atY(y)).isEmpty(), "sem água no platô em " + x + "," + y + "," + z);
+            }
+        }
+        h.assertTrue(level.getBlockState(o.offset(20, 0, 34).atY(y0 + 4)).isAir(), "árvore da rampa cortada");
+        // Rampa para oeste: sai do nível do platô e chega ao chão natural (y0 + 2) sem degrau de mais de 1 bloco.
+        int antes = chao.apply(22, 30);
+        for (int x = 21; x >= 0; x--) {
+            int agora = chao.apply(x, 30);
+            h.assertTrue(Math.abs(agora - antes) <= 1, "rampa sem degrau em x=" + x + " (" + antes + " -> " + agora + ")");
+            antes = agora;
+        }
+        h.assertValueEqual(chao.apply(1, 30), y0 + 2, "a rampa termina no chão natural");
         h.succeed();
     }
 
