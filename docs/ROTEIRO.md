@@ -12,21 +12,22 @@
 | v0.1 | Superman (Clark Kent) | Personagem | 7 | 0 | 0 | 12 |
 | v0.2 | Batman (Bruce Wayne) | Personagem | 4 | 0 | 0 | 11 |
 | v0.3 | Smallville | Local | 5 | 2 | 3 | 4 |
-| v0.4 | Mulher-Maravilha (Diana) | Personagem | 4 | 0 | 0 | 4 |
-| v0.5 | Flash (Barry Allen) | Personagem | 5 | 0 | 0 | 2 |
-| v0.6 | Lanterna Verde (Hal Jordan) | Personagem | 5 | 0 | 0 | 3 |
-| v0.7 | Torre de Vigilância | Local | 4 | 0 | 2 | 5 |
-| v0.8 | Gotham City | Local | 6 | 2 | 4 | 3 |
-| v0.9 | Batcaverna | Local | 5 | 2 | 1 | 3 |
-| v0.10 | Asilo Arkham | Local | 4 | 2 | 0 | 2 |
-| v0.11 | Coringa | Chefe | 6 | 1 | 1 | 2 |
-| v0.12 | Bane | Chefe | 4 | 0 | 1 | 3 |
-| v0.13 | Asa Noturna (Dick Grayson) | Personagem | 4 | 2 | 0 | 0 |
-| v0.14 | Mulher-Gato (Selina Kyle) | Personagem | 4 | 1 | 0 | 0 |
-| v0.15 | Metrópolis | Local | 4 | 0 | 2 | 3 |
-| v0.16 | Lex Luthor | Chefe | 6 | 0 | 1 | 3 |
-| v0.17 | Arqueiro Verde (Oliver Queen) | Personagem | 4 | 2 | 0 | 0 |
-| v0.18 | Central City | Local | 4 | 2 | 0 | 1 |
+| v0.4 | Mundo organizado em volta da DC | Sistema | 3 | 0 | 0 | 0 |
+| v0.5 | Mulher-Maravilha (Diana) | Personagem | 4 | 0 | 0 | 4 |
+| v0.6 | Flash (Barry Allen) | Personagem | 5 | 0 | 0 | 2 |
+| v0.7 | Lanterna Verde (Hal Jordan) | Personagem | 5 | 0 | 0 | 3 |
+| v0.8 | Torre de Vigilância | Local | 4 | 0 | 2 | 5 |
+| v0.9 | Gotham City | Local | 6 | 2 | 4 | 3 |
+| v0.10 | Batcaverna | Local | 5 | 2 | 1 | 3 |
+| v0.11 | Asilo Arkham | Local | 4 | 2 | 0 | 2 |
+| v0.12 | Coringa | Chefe | 6 | 1 | 1 | 2 |
+| v0.13 | Bane | Chefe | 4 | 0 | 1 | 3 |
+| v0.14 | Asa Noturna (Dick Grayson) | Personagem | 4 | 2 | 0 | 0 |
+| v0.15 | Mulher-Gato (Selina Kyle) | Personagem | 4 | 1 | 0 | 0 |
+| v0.16 | Metrópolis | Local | 4 | 0 | 2 | 3 |
+| v0.17 | Lex Luthor | Chefe | 6 | 0 | 1 | 3 |
+| v0.18 | Arqueiro Verde (Oliver Queen) | Personagem | 4 | 2 | 0 | 0 |
+| v0.19 | Central City | Local | 4 | 2 | 0 | 1 |
 | v1.0 | Flash Reverso | Chefe | 7 | 1 | 3 | 1 |
 | v1.1 | Skins alternativas e maestria | Sistema | 1 | 0 | 0 | 0 |
 | v1.2 | Aquaman (Arthur Curry) | Personagem | 6 | 1 | 0 | 1 |
@@ -171,7 +172,30 @@ A primeira região completa: a vila rural com a fazenda Kent, Martha, o Prólogo
 
 **Itens novos (lote) (4):** Coleira do S, Comunicador da Liga, Osso de Cristal Kryptoniano, Torta da Martha
 
-## v0.4: Mulher-Maravilha
+## v0.4: Início e Mundo DC
+
+**Sistema:** Mundo organizado em volta da DC
+
+O mundo passa a ser organizado em volta da DC: locais sempre iguais e nivelados, o tipo de mundo Mundo DC como padrão (com semente oficial) e um início guiado com personagem inicial e itens de transformação nos locais.
+
+**Etapas:**
+
+1. Sistema em destaque: Locais nivelados: platô com bordas suaves, sem água, bioma certo e planta igual em todo mundo (vale também no mundo Normal)
+2. Sistema em destaque: Tipo de mundo Mundo DC (padrão): locais em posições fixas com biomas garantidos, semente oficial preenchida, posições futuras reservadas e servidor configurado no perfil
+3. Sistema em destaque: Início guiado: escolha do local e do personagem inicial, itens de transformação nos locais e revisão das receitas difíceis
+
+**Cria (fica para as próximas):**
+
+- Locais nivelados: platô com bordas suaves, sem água, bioma certo e planta igual em todo mundo (vale também no mundo Normal)
+- Tipo de mundo Mundo DC (padrão): locais em posições fixas com biomas garantidos, semente oficial preenchida, posições futuras reservadas e servidor configurado no perfil
+- Início guiado: escolha do local e do personagem inicial, itens de transformação nos locais e revisão das receitas difíceis
+
+**Reaproveita:**
+
+- Estruturas geradas no mundo e Smallville (v0.3)
+- Guia do Herói e Primeiros Passos (v0.1)
+
+## v0.5: Mulher-Maravilha
 
 **Personagem:** Mulher-Maravilha (Diana)
 
@@ -196,7 +220,7 @@ Diana completa: Laço da Verdade, braceletes que refletem projéteis, escudo, es
 
 **Itens novos (lote) (4):** Escudo Amazônico, Essência Mística, Lingote de Oricalco, Minério de Oricalco
 
-## v0.5: Flash
+## v0.6: Flash
 
 **Personagem:** Flash (Barry Allen)
 
@@ -222,7 +246,7 @@ Barry completo: supervelocidade, corrida em parede e sobre a água, ataques em s
 
 **Itens novos (lote) (2):** Garrafa de Raio, Para-raios Captor
 
-## v0.6: Lanterna Verde
+## v0.7: Lanterna Verde
 
 **Personagem:** Lanterna Verde (Hal Jordan)
 
@@ -247,7 +271,7 @@ Hal completo: construtos do anel, escudo, voo e a bateria de força para recarre
 
 **Itens novos (lote) (3):** Bateria de Energia Verde, Cristal da Vontade (verde), Fragmento do Espectro
 
-## v0.7: Torre de Vigilância
+## v0.8: Torre de Vigilância
 
 **Local:** Torre de Vigilância
 
@@ -278,7 +302,7 @@ A base da Liga em órbita, com o Monitor, o Chamado da Liga e os Alertas, ligada
 
 **Itens novos (lote) (5):** Estátua de Herói, Mapa da Liga, Pintura da Liga Reunida, Selo da Liga da Justiça, Tubo Zeta
 
-## v0.8: Gotham
+## v0.9: Gotham
 
 **Local:** Gotham City
 
@@ -318,7 +342,7 @@ Gotham completa e gerada no mundo, com cidadãos, polícia, capangas, o Bat-Sina
 
 **Itens novos (lote) (3):** Bat-Sinal, Poste de Gotham, Seiva do Verde
 
-## v0.9: Batcaverna
+## v0.10: Batcaverna
 
 **Local:** Batcaverna
 
@@ -353,7 +377,7 @@ A Batcaverna completa sob a Mansão Wayne, com Alfred, a sala de troféus e o tr
 
 **Itens novos (lote) (3):** Kit de Primeiros Socorros, Moeda Gigante da Batcaverna, Painel Tecnológico
 
-## v0.10: Asilo Arkham
+## v0.11: Asilo Arkham
 
 **Local:** Asilo Arkham
 
@@ -373,7 +397,7 @@ A ilha do Arkham completa: alas, celas, internos e a fuga em andamento.
 
 **Reaproveita:**
 
-- Capangas (v0.8), area_cone (v0.1) para o gás do Espantalho
+- Capangas (v0.9), area_cone (v0.1) para o gás do Espantalho
 
 **Variações no lote (2):** Espantalho (Jonathan Crane), Crocodilo (Killer Croc)
 
@@ -381,7 +405,7 @@ A ilha do Arkham completa: alas, celas, internos e a fuga em andamento.
 
 **Itens novos (lote) (2):** Gás do Riso, Toxina do Medo
 
-## v0.11: Coringa
+## v0.12: Coringa
 
 **Chefe:** Coringa
 
@@ -403,7 +427,7 @@ O primeiro chefe com fases: o Coringa no Arkham, com arena, troféu e o Coringa 
 
 **Reaproveita:**
 
-- Arkham (v0.10), gadgets (v0.2)
+- Arkham (v0.11), gadgets (v0.2)
 
 **Variações no lote (1):** Arlequina (Harleen Quinzel)
 
@@ -413,7 +437,7 @@ O primeiro chefe com fases: o Coringa no Arkham, com arena, troféu e o Coringa 
 
 **Itens novos (lote) (2):** Baralho do Coringa, Carta Coringa Dourada
 
-## v0.12: Bane
+## v0.13: Bane
 
 **Chefe:** Bane
 
@@ -433,7 +457,7 @@ Bane nos esgotos de Gotham, com o Veneno que muda as fases, e Bane jogável.
 
 **Reaproveita:**
 
-- Chefes com fases (v0.11), Gotham (v0.8)
+- Chefes com fases (v0.12), Gotham (v0.9)
 
 **Missões (1):** Nos Esgotos
 
@@ -441,7 +465,7 @@ Bane nos esgotos de Gotham, com o Veneno que muda as fases, e Bane jogável.
 
 **Itens novos (lote) (3):** Armadura de Prométio, Frasco de Veneno, Máscara do Bane
 
-## v0.13: Asa Noturna
+## v0.14: Asa Noturna
 
 **Personagem:** Asa Noturna (Dick Grayson)
 
@@ -465,7 +489,7 @@ Dick completo: bastões de eskrima, acrobacias e combos aéreos.
 
 **Variações no lote (2):** Batwoman (Kate Kane), Cassandra Cain
 
-## v0.14: Mulher-Gato
+## v0.15: Mulher-Gato
 
 **Personagem:** Mulher-Gato (Selina Kyle)
 
@@ -485,11 +509,11 @@ Selina completa: chicote, escalada, furtividade e roubo de itens de mobs.
 
 **Reaproveita:**
 
-- Acrobacias (v0.13), gadgets (v0.2) para o Charada
+- Acrobacias (v0.14), gadgets (v0.2) para o Charada
 
 **Variações no lote (1):** Charada (Edward Nygma)
 
-## v0.15: Metrópolis
+## v0.16: Metrópolis
 
 **Local:** Metrópolis
 
@@ -508,7 +532,7 @@ Metrópolis completa: o Planeta Diário, Lois, Jimmy e a primeira missão do Ato
 
 **Reaproveita:**
 
-- Gerador de cidade, cidadãos e reputação (v0.8)
+- Gerador de cidade, cidadãos e reputação (v0.9)
 
 **Locais (1):** Metrópolis
 
@@ -520,7 +544,7 @@ Metrópolis completa: o Planeta Diário, Lois, Jimmy e a primeira missão do Ato
 
 **Itens novos (lote) (3):** Câmera do Planeta Diário, Foto do Planeta Diário, Globo do Planeta Diário
 
-## v0.16: Lex Luthor
+## v0.17: Lex Luthor
 
 **Chefe:** Lex Luthor
 
@@ -542,7 +566,7 @@ A Torre LexCorp como arena e Lex na Armadura de Guerra, com Lex jogável.
 
 **Reaproveita:**
 
-- Chefes com fases (v0.11), Metrópolis (v0.15)
+- Chefes com fases (v0.12), Metrópolis (v0.16)
 
 **Locais (1):** Torre LexCorp
 
@@ -554,7 +578,7 @@ A Torre LexCorp como arena e Lex na Armadura de Guerra, com Lex jogável.
 
 **Itens novos (lote) (3):** Cartão Dourado da LexCorp, Cartão de Acesso LexCorp, Raio Duplicador
 
-## v0.17: Arqueiro Verde
+## v0.18: Arqueiro Verde
 
 **Personagem:** Arqueiro Verde (Oliver Queen)
 
@@ -577,7 +601,7 @@ Oliver completo: arco com flechas especiais (explosiva, rede, gancho, gelo).
 
 **Variações no lote (2):** Arsenal (Roy Harper), Canário Negro (Dinah Lance)
 
-## v0.18: Central City
+## v0.19: Central City
 
 **Local:** Central City
 
@@ -596,7 +620,7 @@ Central City completa: os Laboratórios S.T.A.R., Iris e Cisco.
 
 **Reaproveita:**
 
-- Cidade (v0.8), supervelocidade (v0.5) para Wally e Impulso
+- Cidade (v0.9), supervelocidade (v0.6) para Wally e Impulso
 
 **Variações no lote (2):** Flash (Wally West), Impulso (Bart Allen)
 
@@ -629,7 +653,7 @@ Fecha o Ato 1: a dimensão da Força de Aceleração e o Flash Reverso como chef
 
 **Reaproveita:**
 
-- Supervelocidade (v0.5), chefes (v0.11), Central City (v0.18)
+- Supervelocidade (v0.6), chefes (v0.12), Central City (v0.19)
 
 **Variações no lote (1):** Zoom (Hunter Zolomon)
 
@@ -685,7 +709,7 @@ Arthur completo: nado rápido, tridente, comando de criaturas marinhas e montari
 
 **Reaproveita:**
 
-- Arremessável que volta (v0.4) para Aqualad
+- Arremessável que volta (v0.5) para Aqualad
 
 **Variações no lote (1):** Aqualad (Jackson Hyde)
 
@@ -710,7 +734,7 @@ A cidade submarina na cúpula de ar, com Vulko e os blocos atlantes.
 
 **Reaproveita:**
 
-- Combate aquático (v1.2), construtos (v0.6) para Mera
+- Combate aquático (v1.2), construtos (v0.7) para Mera
 
 **Variações no lote (1):** Mera
 
@@ -799,7 +823,7 @@ A ilha das Amazonas completa: Hipólita, a arquitetura grega e a arena das Prova
 
 **Reaproveita:**
 
-- Kit da Mulher-Maravilha (v0.4) para a Moça-Maravilha
+- Kit da Mulher-Maravilha (v0.5) para a Moça-Maravilha
 
 **Variações no lote (1):** Moça-Maravilha (Cassie Sandsmark)
 
@@ -829,7 +853,7 @@ O deus da guerra invade Themyscira em três fases; depois dele, Hipólita libera
 
 **Reaproveita:**
 
-- Chefes (v0.11), Themyscira (v1.6)
+- Chefes (v0.12), Themyscira (v1.6)
 
 **Missões (2):** A Ilha Escondida, Provas das Amazonas
 
@@ -855,7 +879,7 @@ A caçada na selva de Themyscira; a Mulher-Leopardo jogável.
 
 **Reaproveita:**
 
-- Furtividade (v0.14), acrobacias (v0.13)
+- Furtividade (v0.15), acrobacias (v0.14)
 
 **Missões (1):** A Caçadora
 
@@ -936,7 +960,7 @@ O planeta da Tropa, com Ganthet, Kilowog e a Bateria Central.
 
 **Reaproveita:**
 
-- Construtos (v0.6) para John Stewart e Kilowog
+- Construtos (v0.7) para John Stewart e Kilowog
 
 **Variações no lote (2):** Lanterna Verde (John Stewart), Kilowog
 
@@ -966,7 +990,7 @@ A entidade do medo em Oa, com o campo de recrutas de Kilowog; Kyle e Jessica Cru
 
 **Reaproveita:**
 
-- Oa (v1.11), construtos (v0.6)
+- Oa (v1.11), construtos (v0.7)
 
 **Variações no lote (2):** Lanterna Verde (Kyle Rayner), Lanterna Verde (Jessica Cruz)
 
@@ -1108,7 +1132,7 @@ O Sinal no Céu: Apocalypse cai em Metrópolis; Apocalypse jogável.
 
 **Reaproveita:**
 
-- Metrópolis (v0.15), chefes (v0.11)
+- Metrópolis (v0.16), chefes (v0.12)
 
 **Missões (1):** Sinal no Céu
 
@@ -1135,7 +1159,7 @@ Victor completo: canhão sônico, hackear máquinas e Tubo de Explosão de curta
 
 **Reaproveita:**
 
-- Gadgets (v0.2), Tubo Zeta (v0.7)
+- Gadgets (v0.2), Tubo Zeta (v0.8)
 
 **Itens novos (lote) (3):** Fragmento de Apokolips, Liga de Apokolips, Núcleo da Caixa-Mãe
 
@@ -1283,7 +1307,7 @@ Jaime completo: armadura do escaravelho que forma armas.
 
 **Reaproveita:**
 
-- Armadura (v0.16), construtos (v0.6) para o Gladiador Dourado
+- Armadura (v0.17), construtos (v0.7) para o Gladiador Dourado
 
 **Variações no lote (1):** Gladiador Dourado (Booster Gold)
 
@@ -1308,7 +1332,7 @@ Fecha o Ato 3: a nave do Brainiac sobre a cidade, raio trator e Brainiac jogáve
 
 **Reaproveita:**
 
-- Evento de invasão (v2.3), chefes (v0.11)
+- Evento de invasão (v2.3), chefes (v0.12)
 
 **Locais (1):** Nave do Brainiac
 
@@ -1337,7 +1361,7 @@ Billy completo: a palavra mágica, o raio e os poderes dos seis anciãos.
 
 **Reaproveita:**
 
-- Voo (v0.1), supervelocidade (v0.5)
+- Voo (v0.1), supervelocidade (v0.6)
 
 ## v3.2: Pedra da Eternidade
 
@@ -1384,7 +1408,7 @@ A cidade no deserto e Adão Negro jogável.
 
 **Reaproveita:**
 
-- Gerador de cidade (v0.8), kit do Shazam (v3.1) para Adão Negro
+- Gerador de cidade (v0.9), kit do Shazam (v3.1) para Adão Negro
 
 **Variações no lote (1):** Adão Negro (Teth-Adam)
 
@@ -1495,7 +1519,7 @@ O Monstro do Pântano completo: plantas, raízes e corpo que se regenera.
 
 **Reaproveita:**
 
-- Construtos (v0.6)
+- Construtos (v0.7)
 
 ## v3.8: Parlamento das Árvores
 
@@ -1575,7 +1599,7 @@ O templo da Liga dos Assassinos nas montanhas e o Poço de Lázaro.
 
 **Reaproveita:**
 
-- Acrobacias e furtividade (v0.13, v0.14) para Katana e Azrael
+- Acrobacias e furtividade (v0.14, v0.15) para Katana e Azrael
 
 **Variações no lote (2):** Katana (Tatsu Yamashiro), Azrael
 
@@ -1605,7 +1629,7 @@ O Herdeiro do Demônio: Ra's em duelo de espadas; Ra's e Exterminador jogáveis.
 
 **Reaproveita:**
 
-- Nanda Parbat (v3.10), chefes (v0.11)
+- Nanda Parbat (v3.10), chefes (v0.12)
 
 **Variações no lote (1):** Exterminador (Deathstroke)
 
@@ -1632,7 +1656,7 @@ A cidade escondida na selva com Solovar.
 
 **Reaproveita:**
 
-- Gerador de cidade (v0.8)
+- Gerador de cidade (v0.9)
 
 **Locais (1):** Cidade dos Gorilas
 
@@ -1659,7 +1683,7 @@ A rebelião de Grodd com telepatia; Grodd jogável.
 
 **Reaproveita:**
 
-- Telepatia (v2.1), chefes (v0.11)
+- Telepatia (v2.1), chefes (v0.12)
 
 **Missões (1):** Rebelião na Selva
 
@@ -1794,7 +1818,7 @@ A base da Legião do Mal no pântano escuro; Mão Negra jogável.
 
 **Reaproveita:**
 
-- Bases (v0.9), espectro emocional (v1.12) para Mão Negra
+- Bases (v0.10), espectro emocional (v1.12) para Mão Negra
 
 **Variações no lote (1):** Mão Negra (William Hand)
 
@@ -1905,7 +1929,7 @@ Apokolips e a Fábrica de Parademônios; Lobo da Estepe e Big Barda jogáveis.
 
 **Reaproveita:**
 
-- Tubo de Explosão (v3.22), chefes (v0.11)
+- Tubo de Explosão (v3.22), chefes (v0.12)
 
 **Variações no lote (1):** Big Barda
 
