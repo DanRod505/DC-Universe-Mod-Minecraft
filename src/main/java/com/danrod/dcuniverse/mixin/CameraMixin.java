@@ -25,6 +25,17 @@ public abstract class CameraMixin {
     @Shadow
     public abstract Entity entity();
 
+    @Shadow
+    @org.spongepowered.asm.mixin.Final
+    private org.joml.Vector3f forwards;
+
+    /** A câmera de terceira pessoa também para nos blocos da ilha telecinética (que não são blocos do mundo). */
+    @Inject(method = "getMaxZoom", at = @At("RETURN"), cancellable = true)
+    private void dcuniverse$ilha(float dist, org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Float> cir) {
+        float d = com.danrod.dcuniverse.client.Ilhas.limitarCamera(position(), new Vec3(forwards.x(), forwards.y(), forwards.z()), cir.getReturnValue());
+        if (d < cir.getReturnValue()) cir.setReturnValue(d);
+    }
+
     @Inject(method = "alignWithEntity", at = @At("TAIL"))
     private void dcuniverse$cabine(float partialTicks, CallbackInfo ci) {
         if (isDetached()) return;

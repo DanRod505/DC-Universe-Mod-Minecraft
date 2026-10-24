@@ -10,6 +10,15 @@ import com.danrod.dcuniverse.client.Planador;
 import com.danrod.dcuniverse.client.Voador;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.guia.Guia;
+import com.danrod.dcuniverse.client.Teclas;
+import com.danrod.dcuniverse.client.npc.NpcsCliente;
+import com.danrod.dcuniverse.client.npc.TextoMissao;
+import com.danrod.dcuniverse.core.Rede;
+import com.danrod.dcuniverse.missao.DefMissao;
+import com.danrod.dcuniverse.npc.DefNpc;
+import com.danrod.dcuniverse.npc.ItemRef;
+import net.minecraft.locale.Language;
+import net.minecraftforge.network.PacketDistributor;
 import com.google.gson.JsonParser;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -64,14 +73,15 @@ public final class GuiaScreen extends Screen {
     static final int TINTA = 0xFF3A2A1A, TITULO = 0xFF7A1F1F, SUAVE = 0xFF7D6646, VERDE = 0xFF2E7D32, OURO = 0xFFB0841E;
 
     enum Capitulo {
-        PASSOS(304, 0, 0), PERSONAGENS(304, 48, 16), ITENS(360, 0, 32);
+        PASSOS(304, 0, 336, 0), PERSONAGENS(304, 48, 336, 16), ITENS(360, 0, 336, 32), MISSOES(360, 48, 420, 0), NPCS(388, 0, 420, 16);
 
-        /** Marcador na textura (u, v do fechado; o aberto fica 24 abaixo) e o ícone (v na coluna 336). */
-        final int u, v, icone;
+        /** Marcador na textura (u, v do fechado; o aberto fica 24 abaixo) e o ícone 12x12. */
+        final int u, v, iconeU, icone;
 
-        Capitulo(int u, int v, int icone) {
+        Capitulo(int u, int v, int iconeU, int icone) {
             this.u = u;
             this.v = v;
+            this.iconeU = iconeU;
             this.icone = icone;
         }
     }
@@ -150,6 +160,15 @@ public final class GuiaScreen extends Screen {
         GuiaScreen s = new GuiaScreen();
         s.capitulo = Capitulo.ITENS;
         Minecraft.getInstance().gui.setScreen(s);
+    }
+
+    /** Abre direto no Diário de Missões (tecla J). */
+    public static void abrirDiario() {
+        ultimoCapitulo = Capitulo.MISSOES;
+        GuiaScreen s = new GuiaScreen();
+        s.capitulo = Capitulo.MISSOES;
+        Minecraft.getInstance().gui.setScreen(s);
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
     }
 
     /** Abre na página que faz sentido agora: o personagem ativo, se estiver transformado; senão a última lida. */
@@ -242,6 +261,7 @@ public final class GuiaScreen extends Screen {
         capitulo = c;
         ultimoCapitulo = c;
         pagina = 0;
+        rolagemLista = 0;
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
         sincronizarBusca();
         atualizarBotoes();
@@ -315,6 +335,8 @@ public final class GuiaScreen extends Screen {
                 else personagemEsquerda(g, mx, my);
             }
             case ITENS -> itensEsquerda(g, mx, my);
+            case MISSOES -> missoesEsquerda(g, mx, my);
+            case NPCS -> npcsEsquerda(g, mx, my);
         }
         List<List<Bloco>> paginas = paginasDireita();
         if (!paginas.isEmpty()) {
@@ -349,7 +371,7 @@ public final class GuiaScreen extends Screen {
             int y = y0 + MARC_Y0 + c.ordinal() * MARC_PASSO;
             boolean ativo = c == capitulo;
             g.blit(RenderPipelines.GUI_TEXTURED, TEX, x0 + W - 4, y, c.u, c.v + (ativo ? 24 : 0), 24, 22, TEX_W, TEX_H);
-            g.blit(RenderPipelines.GUI_TEXTURED, TEX, x0 + W + (ativo ? 4 : 2), y + 5, 336, c.icone, 12, 12, TEX_W, TEX_H);
+            g.blit(RenderPipelines.GUI_TEXTURED, TEX, x0 + W + (ativo ? 4 : 2), y + 5, c.iconeU, c.icone, 12, 12, TEX_W, TEX_H);
             if (sobre(mx, my, x0 + W - 4, y, 24, 22)) {
                 g.setTooltipForNextFrame(Component.translatable("dcuniverse.guia.capitulo." + c.name().toLowerCase(Locale.ROOT)), mx, my);
             }
@@ -404,6 +426,371 @@ public final class GuiaScreen extends Screen {
                     yy += 9;
                 }
             }));
+        }
+        return out;
+    }
+
+    // Diário de Missões ------------------------------------------------------
+
+    private static boolean abaConcluidas;
+    private static String ultimaMissao = "";
+    private static String ultimoNpc = "";
+    private int rolagemLista;
+    /** Abandonar pede um segundo clique; guarda até quando vale a confirmação. */
+    private long confirmarAte;
+    private static final int LISTA_Y = TOPO + 40, LINHA = 12, LISTA_LINHAS = 9;
+
+    private List<String> missoesDaAba() {
+        Rede.DiarioSync d = EstadoCliente.diario;
+        List<String> out = new ArrayList<>();
+        if (abaConcluidas) {
+            for (String id : d.concluidas()) if (NpcsCliente.missao(Identifier.tryParse(id)) != null) out.add(id);
+        } else {
+            for (Rede.MissaoVista m : d.ativas()) if (NpcsCliente.missao(Identifier.tryParse(m.id())) != null) out.add(m.id());
+        }
+        return out;
+    }
+
+    private Rede.MissaoVista vista(String id) {
+        for (Rede.MissaoVista m : EstadoCliente.diario.ativas()) if (m.id().equals(id)) return m;
+        return null;
+    }
+
+    private String missaoAtual() {
+        List<String> l = missoesDaAba();
+        if (l.contains(ultimaMissao)) return ultimaMissao;
+        String r = EstadoCliente.diario.rastreada();
+        if (!abaConcluidas && l.contains(r)) return r;
+        return l.isEmpty() ? "" : l.get(0);
+    }
+
+    private void clique() {
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
+    }
+
+    /** Aba de texto (Ativas/Concluídas, ou os grupos de NPCs): sublinhada quando aberta. */
+    private void aba(GuiGraphicsExtractor g, Component c, int x, int y, int w, boolean ativa, Runnable acao) {
+        boolean em = sobre(mouseX, mouseY, x, y - 2, w, 13);
+        g.fill(x, y - 2, x + w, y + 11, ativa ? 0x50B0841E : em ? 0x28B0841E : 0x14000000);
+        if (ativa) g.fill(x, y + 10, x + w, y + 11, OURO);
+        g.centeredText(font, c, x + w / 2, y + 1, ativa ? TITULO : em ? TINTA : SUAVE);
+        alvos.add(new Alvo(x, y - 2, w, 13, ItemStack.EMPTY, acao));
+    }
+
+    private void missoesEsquerda(GuiGraphicsExtractor g, int mx, int my) {
+        int x = x0 + ESQ_X, y = y0 + TOPO;
+        titulo(g, Component.translatable("dcuniverse.guia.capitulo.missoes"), x, y);
+        Rede.DiarioSync d = EstadoCliente.diario;
+        int metade = PAG_W / 2 - 1;
+        aba(g, Component.translatable("dcuniverse.guia.missoes.ativas", d.ativas().size()), x, y + 21, metade, !abaConcluidas, () -> {
+            if (abaConcluidas) { abaConcluidas = false; rolagemLista = 0; pagina = 0; clique(); }
+        });
+        aba(g, Component.translatable("dcuniverse.guia.missoes.concluidas", d.concluidas().size()), x + metade + 2, y + 21, metade, abaConcluidas, () -> {
+            if (!abaConcluidas) { abaConcluidas = true; rolagemLista = 0; pagina = 0; clique(); }
+        });
+        List<String> lista = missoesDaAba();
+        String aberta = missaoAtual();
+        int ly = y0 + LISTA_Y;
+        if (lista.isEmpty()) {
+            paragrafo(g, Component.translatable(abaConcluidas ? "dcuniverse.guia.missoes.nenhuma_concluida" : "dcuniverse.guia.missoes.nenhuma"), x, ly + 4, PAG_W, SUAVE);
+            return;
+        }
+        rolagemLista = Mth.clamp(rolagemLista, 0, Math.max(0, lista.size() - LISTA_LINHAS));
+        for (int i = rolagemLista; i < Math.min(lista.size(), rolagemLista + LISTA_LINHAS); i++) {
+            String id = lista.get(i);
+            DefMissao m = NpcsCliente.missao(Identifier.parse(id));
+            int ry = ly + (i - rolagemLista) * LINHA;
+            boolean sel = id.equals(aberta), em = sobre(mx, my, x, ry - 2, PAG_W, LINHA);
+            if (sel) g.fill(x - 2, ry - 2, x + PAG_W + 1, ry + LINHA - 2, 0x40B0841E);
+            else if (em) g.fill(x - 2, ry - 2, x + PAG_W + 1, ry + LINHA - 2, 0x20B0841E);
+            boolean rastreada = id.equals(d.rastreada());
+            if (abaConcluidas) g.text(font, "✔", x, ry, VERDE, false);
+            else if (rastreada) g.text(font, "◆", x, ry, OURO, false);
+            else g.fill(x + 2, ry + 3, x + 5, ry + 6, SUAVE);
+            String nome = cortar(TextoMissao.nome(m).getString(), PAG_W - 10);
+            g.text(font, nome, x + 10, ry, sel ? TITULO : TINTA, false);
+            if (em) {
+                List<Component> dica = new ArrayList<>();
+                dica.add(TextoMissao.nome(m));
+                dica.add(Component.translatable("dcuniverse.guia.missoes.de", NpcsCliente.nome(m.npc())).withStyle(ChatFormatting.GRAY));
+                if (rastreada) dica.add(Component.translatable("dcuniverse.guia.missoes.rastreando").withStyle(ChatFormatting.GOLD));
+                g.setTooltipForNextFrame(font, dica, java.util.Optional.empty(), mx, my);
+            }
+            alvos.add(new Alvo(x - 2, ry - 2, PAG_W + 3, LINHA, ItemStack.EMPTY, () -> {
+                if (!id.equals(ultimaMissao)) {
+                    ultimaMissao = id;
+                    pagina = 0;
+                    confirmarAte = 0;
+                    minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
+                }
+            }));
+        }
+        if (lista.size() > LISTA_LINHAS) {
+            int bx = x + PAG_W + 3, alt = LISTA_LINHAS * LINHA - 2;
+            g.fill(bx, ly - 2, bx + 2, ly - 2 + alt, 0x40000000);
+            int tam = Math.max(8, alt * LISTA_LINHAS / lista.size());
+            int pos = (alt - tam) * rolagemLista / Math.max(1, lista.size() - LISTA_LINHAS);
+            g.fill(bx, ly - 2 + pos, bx + 2, ly - 2 + pos + tam, OURO);
+        }
+        g.centeredText(font, Component.translatable("dcuniverse.guia.missoes.tecla", Teclas.DIARIO.getTranslatedKeyMessage()), x + PAG_W / 2, y0 + BASE - 7, SUAVE);
+    }
+
+    /** Botão de texto numa linha da página direita. */
+    private Bloco botao(Component c, int cor, Runnable acao) {
+        return new Bloco(16, (g, x, y) -> {
+            int w = font.width(c) + 12;
+            boolean em = sobre(mouseX, mouseY, x, y, w, 13);
+            g.fill(x, y, x + w, y + 13, em ? 0xFF7A5C34 : 0xFF9C8460);
+            g.fill(x + 1, y + 1, x + w - 1, y + 12, em ? 0xFFF3E2B8 : 0xFFF8EFD8);
+            g.text(font, c, x + 6, y + 3, cor, false);
+            alvos.add(new Alvo(x, y, w, 13, ItemStack.EMPTY, acao));
+        });
+    }
+
+    /** Linha com o ícone de um item e o texto ao lado. */
+    private Bloco linhaItem(ItemStack s, Component c) {
+        return new Bloco(18, (g, x, y) -> {
+            encaixe(g, x, y, s, false, link(s));
+            g.text(font, cortar(c.getString(), PAG_W - 22), x + 21, y + 5, TINTA, false);
+        });
+    }
+
+    private List<Bloco> missaoDireita() {
+        List<Bloco> out = new ArrayList<>();
+        String id = missaoAtual();
+        DefMissao m = id.isEmpty() ? null : NpcsCliente.missao(Identifier.parse(id));
+        if (m == null) {
+            texto(out, Component.translatable("dcuniverse.guia.missoes.intro"), TINTA, 6);
+            texto(out, Component.translatable("dcuniverse.guia.missoes.como"), SUAVE, 0);
+            return out;
+        }
+        Rede.MissaoVista v = vista(id);
+        boolean feita = v == null;
+        if (!m.capitulo().isEmpty()) texto(out, Component.translatable("dcuniverse.capitulo." + m.capitulo()).withStyle(ChatFormatting.ITALIC), OURO, 2);
+        titulos(out, TextoMissao.nome(m));
+        texto(out, Component.translatable("dcuniverse.guia.missoes.de", NpcsCliente.nome(m.npc())), SUAVE, 4);
+        if (Language.getInstance().has(m.chave() + ".desc")) texto(out, Component.translatable(m.chave() + ".desc"), TINTA, 4);
+        out.add(secao("dcuniverse.guia.missoes.objetivos"));
+        for (int i = 0; i < m.objetivos().size(); i++) {
+            int estado = feita || i < v.objetivo() ? 0 : i == v.objetivo() ? 1 : 2;
+            Component c = estado == 2 ? Component.literal("???") : TextoMissao.objetivo(m, i, estado == 1 ? v.progresso() : m.objetivos().get(i).qtd());
+            String marca = estado == 0 ? "✔" : estado == 1 ? "▶" : "•";
+            int cor = estado == 0 ? VERDE : estado == 1 ? TINTA : SUAVE;
+            List<FormattedCharSequence> linhas = font.split(c, PAG_W - 10);
+            out.add(new Bloco(linhas.size() * 9 + 2, (g, x, y) -> {
+                g.text(font, marca, x, y, estado == 1 ? OURO : cor, false);
+                int yy = y;
+                for (FormattedCharSequence l : linhas) {
+                    g.text(font, l, x + 10, yy, cor, false);
+                    yy += 9;
+                }
+            }));
+        }
+        DefMissao.Recompensa r = m.recompensa();
+        if (!r.itens().isEmpty() || r.xp() > 0 || r.afinidade() > 0 || !r.grupos().isEmpty()) {
+            out.add(espaco(3));
+            out.add(secao("dcuniverse.guia.missoes.recompensas"));
+            for (var it : r.itens()) {
+                ItemStack s = it.pilha();
+                out.add(linhaItem(s, Component.literal(it.qtd() + "x ").append(s.getHoverName())));
+            }
+            if (r.xp() > 0) out.add(item(Component.translatable("dcuniverse.guia.missoes.xp", r.xp())));
+            DefNpc dono = NpcsCliente.npc(m.npc());
+            if (r.afinidade() > 0 && dono != null) {
+                out.add(item(Component.translatable("dcuniverse.guia.missoes.afinidade", r.afinidade(), Component.translatable("dcuniverse.npc.grupo." + dono.grupo()))));
+            }
+            r.grupos().forEach((grupo, n) -> out.add(item(Component.translatable("dcuniverse.guia.missoes.afinidade", n,
+                Component.translatable("dcuniverse.npc.grupo." + grupo)))));
+        }
+        if (m.repetivel()) {
+            out.add(espaco(2));
+            texto(out, Component.translatable("dcuniverse.guia.missoes.repetivel", m.intervalo()), SUAVE, 0);
+        }
+        if (!feita) {
+            out.add(espaco(4));
+            boolean rastreada = id.equals(EstadoCliente.diario.rastreada());
+            out.add(botao(Component.translatable(rastreada ? "dcuniverse.guia.missoes.parar" : "dcuniverse.guia.missoes.rastrear"), TINTA, () -> {
+                clique();
+                Rede.CANAL.send(new Rede.DiarioAcao(0, rastreada ? "" : id), PacketDistributor.SERVER.noArg());
+            }));
+            boolean confirmar = System.currentTimeMillis() < confirmarAte;
+            out.add(botao(Component.translatable(confirmar ? "dcuniverse.guia.missoes.confirmar" : "dcuniverse.guia.missoes.abandonar"), TITULO, () -> {
+                clique();
+                if (System.currentTimeMillis() < confirmarAte) {
+                    confirmarAte = 0;
+                    Rede.CANAL.send(new Rede.DiarioAcao(1, id), PacketDistributor.SERVER.noArg());
+                } else {
+                    confirmarAte = System.currentTimeMillis() + 3000;
+                }
+            }));
+        }
+        return out;
+    }
+
+    // Facções e NPCs -----------------------------------------------------------
+
+    /** Um verbete: um NPC com nome próprio ou um grupo de cidadãos que dividem as falas. */
+    private record Verbete(String chave, DefNpc def, List<DefNpc> membros) {}
+
+    private List<Verbete> verbetes() {
+        Map<String, Verbete> out = new java.util.LinkedHashMap<>();
+        for (String id : EstadoCliente.diario.conhecidos()) {
+            DefNpc d = NpcsCliente.npc(Identifier.tryParse(id));
+            if (d == null) continue;
+            String chave = d.nomes().isEmpty() ? d.id().toString() : "grupo:" + d.grupo();
+            Verbete v = out.computeIfAbsent(chave, k -> new Verbete(k, d, new ArrayList<>()));
+            v.membros().add(d);
+        }
+        return List.copyOf(out.values());
+    }
+
+    private Verbete verbeteAtual(List<Verbete> l) {
+        for (Verbete v : l) if (v.chave().equals(ultimoNpc)) return v;
+        return l.isEmpty() ? null : l.get(0);
+    }
+
+    private Component nomeVerbete(Verbete v) {
+        return v.chave().startsWith("grupo:") ? Component.translatable("dcuniverse.npc.grupo." + v.def().grupo())
+            : Component.translatable(NpcsCliente.chave(v.def().chaveNome()));
+    }
+
+    private int afinidade(DefNpc d) {
+        return EstadoCliente.diario.afinidades().getOrDefault(d.grupo(), 0);
+    }
+
+    private static int nivelDe(int af) {
+        int n = 0;
+        for (int i = 0; i < NIVEIS.length; i++) if (af >= NIVEIS[i]) n = i;
+        return n;
+    }
+
+    private static final int[] NIVEIS = {0, 25, 50, 75, 100};
+
+    private void npcsEsquerda(GuiGraphicsExtractor g, int mx, int my) {
+        int x = x0 + ESQ_X, y = y0 + TOPO;
+        titulo(g, Component.translatable("dcuniverse.guia.capitulo.npcs"), x, y);
+        List<Verbete> lista = verbetes();
+        if (lista.isEmpty()) {
+            paragrafo(g, Component.translatable("dcuniverse.guia.npcs.vazio"), x, y + 24, PAG_W, SUAVE);
+            return;
+        }
+        Verbete aberto = verbeteAtual(lista);
+        int linha = 26, linhas = 5;
+        rolagemLista = Mth.clamp(rolagemLista, 0, Math.max(0, lista.size() - linhas));
+        int ly = y + 22;
+        for (int i = rolagemLista; i < Math.min(lista.size(), rolagemLista + linhas); i++) {
+            Verbete v = lista.get(i);
+            int ry = ly + (i - rolagemLista) * linha;
+            boolean sel = v == aberto, em = sobre(mx, my, x - 2, ry - 2, PAG_W + 3, linha - 2);
+            if (sel) g.fill(x - 2, ry - 2, x + PAG_W + 1, ry + linha - 4, 0x40B0841E);
+            else if (em) g.fill(x - 2, ry - 2, x + PAG_W + 1, ry + linha - 4, 0x20B0841E);
+            g.fill(x - 1, ry - 1, x + 21, ry + 21, 0xFF5A4630);
+            PlayerFaceExtractor.extractRenderState(g, NpcsCliente.skin(v.def(), 0), x, ry, 20);
+            g.text(font, cortar(nomeVerbete(v).getString(), PAG_W - 26), x + 25, ry + 1, sel ? TITULO : TINTA, false);
+            int af = afinidade(v.def());
+            barra(g, x + 25, ry + 12, PAG_W - 46, af / 100f, nivelDe(af) >= 3 ? VERDE : OURO);
+            g.text(font, String.valueOf(af), x + PAG_W - font.width(String.valueOf(af)), ry + 12, SUAVE, false);
+            if (em) {
+                g.setTooltipForNextFrame(font, List.of(nomeVerbete(v),
+                    Component.translatable("dcuniverse.npc.nivel." + nivelDe(af)).withStyle(ChatFormatting.GRAY)), java.util.Optional.empty(), mx, my);
+            }
+            alvos.add(new Alvo(x - 2, ry - 2, PAG_W + 3, linha - 2, ItemStack.EMPTY, () -> {
+                if (!v.chave().equals(ultimoNpc)) {
+                    ultimoNpc = v.chave();
+                    pagina = 0;
+                    minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
+                }
+            }));
+        }
+        if (lista.size() > linhas) {
+            g.centeredText(font, (rolagemLista + 1) + "-" + Math.min(lista.size(), rolagemLista + linhas) + " / " + lista.size(), x + PAG_W / 2, y0 + BASE - 7, SUAVE);
+        }
+    }
+
+    private List<Bloco> npcDireita() {
+        List<Bloco> out = new ArrayList<>();
+        Verbete v = verbeteAtual(verbetes());
+        if (v == null) {
+            texto(out, Component.translatable("dcuniverse.guia.npcs.intro"), TINTA, 0);
+            return out;
+        }
+        DefNpc d = v.def();
+        int af = afinidade(d), nv = nivelDe(af);
+        titulos(out, nomeVerbete(v));
+        if (v.chave().startsWith("grupo:")) {
+            List<String> profs = new ArrayList<>();
+            for (DefNpc m : v.membros()) {
+                String p = Component.translatable("dcuniverse.npc.profissao." + m.profissao()).getString();
+                if (!m.profissao().isEmpty() && !profs.contains(p)) profs.add(p);
+            }
+            if (!profs.isEmpty()) texto(out, Component.literal(String.join(", ", profs)), SUAVE, 2);
+        }
+        String sobreK = NpcsCliente.chave(d.chave("sobre"));
+        if (Language.getInstance().has(sobreK)) texto(out, Component.translatable(sobreK), TINTA, 4);
+        out.add(secao("dcuniverse.guia.npcs.afinidade"));
+        out.add(new Bloco(12, (g, x, y) -> {
+            Component nome = Component.translatable("dcuniverse.npc.nivel." + nv);
+            g.text(font, nome, x, y, nv >= 3 ? VERDE : TINTA, false);
+            int bx = x + font.width(nome) + 5;
+            barra(g, bx, y + 1, PAG_W - (bx - x) - 22, af / 100f, nv >= 3 ? VERDE : OURO);
+            g.text(font, String.valueOf(af), x + PAG_W - font.width(String.valueOf(af)), y, SUAVE, false);
+        }));
+        if (nv < NIVEIS.length - 1) {
+            texto(out, Component.translatable("dcuniverse.guia.npcs.proximo", NIVEIS[nv + 1],
+                Component.translatable("dcuniverse.npc.beneficio." + (nv + 1))), SUAVE, 2);
+        } else {
+            texto(out, Component.translatable("dcuniverse.guia.npcs.maximo"), VERDE, 2);
+        }
+        texto(out, Component.translatable("dcuniverse.guia.npcs.ganhar"), SUAVE, 3);
+        Map<String, Integer> gostos = new java.util.LinkedHashMap<>();
+        for (DefNpc m : v.membros()) m.gostos().forEach(gostos::putIfAbsent);
+        if (!gostos.isEmpty()) {
+            out.add(secao("dcuniverse.guia.npcs.gostos"));
+            List<ItemStack> pilhas = new ArrayList<>();
+            for (String k : gostos.keySet()) {
+                ItemStack s = new ItemRef(k, 1).pilha();
+                if (!s.isEmpty()) pilhas.add(s);
+            }
+            for (int i = 0; i < pilhas.size(); i += 6) {
+                List<ItemStack> fila = pilhas.subList(i, Math.min(pilhas.size(), i + 6));
+                out.add(new Bloco(20, (g, x, y) -> {
+                    for (int k = 0; k < fila.size(); k++) encaixe(g, x + k * 20, y, fila.get(k), false, link(fila.get(k)));
+                }));
+            }
+        }
+        List<DefMissao> dele = new ArrayList<>();
+        for (DefMissao m : NpcsCliente.missoes().values()) {
+            if (v.membros().stream().anyMatch(x -> x.id().equals(m.npc()))) dele.add(m);
+        }
+        dele.sort(Comparator.comparing(m -> m.id().toString()));
+        if (!dele.isEmpty()) {
+            out.add(espaco(2));
+            out.add(secao("dcuniverse.guia.npcs.missoes"));
+            Rede.DiarioSync dz = EstadoCliente.diario;
+            for (DefMissao m : dele) {
+                String id = m.id().toString();
+                boolean ativa = vista(id) != null, feita = dz.concluidas().contains(id);
+                boolean trancada = !ativa && !feita && af < m.min();
+                Component nome = trancada ? Component.translatable("dcuniverse.guia.npcs.trancada", NIVEIS[nivelDe(m.min())] == m.min()
+                    ? Component.translatable("dcuniverse.npc.nivel." + nivelDe(m.min())) : Component.literal(String.valueOf(m.min())))
+                    : TextoMissao.nome(m);
+                String marca = feita ? "✔" : ativa ? "▶" : trancada ? "•" : "✦";
+                int cor = feita ? VERDE : ativa ? TINTA : SUAVE;
+                out.add(new Bloco(10, (g, x, y) -> {
+                    g.text(font, marca, x, y, ativa ? OURO : cor, false);
+                    boolean em = !trancada && sobre(mouseX, mouseY, x, y - 1, PAG_W, 10);
+                    Component c = Component.literal(cortar(nome.getString(), PAG_W - 10));
+                    if (em) c = c.copy().withStyle(ChatFormatting.UNDERLINE);
+                    g.text(font, c, x + 10, y, em ? TITULO : cor, false);
+                    if (!trancada && (ativa || feita)) {
+                        alvos.add(new Alvo(x, y - 1, PAG_W, 10, ItemStack.EMPTY, () -> {
+                            abaConcluidas = feita && !ativa;
+                            ultimaMissao = id;
+                            irPara(Capitulo.MISSOES);
+                        }));
+                    }
+                }));
+            }
         }
         return out;
     }
@@ -622,7 +1009,13 @@ public final class GuiaScreen extends Screen {
             out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.armas", fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 64)),
                 prm.i("missiles", 4), fmt(prm.d("missile_damage", 7)), fmt(prm.d("missile_radius", 3.5)), fmt(prm.d("missile_reload", 5)))));
         }
-        if (prm.json().has("model") && !prm.s("model", "").equals("batwing")) {
+        if (prm.s("model", "").equals("nave_kryptoniana")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.voo", fmt(prm.d("speed", 34)), fmt(prm.d("boost_speed", 72)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.nave.canhao", fmt(prm.d("beam_damage", 2.5)), fmt(prm.d("beam_range", 48)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.nave.orbes", prm.i("orbs", 3), fmt(prm.d("orb_damage", 8)),
+                fmt(prm.d("orb_radius", 3.5)), fmt(prm.d("orb_reload", 6)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.nave.escudo", fmt(prm.d("shield_time", 12)), fmt(prm.d("shield_recharge", 18)))));
+        } else if (prm.json().has("model") && !prm.s("model", "").equals("batwing")) {
             String m = prm.s("model", "");
             out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.velocidade", fmt(prm.d("speed", 26)), fmt(prm.d("boost_speed", 42)))));
             out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.armas." + m, fmt(prm.d("gun_damage", 1)), fmt(prm.d("gun_range", 48)),
@@ -631,6 +1024,18 @@ public final class GuiaScreen extends Screen {
             out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.especial." + m, fmt(prm.d("special_radius", 5)),
                 fmt(prm.d("special_damage", 4)), fmt(prm.d("stun", 3)), fmt(prm.d("special_cooldown", 12)), fmt(prm.d("special_duration", 6)),
                 fmt(prm.d("dive_speed", 14)))));
+        }
+        if (prm.json().has("reduction")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.escudo_tk", Math.round(prm.d("reduction", 0.75) * 100), fmt(prm.d("shield_radius", 2.6)))));
+        }
+        if (prm.json().has("throw_speed")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.telecinese", prm.i("max_blocks", 18), fmt(prm.d("hold", 30)))));
+        }
+        if (prm.json().has("max_blocks") && prm.json().has("depth") && prm.json().has("speed")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.ilha", prm.i("max_blocks", 420), fmt(prm.d("speed", 8)))));
+        }
+        if (prm.b("breaks_soft", false)) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.investida", fmt(prm.d("speed", 3.2) * 20), fmt(prm.d("knockback", 2)))));
         }
         if (prm.json().has("drain")) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.dreno", fmt(prm.d("drain", 1.5)),
@@ -1065,6 +1470,8 @@ public final class GuiaScreen extends Screen {
             case PASSOS -> paginar(passosDireita());
             case PERSONAGENS -> naLista ? paginar(listaDireita()) : fichaPaginas();
             case ITENS -> paginar(itemDireita());
+            case MISSOES -> paginar(missaoDireita());
+            case NPCS -> paginar(npcDireita());
         };
     }
 
@@ -1172,6 +1579,12 @@ public final class GuiaScreen extends Screen {
             FormattedCharSequence l = linhas.get(i);
             out.add(new Bloco(10 + (i == linhas.size() - 1 ? depois : 0), (g, x, y) -> g.text(font, l, x, y, cor, false)));
         }
+    }
+
+    /** Título em negrito que quebra em várias linhas quando não cabe na página. */
+    private void titulos(List<Bloco> out, Component c) {
+        List<FormattedCharSequence> linhas = font.split(c.copy().withStyle(ChatFormatting.BOLD), PAG_W);
+        for (FormattedCharSequence l : linhas) out.add(new Bloco(10, (g, x, y) -> g.text(font, l, x, y, TITULO, false), true));
     }
 
     private Bloco nome(Component c) {
@@ -1291,6 +1704,10 @@ public final class GuiaScreen extends Screen {
     public boolean mouseScrolled(double x, double y, double sx, double sy) {
         if (sy != 0 && capitulo == Capitulo.ITENS && sobre(x, y, x0, y0 + GRADE_Y, W / 2, GRADE_LINHAS * PASSO)) {
             rolagem = Mth.clamp(rolagem + (sy < 0 ? 1 : -1), 0, maxRolagem());
+            return true;
+        }
+        if (sy != 0 && (capitulo == Capitulo.MISSOES || capitulo == Capitulo.NPCS) && sobre(x, y, x0, y0, W / 2, H)) {
+            rolagemLista = Math.max(0, rolagemLista + (sy < 0 ? 1 : -1));
             return true;
         }
         if (sy != 0 && capitulo == Capitulo.PERSONAGENS && naLista && sobre(x, y, x0, y0 + GRADE_Y, W / 2, GRADE_LINHAS * PASSO)) {

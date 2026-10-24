@@ -1,0 +1,200 @@
+{
+  "skins": [
+    "dcuniverse:textures/entity/npc/martha_kent.png"
+  ],
+  "slim": true,
+  "wander": 7,
+  "likes": {
+    "minecraft:wheat": 3,
+    "minecraft:pumpkin": 5,
+    "minecraft:carrot": 2,
+    "minecraft:poppy": 3,
+    "minecraft:sunflower": 4,
+    "minecraft:egg": 2,
+    "minecraft:honey_bottle": 4
+  },
+  "talks": [
+    {
+      "id": "guia"
+    },
+    {
+      "id": "transformar"
+    },
+    {
+      "id": "radial"
+    },
+    {
+      "id": "energia"
+    },
+    {
+      "id": "voo"
+    },
+    {
+      "id": "diario"
+    },
+    {
+      "id": "afinidade"
+    },
+    {
+      "id": "krypto"
+    },
+    {
+      "id": "fazenda",
+      "min": 25
+    },
+    {
+      "id": "jonathan",
+      "min": 50
+    },
+    {
+      "id": "nave",
+      "min": 75
+    },
+    {
+      "id": "clark",
+      "min": 100
+    }
+  ],
+  "greetings": [
+    "superman",
+    "batman"
+  ],
+  "trades": [
+    {
+      "in": [
+        {
+          "item": "minecraft:wheat",
+          "count": 12
+        }
+      ],
+      "out": {
+        "item": "minecraft:bread",
+        "count": 4
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:pumpkin",
+          "count": 2
+        },
+        {
+          "item": "minecraft:egg",
+          "count": 1
+        }
+      ],
+      "out": {
+        "item": "minecraft:pumpkin_pie",
+        "count": 2
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:potato",
+          "count": 8
+        }
+      ],
+      "out": {
+        "item": "minecraft:baked_potato",
+        "count": 6
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:wheat",
+          "count": 6
+        },
+        {
+          "item": "minecraft:apple",
+          "count": 3
+        },
+        {
+          "item": "minecraft:egg",
+          "count": 1
+        }
+      ],
+      "out": {
+        "item": "dcuniverse:torta_martha",
+        "count": 2
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:wheat",
+          "count": 6
+        },
+        {
+          "item": "minecraft:cocoa_beans",
+          "count": 2
+        }
+      ],
+      "out": {
+        "item": "minecraft:cookie",
+        "count": 8
+      },
+      "min": 25
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:wheat",
+          "count": 12
+        },
+        {
+          "item": "minecraft:egg",
+          "count": 2
+        },
+        {
+          "item": "minecraft:sugar",
+          "count": 2
+        }
+      ],
+      "out": {
+        "item": "minecraft:cake",
+        "count": 1
+      },
+      "min": 50
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:leather",
+          "count": 3
+        },
+        {
+          "item": "minecraft:red_wool",
+          "count": 1
+        },
+        {
+          "item": "minecraft:gold_ingot",
+          "count": 1
+        }
+      ],
+      "out": {
+        "item": "dcuniverse:coleira_s",
+        "count": 1
+      },
+      "min": 50
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:apple",
+          "count": 4
+        },
+        {
+          "item": "minecraft:gold_ingot",
+          "count": 4
+        }
+      ],
+      "out": {
+        "item": "minecraft:golden_apple",
+        "count": 1
+      },
+      "min": 75
+    }
+  ]
+}

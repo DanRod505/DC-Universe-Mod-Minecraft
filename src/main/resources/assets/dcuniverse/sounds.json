@@ -473,5 +473,135 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.veiculo_atropela"
+  },
+  "habilidade.investida": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/investida"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.investida"
+  },
+  "habilidade.telecinese_ergue": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/telecinese_ergue"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.telecinese_ergue"
+  },
+  "habilidade.telecinese_lanca": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/telecinese_lanca"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.telecinese_lanca"
+  },
+  "habilidade.telecinese_pousa": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/telecinese_pousa"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.telecinese_pousa"
+  },
+  "habilidade.escudo_tk_liga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/escudo_tk_liga"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.escudo_tk_liga"
+  },
+  "habilidade.escudo_tk_desliga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/escudo_tk_desliga"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.escudo_tk_desliga"
+  },
+  "habilidade.escudo_tk_impacto": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/escudo_tk_impacto"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.escudo_tk_impacto"
+  },
+  "habilidade.ilha_arranca": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/ilha_arranca",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.ilha_arranca"
+  },
+  "habilidade.ilha_motor": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/ilha_motor"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.ilha_motor"
+  },
+  "habilidade.ilha_pousa": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/ilha_pousa",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.ilha_pousa"
+  },
+  "habilidade.nave_chega": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/nave_chega"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.nave_chega"
+  },
+  "habilidade.nave_motor": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/nave_motor"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.nave_motor"
+  },
+  "habilidade.nave_canhao": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/nave_canhao"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.nave_canhao"
+  },
+  "habilidade.nave_orbe": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/nave_orbe"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.nave_orbe"
+  },
+  "habilidade.nave_escudo_liga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/nave_escudo_liga"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.nave_escudo_liga"
+  },
+  "habilidade.nave_escudo_desliga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/nave_escudo_desliga"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.nave_escudo_desliga"
   }
 }

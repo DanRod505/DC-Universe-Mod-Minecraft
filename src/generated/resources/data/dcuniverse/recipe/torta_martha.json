@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:apple",
+    "minecraft:wheat",
+    "minecraft:sugar",
+    "minecraft:egg"
+  ],
+  "result": {
+    "id": "dcuniverse:torta_martha"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "dcuniverse:local",
+  "local": "smallville",
+  "unico": true,
+  "biomes": "#dcuniverse:has_structure/smallville",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "none"
+}

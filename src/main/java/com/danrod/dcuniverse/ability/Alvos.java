@@ -6,6 +6,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -29,14 +32,36 @@ public final class Alvos {
 
     /** Pode atingir? Nunca o próprio jogador; outros jogadores só com PvP permitido. */
     public static boolean podeAtingir(ServerPlayer atacante, Entity alvo) {
+        // No End: os cristais (que curam o dragão) quebram com qualquer poder, e as partes do dragão contam como ele.
+        if (alvo instanceof EndCrystal cristal) return cristal.isAlive();
+        if (alvo instanceof EnderDragonPart parte) alvo = parte.parentMob;
         if (alvo == atacante || !(alvo instanceof LivingEntity vivo) || !vivo.isAlive()) return false;
         if (alvo instanceof Player outro) return atacante.canHarmPlayer(outro);
         return !alvo.isAlliedTo(atacante);
     }
 
+    /** Pode levar golpe de poder: criaturas vivas, os cristais do End e as partes do Ender Dragon. */
+    public static boolean atingivel(Entity e) {
+        return e instanceof LivingEntity || e instanceof EndCrystal || e instanceof EnderDragonPart;
+    }
+
     public static void ferir(ServerPlayer atacante, Entity alvo, DamageSource fonte, float dano) {
         if (atacante.level() instanceof ServerLevel level && podeAtingir(atacante, alvo)) {
-            ((LivingEntity) alvo).hurtServer(level, fonte, dano);
+            // O dragão só aceita dano que venha de um jogador: gelo, fogo e afins sem autor viram ataque do jogador.
+            boolean dragao = alvo instanceof EnderDragon || alvo instanceof EnderDragonPart || alvo instanceof EndCrystal;
+            if (dragao && fonte.getEntity() == null) fonte = level.damageSources().playerAttack(atacante);
+            alvo.hurtServer(level, fonte, dano);
+        }
+    }
+
+    /**
+     * Cristais do End dentro de uma área de efeito (as áreas procuram só criaturas vivas): cada um é atingido pelo
+     * atacante e explode como em um golpe normal.
+     */
+    public static void cristais(ServerPlayer atacante, AABB area, DamageSource fonte) {
+        if (atacante == null || !(atacante.level() instanceof ServerLevel level)) return;
+        for (EndCrystal c : level.getEntitiesOfClass(EndCrystal.class, area, EndCrystal::isAlive)) {
+            ferir(atacante, c, fonte, 1);
         }
     }
 

@@ -1,0 +1,35 @@
+{
+  "npc": "dcuniverse:cidadao_fazendeira",
+  "repeatable": true,
+  "interval": 1,
+  "objectives": [
+    {
+      "type": "collect",
+      "item": "minecraft:wheat",
+      "count": 10
+    },
+    {
+      "type": "collect",
+      "item": "minecraft:carrot",
+      "count": 6
+    },
+    {
+      "type": "deliver",
+      "npc": "dcuniverse:cidadao_fazendeira"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:emerald",
+        "count": 3
+      },
+      {
+        "item": "minecraft:pumpkin_pie",
+        "count": 2
+      }
+    ],
+    "xp": 15,
+    "affinity": 5
+  }
+}

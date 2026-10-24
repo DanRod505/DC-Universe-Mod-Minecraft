@@ -1,0 +1,16 @@
+{
+  "placement": {
+    "type": "minecraft:concentric_rings",
+    "count": 16,
+    "distance": 4,
+    "preferred_biomes": "#dcuniverse:smallville_preferido",
+    "salt": 0,
+    "spread": 8
+  },
+  "structures": [
+    {
+      "structure": "dcuniverse:smallville",
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "dcuniverse:block/nave_kalel"
+    },
+    "facing=east": {
+      "model": "dcuniverse:block/nave_kalel",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "dcuniverse:block/nave_kalel",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "dcuniverse:block/nave_kalel",
+      "y": 270
+    }
+  }
+}

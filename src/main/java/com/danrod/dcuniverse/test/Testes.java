@@ -27,6 +27,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -44,6 +45,8 @@ public final class Testes {
 
     private static final Identifier SUPERMAN = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "superman");
     private static final Identifier BATMAN = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batman");
+    private static final Identifier SUPERGIRL = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "supergirl");
+    private static final Identifier SUPERBOY = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "superboy");
 
     static {
         FUNCOES.register("transform", () -> Testes::transforma);
@@ -72,6 +75,18 @@ public final class Testes {
         FUNCOES.register("new_gadgets", () -> Testes::gadgetsNovos);
         FUNCOES.register("freeze_sonic", () -> Testes::batarangues);
         FUNCOES.register("garage", () -> Testes::garagem);
+        FUNCOES.register("smallville", () -> Testes::smallville);
+        FUNCOES.register("npcs", () -> Testes::npcs);
+        FUNCOES.register("pets", () -> Testes::mascotes);
+        FUNCOES.register("creative_tabs", () -> Testes::abas);
+        FUNCOES.register("prologue", () -> Testes::prologo);
+        FUNCOES.register("meteor_shower", () -> Testes::chuvaMeteoros);
+        FUNCOES.register("league_communicator", () -> Testes::comunicador);
+        FUNCOES.register("supergirl", () -> Testes::supergirl);
+        FUNCOES.register("kryptonian_ship", () -> Testes::nave);
+        FUNCOES.register("telekinesis", () -> Testes::telecinese);
+        FUNCOES.register("floating_island", () -> Testes::ilha);
+        FUNCOES.register("batch_v03", () -> Testes::loteV03);
     }
 
     private Testes() {}
@@ -867,14 +882,12 @@ public final class Testes {
     /** Gel explosivo: cola na parede mirada, agachado detona e o bloco quebra; obsidiana resiste. */
     static void gel(GameTestHelper h) {
         ServerPlayer p = jogador(h);
-        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
         p.setPos(aqui.x, aqui.y, aqui.z);
         p.setYRot(0);
         p.setXRot(0);
-        // Corredor limpo até a parede (os testes vizinhos podem deixar blocos por perto).
-        for (int x = 0; x <= 2; x++) for (int y = 1; y <= 3; y++) for (int z = 1; z <= 3; z++) h.setBlock(x, y, z, net.minecraft.world.level.block.Blocks.AIR);
-        h.setBlock(1, 2, 4, net.minecraft.world.level.block.Blocks.STONE);
-        h.setBlock(1, 2, 5, net.minecraft.world.level.block.Blocks.OBSIDIAN);
+        h.setBlock(1, 3, 4, net.minecraft.world.level.block.Blocks.STONE);
+        h.setBlock(1, 3, 5, net.minecraft.world.level.block.Blocks.OBSIDIAN);
         Transformacao.transformar(p, BATMAN, true);
         EstadoJogador e = EstadoJogador.de(p);
         Personagem bat = e.personagem();
@@ -886,10 +899,13 @@ public final class Testes {
         h.assertTrue(Habilidades.executar(p, bat, g), "agachado detona (mesmo em recarga)");
         p.setShiftKeyDown(false);
         h.assertTrue(Guia.concluida(p, "gel") && Guia.concluida(p, "gel_detonar"), "tarefas do gel");
-        h.runAfterDelay(com.danrod.dcuniverse.content.GelEntidade.PAVIO + 4, () -> {
-            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.AIR, 1, 2, 4);
-            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.OBSIDIAN, 1, 2, 5);
-            h.succeed();
+        // Longe da explosão (o jogador de teste não pode levar dano).
+        var longe = h.absoluteVec(new net.minecraft.world.phys.Vec3(13.5, 2, 13.5));
+        p.setPos(longe.x, longe.y, longe.z);
+        // Espera a explosão sem prazo fixo: com o servidor atrasado (CI), o pavio pode passar alguns ticks.
+        h.succeedWhen(() -> {
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.AIR, 1, 3, 4);
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.OBSIDIAN, 1, 3, 5);
         });
     }
 
@@ -975,6 +991,463 @@ public final class Testes {
         com.danrod.dcuniverse.content.Batcomputador.recarregar(p, pos);
         h.assertTrue(EstadoJogador.de(p).energia() == 0, "só recarrega de novo depois do intervalo");
         com.danrod.dcuniverse.content.Batcomputador.resetar(p);
+        h.succeed();
+    }
+
+    /**
+     * Smallville (v0.3): cada planta do local constrói sem erro num canto longe do teste, a nave de Kal-El fica
+     * no porão do celeiro, a cratera tem o baú do meteoro, as placas recebem texto e a chegada marca a tarefa.
+     */
+    static void smallville(GameTestHelper h) {
+        var level = h.getLevel();
+        net.minecraft.core.BlockPos base = h.absolutePos(net.minecraft.core.BlockPos.ZERO).offset(0, 0, 3000);
+        int i = 0;
+        java.util.Map<String, net.minecraft.world.level.levelgen.structure.BoundingBox> caixas = new java.util.HashMap<>();
+        for (var e : new java.util.TreeMap<>(com.danrod.dcuniverse.world.estrutura.Estruturas.PLANTAS).entrySet()) {
+            if (!e.getKey().startsWith("smallville/")) continue;
+            var p = e.getValue();
+            net.minecraft.core.BlockPos origem = base.offset(i++ * 160, 0, 0);
+            var caixa = new net.minecraft.world.level.levelgen.structure.BoundingBox(origem.getX() - 6, origem.getY() - p.abaixo() - 2, origem.getZ() - 6,
+                origem.getX() + p.largura() + 6, origem.getY() + p.altura() + 2, origem.getZ() + p.fundo() + 6);
+            p.construir(new com.danrod.dcuniverse.world.estrutura.Obra(level, caixa, origem, net.minecraft.world.level.block.Rotation.NONE, 42L));
+            caixas.put(e.getKey(), caixa);
+        }
+        h.assertTrue(caixas.size() >= 20, "todas as plantas de Smallville construíram (" + caixas.size() + ")");
+        h.assertTrue(achar(level, caixas.get("smallville/celeiro"), b -> b.is(com.danrod.dcuniverse.content.Blocos.NAVE_KALEL.get())), "nave de Kal-El no porão do celeiro");
+        h.assertTrue(achar(level, caixas.get("smallville/cratera"), b -> b.is(com.danrod.dcuniverse.content.Blocos.MINERIO_KRYPTONITA.get())), "kryptonita na cratera");
+        h.assertTrue(achar(level, caixas.get("smallville/cratera"), b -> b.is(net.minecraft.world.level.block.Blocks.CHEST)), "baú do meteoro na cratera");
+        boolean placaComTexto = false;
+        var cx = caixas.get("smallville/talon");
+        for (net.minecraft.core.BlockPos q : net.minecraft.core.BlockPos.betweenClosed(cx.minX(), cx.minY(), cx.minZ(), cx.maxX(), cx.maxY(), cx.maxZ()))
+            if (level.getBlockEntity(q) instanceof net.minecraft.world.level.block.entity.SignBlockEntity s
+                && s.getFrontText().getMessage(1, false).getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
+                && t.getKey().startsWith("dcuniverse.placa.talon")) placaComTexto = true;
+        h.assertTrue(placaComTexto, "placas do Talon com texto traduzível");
+        h.succeed();
+    }
+
+    private static Identifier dcu(String path) {
+        return Identifier.fromNamespaceAndPath(DCUniverse.MODID, path);
+    }
+
+    private static com.danrod.dcuniverse.npc.NpcEntidade npc(GameTestHelper h, String id, ServerPlayer p) {
+        var d = com.danrod.dcuniverse.npc.Npcs.npc(dcu(id));
+        h.assertTrue(d != null, "NPC " + id + " carregado do datapack");
+        var tipo = d.slim() ? com.danrod.dcuniverse.content.Entidades.NPC_SLIM.get() : com.danrod.dcuniverse.content.Entidades.NPC.get();
+        var n = tipo.create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        net.minecraft.core.BlockPos pos = h.absolutePos(new net.minecraft.core.BlockPos(2, 1, 2));
+        n.configurar(d, pos, "");
+        n.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        h.getLevel().addFreshEntity(n);
+        p.snapTo(pos.getX() + 1.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        return n;
+    }
+
+    /**
+     * Missões do Prólogo (v0.3 etapa 3): a ordem (Meteoro abre O Primeiro Emblema e Colheita em Família), a afinidade
+     * extra com os cidadãos, fabricar pela tag de transformação de nível 1, transformar e o Comunicador de recompensa.
+     */
+    static void prologo(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Identifier meteoro = dcu("meteoro_smallville"), emblema = dcu("primeiro_emblema"), colheita = dcu("colheita_familia");
+        var mEmblema = com.danrod.dcuniverse.npc.Npcs.missao(emblema);
+        h.assertTrue(com.danrod.dcuniverse.npc.Npcs.missao(meteoro) != null && mEmblema != null && com.danrod.dcuniverse.npc.Npcs.missao(colheita) != null, "missões do Prólogo carregadas");
+        h.assertValueEqual(mEmblema.capitulo(), "prologo", "capítulo do Prólogo");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.disponivel(p, com.danrod.dcuniverse.npc.Npcs.missao(meteoro)), "Meteoro em Smallville abre a campanha");
+        h.assertTrue(!com.danrod.dcuniverse.missao.Diario.disponivel(p, mEmblema), "O Primeiro Emblema pede o Meteoro antes");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.disponiveis(p).contains(meteoro.toString()), "Martha mostra ! com o Meteoro");
+        com.danrod.dcuniverse.missao.Diario.aceitar(p, meteoro);
+        com.danrod.dcuniverse.missao.Diario.concluir(p, meteoro);
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "cidadaos"), 5, "Meteoro dá +5 com os cidadãos");
+        h.assertTrue(p.getInventory().countItem(com.danrod.dcuniverse.content.Itens.FRAGMENTO_ALIENIGENA.get()) >= 4, "recompensa: fragmentos alienígenas");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.disponivel(p, mEmblema), "Meteoro libera O Primeiro Emblema");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.disponivel(p, com.danrod.dcuniverse.npc.Npcs.missao(colheita)), "Meteoro libera a Colheita em Família");
+
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.aceitar(p, emblema), "aceitar O Primeiro Emblema");
+        h.assertTrue(p.getInventory().countItem(com.danrod.dcuniverse.content.Itens.TECIDO_TATICO.get()) >= 2, "Martha dá o tecido ao aceitar");
+        com.danrod.dcuniverse.missao.Diario.fabricou(p, new ItemStack(com.danrod.dcuniverse.content.Itens.CINTO_BATMAN.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(emblema).objetivo(), 0, "o cinto não conta antes do núcleo");
+        com.danrod.dcuniverse.missao.Diario.fabricou(p, new ItemStack(com.danrod.dcuniverse.content.Itens.NUCLEO_META_1.get()));
+        com.danrod.dcuniverse.missao.Diario.fabricou(p, new ItemStack(com.danrod.dcuniverse.content.Itens.CRISTAL_SUPERMAN.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(emblema).objetivo(), 1, "o cristal do Superman não é de nível 1");
+        com.danrod.dcuniverse.missao.Diario.fabricou(p, new ItemStack(com.danrod.dcuniverse.content.Itens.CINTO_BATMAN.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(emblema).objetivo(), 2, "o cinto vale pela tag de nível 1");
+        Transformacao.transformar(p, BATMAN, true);
+        com.danrod.dcuniverse.missao.Diario.verificar(p);
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(emblema).objetivo(), 3, "transformar-se cumpre o objetivo");
+        Transformacao.destransformar(p);
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.falou(p, dcu("martha_kent")).isPresent(), "falar com a Martha fecha a missão");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.concluida(p, emblema), "O Primeiro Emblema concluída");
+        h.assertTrue(com.danrod.dcuniverse.liga.Liga.carrega(p), "recompensa: Comunicador da Liga");
+        h.assertTrue(!com.danrod.dcuniverse.missao.Diario.disponiveis(p).contains(emblema.toString()), "missão única não volta");
+        p.discard();
+        h.succeed();
+    }
+
+    /** Chuva de meteoros: três meteoros caem em volta do ponto e cada um deixa um Meteorito que solta fragmentos. */
+    static void chuvaMeteoros(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        BlockPos centro = h.absolutePos(new BlockPos(1, 1, 1));
+        var pontos = com.danrod.dcuniverse.missao.Cenas.chuvaMeteoros(p, centro);
+        h.assertValueEqual(pontos.size(), 3, "três meteoros");
+        h.runAfterDelay(140, () -> {
+            var level = h.getLevel();
+            for (BlockPos b : pontos) h.assertTrue(level.getBlockState(b).is(com.danrod.dcuniverse.content.Blocos.METEORITO.get()), "meteorito caiu em " + b);
+            var drops = net.minecraft.world.level.block.Block.getDrops(level.getBlockState(pontos.get(0)), level, pontos.get(0), null);
+            h.assertTrue(drops.stream().anyMatch(s -> s.is(com.danrod.dcuniverse.content.Itens.FRAGMENTO_ALIENIGENA.get())), "meteorito solta fragmentos alienígenas");
+            for (BlockPos b : pontos) level.removeBlock(b, false);
+            p.discard();
+            h.succeed();
+        });
+    }
+
+    /** Comunicador da Liga: vínculo dos dois lados (e desfazer), só aparece quem carrega um, e o ponto de encontro. */
+    static void comunicador(GameTestHelper h) {
+        ServerPlayer a = jogador(h), b = jogador(h);
+        h.assertTrue(com.danrod.dcuniverse.liga.Liga.alternar(a, b), "vincular");
+        h.assertTrue(com.danrod.dcuniverse.liga.Liga.aliados(a).containsKey(b.getUUID().toString())
+            && com.danrod.dcuniverse.liga.Liga.aliados(b).containsKey(a.getUUID().toString()), "vínculo dos dois lados");
+        a.getInventory().add(new ItemStack(com.danrod.dcuniverse.content.Itens.COMUNICADOR_LIGA.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.liga.Liga.marcar(a, a.blockPosition(), List.of(a, b)), 0, "aliado sem comunicador não recebe o ponto");
+        b.getInventory().add(new ItemStack(com.danrod.dcuniverse.content.Itens.COMUNICADOR_LIGA.get()));
+        h.assertValueEqual(com.danrod.dcuniverse.liga.Liga.marcar(a, a.blockPosition(), List.of(a, b)), 1, "aliado com comunicador recebe o ponto");
+        com.danrod.dcuniverse.liga.Liga.tick(h.getLevel().getServer());
+        h.assertTrue(!com.danrod.dcuniverse.liga.Liga.alternar(a, b), "desvincular");
+        h.assertTrue(com.danrod.dcuniverse.liga.Liga.aliados(a).isEmpty() && com.danrod.dcuniverse.liga.Liga.aliados(b).isEmpty(), "vínculo desfeito dos dois lados");
+        a.discard();
+        b.discard();
+        h.succeed();
+    }
+
+    /**
+     * Abas do criativo: montadas com as tags do servidor, todo item do mod (menos as peças do traje, que só existem
+     * transformado) aparece em exatamente uma aba, e cada aba do mod tem o item dela.
+     */
+    static void abas(GameTestHelper h) {
+        var params = new net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters(
+            h.getLevel().enabledFeatures(), true, h.getLevel().registryAccess());
+        java.util.Map<net.minecraft.world.item.Item, String> onde = new java.util.HashMap<>();
+        for (var a : com.danrod.dcuniverse.content.Itens.Aba.values()) {
+            a.get().buildContents(params);
+            h.assertTrue(!a.get().getDisplayItems().isEmpty(), "aba " + a.id + " vazia");
+            for (ItemStack s : a.get().getDisplayItems()) {
+                String antes = onde.put(s.getItem(), a.id);
+                h.assertTrue(antes == null, s.getItem() + " em duas abas: " + antes + " e " + a.id);
+            }
+        }
+        for (var r : com.danrod.dcuniverse.content.Itens.ITEMS.getEntries()) {
+            if (r.get() instanceof com.danrod.dcuniverse.suit.TrajeItem) continue;
+            h.assertTrue(onde.containsKey(r.get()), "item fora do criativo: " + r.getId());
+        }
+        h.assertTrue("dcuniverse_blocos".equals(onde.get(com.danrod.dcuniverse.content.Blocos.CAMARA_SOLAR.get().asItem())), "Câmara Solar na aba Blocos");
+        h.succeed();
+    }
+
+    /**
+     * NPCs (v0.3 etapa 2): o datapack de NPCs e missões é coerente, a afinidade sobe por nível, presente vale uma
+     * vez por dia, e uma missão completa pelo diálogo (aceitar, coletar, entregar) dá a recompensa.
+     */
+    static void npcs(GameTestHelper h) {
+        var npcs = com.danrod.dcuniverse.npc.Npcs.npcs();
+        var missoes = com.danrod.dcuniverse.npc.Npcs.missoes();
+        h.assertTrue(npcs.size() >= 7 && missoes.size() >= 10, "NPCs e missões carregados (" + npcs.size() + ", " + missoes.size() + ")");
+        for (var m : missoes) {
+            h.assertTrue(com.danrod.dcuniverse.npc.Npcs.npc(m.npc()) != null, "quem dá " + m.id() + " existe");
+            for (var o : m.objetivos()) {
+                if (o.npc() != null) h.assertTrue(com.danrod.dcuniverse.npc.Npcs.npc(o.npc()) != null, "NPC do objetivo de " + m.id());
+                if (o.item() != null) h.assertTrue(!o.item().pilha().isEmpty(), "item do objetivo de " + m.id());
+            }
+            for (var r : m.recompensa().itens()) h.assertTrue(!r.pilha().isEmpty(), "recompensa de " + m.id());
+            for (var r : m.requer()) h.assertTrue(com.danrod.dcuniverse.npc.Npcs.missao(r) != null, "requisito de " + m.id());
+        }
+        for (var d : npcs) {
+            for (var t : d.trocas()) h.assertTrue(!t.saida().pilha().isEmpty(), "troca de " + d.id());
+            for (String g : d.gostos().keySet()) h.assertTrue(!new com.danrod.dcuniverse.npc.ItemRef(g, 1).pilha().isEmpty(), "presente " + g + " de " + d.id());
+        }
+        ServerPlayer p = jogador(h);
+        var martha = npc(h, "martha_kent", p);
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "martha_kent"), 0, "afinidade começa em zero");
+        com.danrod.dcuniverse.npc.Dialogo.abrir(p, martha);
+        h.assertTrue(com.danrod.dcuniverse.npc.Afinidade.conhecidos(p).contains("dcuniverse:martha_kent"), "conversar registra o NPC");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.PUMPKIN, 2));
+        com.danrod.dcuniverse.npc.Dialogo.escolher(p, martha.getId(), "presente");
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "martha_kent"), 5, "presente que ela gosta dá afinidade");
+        com.danrod.dcuniverse.npc.Dialogo.escolher(p, martha.getId(), "presente");
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "martha_kent"), 5, "só um presente por dia");
+        h.assertValueEqual(p.getMainHandItem().getCount(), 1, "o segundo presente não é gasto");
+        Identifier ovos = dcu("martha_ovos");
+        com.danrod.dcuniverse.npc.Dialogo.escolher(p, martha.getId(), "aceitar:" + ovos);
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.ativa(p, ovos), "missão aceita pelo diálogo");
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.rastreada(p), ovos.toString(), "a missão aceita passa a ser seguida");
+        p.getInventory().add(new ItemStack(Items.EGG, 6));
+        com.danrod.dcuniverse.missao.Diario.verificar(p);
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.entregas(p, dcu("martha_kent")).stream().anyMatch(m -> m.id().equals(ovos)), "pronta para entregar");
+        com.danrod.dcuniverse.npc.Dialogo.escolher(p, martha.getId(), "entregar:" + ovos);
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.concluida(p, ovos) && !com.danrod.dcuniverse.missao.Diario.ativa(p, ovos), "missão concluída");
+        h.assertValueEqual(p.getInventory().countItem(Items.EGG), 0, "ovos entregues");
+        h.assertTrue(p.getInventory().countItem(Items.BREAD) >= 4, "recompensa recebida");
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.de(p, "martha_kent"), 10, "missão dá afinidade");
+        h.assertTrue(!com.danrod.dcuniverse.missao.Diario.disponivel(p, com.danrod.dcuniverse.npc.Npcs.missao(ovos)), "repetível só no dia seguinte");
+        h.assertTrue(!com.danrod.dcuniverse.missao.Diario.disponivel(p, com.danrod.dcuniverse.npc.Npcs.missao(dcu("martha_streaky"))), "missão trancada por afinidade e requisito");
+        com.danrod.dcuniverse.npc.Afinidade.definir(p, "cidadaos", 80);
+        h.assertValueEqual(com.danrod.dcuniverse.npc.Afinidade.nivel(80), 3, "80 é Confidente");
+        h.assertValueEqual(com.danrod.dcuniverse.npc.DefNpc.preco(12, 80), 9, "Confidente paga 25% menos");
+        h.assertTrue(martha.hurtServer(h.getLevel(), h.getLevel().damageSources().playerAttack(p), 50f) == false || martha.isAlive(), "NPC não morre por dano comum");
+        h.assertTrue(martha.isAlive(), "Martha continua viva");
+        h.succeed();
+    }
+
+    /** Mascotes: o Krypto só aceita o Osso de Cristal, é um por jogador e conta para a missão da Martha. */
+    static void mascotes(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Identifier m = dcu("martha_krypto");
+        h.assertTrue(com.danrod.dcuniverse.missao.Diario.aceitar(p, m), "aceitar Um Amigo de Quatro Patas");
+        h.assertValueEqual(p.getInventory().countItem(Itens.OSSO_CRISTAL.get()), 1, "a Martha entrega o Osso de Cristal");
+        var k = com.danrod.dcuniverse.content.Entidades.KRYPTO.get().create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        net.minecraft.core.BlockPos pos = h.absolutePos(new net.minecraft.core.BlockPos(2, 1, 2));
+        k.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        k.setInvulnerable(true); // testes vizinhos soltam ondas de choque; o dono falso não recebe a mensagem de morte
+        h.getLevel().addFreshEntity(k);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BONE));
+        k.mobInteract(p, net.minecraft.world.InteractionHand.MAIN_HAND);
+        h.assertTrue(!k.isTame(), "osso comum não doma o Krypto");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Itens.OSSO_CRISTAL.get()));
+        k.mobInteract(p, net.minecraft.world.InteractionHand.MAIN_HAND);
+        h.assertTrue(k.isTame() && k.isOwnedBy(p), "Osso de Cristal doma na hora");
+        h.assertTrue(com.danrod.dcuniverse.npc.Mascotes.tem(p, "krypto"), "Krypto registrado no jogador");
+        h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(m).objetivo(), 1, "domar avança a missão");
+        h.assertValueEqual(p.getInventory().countItem(Itens.COLEIRA_S.get()), 1, "domar o Krypto dá a Coleira do S");
+        com.danrod.dcuniverse.npc.Coleira.recompensa(p);
+        h.assertValueEqual(p.getInventory().countItem(Itens.COLEIRA_S.get()), 1, "a coleira da conquista vem uma vez só");
+        var k2 = com.danrod.dcuniverse.content.Entidades.KRYPTO.get().create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        k2.snapTo(pos.getX() + 2.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        h.getLevel().addFreshEntity(k2);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Itens.OSSO_CRISTAL.get()));
+        k2.mobInteract(p, net.minecraft.world.InteractionHand.MAIN_HAND);
+        h.assertTrue(!k2.isTame(), "só um Krypto por jogador");
+        var s = com.danrod.dcuniverse.content.Entidades.STREAKY.get().create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        s.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 2.5, 0f, 0f);
+        s.setInvulnerable(true);
+        h.getLevel().addFreshEntity(s);
+        s.tame(p);
+        h.assertTrue(com.danrod.dcuniverse.npc.Mascotes.tem(p, "streaky"), "Streaky registrado no jogador");
+        h.assertTrue(!s.causeFallDamage(20, 1f, h.getLevel().damageSources().fall()), "Streaky não sofre dano de queda");
+        // O dono voa: o Krypto sai do chão e vai junto.
+        p.snapTo(pos.getX() + 0.5, pos.getY() + 4, pos.getZ() + 0.5, 0f, 0f);
+        p.getAbilities().flying = true;
+        h.runAfterDelay(10, () -> {
+            h.assertTrue(k.voando() && k.isNoGravity(), "Krypto voa quando o dono voa");
+            h.assertTrue(k.getY() > pos.getY() + 0.5, "Krypto subiu do chão (" + k.getY() + ")");
+            p.getAbilities().flying = false;
+            h.runAfterDelay(3, () -> {
+                h.assertTrue(!k.voando(), "Krypto pousa quando o dono para de voar");
+                k.discard();
+                k2.discard();
+                s.discard();
+                h.succeed();
+            });
+        });
+    }
+
+    private static boolean achar(net.minecraft.server.level.ServerLevel level, net.minecraft.world.level.levelgen.structure.BoundingBox c,
+                                 java.util.function.Predicate<net.minecraft.world.level.block.state.BlockState> teste) {
+        for (net.minecraft.core.BlockPos q : net.minecraft.core.BlockPos.betweenClosed(c.minX(), c.minY(), c.minZ(), c.maxX(), c.maxY(), c.maxZ()))
+            if (teste.test(level.getBlockState(q))) return true;
+        return false;
+    }
+
+    /**
+     * Supergirl: herda o kit do Superman (calor, sopro, raio X), a investida aérea derruba quem está no caminho e
+     * quebra o vidro, e a suprema chama a nave kryptoniana, que vai embora quando ela destransforma.
+     */
+    static void supergirl(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        h.assertTrue(Transformacao.transformar(p, SUPERGIRL, true), "transformar na Supergirl");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem kara = e.personagem();
+        for (String id : new String[] {"visao_de_calor", "sopro_congelante", "visao_raio_x", "investida_aerea"}) {
+            h.assertTrue(kara.habilidade(id) != null, "tem " + id);
+        }
+        e.setEnergia(kara.energia().max());
+        // Um zumbi e um vidro na frente (o jogador olha para o sul, +z).
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 2, 6));
+        zumbi.setNoAi(true);
+        var vidro = h.absolutePos(new net.minecraft.core.BlockPos(1, 3, 4));
+        h.getLevel().setBlockAndUpdate(vidro, net.minecraft.world.level.block.Blocks.GLASS.defaultBlockState());
+        float vida = zumbi.getHealth();
+        h.assertTrue(Habilidades.executar(p, kara, kara.habilidade("investida_aerea")), "investida aérea");
+        h.assertTrue(Guia.concluida(p, "investida"), "tarefa da investida");
+        // O movimento é do cliente: aqui o teste anda com o jogador como o cliente andaria (1,5 bloco por tick).
+        for (int t = 1; t <= 5; t++) {
+            int k = t;
+            h.runAfterDelay(t, () -> p.setPos(aqui.x, aqui.y, aqui.z + 1.5 * k));
+        }
+        h.runAfterDelay(12, () -> {
+            h.assertTrue(zumbi.getHealth() < vida || !zumbi.isAlive(), "o zumbi no caminho levou o golpe");
+            h.assertTrue(h.getLevel().getBlockState(vidro).isAir(), "o vidro se despedaçou");
+            Transformacao.destransformar(p);
+            zumbi.discard();
+            h.succeed();
+        });
+    }
+
+    /** Nave kryptoniana: a suprema chama a nave com orbes e escudo cheios; ela vai embora quando a Supergirl destransforma. */
+    static void nave(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, SUPERGIRL, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem kara = e.personagem();
+        e.setEnergia(kara.energia().max());
+        Personagem.Habilidade sup = kara.suprema();
+        h.assertValueEqual(sup.id(), "nave_kryptoniana", "a suprema é a nave");
+        h.assertTrue(Habilidades.executar(p, kara, sup), "chama a nave");
+        h.assertValueEqual(e.energia(), kara.energia().max() * 0.3f, "custa 70% da energia");
+        var nave = (com.danrod.dcuniverse.content.NaveKryptoniana) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+        h.assertTrue(nave != null && nave.isAlive(), "nave no mundo");
+        h.assertValueEqual(nave.orbes(), 3, "três orbes prontos");
+        h.assertValueEqual((double) nave.escudo(), 1.0, "escudo carregado");
+        Transformacao.destransformar(p);
+        h.assertValueEqual(nave.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "a nave vai embora");
+        nave.discard();
+        com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        h.succeed();
+    }
+
+    /**
+     * Telecinese tátil: arranca o pedaço mirado (os blocos viram blocos flutuantes), arremessa e eles assentam
+     * de volta como blocos; o escudo telecinético corta 75% do dano.
+     */
+    static void telecinese(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var level = h.getLevel();
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dz = -3; dz <= 6; dz++) {
+                level.setBlockAndUpdate(h.absolutePos(new net.minecraft.core.BlockPos(2 + dx, 1, 2 + dz)), net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState());
+            }
+        }
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 2.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 70);
+        h.assertTrue(Transformacao.transformar(p, SUPERBOY, true), "transformar no Superboy");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem conner = e.personagem();
+        e.setEnergia(conner.energia().max());
+        Personagem.Habilidade tk = conner.habilidade("telecinese_tatil");
+        h.assertTrue(Habilidades.executar(p, conner, tk), "ergue o chão mirado");
+        var blocos = level.getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(10));
+        h.assertTrue(blocos.size() >= 4, "blocos flutuando (" + blocos.size() + ")");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Telecinese.segurando(p), "segurando");
+        h.assertTrue(Guia.concluida(p, "telecinese"), "tarefa da telecinese");
+        float antes = e.energia();
+        p.setXRot(10);
+        h.assertTrue(Habilidades.executar(p, conner, tk), "arremessa");
+        h.assertValueEqual(e.energia(), antes, "arremessar o que já está erguido não gasta");
+        h.assertFalse(com.danrod.dcuniverse.ability.active.Telecinese.segurando(p), "soltou");
+        // Escudo (ferir o jogador de teste não funciona: sem conexão).
+        Personagem.Habilidade esc = conner.habilidade("escudo_telecinetico");
+        h.assertTrue(Habilidades.executar(p, conner, esc), "liga o escudo");
+        h.assertValueEqual((double) com.danrod.dcuniverse.ability.active.EscudoTk.reducao(p), 0.75, "o escudo corta 75% do dano");
+        h.runAfterDelay(60, () -> {
+            long voando = level.getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(80)).size();
+            h.assertValueEqual(voando, 0L, "os blocos arremessados assentaram");
+            com.danrod.dcuniverse.ability.active.EscudoTk.limpar();
+            Transformacao.destransformar(p);
+            h.succeed();
+        });
+    }
+
+    /** Ilha telecinética: arranca um disco de terra com o que há em cima, flutua e assenta de novo como blocos. */
+    static void ilha(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var level = h.getLevel();
+        for (int dx = -6; dx <= 6; dx++) {
+            for (int dz = -6; dz <= 6; dz++) {
+                for (int y = 1; y <= 4; y++) {
+                    level.setBlockAndUpdate(h.absolutePos(new net.minecraft.core.BlockPos(7 + dx, y, 7 + dz)),
+                        (y == 4 ? net.minecraft.world.level.block.Blocks.GRASS_BLOCK : net.minecraft.world.level.block.Blocks.DIRT).defaultBlockState());
+                }
+            }
+        }
+        var flor = h.absolutePos(new net.minecraft.core.BlockPos(8, 5, 7));
+        level.setBlockAndUpdate(flor, net.minecraft.world.level.block.Blocks.POPPY.defaultBlockState());
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(7.5, 5, 7.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 90);
+        h.assertTrue(Transformacao.transformar(p, SUPERBOY, true), "transformar no Superboy");
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem conner = e.personagem();
+        e.setEnergia(conner.energia().max());
+        Personagem.Habilidade sup = conner.suprema();
+        h.assertValueEqual(sup.id(), "ilha_telecinetica", "a suprema é a ilha");
+        var mira = com.danrod.dcuniverse.ability.Alvos.mirarBloco(p, 24, net.minecraft.world.level.ClipContext.Fluid.NONE);
+        h.assertTrue(Habilidades.executar(p, conner, sup), "arranca a ilha (mira " + mira.getType() + " " + mira.getBlockPos() + ", pé " + p.blockPosition()
+            + ", altura " + level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getBlockX(), p.getBlockZ()) + ")");
+        var ilhas = level.getEntitiesOfClass(com.danrod.dcuniverse.content.IlhaTelecinetica.class, p.getBoundingBox().inflate(16));
+        h.assertValueEqual(ilhas.size(), 1, "uma ilha no mundo");
+        var ilha = ilhas.get(0);
+        h.assertTrue(ilha.celulas().size() > 60, "disco com cúpula (" + ilha.celulas().size() + " blocos)");
+        h.assertTrue(level.getBlockState(flor).isAir() && level.getBlockState(flor.below()).isAir(), "a flor e o chão foram junto");
+        h.assertTrue(ilha.caixasPartes().size() > 10, "colunas de colisão");
+        // O jogador de teste não é achado pela ilha (level.getEntity), então ela assenta logo onde estava: confere
+        // que volta a ser blocos de verdade (a subida e a pilotagem são testadas no jogo).
+        var centro = net.minecraft.core.BlockPos.containing(ilha.getX(), ilha.getY(), ilha.getZ());
+        h.runAfterDelay(10, () -> {
+            h.assertFalse(ilha.isAlive(), "assentou");
+            h.assertTrue(level.getBlockState(centro.below()).is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK), "virou blocos de novo");
+            Transformacao.destransformar(p);
+            com.danrod.dcuniverse.ability.active.Ilha.limpar();
+            h.succeed();
+        });
+    }
+
+    /**
+     * Lote da v0.3: a Torta da Martha alimenta, dá Regeneração e devolve 10% da energia só a kryptonianos; a Coleira
+     * do S veste um cão domado pelo próprio jogador e não pega em animal dos outros.
+     */
+    static void loteV03(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem sup = e.personagem();
+        Energia.adicionar(p, sup, -10_000);
+        Energia.adicionar(p, sup, sup.energia().max() * 0.2f);
+        float antes = e.energia();
+        // O jogador falso não tem conexão para receber o efeito, então a comida e a Regeneração são conferidas nos
+        // componentes do item e a energia pelo mesmo caminho que finishUsingItem usa.
+        ItemStack torta = new ItemStack(Itens.TORTA_MARTHA.get());
+        var comida = torta.get(net.minecraft.core.component.DataComponents.FOOD);
+        h.assertTrue(comida != null && comida.nutrition() == 8, "torta enche 8 de fome");
+        var consumo = torta.get(net.minecraft.core.component.DataComponents.CONSUMABLE);
+        h.assertTrue(consumo != null && consumo.onConsumeEffects().stream().anyMatch(c -> c instanceof net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect a
+            && a.effects().stream().anyMatch(m -> m.is(net.minecraft.world.effect.MobEffects.REGENERATION) && m.getDuration() == 200)), "torta dá Regeneração I por 10 s");
+        h.assertTrue(com.danrod.dcuniverse.content.TortaItem.recarregar(p), "Superman é kryptoniano");
+        h.assertTrue(Math.abs(e.energia() - antes - sup.energia().max() * 0.1f) < 0.5f, "torta devolve 10% da energia (" + antes + " -> " + e.energia() + ")");
+        Transformacao.destransformar(p);
+        Transformacao.transformar(p, BATMAN, true);
+        h.assertFalse(com.danrod.dcuniverse.content.TortaItem.recarregar(p), "Batman não é kryptoniano");
+
+        BlockPos pos = h.absolutePos(new BlockPos(2, 1, 2));
+        var lobo = net.minecraft.world.entity.EntityTypes.WOLF.create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        lobo.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        lobo.setInvulnerable(true);
+        h.getLevel().addFreshEntity(lobo);
+        ItemStack coleira = new ItemStack(Itens.COLEIRA_S.get());
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, coleira);
+        p.interactOn(lobo, net.minecraft.world.InteractionHand.MAIN_HAND, lobo.position());
+        h.assertFalse(com.danrod.dcuniverse.npc.Coleira.usa(lobo), "não veste cão selvagem");
+        lobo.tame(p);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, coleira);
+        p.interactOn(lobo, net.minecraft.world.InteractionHand.MAIN_HAND, lobo.position());
+        h.assertTrue(com.danrod.dcuniverse.npc.Coleira.usa(lobo), "veste o próprio cão domado");
+        h.assertFalse(lobo.isOrderedToSit(), "vestir não manda o cão sentar");
+        h.assertTrue(coleira.isEmpty(), "a coleira sai da mão");
+        ItemStack outra = new ItemStack(Itens.COLEIRA_S.get());
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, outra);
+        p.interactOn(lobo, net.minecraft.world.InteractionHand.MAIN_HAND, lobo.position());
+        h.assertValueEqual(outra.getCount(), 1, "não veste duas vezes");
+        lobo.discard();
         h.succeed();
     }
 }

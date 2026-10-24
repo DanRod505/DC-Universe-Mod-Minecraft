@@ -144,6 +144,7 @@ public class ProjetilEntidade extends ThrowableItemProjectile {
             empurrar(e, fora.lengthSqr() < 1e-4 ? getDeltaMovement().normalize() : fora.normalize(),
                 empurrao * (float) (1 - Math.sqrt(e.distanceToSqr(onde)) / (raioImpacto + 1)));
         }
+        Alvos.cristais(dono, new AABB(onde, onde).inflate(raioImpacto), damageSources().thrown(this, dono));
     }
 
     private static void empurrar(LivingEntity e, Vec3 dir, float forca) {

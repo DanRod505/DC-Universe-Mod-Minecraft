@@ -18,7 +18,7 @@ import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/** /dcu transform|untransform|select|energy|ready|status|guide|hud: comandos de admin para testes (seção 2.4). */
+/** /dcu transform|untransform|select|energy|ready|status|guide|hud|local|afinidade|missao|npc: comandos de admin para testes (seção 2.4). */
 public final class Comandos {
     private Comandos() {}
 
@@ -82,6 +82,17 @@ public final class Comandos {
                         c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + ": recargas zeradas"), false);
                         return 1;
                     })))
+            .then(Commands.literal("fly")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .executes(c -> {
+                        // Para testes: liga o voo de quem pode voar, como o pulo duplo.
+                        ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                        if (!alvo.getAbilities().mayfly) return 0;
+                        alvo.getAbilities().flying = true;
+                        alvo.onUpdateAbilities();
+                        c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + ": voando"), false);
+                        return 1;
+                    })))
             .then(Commands.literal("status")
                 .then(Commands.argument("jogador", EntityArgument.player())
                     .executes(c -> {
@@ -124,6 +135,101 @@ public final class Comandos {
                         .executes(c -> {
                             DemoHud.parar(EntityArgument.getPlayer(c, "jogador"));
                             return 1;
-                        })))));
+                        }))))
+            // Teleporta para um local gerado (e um ponto dele): /dcu local smallville nave
+            .then(Commands.literal("local")
+                .then(Commands.argument("local", com.mojang.brigadier.arguments.StringArgumentType.word())
+                    .suggests((c, b) -> SharedSuggestionProvider.suggest(com.danrod.dcuniverse.world.estrutura.Estruturas.LOCAIS.keySet(), b))
+                    .executes(c -> irPara(c.getSource(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"), ""))
+                    .then(Commands.argument("ponto", com.mojang.brigadier.arguments.StringArgumentType.word())
+                        .suggests((c, b) -> {
+                            var l = com.danrod.dcuniverse.world.estrutura.Estruturas.LOCAIS.get(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"));
+                            return SharedSuggestionProvider.suggest(l == null ? java.util.Set.of() : l.pontos().keySet(), b);
+                        })
+                        .executes(c -> irPara(c.getSource(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"),
+                            com.mojang.brigadier.arguments.StringArgumentType.getString(c, "ponto"))))))
+            // Afinidade com um grupo de NPC: /dcu afinidade Dev martha_kent 60
+            .then(Commands.literal("afinidade")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .then(Commands.literal("reset").executes(c -> {
+                        com.danrod.dcuniverse.npc.Afinidade.resetar(EntityArgument.getPlayer(c, "jogador"));
+                        return 1;
+                    }))
+                    .then(Commands.argument("grupo", com.mojang.brigadier.arguments.StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(com.danrod.dcuniverse.npc.Npcs.npcs().stream().map(n -> n.grupo()).distinct(), b))
+                        .then(Commands.argument("valor", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 100))
+                            .executes(c -> {
+                                ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                                String g = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "grupo");
+                                com.danrod.dcuniverse.npc.Afinidade.definir(alvo, g, com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "valor"));
+                                c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + " / " + g + ": " + com.danrod.dcuniverse.npc.Afinidade.de(alvo, g)), false);
+                                return 1;
+                            })))))
+            // Missões: /dcu missao Dev aceitar|concluir|abandonar dcuniverse:lana_cafe, /dcu missao Dev reset
+            .then(Commands.literal("missao")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .then(Commands.literal("reset").executes(c -> {
+                        com.danrod.dcuniverse.missao.Diario.resetar(EntityArgument.getPlayer(c, "jogador"));
+                        return 1;
+                    }))
+                    .then(missao("aceitar", (p, id) -> com.danrod.dcuniverse.missao.Diario.aceitar(p, id)))
+                    .then(missao("concluir", (p, id) -> {
+                        com.danrod.dcuniverse.missao.Diario.concluir(p, id);
+                        return true;
+                    }))
+                    .then(missao("abandonar", (p, id) -> {
+                        com.danrod.dcuniverse.missao.Diario.abandonar(p, id);
+                        return true;
+                    }))))
+            // Coloca um NPC do datapack onde o comando roda (mora ali): /dcu npc dcuniverse:martha_kent
+            .then(Commands.literal("npc")
+                .then(Commands.argument("npc", IdentifierArgument.id())
+                    .suggests((c, b) -> SharedSuggestionProvider.suggestResource(com.danrod.dcuniverse.npc.Npcs.npcs().stream().map(n -> n.id()), b))
+                    .executes(c -> {
+                        var def = com.danrod.dcuniverse.npc.Npcs.npc(IdentifierArgument.getId(c, "npc"));
+                        if (def == null) {
+                            c.getSource().sendFailure(Component.literal("NPC desconhecido"));
+                            return 0;
+                        }
+                        var level = c.getSource().getLevel();
+                        var pos = net.minecraft.core.BlockPos.containing(c.getSource().getPosition());
+                        var npc = (def.slim() ? com.danrod.dcuniverse.content.Entidades.NPC_SLIM : com.danrod.dcuniverse.content.Entidades.NPC).get()
+                            .create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+                        if (npc == null) return 0;
+                        npc.configurar(def, pos, "");
+                        npc.snapTo(c.getSource().getPosition().x, c.getSource().getPosition().y, c.getSource().getPosition().z, c.getSource().getRotation().y, 0);
+                        level.addFreshEntity(npc);
+                        c.getSource().sendSuccess(() -> Component.literal("NPC " + def.id() + " criado"), false);
+                        return 1;
+                    }))));
+    }
+
+    private static com.mojang.brigadier.builder.ArgumentBuilder<CommandSourceStack, ?> missao(String acao,
+            java.util.function.BiPredicate<ServerPlayer, net.minecraft.resources.Identifier> f) {
+        return Commands.literal(acao).then(Commands.argument("missao", IdentifierArgument.id())
+            .suggests((c, b) -> SharedSuggestionProvider.suggestResource(com.danrod.dcuniverse.npc.Npcs.missoes().stream().map(m -> m.id()), b))
+            .executes(c -> {
+                ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                var id = IdentifierArgument.getId(c, "missao");
+                if (com.danrod.dcuniverse.npc.Npcs.missao(id) == null || !f.test(alvo, id)) {
+                    c.getSource().sendFailure(Component.literal("Missão desconhecida ou já ativa: " + id));
+                    return 0;
+                }
+                c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + ": " + acao + " " + id), false);
+                return 1;
+            }));
+    }
+
+    private static int irPara(CommandSourceStack src, String local, String ponto) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer p = src.getPlayerOrException();
+        var pos = com.danrod.dcuniverse.world.estrutura.Locais.ponto(p.level(), local, ponto, p.blockPosition());
+        if (pos.isEmpty()) {
+            src.sendFailure(Component.translatable("dcuniverse.cmd.local_nao_achado", local));
+            return 0;
+        }
+        var b = pos.get();
+        p.teleportTo(p.level(), b.getX() + 0.5, b.getY(), b.getZ() + 0.5, java.util.Set.of(), p.getYRot(), p.getXRot(), true);
+        src.sendSuccess(() -> Component.literal(local + (ponto.isEmpty() ? "" : " / " + ponto) + ": " + b.toShortString()), false);
+        return 1;
     }
 }

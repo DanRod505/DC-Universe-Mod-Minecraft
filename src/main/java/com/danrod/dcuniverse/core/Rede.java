@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 11;
+    private static final int VERSAO = 12;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -183,6 +183,9 @@ public final class Rede {
 
     public record Destransformar() {}
 
+    /** O animal passou a usar (ou tirou) a Coleira do S. */
+    public record Coleira(int entidade, boolean usa) {}
+
     /** Custo de uma receita no Batcomputador: item que representa o ingrediente, quantos pede e quantos o jogador tem. */
     public record BatCusto(String item, int qtd, int tem) {}
 
@@ -319,6 +322,113 @@ public final class Rede {
     /** O cliente soltou um super-salto carregado (força de 0 a 1); o servidor confere e mostra para todos. */
     public record Salto(float forca) {}
 
+    /** NPCs e missões do datapack (JSON cru), para o Diário e o capítulo de NPCs do Guia. */
+    public record NpcCatalogo(Map<String, String> npcs, Map<String, String> missoes) {
+        public static void encode(NpcCatalogo m, FriendlyByteBuf b) {
+            b.writeMap(m.npcs, FriendlyByteBuf::writeUtf, (buf, s) -> buf.writeUtf(s, 65536));
+            b.writeMap(m.missoes, FriendlyByteBuf::writeUtf, (buf, s) -> buf.writeUtf(s, 65536));
+        }
+
+        public static NpcCatalogo decode(FriendlyByteBuf b) {
+            return new NpcCatalogo(Map.copyOf(b.readMap(FriendlyByteBuf::readUtf, buf -> buf.readUtf(65536))),
+                Map.copyOf(b.readMap(FriendlyByteBuf::readUtf, buf -> buf.readUtf(65536))));
+        }
+    }
+
+    /**
+     * Opção do diálogo: id devolvido ao servidor, texto (chave do lang, argumentos com "@" também são chaves),
+     * itens desenhados ao lado ("id*qtd": numa troca, o último é o que se ganha) e se dá para escolher agora.
+     */
+    public record Opcao(String id, String texto, List<String> args, List<String> itens, boolean ativa) {
+        static void encode(Opcao o, FriendlyByteBuf b) {
+            b.writeUtf(o.id);
+            b.writeUtf(o.texto);
+            b.writeCollection(o.args, FriendlyByteBuf::writeUtf);
+            b.writeCollection(o.itens, FriendlyByteBuf::writeUtf);
+            b.writeBoolean(o.ativa);
+        }
+
+        static Opcao decode(FriendlyByteBuf b) {
+            return new Opcao(b.readUtf(), b.readUtf(), List.copyOf(b.readList(FriendlyByteBuf::readUtf)), List.copyOf(b.readList(FriendlyByteBuf::readUtf)), b.readBoolean());
+        }
+    }
+
+    /** Abre (ou atualiza) a conversa com um NPC: quem é, a afinidade do jogador com o grupo, a fala e as opções. */
+    public record NpcAbrir(int entidade, String npc, int skin, int afinidade, String grupo, String texto, List<String> args, List<Opcao> opcoes) {
+        public static void encode(NpcAbrir m, FriendlyByteBuf b) {
+            b.writeVarInt(m.entidade);
+            b.writeUtf(m.npc);
+            b.writeVarInt(m.skin);
+            b.writeVarInt(m.afinidade);
+            b.writeUtf(m.grupo);
+            b.writeUtf(m.texto);
+            b.writeCollection(m.args, FriendlyByteBuf::writeUtf);
+            b.writeCollection(m.opcoes, (buf, o) -> Opcao.encode(o, buf));
+        }
+
+        public static NpcAbrir decode(FriendlyByteBuf b) {
+            return new NpcAbrir(b.readVarInt(), b.readUtf(), b.readVarInt(), b.readVarInt(), b.readUtf(), b.readUtf(),
+                List.copyOf(b.readList(FriendlyByteBuf::readUtf)), List.copyOf(b.readList(Opcao::decode)));
+        }
+    }
+
+    /** Opção escolhida na conversa ("tchau" fecha). */
+    public record NpcEscolha(int entidade, String opcao) {}
+
+    /** Fala de NPC no chat (entidade -1 = só pelo id do NPC). */
+    public record NpcFala(int entidade, String npc, String texto, List<String> args) {}
+
+    /** Uma missão ativa como o cliente vê: objetivo atual, progresso nele e para onde a seta aponta. */
+    public record MissaoVista(String id, int objetivo, int progresso, boolean temAlvo, int x, int y, int z) {}
+
+    /** Diário do jogador: ativas, concluídas, a rastreada, afinidade por grupo, NPCs conhecidos e missões que já podem ser aceitas. */
+    public record DiarioSync(List<MissaoVista> ativas, List<String> concluidas, String rastreada, Map<String, Integer> afinidades, List<String> conhecidos,
+                             List<String> disponiveis) {
+        public static final DiarioSync VAZIO = new DiarioSync(List.of(), List.of(), "", Map.of(), List.of(), List.of());
+
+        public static void encode(DiarioSync m, FriendlyByteBuf b) {
+            b.writeCollection(m.ativas, (buf, a) -> {
+                buf.writeUtf(a.id());
+                buf.writeVarInt(a.objetivo());
+                buf.writeVarInt(a.progresso());
+                buf.writeBoolean(a.temAlvo());
+                buf.writeInt(a.x());
+                buf.writeInt(a.y());
+                buf.writeInt(a.z());
+            });
+            b.writeCollection(m.concluidas, FriendlyByteBuf::writeUtf);
+            b.writeUtf(m.rastreada);
+            b.writeMap(m.afinidades, FriendlyByteBuf::writeUtf, FriendlyByteBuf::writeVarInt);
+            b.writeCollection(m.conhecidos, FriendlyByteBuf::writeUtf);
+            b.writeCollection(m.disponiveis, FriendlyByteBuf::writeUtf);
+        }
+
+        public static DiarioSync decode(FriendlyByteBuf b) {
+            return new DiarioSync(List.copyOf(b.readList(buf -> new MissaoVista(buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readBoolean(),
+                buf.readInt(), buf.readInt(), buf.readInt()))), List.copyOf(b.readList(FriendlyByteBuf::readUtf)), b.readUtf(),
+                Map.copyOf(b.readMap(FriendlyByteBuf::readUtf, FriendlyByteBuf::readVarInt)), List.copyOf(b.readList(FriendlyByteBuf::readUtf)),
+                List.copyOf(b.readList(FriendlyByteBuf::readUtf)));
+        }
+    }
+
+    /** Aliado vinculado pelo Comunicador da Liga, na mesma dimensão. */
+    public record Aliado(java.util.UUID id, String nome, double x, double y, double z) {}
+
+    /** Comunicador da Liga: aliados vinculados que também carregam um (lista vazia = esconder). */
+    public record LigaSync(List<Aliado> aliados) {}
+
+    /** Ponto de encontro marcado por um aliado (ou por você). */
+    public record LigaPonto(String quem, int x, int y, int z) {}
+
+    /** Aviso de missão para o cliente mostrar (tipo "nova" ou "concluida"). */
+    public record MissaoAviso(String tipo, String missao) {}
+
+    /** Pedido do Diário: 0 rastrear (arg = id, "" para nenhuma), 1 abandonar. */
+    public record DiarioAcao(int tipo, String arg) {}
+
+    /** Os blocos de uma Ilha Telecinética (content/IlhaTelecinetica): posição local empacotada e estado de cada um. */
+    public record IlhaBlocos(int entidade, int[] pos, int[] estados) {}
+
     private Rede() {}
 
     public static void registrar() {
@@ -379,6 +489,15 @@ public final class Rede {
             .decoder(b -> new ManobraVista(b.readVarInt(), b.readVarInt()))
             .consumerMainThread((m, ctx) -> EstadoCliente.MANOBRAS.add(m))
             .add();
+        CANAL.messageBuilder(Coleira.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeBoolean(m.usa()))
+            .decoder(b -> new Coleira(b.readVarInt(), b.readBoolean()))
+            .consumerMainThread((m, ctx) -> {
+                if (m.usa()) EstadoCliente.COLEIRAS.add(m.entidade());
+                else EstadoCliente.COLEIRAS.remove(m.entidade());
+            })
+            .add();
         CANAL.messageBuilder(Destransformar.class)
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> {}).decoder(b -> new Destransformar())
@@ -426,6 +545,88 @@ public final class Rede {
             .encoder((m, b) -> b.writeFloat(m.forca())).decoder(b -> new Salto(b.readFloat()))
             .consumerMainThread((m, ctx) -> comJogador(ctx, p -> SuperSalto.saltar(p, m.forca())))
             .add();
+        CANAL.messageBuilder(NpcCatalogo.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(NpcCatalogo::encode).decoder(NpcCatalogo::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.npcCatalogo(m))
+            .add();
+        CANAL.messageBuilder(NpcAbrir.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(NpcAbrir::encode).decoder(NpcAbrir::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.npcAbrir.accept(m))
+            .add();
+        CANAL.messageBuilder(NpcEscolha.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> {
+                b.writeVarInt(m.entidade());
+                b.writeUtf(m.opcao());
+            }).decoder(b -> new NpcEscolha(b.readVarInt(), b.readUtf(256)))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.npc.Dialogo.escolher(p, m.entidade(), m.opcao())))
+            .add();
+        CANAL.messageBuilder(NpcFala.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> {
+                b.writeVarInt(m.entidade() + 1);
+                b.writeUtf(m.npc());
+                b.writeUtf(m.texto());
+                b.writeCollection(m.args(), FriendlyByteBuf::writeUtf);
+            }).decoder(b -> new NpcFala(b.readVarInt() - 1, b.readUtf(), b.readUtf(), List.copyOf(b.readList(FriendlyByteBuf::readUtf))))
+            .consumerMainThread((m, ctx) -> EstadoCliente.npcFala.accept(m))
+            .add();
+        CANAL.messageBuilder(DiarioSync.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(DiarioSync::encode).decoder(DiarioSync::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.diario = m)
+            .add();
+        CANAL.messageBuilder(LigaSync.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeCollection(m.aliados(), (buf, a) -> {
+                buf.writeUUID(a.id());
+                buf.writeUtf(a.nome());
+                buf.writeDouble(a.x());
+                buf.writeDouble(a.y());
+                buf.writeDouble(a.z());
+            })).decoder(b -> new LigaSync(List.copyOf(b.readList(buf -> new Aliado(buf.readUUID(), buf.readUtf(), buf.readDouble(), buf.readDouble(), buf.readDouble())))))
+            .consumerMainThread((m, ctx) -> EstadoCliente.liga = m)
+            .add();
+        CANAL.messageBuilder(LigaPonto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> {
+                b.writeUtf(m.quem());
+                b.writeInt(m.x());
+                b.writeInt(m.y());
+                b.writeInt(m.z());
+            }).decoder(b -> new LigaPonto(b.readUtf(), b.readInt(), b.readInt(), b.readInt()))
+            .consumerMainThread((m, ctx) -> EstadoCliente.pontoLiga(m))
+            .add();
+        CANAL.messageBuilder(IlhaBlocos.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> {
+                b.writeVarInt(m.entidade());
+                b.writeVarIntArray(m.pos());
+                b.writeVarIntArray(m.estados());
+            }).decoder(b -> new IlhaBlocos(b.readVarInt(), b.readVarIntArray(4096), b.readVarIntArray(4096)))
+            .consumerMainThread((m, ctx) -> EstadoCliente.ILHAS.put(m.entidade(), m))
+            .add();
+        CANAL.messageBuilder(MissaoAviso.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> {
+                b.writeUtf(m.tipo());
+                b.writeUtf(m.missao());
+            }).decoder(b -> new MissaoAviso(b.readUtf(), b.readUtf()))
+            .consumerMainThread((m, ctx) -> EstadoCliente.AVISOS.add(m))
+            .add();
+        CANAL.messageBuilder(DiarioAcao.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> {
+                b.writeVarInt(m.tipo());
+                b.writeUtf(m.arg());
+            }).decoder(b -> new DiarioAcao(b.readVarInt(), b.readUtf(256)))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> {
+                if (m.tipo() == 0) com.danrod.dcuniverse.missao.Diario.rastrear(p, m.arg());
+                else if (m.tipo() == 1 && !m.arg().isEmpty()) com.danrod.dcuniverse.missao.Diario.abandonar(p, Identifier.parse(m.arg()));
+            }))
+            .add();
     }
 
     /** Mostra um efeito para todos perto do ponto (até 96 blocos). */
@@ -461,6 +662,17 @@ public final class Rede {
     public static void manobraVista(ServerPlayer player, int tipo) {
         if (player.connection == null) return;
         CANAL.send(new ManobraVista(player.getId(), tipo), PacketDistributor.TRACKING_ENTITY.with(player));
+    }
+
+    /** Avisa quem está vendo o animal que ele pôs ou tirou a Coleira do S. */
+    public static void coleira(net.minecraft.world.entity.Entity e, boolean usa) {
+        if (e.level().isClientSide()) return;
+        CANAL.send(new Coleira(e.getId(), usa), PacketDistributor.TRACKING_ENTITY.with(e));
+    }
+
+    public static void coleiraPara(ServerPlayer quemVe, net.minecraft.world.entity.Entity e) {
+        if (quemVe.connection == null) return;
+        CANAL.send(new Coleira(e.getId(), true), PacketDistributor.PLAYER.with(quemVe));
     }
 
     /** Manda a aparência de alvo só para quem começou a ver ele. */
@@ -537,5 +749,46 @@ public final class Rede {
     public static void guia(ServerPlayer player, String novaTarefa) {
         if (player.connection == null) return;
         CANAL.send(Guia.montar(player, novaTarefa), PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void npcCatalogo(ServerPlayer player) {
+        if (player.connection == null) return;
+        CANAL.send(new NpcCatalogo(com.danrod.dcuniverse.npc.Npcs.jsonNpcs(), com.danrod.dcuniverse.npc.Npcs.jsonMissoes()), PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void npcAbrir(ServerPlayer player, NpcAbrir m) {
+        if (player.connection == null) return;
+        CANAL.send(m, PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void npcFala(ServerPlayer player, int entidade, String npc, String texto, List<String> args) {
+        if (player.connection == null) return;
+        CANAL.send(new NpcFala(entidade, npc, texto, args), PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void diario(ServerPlayer player) {
+        if (player.connection == null) return;
+        CANAL.send(com.danrod.dcuniverse.missao.Diario.montar(player), PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void missaoAviso(ServerPlayer player, String tipo, String missao) {
+        if (player.connection == null) return;
+        CANAL.send(new MissaoAviso(tipo, missao), PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void liga(ServerPlayer player, LigaSync m) {
+        if (player.connection == null) return;
+        CANAL.send(m, PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void ligaPonto(ServerPlayer player, LigaPonto m) {
+        if (player.connection == null) return;
+        CANAL.send(m, PacketDistributor.PLAYER.with(player));
+    }
+
+    /** Os blocos da ilha para quem passou a ver a entidade. */
+    public static void ilha(ServerPlayer player, IlhaBlocos m) {
+        if (player.connection == null) return;
+        CANAL.send(m, PacketDistributor.PLAYER.with(player));
     }
 }

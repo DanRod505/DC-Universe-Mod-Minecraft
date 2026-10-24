@@ -41,7 +41,11 @@ public class MissilEntidade extends Projectile {
     }
 
     public MissilEntidade(Level level, ServerPlayer dono, Vec3 de, Vec3 dir, double velInicial, Entity alvo, float dano, float raio) {
-        this(Entidades.MISSIL.get(), level);
+        this(Entidades.MISSIL.get(), level, dono, de, dir, velInicial, alvo, dano, raio);
+    }
+
+    protected MissilEntidade(EntityType<? extends MissilEntidade> tipo, Level level, ServerPlayer dono, Vec3 de, Vec3 dir, double velInicial, Entity alvo, float dano, float raio) {
+        this(tipo, level);
         setOwner(dono);
         this.alvo = alvo;
         this.dano = dano;
@@ -90,17 +94,13 @@ public class MissilEntidade extends Projectile {
         super.tick();
         if (level().isClientSide()) {
             interpolacao.interpolate();
-            if (tickCount > 4) {
-                Vec3 tras = Vec3.directionFromRotation(-getXRot(), -getYRot()).scale(-0.5);
-                level().addParticle(ParticleTypes.FLAME, getX() + tras.x, getY() + tras.y, getZ() + tras.z, 0, 0, 0);
-                level().addParticle(ParticleTypes.LARGE_SMOKE, getX() + tras.x * 2, getY() + tras.y * 2, getZ() + tras.z * 2, 0, 0.02, 0);
-            }
+            rastro();
             return;
         }
         Vec3 v = getDeltaMovement();
-        if (tickCount > 4) {
+        if (tickCount > acende()) {
             // Motor aceso: acelera e persegue o alvo virando aos poucos.
-            vel = Math.min(2.8f, vel + 0.12f);
+            vel = Math.min(velMaxima(), vel + 0.12f);
             Vec3 quer = v.normalize();
             if (alvo != null && alvo.isAlive()) quer = alvo.getBoundingBox().getCenter().subtract(position()).normalize();
             else if (ponto != null && position().distanceToSqr(ponto) > 1) quer = ponto.subtract(position()).normalize();
@@ -113,7 +113,7 @@ public class MissilEntidade extends Projectile {
         BlockHitResult bloco = level().clip(new ClipContext(de, ate, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         Vec3 limite = bloco.getType() == HitResult.Type.MISS ? ate : bloco.getLocation();
         EntityHitResult ent = ProjectileUtil.getEntityHitResult(level(), this, de, limite, getBoundingBox().expandTowards(v).inflate(0.8),
-            e -> e instanceof LivingEntity && e.isAlive() && e != getOwner() && !(getOwner() != null && e.getVehicle() != null && e.getVehicle() == getOwner().getVehicle()));
+            e -> Alvos.atingivel(e) && e.isAlive() && e != getOwner() && !(getOwner() != null && e.getVehicle() != null && e.getVehicle() == getOwner().getVehicle()));
         if (ent != null) {
             explodir(ent.getLocation());
         } else if (bloco.getType() != HitResult.Type.MISS || tickCount > 120) {
@@ -123,12 +123,33 @@ public class MissilEntidade extends Projectile {
         }
     }
 
-    private void explodir(Vec3 onde) {
-        ServerLevel level = (ServerLevel) level();
+    /** Ticks caindo antes de acender o motor e começar a perseguir. */
+    protected int acende() {
+        return 4;
+    }
+
+    protected float velMaxima() {
+        return 2.8f;
+    }
+
+    /** Fumaça e chama atrás (no cliente). */
+    protected void rastro() {
+        if (tickCount <= 4) return;
+        Vec3 tras = Vec3.directionFromRotation(-getXRot(), -getYRot()).scale(-0.5);
+        level().addParticle(ParticleTypes.FLAME, getX() + tras.x, getY() + tras.y, getZ() + tras.z, 0, 0, 0);
+        level().addParticle(ParticleTypes.LARGE_SMOKE, getX() + tras.x * 2, getY() + tras.y * 2, getZ() + tras.z * 2, 0, 0.02, 0);
+    }
+
+    protected void estouro(ServerLevel level, Vec3 onde) {
         level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, onde.x, onde.y, onde.z, 1, 0, 0, 0, 0);
         level.sendParticles(ParticleTypes.FLAME, onde.x, onde.y, onde.z, 30, 0.6, 0.6, 0.6, 0.15);
         level.sendParticles(ParticleTypes.LARGE_SMOKE, onde.x, onde.y, onde.z, 24, 0.8, 0.8, 0.8, 0.06);
         level.playSound(null, onde.x, onde.y, onde.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.5f, 0.9f);
+    }
+
+    private void explodir(Vec3 onde) {
+        ServerLevel level = (ServerLevel) level();
+        estouro(level, onde);
         ServerPlayer dono = getOwner() instanceof ServerPlayer sp ? sp : null;
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(onde, onde).inflate(raio))) {
             double d = Math.sqrt(e.getBoundingBox().distanceToSqr(onde));
@@ -140,6 +161,7 @@ public class MissilEntidade extends Projectile {
             e.push(fora.x * 1.2 * f, 0.6 * f, fora.z * 1.2 * f);
             e.hurtMarked = true;
         }
+        Alvos.cristais(dono, new AABB(onde, onde).inflate(raio), damageSources().explosion(this, dono));
         discard();
     }
 }

@@ -1,0 +1,46 @@
+{
+  "npc": "dcuniverse:martha_kent",
+  "chapter": "prologo",
+  "requires": [
+    "dcuniverse:meteoro_smallville"
+  ],
+  "start_items": [
+    {
+      "item": "dcuniverse:tecido_tatico",
+      "count": 2
+    }
+  ],
+  "objectives": [
+    {
+      "type": "craft",
+      "item": "dcuniverse:nucleo_meta_1",
+      "count": 1
+    },
+    {
+      "type": "craft",
+      "item": "#dcuniverse:transformacao_nivel_1",
+      "count": 1
+    },
+    {
+      "type": "transform"
+    },
+    {
+      "type": "talk",
+      "npc": "dcuniverse:martha_kent"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "dcuniverse:tecido_tatico",
+        "count": 8
+      },
+      {
+        "item": "dcuniverse:comunicador_liga",
+        "count": 1
+      }
+    ],
+    "xp": 100,
+    "affinity": 15
+  }
+}

@@ -66,6 +66,24 @@ public final class Sons {
     public static final RegistryObject<SoundEvent> VEICULO_TURBO = som("habilidade.veiculo_turbo");
     public static final RegistryObject<SoundEvent> VEICULO_ATROPELA = som("habilidade.veiculo_atropela");
 
+    // v0.3 (etapa 4): Supergirl e Superboy
+    public static final RegistryObject<SoundEvent> INVESTIDA = som("habilidade.investida");
+    public static final RegistryObject<SoundEvent> TELECINESE_ERGUE = som("habilidade.telecinese_ergue");
+    public static final RegistryObject<SoundEvent> TELECINESE_LANCA = som("habilidade.telecinese_lanca");
+    public static final RegistryObject<SoundEvent> TELECINESE_POUSA = som("habilidade.telecinese_pousa");
+    public static final RegistryObject<SoundEvent> ESCUDO_TK_LIGA = som("habilidade.escudo_tk_liga");
+    public static final RegistryObject<SoundEvent> ESCUDO_TK_DESLIGA = som("habilidade.escudo_tk_desliga");
+    public static final RegistryObject<SoundEvent> ESCUDO_TK_IMPACTO = som("habilidade.escudo_tk_impacto");
+    public static final RegistryObject<SoundEvent> ILHA_ARRANCA = som("habilidade.ilha_arranca");
+    public static final RegistryObject<SoundEvent> ILHA_MOTOR = som("habilidade.ilha_motor");
+    public static final RegistryObject<SoundEvent> ILHA_POUSA = som("habilidade.ilha_pousa");
+    public static final RegistryObject<SoundEvent> NAVE_CHEGA = som("habilidade.nave_chega");
+    public static final RegistryObject<SoundEvent> NAVE_MOTOR = som("habilidade.nave_motor");
+    public static final RegistryObject<SoundEvent> NAVE_CANHAO = som("habilidade.nave_canhao");
+    public static final RegistryObject<SoundEvent> NAVE_ORBE = som("habilidade.nave_orbe");
+    public static final RegistryObject<SoundEvent> NAVE_ESCUDO_LIGA = som("habilidade.nave_escudo_liga");
+    public static final RegistryObject<SoundEvent> NAVE_ESCUDO_DESLIGA = som("habilidade.nave_escudo_desliga");
+
     private Sons() {}
 
     private static RegistryObject<SoundEvent> som(String nome) {

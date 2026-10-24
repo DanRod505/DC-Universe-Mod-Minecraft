@@ -34,6 +34,7 @@ public final class Cliente {
             e.register(Teclas.USAR);
             e.register(Teclas.DESTRANSFORMAR);
             e.register(Teclas.GUIA);
+            e.register(Teclas.DIARIO);
         });
         AddGuiOverlayLayersEvent.BUS.addListener(e -> {
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
@@ -54,6 +55,12 @@ public final class Cliente {
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batwing"), Piloto::desenhar);
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "veiculo"), Motorista::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "rastreio"), com.danrod.dcuniverse.client.npc.Rastreio::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "liga"), LigaHud::desenhar);
+            e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "ilha"), Ilhas::desenhar);
         });
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> {
             e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new);
@@ -65,6 +72,14 @@ public final class Cliente {
             e.registerEntityRenderer(Entidades.BATMOVEL.get(), com.danrod.dcuniverse.client.render.VeiculoRenderer::new);
             e.registerEntityRenderer(Entidades.BATMOTO.get(), com.danrod.dcuniverse.client.render.VeiculoRenderer::new);
             e.registerEntityRenderer(Entidades.BATBARCO.get(), com.danrod.dcuniverse.client.render.VeiculoRenderer::new);
+            e.registerEntityRenderer(Entidades.NPC.get(), com.danrod.dcuniverse.client.npc.NpcRenderer::largo);
+            e.registerEntityRenderer(Entidades.NPC_SLIM.get(), com.danrod.dcuniverse.client.npc.NpcRenderer::fino);
+            e.registerEntityRenderer(Entidades.KRYPTO.get(), com.danrod.dcuniverse.client.npc.KryptoRenderer::new);
+            e.registerEntityRenderer(Entidades.STREAKY.get(), com.danrod.dcuniverse.client.npc.StreakyRenderer::new);
+            e.registerEntityRenderer(Entidades.BLOCO_TK.get(), com.danrod.dcuniverse.client.render.BlocoTkRenderer::new);
+            e.registerEntityRenderer(Entidades.ILHA.get(), com.danrod.dcuniverse.client.render.IlhaRenderer::new);
+            e.registerEntityRenderer(Entidades.NAVE_KRYPTONIANA.get(), com.danrod.dcuniverse.client.render.NaveKryptonianaRenderer::new);
+            e.registerEntityRenderer(Entidades.ORBE_SOLAR.get(), com.danrod.dcuniverse.client.render.OrbeRenderer::new);
         });
         TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
         ClientPlayerNetworkEvent.LoggingOut.BUS.addListener(e -> {
@@ -80,12 +95,16 @@ public final class Cliente {
             Gancheador.limpar();
             Piloto.limpar();
             Motorista.limpar();
+            Ilhas.limpar();
             usando = false;
         });
         GuiaItem.abrir = GuiaScreen::abrir;
         com.danrod.dcuniverse.core.EstadoCliente.batcomputador = BatcomputadorScreen::receber;
+        EstadoCliente.npcAbrir = com.danrod.dcuniverse.client.npc.DialogoScreen::receber;
+        EstadoCliente.npcFala = com.danrod.dcuniverse.client.npc.DialogoScreen::falar;
         Skins.registrar();
         Pecas.registrar();
+        com.danrod.dcuniverse.client.npc.ColeiraCamada.registrar();
         Voador.registrar();
         Planador.registrar();
         Efeitos.registrarFeixe();
@@ -95,6 +114,9 @@ public final class Cliente {
         Saltador.registrar();
         Piloto.registrar();
         Motorista.registrar();
+        Ilhas.registrar();
+        LigaHud.registrar();
+        com.danrod.dcuniverse.client.npc.NpcRenderer.registrar();
     }
 
     private static void tick() {
@@ -103,6 +125,13 @@ public final class Cliente {
         boolean livre = mc.gui.screen() == null;
         while (Teclas.GUIA.consumeClick()) {
             if (livre) GuiaScreen.abrir();
+        }
+        while (Teclas.DIARIO.consumeClick()) {
+            if (livre) GuiaScreen.abrirDiario();
+        }
+        LigaHud.tick(mc);
+        for (Rede.MissaoAviso a; (a = EstadoCliente.AVISOS.poll()) != null; ) {
+            mc.gui.toastManager().addToast(new com.danrod.dcuniverse.client.npc.MissaoToast(a.tipo(), a.missao()));
         }
         while (Teclas.DESTRANSFORMAR.consumeClick()) {
             if (EstadoCliente.transformado()) Rede.CANAL.send(new Rede.Destransformar(), PacketDistributor.SERVER.noArg());

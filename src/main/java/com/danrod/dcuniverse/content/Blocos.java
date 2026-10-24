@@ -59,6 +59,16 @@ public final class Blocos {
         .sound(SoundType.NETHERITE_BLOCK).noOcclusion().isRedstoneConductor((s, l, pos) -> false)
         .isSuffocating((s, l, pos) -> false).isViewBlocking((s, l, pos) -> false)), Rarity.RARE);
 
+    /** Nave de Kal-El: só aparece no porão do celeiro da Fazenda Kent (sem item; inquebrável no sobrevivência). */
+    public static final RegistryObject<Block> NAVE_KALEL = bloco("nave_kalel", p -> new NaveKalEl(p
+        .mapColor(MapColor.METAL).strength(-1f, 3600000f).noLootTable().noOcclusion().lightLevel(s -> 10)
+        .sound(SoundType.NETHERITE_BLOCK).pushReaction(PushReaction.BLOCK).isRedstoneConductor((s, l, pos) -> false)
+        .isSuffocating((s, l, pos) -> false).isViewBlocking((s, l, pos) -> false)));
+
+    /** Meteorito: cai em volta da Cratera do Meteoro na missão "Meteoro em Smallville" (missao/Cenas); sem item, solta Fragmentos Alienígenas. */
+    public static final RegistryObject<Block> METEORITO = bloco("meteorito", p -> new Block(p
+        .mapColor(MapColor.COLOR_BLACK).strength(1.5f, 6f).lightLevel(s -> 9).sound(SoundType.ANCIENT_DEBRIS)));
+
     private Blocos() {}
 
     private static RegistryObject<Block> blocoComItem(String id, Function<BlockBehaviour.Properties, Block> fabrica, Rarity raridade) {

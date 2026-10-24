@@ -9,6 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * ser escrita pelo handler do pacote em qualquer lado; só o código de cliente lê.
  */
 public final class EstadoCliente {
+    /** Blocos das Ilhas Telecinéticas por id da entidade (chegam logo depois da entidade). */
+    public static final java.util.Map<Integer, Rede.IlhaBlocos> ILHAS = new java.util.concurrent.ConcurrentHashMap<>();
+
     public static volatile Rede.Sync atual = Rede.Sync.VAZIO;
     /** JSON de cada personagem do servidor (id -> JSON), para o Guia. */
     public static volatile Map<String, String> catalogo = Map.of();
@@ -19,6 +22,8 @@ public final class EstadoCliente {
 
     /** Aparência de cada jogador visível transformado (id da entidade), para trocar a skin. */
     public static final Map<Integer, Rede.Aparencia> APARENCIAS = new ConcurrentHashMap<>();
+    /** Animais (ids de entidade) que estão usando a Coleira do S. */
+    public static final java.util.Set<Integer> COLEIRAS = ConcurrentHashMap.newKeySet();
     /** Jogadores que acabaram de transformar (o cliente toca o efeito de transformação e tira da fila). */
     public static final Map<Integer, Rede.Aparencia> TRANSFORMOU = new ConcurrentHashMap<>();
 
@@ -34,7 +39,39 @@ public final class EstadoCliente {
     /** Abre ou atualiza a tela do Batcomputador (o cliente troca por client/BatcomputadorScreen::receber). */
     public static volatile java.util.function.Consumer<Rede.BatAbrir> batcomputador = m -> {};
 
+    /** NPCs e missões do servidor (id -> JSON), para o Diário e o capítulo de NPCs. */
+    public static volatile Map<String, String> npcs = Map.of(), missoes = Map.of();
+    /** Diário de Missões do jogador local. */
+    public static volatile Rede.DiarioSync diario = Rede.DiarioSync.VAZIO;
+    /** Missões aceitas ou concluídas que o cliente ainda vai anunciar. */
+    /** Comunicador da Liga: aliados à vista e o último ponto de encontro (com o tempo de jogo em que chegou). */
+    public static volatile Rede.LigaSync liga = new Rede.LigaSync(java.util.List.of());
+    public static volatile Rede.LigaPonto ponto;
+    public static volatile long pontoEm;
+    public static volatile java.util.function.Consumer<Rede.LigaPonto> aoPonto = m -> {};
+
+    public static void pontoLiga(Rede.LigaPonto m) {
+        ponto = m;
+        pontoEm = System.currentTimeMillis();
+        aoPonto.accept(m);
+    }
+
+    public static final java.util.Queue<Rede.MissaoAviso> AVISOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    /** Abre a conversa com um NPC (client/npc/DialogoScreen::receber). */
+    public static volatile java.util.function.Consumer<Rede.NpcAbrir> npcAbrir = m -> {};
+    /** Escreve a fala de um NPC no chat (client/npc/DialogoScreen::falar). */
+    public static volatile java.util.function.Consumer<Rede.NpcFala> npcFala = m -> {};
+
     private EstadoCliente() {}
+
+    public static void npcCatalogo(Rede.NpcCatalogo c) {
+        npcs = c.npcs();
+        missoes = c.missoes();
+        versaoCatalogo++;
+    }
+
+    /** Muda a cada catálogo novo (quem guarda os JSON já lidos sabe quando ler de novo). */
+    public static volatile int versaoCatalogo;
 
     /** Estado da capa de quem plana sem estar transformado (Capa Planadora), por id da entidade. */
     public static final Map<Integer, Integer> PLANAR_SEM_HEROI = new ConcurrentHashMap<>();
@@ -91,12 +128,20 @@ public final class EstadoCliente {
     }
 
     public static void limpar() {
+        ILHAS.clear();
         atual = Rede.Sync.VAZIO;
         catalogo = Map.of();
         passivasDe = "";
         guia = Rede.GuiaSync.VAZIO;
         tarefaNova = "";
+        npcs = Map.of();
+        missoes = Map.of();
+        diario = Rede.DiarioSync.VAZIO;
+        AVISOS.clear();
+        liga = new Rede.LigaSync(java.util.List.of());
+        ponto = null;
         APARENCIAS.clear();
+        COLEIRAS.clear();
         TRANSFORMOU.clear();
         MANOBRAS.clear();
         GANCHOS.clear();

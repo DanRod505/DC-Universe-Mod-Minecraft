@@ -38,10 +38,23 @@ public final class Eventos {
     private Eventos() {}
 
     public static void registrar() {
-        AddReloadListenerEvent.BUS.addListener(e -> e.addListener(new Personagens()));
+        AddReloadListenerEvent.BUS.addListener(e -> {
+            e.addListener(new Personagens());
+            e.addListener(new com.danrod.dcuniverse.npc.Npcs.CarregarNpcs());
+            e.addListener(new com.danrod.dcuniverse.npc.Npcs.CarregarMissoes());
+        });
+        net.minecraftforge.event.entity.EntityAttributeCreationEvent.BUS.addListener(e -> {
+            e.put(com.danrod.dcuniverse.content.Entidades.NPC.get(), com.danrod.dcuniverse.npc.NpcEntidade.atributos().build());
+            e.put(com.danrod.dcuniverse.content.Entidades.NPC_SLIM.get(), com.danrod.dcuniverse.npc.NpcEntidade.atributos().build());
+            e.put(com.danrod.dcuniverse.content.Entidades.KRYPTO.get(), com.danrod.dcuniverse.npc.Krypto.atributos().build());
+            e.put(com.danrod.dcuniverse.content.Entidades.STREAKY.get(), com.danrod.dcuniverse.npc.Streaky.atributos().build());
+        });
         RegisterCommandsEvent.BUS.addListener(e -> Comandos.registrar(e.getDispatcher()));
         // Vale no login e a cada /reload: o Guia mostra os personagens exatamente como o servidor os carregou.
-        OnDatapackSyncEvent.BUS.addListener(e -> e.getPlayers().forEach(Rede::catalogo));
+        OnDatapackSyncEvent.BUS.addListener(e -> e.getPlayers().forEach(p -> {
+            Rede.catalogo(p);
+            Rede.npcCatalogo(p);
+        }));
         TickEvent.PlayerTickEvent.Post.BUS.addListener(e -> {
             if (e.player() instanceof ServerPlayer sp) tick(sp);
         });
@@ -50,6 +63,18 @@ public final class Eventos {
             if (e.getEntity() instanceof ServerPlayer sp && EstadoJogador.de(sp).transformado()) Transformacao.destransformar(sp);
             return false;
         });
+        LivingDeathEvent.BUS.addListener(e -> {
+            if (e.getSource().getEntity() instanceof ServerPlayer sp && !(e.getEntity() instanceof net.minecraft.world.entity.player.Player)) {
+                com.danrod.dcuniverse.missao.Diario.abateu(sp, e.getEntity());
+                if (e.getEntity() instanceof net.minecraft.world.entity.monster.Enemy) com.danrod.dcuniverse.npc.Afinidade.protegeu(sp, e.getEntity());
+            }
+        });
+        PlayerEvent.ItemCraftedEvent.BUS.addListener(e -> {
+            if (e.getEntity() instanceof ServerPlayer sp) com.danrod.dcuniverse.missao.Diario.fabricou(sp, e.getCrafting());
+        });
+        EntityJoinLevelEvent.BUS.addListener(e -> {
+            if (e.getEntity() instanceof net.minecraft.world.entity.monster.Creeper c && !e.getLevel().isClientSide()) com.danrod.dcuniverse.npc.Streaky.assustar(c);
+        });
         LivingFallEvent.BUS.addListener((Predicate<LivingFallEvent>) e -> e.getEntity() instanceof ServerPlayer sp && Passivas.semQueda(sp));
         ItemTossEvent.BUS.addListener((Predicate<ItemTossEvent>) e -> Traje.ehTraje(e.getEntity().getItem()));
         EntityJoinLevelEvent.BUS.addListener((Predicate<EntityJoinLevelEvent>) e -> e.getEntity() instanceof ItemEntity item && Traje.ehTraje(item.getItem()));
@@ -57,14 +82,22 @@ public final class Eventos {
             if (e.getEntity() instanceof ServerPlayer p) {
                 Guia.darGuia(p);
                 Rede.guia(p, "");
+                com.danrod.dcuniverse.missao.Diario.sincronizar(p);
             }
             sync(e.getEntity());
         });
         PlayerEvent.PlayerRespawnEvent.BUS.addListener(e -> sync(e.getEntity()));
         PlayerEvent.PlayerLoggedOutEvent.BUS.addListener(e -> {
-            if (e.getEntity() instanceof ServerPlayer sp) DemoHud.parar(sp);
+            if (e.getEntity() instanceof ServerPlayer sp) {
+                DemoHud.parar(sp);
+                com.danrod.dcuniverse.world.estrutura.Chegada.sair(sp);
+                com.danrod.dcuniverse.npc.Dialogo.fechar(sp);
+            }
         });
         PlayerEvent.StartTracking.BUS.addListener(e -> {
+            if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof com.danrod.dcuniverse.content.IlhaTelecinetica ilha) {
+                Rede.ilha(quem, ilha.pacote());
+            }
             if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof ServerPlayer alvo) {
                 Rede.aparenciaPara(quem, alvo);
                 // Ver outro jogador transformado também libera a página do personagem no Guia.
@@ -77,34 +110,54 @@ public final class Eventos {
             Onda.tick();
             com.danrod.dcuniverse.ability.Congelamento.tick();
             Fortaleza.tick();
+            com.danrod.dcuniverse.missao.Cenas.tick();
+            com.danrod.dcuniverse.missao.Cenas.tickFumaca();
+            com.danrod.dcuniverse.liga.Liga.tick(e.server());
             com.danrod.dcuniverse.ability.active.Gancho.tick();
             com.danrod.dcuniverse.ability.active.Fumaca.tick(e.server());
             com.danrod.dcuniverse.ability.active.Disruptor.tick();
+            com.danrod.dcuniverse.ability.active.Investida.tick();
+            com.danrod.dcuniverse.ability.active.Telecinese.tick(e.server());
+            com.danrod.dcuniverse.ability.active.EscudoTk.tick();
+            com.danrod.dcuniverse.ability.active.Ilha.tick();
             for (var level : e.server().getAllLevels()) com.danrod.dcuniverse.content.Teias.tick(level);
         });
         ServerStoppingEvent.BUS.addListener(e -> {
             Onda.limpar();
             com.danrod.dcuniverse.ability.Congelamento.limpar();
             Fortaleza.limpar();
+            com.danrod.dcuniverse.missao.Cenas.limpar();
             com.danrod.dcuniverse.ability.active.Gancho.limpar();
             com.danrod.dcuniverse.ability.active.Veiculo.limpar();
             com.danrod.dcuniverse.ability.active.Fumaca.limpar();
             com.danrod.dcuniverse.ability.active.Disruptor.limpar();
+            com.danrod.dcuniverse.ability.active.Investida.limpar();
+            com.danrod.dcuniverse.ability.active.Telecinese.limpar();
+            com.danrod.dcuniverse.ability.active.EscudoTk.limpar();
+            com.danrod.dcuniverse.ability.active.Ilha.limpar();
             com.danrod.dcuniverse.content.Teias.limpar();
         });
         Naturais.registrar();
         com.danrod.dcuniverse.content.Batcomputador.registrar();
         com.danrod.dcuniverse.content.Teias.registrar();
         com.danrod.dcuniverse.content.BatwingEntidade.registrar();
+        com.danrod.dcuniverse.content.NaveKryptoniana.registrar();
+        com.danrod.dcuniverse.npc.Coleira.registrar();
         com.danrod.dcuniverse.ability.Congelamento.registrar();
         com.danrod.dcuniverse.ability.active.Detetive.registrar();
         com.danrod.dcuniverse.ability.passive.Furtividade.registrar();
         com.danrod.dcuniverse.ability.passive.ContraAtaque.registrar();
+        com.danrod.dcuniverse.ability.active.EscudoTk.registrar();
     }
 
     static void tick(ServerPlayer player) {
         QuedaAmortecida.tick(player);
-        if (player.tickCount % 20 == 0) Guia.tickSegundo(player);
+        if (player.tickCount % 20 == 0) {
+            Guia.tickSegundo(player);
+            com.danrod.dcuniverse.world.estrutura.Chegada.tickSegundo(player);
+            com.danrod.dcuniverse.missao.Diario.tickSegundo(player);
+        }
+        if (player.tickCount % 100 == 0) com.danrod.dcuniverse.npc.Residentes.tick(player);
         EstadoJogador estado = EstadoJogador.de(player);
         if (!estado.transformado()) {
             if (player.tickCount % 20 == 0) Traje.verificar(player, null);

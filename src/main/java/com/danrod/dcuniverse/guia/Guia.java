@@ -27,7 +27,10 @@ public final class Guia {
     public static final List<String> TAREFAS = List.of("transformar", "sol", "radial", "habilidade", "voar", "estrondo", "manobra", "amortecida", "destransformar",
         "gancho", "batarangue", "batwing", "planar", "manobra_planar",
         "detetive", "fumaca", "gel", "gel_detonar", "contra_ataque", "furtivo",
-        "capa_planador", "visor_tatico", "batcomputador", "cinto", "garagem");
+        "capa_planador", "visor_tatico", "batcomputador", "cinto", "garagem",
+        "smallville", "nave_kalel",
+        "conversar_npc", "missao_aceitar", "missao_concluir", "trocar_npc", "presente_npc", "domar_krypto", "domar_streaky", "liga_vincular", "liga_ponto",
+        "investida", "nave", "telecinese", "ilha");
     /** Segundos recarregando ao sol para ganhar o visto de "sol". */
     public static final int SEGUNDOS_SOL = 5;
 
@@ -54,6 +57,11 @@ public final class Guia {
     public static void concluir(ServerPlayer player, String tarefa) {
         if (!TAREFAS.contains(tarefa) || adicionar(player, "tarefas", tarefa)) return;
         Rede.guia(player, tarefa);
+    }
+
+    /** Registra a visita a um local; verdadeiro só na primeira vez. */
+    public static boolean visitar(ServerPlayer player, String local) {
+        return !adicionar(player, "locais", local);
     }
 
     public static boolean descoberto(ServerPlayer player, Identifier personagem) {

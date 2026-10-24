@@ -1,0 +1,108 @@
+{
+  "text": "cidadao",
+  "group": "cidadaos",
+  "wander": 14,
+  "likes": {
+    "minecraft:bread": 2,
+    "minecraft:cookie": 3,
+    "minecraft:iron_ingot": 3,
+    "minecraft:emerald": 3,
+    "minecraft:pumpkin_pie": 3
+  },
+  "skins": [
+    "dcuniverse:textures/entity/npc/xerife.png"
+  ],
+  "names": [
+    "Pete",
+    "Hank",
+    "Earl",
+    "Walt",
+    "Jesse",
+    "Bo",
+    "Gus",
+    "Roy",
+    "Dale",
+    "Lyle"
+  ],
+  "profession": "xerife",
+  "trades": [
+    {
+      "in": [
+        {
+          "item": "minecraft:rotten_flesh",
+          "count": 16
+        }
+      ],
+      "out": {
+        "item": "minecraft:emerald",
+        "count": 1
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 3
+        }
+      ],
+      "out": {
+        "item": "minecraft:shield",
+        "count": 1
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 5
+        }
+      ],
+      "out": {
+        "item": "minecraft:iron_sword",
+        "count": 1
+      },
+      "min": 50
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 8
+        }
+      ],
+      "out": {
+        "item": "minecraft:crossbow",
+        "count": 1
+      },
+      "min": 75
+    }
+  ],
+  "talks": [
+    {
+      "id": "tempo"
+    },
+    {
+      "id": "kents"
+    },
+    {
+      "id": "meteoro"
+    },
+    {
+      "id": "talon"
+    },
+    {
+      "id": "herois"
+    },
+    {
+      "id": "profissao"
+    },
+    {
+      "id": "segredo",
+      "min": 50
+    }
+  ],
+  "greetings": [
+    "superman",
+    "batman"
+  ]
+}

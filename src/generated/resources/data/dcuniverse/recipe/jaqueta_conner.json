@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "dcuniverse:cristal_kryptoniano",
+    "B": "minecraft:leather",
+    "C": "minecraft:black_dye",
+    "N": "dcuniverse:nucleo_meta_3"
+  },
+  "pattern": [
+    "BCB",
+    "ANA",
+    "BAB"
+  ],
+  "result": {
+    "id": "dcuniverse:jaqueta_conner"
+  }
+}

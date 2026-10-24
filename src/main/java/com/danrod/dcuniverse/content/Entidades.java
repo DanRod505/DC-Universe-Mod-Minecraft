@@ -55,5 +55,46 @@ public final class Entidades {
             .noLootTable().sized(2.6f, 1.1f).clientTrackingRange(12).updateInterval(1)
             .build(TIPOS.key("batbarco")));
 
+    public static final RegistryObject<EntityType<com.danrod.dcuniverse.npc.NpcEntidade>> NPC = TIPOS.register("npc",
+        () -> EntityType.Builder.<com.danrod.dcuniverse.npc.NpcEntidade>of(com.danrod.dcuniverse.npc.NpcEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.6f, 1.8f).eyeHeight(1.62f).clientTrackingRange(10)
+            .build(TIPOS.key("npc")));
+
+    /** O mesmo NPC com braços finos (modelo slim). */
+    public static final RegistryObject<EntityType<com.danrod.dcuniverse.npc.NpcEntidade>> NPC_SLIM = TIPOS.register("npc_slim",
+        () -> EntityType.Builder.<com.danrod.dcuniverse.npc.NpcEntidade>of(com.danrod.dcuniverse.npc.NpcEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.6f, 1.8f).eyeHeight(1.62f).clientTrackingRange(10)
+            .build(TIPOS.key("npc_slim")));
+
+    public static final RegistryObject<EntityType<com.danrod.dcuniverse.npc.Krypto>> KRYPTO = TIPOS.register("krypto",
+        () -> EntityType.Builder.<com.danrod.dcuniverse.npc.Krypto>of(com.danrod.dcuniverse.npc.Krypto::new, MobCategory.CREATURE)
+            .noLootTable().sized(0.6f, 0.85f).eyeHeight(0.68f).clientTrackingRange(10)
+            .build(TIPOS.key("krypto")));
+
+    public static final RegistryObject<EntityType<com.danrod.dcuniverse.npc.Streaky>> STREAKY = TIPOS.register("streaky",
+        () -> EntityType.Builder.<com.danrod.dcuniverse.npc.Streaky>of(com.danrod.dcuniverse.npc.Streaky::new, MobCategory.CREATURE)
+            .noLootTable().sized(0.6f, 0.7f).eyeHeight(0.35f).clientTrackingRange(10)
+            .build(TIPOS.key("streaky")));
+
+    public static final RegistryObject<EntityType<BlocoTelecinetico>> BLOCO_TK = TIPOS.register("bloco_telecinetico",
+        () -> EntityType.Builder.<BlocoTelecinetico>of(BlocoTelecinetico::new, MobCategory.MISC)
+            .noLootTable().sized(0.98f, 0.98f).clientTrackingRange(8).updateInterval(1)
+            .build(TIPOS.key("bloco_telecinetico")));
+
+    public static final RegistryObject<EntityType<IlhaTelecinetica>> ILHA = TIPOS.register("ilha_telecinetica",
+        () -> EntityType.Builder.<IlhaTelecinetica>of(IlhaTelecinetica::new, MobCategory.MISC)
+            .noLootTable().sized(1f, 1f).clientTrackingRange(16).updateInterval(1)
+            .build(TIPOS.key("ilha_telecinetica")));
+
+    public static final RegistryObject<EntityType<NaveKryptoniana>> NAVE_KRYPTONIANA = TIPOS.register("nave_kryptoniana",
+        () -> EntityType.Builder.<NaveKryptoniana>of(NaveKryptoniana::new, MobCategory.MISC)
+            .noLootTable().sized(4.0f, 2.2f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("nave_kryptoniana")));
+
+    public static final RegistryObject<EntityType<OrbeSolar>> ORBE_SOLAR = TIPOS.register("orbe_solar",
+        () -> EntityType.Builder.<OrbeSolar>of(OrbeSolar::new, MobCategory.MISC)
+            .noLootTable().sized(0.6f, 0.6f).clientTrackingRange(8).updateInterval(1)
+            .build(TIPOS.key("orbe_solar")));
+
     private Entidades() {}
 }

@@ -1,0 +1,32 @@
+{
+  "npc": "dcuniverse:cidadao_comerciante",
+  "repeatable": true,
+  "interval": 2,
+  "min": 25,
+  "objectives": [
+    {
+      "type": "craft",
+      "item": "minecraft:torch",
+      "count": 32
+    },
+    {
+      "type": "collect",
+      "item": "minecraft:torch",
+      "count": 32
+    },
+    {
+      "type": "deliver",
+      "npc": "dcuniverse:cidadao_comerciante"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:emerald",
+        "count": 4
+      }
+    ],
+    "xp": 20,
+    "affinity": 6
+  }
+}

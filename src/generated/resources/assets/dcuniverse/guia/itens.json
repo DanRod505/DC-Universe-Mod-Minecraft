@@ -96,6 +96,11 @@
    "obter": false
   },
   {
+   "id": "comunicador_liga",
+   "cat": "utilidade",
+   "obter": true
+  },
+  {
    "id": "camara_solar",
    "cat": "bloco",
    "obter": false
@@ -116,12 +121,37 @@
    "obter": true
   },
   {
+   "id": "torta_martha",
+   "cat": "utilidade",
+   "obter": true
+  },
+  {
+   "id": "osso_cristal",
+   "cat": "utilidade",
+   "obter": true
+  },
+  {
+   "id": "coleira_s",
+   "cat": "utilidade",
+   "obter": true
+  },
+  {
    "id": "cristal_superman",
    "cat": "transformacao",
    "obter": false
   },
   {
    "id": "cinto_batman",
+   "cat": "transformacao",
+   "obter": false
+  },
+  {
+   "id": "cristal_supergirl",
+   "cat": "transformacao",
+   "obter": false
+  },
+  {
+   "id": "jaqueta_conner",
    "cat": "transformacao",
    "obter": false
   }
@@ -258,6 +288,38 @@
   {
    "type": "minecraft:crafting_shaped",
    "key": {
+    "C": "minecraft:copper_ingot",
+    "E": "minecraft:ender_pearl",
+    "P": "dcuniverse:placa_circuito"
+   },
+   "pattern": [
+    " P ",
+    "CEC"
+   ],
+   "result": {
+    "id": "dcuniverse:comunicador_liga"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "A": "dcuniverse:cristal_kryptoniano",
+    "B": "dcuniverse:tecido_tatico",
+    "C": "minecraft:feather",
+    "N": "dcuniverse:nucleo_meta_4"
+   },
+   "pattern": [
+    "BCB",
+    "ANA",
+    "BAB"
+   ],
+   "result": {
+    "id": "dcuniverse:cristal_supergirl"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
     "A": "dcuniverse:cristal_kryptoniano",
     "B": "dcuniverse:tecido_tatico",
     "C": "minecraft:sunflower",
@@ -307,6 +369,23 @@
    ],
    "result": {
     "id": "dcuniverse:guia_heroi"
+   }
+  },
+  {
+   "type": "minecraft:crafting_shaped",
+   "key": {
+    "A": "dcuniverse:cristal_kryptoniano",
+    "B": "minecraft:leather",
+    "C": "minecraft:black_dye",
+    "N": "dcuniverse:nucleo_meta_3"
+   },
+   "pattern": [
+    "BCB",
+    "ANA",
+    "BAB"
+   ],
+   "result": {
+    "id": "dcuniverse:jaqueta_conner"
    }
   },
   {
@@ -410,6 +489,16 @@
    }
   },
   {
+   "type": "minecraft:crafting_shapeless",
+   "ingredients": [
+    "minecraft:bone",
+    "dcuniverse:cristal_kryptoniano"
+   ],
+   "result": {
+    "id": "dcuniverse:osso_cristal"
+   }
+  },
+  {
    "type": "minecraft:crafting_shaped",
    "key": {
     "C": "minecraft:copper_ingot",
@@ -442,6 +531,18 @@
    "result": {
     "id": "dcuniverse:tecido_tatico",
     "count": 4
+   }
+  },
+  {
+   "type": "minecraft:crafting_shapeless",
+   "ingredients": [
+    "minecraft:apple",
+    "minecraft:wheat",
+    "minecraft:sugar",
+    "minecraft:egg"
+   ],
+   "result": {
+    "id": "dcuniverse:torta_martha"
    }
   },
   {

@@ -1,0 +1,38 @@
+{
+  "npc": "dcuniverse:martha_kent",
+  "min": 25,
+  "requires": [
+    "dcuniverse:martha_krypto"
+  ],
+  "objectives": [
+    {
+      "type": "collect",
+      "item": "minecraft:cod",
+      "count": 3
+    },
+    {
+      "type": "tame",
+      "targets": [
+        "dcuniverse:streaky"
+      ]
+    },
+    {
+      "type": "talk",
+      "npc": "dcuniverse:martha_kent"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:salmon",
+        "count": 6
+      },
+      {
+        "item": "minecraft:cake",
+        "count": 1
+      }
+    ],
+    "xp": 60,
+    "affinity": 10
+  }
+}

@@ -3,6 +3,20 @@
   "minVersion": "0.8",
   "package": "com.danrod.dcuniverse.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["AbstractClientPlayerMixin", "CameraMixin", "EntityRendererMixin", "LevelRendererMixin", "PlayerModelMixin"],
-  "injectors": { "defaultRequire": 0 }
+  "client": [
+    "AbstractClientPlayerMixin",
+    "CameraMixin",
+    "MusicManagerMixin",
+    "EntityRendererMixin",
+    "EntityRenderStateMixin",
+    "LevelRendererMixin",
+    "PlayerModelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  },
+  "mixins": [
+    "ServerGamePacketListenerImplAccessor",
+    "ServerGamePacketListenerImplMixin"
+  ]
 }

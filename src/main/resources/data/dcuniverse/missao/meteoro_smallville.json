@@ -1,0 +1,39 @@
+{
+  "npc": "dcuniverse:martha_kent",
+  "chapter": "prologo",
+  "objectives": [
+    {
+      "type": "go",
+      "local": "smallville",
+      "point": "cratera",
+      "radius": 14,
+      "event": "chuva_meteoros"
+    },
+    {
+      "type": "collect",
+      "item": "dcuniverse:fragmento_alienigena",
+      "count": 3
+    },
+    {
+      "type": "deliver",
+      "npc": "dcuniverse:martha_kent"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "dcuniverse:fragmento_alienigena",
+        "count": 4
+      },
+      {
+        "item": "minecraft:bread",
+        "count": 8
+      }
+    ],
+    "xp": 50,
+    "affinity": 10,
+    "affinity_groups": {
+      "cidadaos": 5
+    }
+  }
+}

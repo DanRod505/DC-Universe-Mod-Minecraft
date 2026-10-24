@@ -215,7 +215,7 @@ public class BatarangueEntidade extends Projectile {
     }
 
     private boolean podeAtingir(Entity e) {
-        if (!(e instanceof LivingEntity) || !e.isAlive() || atingidos.contains(e.getId())) return false;
+        if (!Alvos.atingivel(e) || !e.isAlive() || atingidos.contains(e.getId())) return false;
         Entity dono = getOwner();
         if (e == dono) return false;
         return !(dono instanceof ServerPlayer sp) || Alvos.podeAtingir(sp, e);
@@ -317,6 +317,7 @@ public class BatarangueEntidade extends Projectile {
             e.push(fora.x * 0.9 * f, 0.45 * f, fora.z * 0.9 * f);
             e.hurtMarked = true;
         }
+        if (getOwner() instanceof ServerPlayer sp) Alvos.cristais(sp, new AABB(onde, onde).inflate(raio), damageSources().explosion(this, sp));
         discard();
     }
 

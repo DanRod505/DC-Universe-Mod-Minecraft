@@ -1,0 +1,145 @@
+{
+  "text": "cidadao",
+  "group": "cidadaos",
+  "wander": 5,
+  "likes": {
+    "minecraft:bread": 2,
+    "minecraft:pumpkin_pie": 3,
+    "minecraft:emerald": 3,
+    "minecraft:sunflower": 2,
+    "minecraft:cookie": 2
+  },
+  "skins": [
+    "dcuniverse:textures/entity/npc/comerciante_1.png",
+    "dcuniverse:textures/entity/npc/comerciante_2.png"
+  ],
+  "names": [
+    "Pete",
+    "Hank",
+    "Earl",
+    "Walt",
+    "Jesse",
+    "Bo",
+    "Gus",
+    "Roy",
+    "Dale",
+    "Lyle"
+  ],
+  "profession": "comerciante",
+  "trades": [
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 1
+        }
+      ],
+      "out": {
+        "item": "minecraft:torch",
+        "count": 16
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 1
+        }
+      ],
+      "out": {
+        "item": "minecraft:bread",
+        "count": 6
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 2
+        }
+      ],
+      "out": {
+        "item": "minecraft:lantern",
+        "count": 2
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 3
+        }
+      ],
+      "out": {
+        "item": "minecraft:bone",
+        "count": 6
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:coal",
+          "count": 12
+        }
+      ],
+      "out": {
+        "item": "minecraft:emerald",
+        "count": 1
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 4
+        }
+      ],
+      "out": {
+        "item": "minecraft:cod",
+        "count": 6
+      },
+      "min": 25
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:emerald",
+          "count": 6
+        }
+      ],
+      "out": {
+        "item": "minecraft:bucket",
+        "count": 1
+      },
+      "min": 50
+    }
+  ],
+  "talks": [
+    {
+      "id": "tempo"
+    },
+    {
+      "id": "kents"
+    },
+    {
+      "id": "meteoro"
+    },
+    {
+      "id": "talon"
+    },
+    {
+      "id": "herois"
+    },
+    {
+      "id": "profissao"
+    },
+    {
+      "id": "segredo",
+      "min": 50
+    }
+  ],
+  "greetings": [
+    "superman",
+    "batman"
+  ]
+}

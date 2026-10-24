@@ -1,0 +1,26 @@
+{
+  "npc": "dcuniverse:cidadao_fazendeiro",
+  "repeatable": true,
+  "interval": 1,
+  "objectives": [
+    {
+      "type": "collect",
+      "item": "#minecraft:logs",
+      "count": 16
+    },
+    {
+      "type": "deliver",
+      "npc": "dcuniverse:cidadao_fazendeiro"
+    }
+  ],
+  "rewards": {
+    "items": [
+      {
+        "item": "minecraft:emerald",
+        "count": 3
+      }
+    ],
+    "xp": 15,
+    "affinity": 5
+  }
+}
