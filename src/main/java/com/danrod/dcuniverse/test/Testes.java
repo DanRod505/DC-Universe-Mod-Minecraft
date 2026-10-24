@@ -88,6 +88,7 @@ public final class Testes {
         FUNCOES.register("telekinesis", () -> Testes::telecinese);
         FUNCOES.register("floating_island", () -> Testes::ilha);
         FUNCOES.register("batch_v03", () -> Testes::loteV03);
+        FUNCOES.register("guided_start", () -> Testes::inicioGuiado);
     }
 
     private Testes() {}
@@ -956,10 +957,10 @@ public final class Testes {
         inv.add(new ItemStack(Items.IRON_INGOT, 6));
         inv.add(new ItemStack(Itens.PLACA_CIRCUITO.get(), 2));
         inv.add(new ItemStack(Items.REDSTONE, 2));
-        inv.add(new ItemStack(Items.COMPARATOR));
+        inv.add(new ItemStack(Items.REPEATER));
         com.danrod.dcuniverse.content.Batcomputador.fabricar(p, pos, "componente_tecnologico");
         h.assertTrue(inv.countItem(Itens.COMPONENTE_TECNOLOGICO.get()) == 1, "fabricou o componente");
-        h.assertTrue(inv.countItem(Items.IRON_INGOT) == 2 && inv.countItem(Items.COMPARATOR) == 0, "gastou os ingredientes");
+        h.assertTrue(inv.countItem(Items.IRON_INGOT) == 2 && inv.countItem(Items.REPEATER) == 0, "gastou os ingredientes");
         com.danrod.dcuniverse.content.Batcomputador.fabricar(p, pos, "componente_tecnologico");
         h.assertTrue(inv.countItem(Itens.COMPONENTE_TECNOLOGICO.get()) == 1, "sem ingredientes não fabrica");
         // Análise: carne podre registra o zumbi, e a família inteira (o zumbi do deserto também) fica analisada.
@@ -1370,24 +1371,35 @@ public final class Testes {
     /** Nave kryptoniana: a suprema chama a nave com orbes e escudo cheios; ela vai embora quando a Supergirl destransforma. */
     static void nave(GameTestHelper h) {
         ServerPlayer p = jogador(h);
-        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        // Bem acima da área: a nave precisa de céu aberto atrás do jogador para descer (sem céu ela já embarca o
+        // dono, e o jogador de teste, sem conexão, não pode desembarcar). Os testes vizinhos não chegam lá.
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 40, 1.5));
         p.setPos(aqui.x, aqui.y, aqui.z);
         Transformacao.transformar(p, SUPERGIRL, true);
-        EstadoJogador e = EstadoJogador.de(p);
-        Personagem kara = e.personagem();
-        e.setEnergia(kara.energia().max());
-        Personagem.Habilidade sup = kara.suprema();
-        h.assertValueEqual(sup.id(), "nave_kryptoniana", "a suprema é a nave");
-        h.assertTrue(Habilidades.executar(p, kara, sup), "chama a nave");
-        h.assertValueEqual(e.energia(), kara.energia().max() * 0.3f, "custa 70% da energia");
-        var nave = (com.danrod.dcuniverse.content.NaveKryptoniana) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
-        h.assertTrue(nave != null && nave.isAlive(), "nave no mundo");
-        h.assertValueEqual(nave.orbes(), 3, "três orbes prontos");
-        h.assertValueEqual((double) nave.escudo(), 1.0, "escudo carregado");
-        Transformacao.destransformar(p);
-        h.assertValueEqual(nave.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "a nave vai embora");
-        nave.discard();
-        com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        try {
+            EstadoJogador e = EstadoJogador.de(p);
+            Personagem kara = e.personagem();
+            e.setEnergia(kara.energia().max());
+            Personagem.Habilidade sup = kara.suprema();
+            h.assertValueEqual(sup.id(), "nave_kryptoniana", "a suprema é a nave");
+            h.assertTrue(Habilidades.executar(p, kara, sup), "chama a nave");
+            h.assertValueEqual(e.energia(), kara.energia().max() * 0.3f, "custa 70% da energia");
+            var nave = (com.danrod.dcuniverse.content.NaveKryptoniana) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+            h.assertTrue(nave != null && nave.isAlive(), "nave no mundo");
+            h.assertValueEqual(nave.orbes(), 3, "três orbes prontos");
+            h.assertValueEqual((double) nave.escudo(), 1.0, "escudo carregado");
+            Transformacao.destransformar(p);
+            h.assertValueEqual(nave.estado(), com.danrod.dcuniverse.content.BatwingEntidade.INDO, "a nave vai embora");
+        } finally {
+            // O jogador de teste não tem conexão: nenhuma nave dele pode ficar no mundo para ir embora sozinha.
+            for (var n : h.getLevel().getEntities(com.danrod.dcuniverse.content.Entidades.NAVE_KRYPTONIANA.get(), x -> true)) {
+                if (n.distanceToSqr(p) < 64 * 64) {
+                    n.ejectPassengers();
+                    n.discard();
+                }
+            }
+            com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        }
         h.succeed();
     }
 
@@ -1522,6 +1534,43 @@ public final class Testes {
         p.interactOn(lobo, net.minecraft.world.InteractionHand.MAIN_HAND, lobo.position());
         h.assertValueEqual(outra.getCount(), 1, "não veste duas vezes");
         lobo.discard();
+        h.succeed();
+    }
+
+    /**
+     * Início guiado: os quatro personagens prontos aparecem para escolher; escolher dá o item uma vez só e lembra a
+     * escolha; local que não existe é recusado. A nave de Kal-El dá o cristal uma vez por jogador. O mapa monta a
+     * paleta com as cores achadas.
+     */
+    static void inicioGuiado(GameTestHelper h) {
+        var ids = com.danrod.dcuniverse.inicio.Inicio.personagens().stream().map(com.danrod.dcuniverse.core.Rede.Inicial::personagem).toList();
+        for (Identifier id : List.of(SUPERMAN, BATMAN, SUPERGIRL, SUPERBOY)) h.assertTrue(ids.contains(id.toString()), "dá para começar com " + id);
+        ServerPlayer p = jogador(h);
+        h.assertFalse(com.danrod.dcuniverse.inicio.Inicio.escolheu(p), "ainda não escolheu");
+        com.danrod.dcuniverse.inicio.Inicio.escolher(p, "gotham", BATMAN.toString());
+        h.assertFalse(com.danrod.dcuniverse.inicio.Inicio.escolheu(p), "Gotham ainda não existe: recusa");
+        com.danrod.dcuniverse.inicio.Inicio.escolher(p, com.danrod.dcuniverse.inicio.Inicio.NASCIMENTO, BATMAN.toString());
+        h.assertTrue(com.danrod.dcuniverse.inicio.Inicio.escolheu(p), "escolheu");
+        h.assertTrue(p.getInventory().contains(st -> st.is(Itens.CINTO_BATMAN.get())), "ganhou o Cinto de Utilidades");
+        h.assertTrue(Guia.descoberto(p, BATMAN), "Batman descoberto no Guia");
+        com.danrod.dcuniverse.inicio.Inicio.escolher(p, com.danrod.dcuniverse.inicio.Inicio.NASCIMENTO, SUPERMAN.toString());
+        h.assertFalse(p.getInventory().contains(st -> st.is(Itens.CRISTAL_SUPERMAN.get())), "só escolhe uma vez");
+
+        BlockPos nave = new BlockPos(1, 2, 1);
+        h.setBlock(nave, com.danrod.dcuniverse.content.Blocos.NAVE_KALEL.get());
+        var hit = new net.minecraft.world.phys.BlockHitResult(h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2.5, 1.5)), net.minecraft.core.Direction.UP,
+            h.absolutePos(nave), false);
+        for (int i = 0; i < 2; i++) h.getBlockState(nave).useWithoutItem(h.getLevel(), p, hit);
+        int cristais = 0;
+        for (int i = 0; i < p.getInventory().getContainerSize(); i++)
+            if (p.getInventory().getItem(i).is(Itens.CRISTAL_SUPERMAN.get())) cristais += p.getInventory().getItem(i).getCount();
+        h.assertValueEqual(cristais, 1, "a nave dá um cristal por jogador");
+
+        var mapa = com.danrod.dcuniverse.world.mundo.MapaMundo.calcular(new int[]{-1000, -500, 1000, 500}, (x, z) -> x < 0 ? 0x2E7D32 : 0x0B1B4A);
+        h.assertTrue(mapa.w() <= com.danrod.dcuniverse.world.mundo.MapaMundo.LADO && mapa.w() > com.danrod.dcuniverse.world.mundo.MapaMundo.LADO * 3 / 4 && mapa.h() == mapa.w() / 2, "lado maior com até LADO pixels e a proporção certa");
+        h.assertValueEqual(mapa.paleta().length, 2, "duas cores na paleta");
+        h.assertValueEqual(mapa.paleta()[mapa.pixels()[0]], 0x2E7D32, "oeste verde");
+        h.assertValueEqual(mapa.paleta()[mapa.pixels()[mapa.w() - 1]], 0x0B1B4A, "leste azul");
         h.succeed();
     }
 }

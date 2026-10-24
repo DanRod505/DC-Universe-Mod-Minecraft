@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 12;
+    private static final int VERSAO = 13;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -429,9 +429,88 @@ public final class Rede {
     /** Os blocos de uma Ilha Telecinética (content/IlhaTelecinetica): posição local empacotada e estado de cada um. */
     public record IlhaBlocos(int entidade, int[] pos, int[] estados) {}
 
+    /** Um local no mapa do mundo: os prontos ficam onde nasceram; os reservados, no ponto marcado no Mundo DC. */
+    public record Marca(String local, int x, int z, boolean pronto) {}
+
+    /** Personagem que dá para escolher no início guiado e o item de transformação dele. */
+    public record Inicial(String personagem, String item) {}
+
+    /**
+     * Mapa do mundo para o cliente: {@code escolher} abre a tela do início guiado (com os personagens, se o servidor
+     * dá o item inicial); senão é só o mapa da tecla M. (jx, jz) é onde o jogador está.
+     */
+    public record InicioAbrir(boolean escolher, com.danrod.dcuniverse.world.mundo.MapaMundo.Mapa mapa, List<Marca> marcas, int jx, int jz,
+                              List<Inicial> personagens) {
+        public static void encode(InicioAbrir m, FriendlyByteBuf b) {
+            b.writeBoolean(m.escolher);
+            var a = m.mapa;
+            b.writeVarInt(a.x0());
+            b.writeVarInt(a.z0());
+            b.writeVarInt(a.passo());
+            b.writeVarInt(a.w());
+            b.writeVarInt(a.h());
+            b.writeVarIntArray(a.paleta());
+            b.writeByteArray(a.pixels());
+            b.writeVarInt(m.marcas.size());
+            for (Marca k : m.marcas) {
+                b.writeUtf(k.local());
+                b.writeVarInt(k.x());
+                b.writeVarInt(k.z());
+                b.writeBoolean(k.pronto());
+            }
+            b.writeVarInt(m.jx);
+            b.writeVarInt(m.jz);
+            b.writeVarInt(m.personagens.size());
+            for (Inicial i : m.personagens) {
+                b.writeUtf(i.personagem());
+                b.writeUtf(i.item());
+            }
+        }
+
+        public static InicioAbrir decode(FriendlyByteBuf b) {
+            boolean escolher = b.readBoolean();
+            int x0 = b.readVarInt(), z0 = b.readVarInt(), passo = b.readVarInt(), w = b.readVarInt(), h = b.readVarInt();
+            int[] paleta = b.readVarIntArray(256);
+            byte[] px = b.readByteArray(com.danrod.dcuniverse.world.mundo.MapaMundo.LADO * com.danrod.dcuniverse.world.mundo.MapaMundo.LADO);
+            var mapa = new com.danrod.dcuniverse.world.mundo.MapaMundo.Mapa(x0, z0, passo, w, h, paleta, px);
+            int n = Math.min(b.readVarInt(), 256);
+            List<Marca> marcas = new ArrayList<>();
+            for (int i = 0; i < n; i++) marcas.add(new Marca(b.readUtf(), b.readVarInt(), b.readVarInt(), b.readBoolean()));
+            int jx = b.readVarInt(), jz = b.readVarInt();
+            int np = Math.min(b.readVarInt(), 256);
+            List<Inicial> ps = new ArrayList<>();
+            for (int i = 0; i < np; i++) ps.add(new Inicial(b.readUtf(), b.readUtf()));
+            return new InicioAbrir(escolher, mapa, List.copyOf(marcas), jx, jz, List.copyOf(ps));
+        }
+    }
+
+    /** Escolha do início guiado: local ("" = ponto de nascimento) e personagem ("" sem item inicial). */
+    public record InicioEscolha(String local, String personagem) {}
+
+    /** Pedido do mapa do mundo (tecla M). */
+    public record MapaPedir() {}
+
     private Rede() {}
 
     public static void registrar() {
+        CANAL.messageBuilder(InicioAbrir.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(InicioAbrir::encode).decoder(InicioAbrir::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.inicio.accept(m))
+            .add();
+        CANAL.messageBuilder(InicioEscolha.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> {
+                b.writeUtf(m.local());
+                b.writeUtf(m.personagem());
+            }).decoder(b -> new InicioEscolha(b.readUtf(64), b.readUtf(128)))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.inicio.Inicio.escolher(p, m.local(), m.personagem())))
+            .add();
+        CANAL.messageBuilder(MapaPedir.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> {}).decoder(b -> new MapaPedir())
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.inicio.Inicio.abrir(p, false)))
+            .add();
         CANAL.messageBuilder(Sync.class)
             .direction(PacketFlow.CLIENTBOUND)
             .encoder(Sync::encode).decoder(Sync::decode)
@@ -749,6 +828,10 @@ public final class Rede {
     public static void guia(ServerPlayer player, String novaTarefa) {
         if (player.connection == null) return;
         CANAL.send(Guia.montar(player, novaTarefa), PacketDistributor.PLAYER.with(player));
+    }
+
+    public static void inicio(ServerPlayer player, InicioAbrir m) {
+        if (player.connection != null) CANAL.send(m, PacketDistributor.PLAYER.with(player));
     }
 
     public static void npcCatalogo(ServerPlayer player) {

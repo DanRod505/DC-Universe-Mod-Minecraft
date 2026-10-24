@@ -82,6 +82,7 @@ public final class Eventos {
             if (e.getEntity() instanceof ServerPlayer p) {
                 Guia.darGuia(p);
                 Rede.guia(p, "");
+                com.danrod.dcuniverse.inicio.Inicio.entrou(p);
                 com.danrod.dcuniverse.missao.Diario.sincronizar(p);
             }
             sync(e.getEntity());
@@ -122,7 +123,9 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.active.Ilha.tick();
             for (var level : e.server().getAllLevels()) com.danrod.dcuniverse.content.Teias.tick(level);
         });
+        net.minecraftforge.event.server.ServerStartedEvent.BUS.addListener(e -> com.danrod.dcuniverse.inicio.Inicio.ajustarNascimento(e.getServer()));
         ServerStoppingEvent.BUS.addListener(e -> {
+            com.danrod.dcuniverse.inicio.Inicio.limpar();
             Onda.limpar();
             com.danrod.dcuniverse.ability.Congelamento.limpar();
             Fortaleza.limpar();

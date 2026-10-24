@@ -24,6 +24,10 @@
   "rewards": {
     "items": [
       {
+        "item": "dcuniverse:cristal_supergirl",
+        "count": 1
+      },
+      {
         "item": "minecraft:golden_apple",
         "count": 1
       },

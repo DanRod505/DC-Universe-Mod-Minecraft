@@ -86,7 +86,8 @@ def main():
     no_pack = {ler(a)["n"]: a.stem for a in (raiz / f"src/main/resources/data/{NS}/dc_characters").glob("*.json")}
 
     texto_guia = {i["id"]: i for i in itens}
-    texto_guia |= {p["transformacao"]["id"]: {"guia": p["transformacao"].get("guia"), "cat": "transformacao"} for p in personagens}
+    texto_guia |= {p["transformacao"]["id"]: {"guia": p["transformacao"].get("guia"), "guia_obter": p["transformacao"].get("guia_obter"),
+                                         "cat": "transformacao"} for p in personagens}
     en_guia = ler(dados / "traducoes_en.json").get("guia", {})
     erros = [f"traducoes_en.json: falta o nome em inglês de {i}" for i in sorted(ids) if i not in en]
     erros += [f"falta o texto do Guia (campo guia) de {i}" for i in sorted(ids) if not texto_guia[i].get("guia")]

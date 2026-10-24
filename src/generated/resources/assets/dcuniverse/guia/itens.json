@@ -138,22 +138,22 @@
   {
    "id": "cristal_superman",
    "cat": "transformacao",
-   "obter": false
+   "obter": true
   },
   {
    "id": "cinto_batman",
    "cat": "transformacao",
-   "obter": false
+   "obter": true
   },
   {
    "id": "cristal_supergirl",
    "cat": "transformacao",
-   "obter": false
+   "obter": true
   },
   {
    "id": "jaqueta_conner",
    "cat": "transformacao",
-   "obter": false
+   "obter": true
   }
  ],
  "receitas": [
@@ -271,7 +271,7 @@
   {
    "type": "minecraft:crafting_shaped",
    "key": {
-    "C": "minecraft:comparator",
+    "C": "minecraft:repeater",
     "I": "minecraft:iron_ingot",
     "P": "dcuniverse:placa_circuito",
     "R": "minecraft:redstone"
@@ -477,11 +477,11 @@
    "key": {
     "K": "minecraft:netherite_scrap",
     "N": "dcuniverse:nucleo_meta_3",
-    "S": "minecraft:echo_shard"
+    "S": "minecraft:crying_obsidian"
    },
    "pattern": [
     "SKS",
-    "KNK",
+    "SNS",
     "SKS"
    ],
    "result": {
@@ -503,13 +503,13 @@
    "key": {
     "C": "minecraft:copper_ingot",
     "G": "minecraft:gold_nugget",
-    "Q": "minecraft:quartz",
+    "L": "minecraft:lapis_lazuli",
     "R": "minecraft:redstone"
    },
    "pattern": [
-    "QRQ",
+    "LRL",
     "CGC",
-    "QRQ"
+    "LRL"
    ],
    "result": {
     "id": "dcuniverse:placa_circuito",

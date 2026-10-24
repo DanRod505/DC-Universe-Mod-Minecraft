@@ -821,7 +821,7 @@ public final class GuiaScreen extends Screen {
         g.blit(RenderPipelines.GUI_TEXTURED, TEX, x + PAG_W / 2 - 32, py1 - 6, 304, 124, 64, 10, TEX_W, TEX_H);
         float giro = arrastando ? giroBase : giroBase + (float) (System.currentTimeMillis() % 14400L) / 40f;
         PlayerSkin skin = visto ? Skins.skinDoPersonagem(p.id().toString()) : null;
-        previa(g, skin != null ? skin : SKIN_SILHUETA, px0, py0, px1, py1, giro);
+        previa(minecraft, g, skin != null ? skin : SKIN_SILHUETA, px0, py0, px1, py1, giro, inclinacao, PREVIA_H / 2.2f);
         Component nome = visto ? Component.translatable(p.chaveNome()) : Component.literal("???");
         g.centeredText(font, nome.copy().withStyle(ChatFormatting.BOLD), x + PAG_W / 2, py1 + 7, TITULO);
         Component sub = visto
@@ -843,7 +843,8 @@ public final class GuiaScreen extends Screen {
      * Prévia 3D: o mesmo renderizador de jogador do jogo (com a capa), vestido com a skin do personagem e sem
      * armadura nem itens. O id falso impede que a troca de skin dos jogadores transformados (client/Skins) mexa nela.
      */
-    private void previa(GuiGraphicsExtractor g, PlayerSkin skin, int ax0, int ay0, int ax1, int ay1, float giro) {
+    public static void previa(Minecraft minecraft, GuiGraphicsExtractor g, PlayerSkin skin, int ax0, int ay0, int ax1, int ay1, float giro,
+                              float inclinacao, float tamanho) {
         if (minecraft.player == null) return;
         var renderer = minecraft.getEntityRenderDispatcher().getRenderer(minecraft.player);
         if (!(renderer.createRenderState(minecraft.player, 1f) instanceof AvatarRenderState s)) return;
@@ -874,7 +875,7 @@ public final class GuiaScreen extends Screen {
         s.scale = 1f;
         Quaternionf camera = new Quaternionf().rotateX(inclinacao * Mth.DEG_TO_RAD);
         Quaternionf rot = new Quaternionf().rotateZ(Mth.PI).mul(camera);
-        g.entity(s, PREVIA_H / 2.2f, new Vector3f(0, s.boundingBoxHeight / 2f + 0.0625f, 0), rot, camera, ax0, ay0, ax1, ay1);
+        g.entity(s, tamanho, new Vector3f(0, s.boundingBoxHeight / 2f + 0.0625f, 0), rot, camera, ax0, ay0, ax1, ay1);
     }
 
     /** Liga o bloco a um título do sumário. */

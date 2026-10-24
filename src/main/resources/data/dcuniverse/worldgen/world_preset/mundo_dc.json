@@ -229,7 +229,7 @@
               ]
             },
             {
-              "local": "torre_do_destino",
+              "local": "torre_destino",
               "x": -1600,
               "z": -1200,
               "raio": 360,
@@ -313,7 +313,7 @@
               ]
             },
             {
-              "local": "salao_da_perdicao",
+              "local": "salao_perdicao",
               "x": -1000,
               "z": 1500,
               "raio": 380,
@@ -366,7 +366,7 @@
               ]
             },
             {
-              "local": "cidade_dos_gorilas",
+              "local": "gorila_city",
               "x": -1000,
               "z": 3400,
               "busca": 256,
@@ -397,7 +397,7 @@
               ]
             },
             {
-              "local": "parlamento_das_arvores",
+              "local": "parlamento_arvores",
               "x": 1400,
               "z": 2200,
               "raio": 420,
@@ -565,7 +565,7 @@
               ]
             },
             {
-              "local": "a_fossa",
+              "local": "fossa",
               "x": 5600,
               "z": 3600,
               "busca": 384,
@@ -651,7 +651,7 @@
               ]
             },
             {
-              "local": "fortaleza_da_solidao",
+              "local": "fortaleza",
               "x": 0,
               "z": -4200,
               "busca": 384,

@@ -178,6 +178,15 @@ public final class Comandos {
                                 return 0;
                             }
                         })))))
+            // Refaz o início guiado de um jogador (escolhe de novo onde começar e o personagem): /dcu inicio Dev
+            .then(Commands.literal("inicio")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .executes(c -> {
+                        ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                        com.danrod.dcuniverse.inicio.Inicio.resetar(alvo);
+                        c.getSource().sendSuccess(() -> Component.translatable("dcuniverse.inicio.resetado", alvo.getDisplayName()), true);
+                        return 1;
+                    })))
             // Confere o nivelamento de um local gerado: /dcu conferir_local smallville
             .then(Commands.literal("conferir_local")
                 .then(Commands.argument("local", com.mojang.brigadier.arguments.StringArgumentType.word())

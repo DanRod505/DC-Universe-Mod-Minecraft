@@ -14,6 +14,7 @@ public final class Teclas {
     public static final KeyMapping DESTRANSFORMAR = new KeyMapping("key.dcuniverse.destransformar", InputConstants.KEY_H, CATEGORIA);
     public static final KeyMapping GUIA = new KeyMapping("key.dcuniverse.guia", InputConstants.KEY_G, CATEGORIA);
     public static final KeyMapping DIARIO = new KeyMapping("key.dcuniverse.diario", InputConstants.KEY_J, CATEGORIA);
+    public static final KeyMapping MAPA = new KeyMapping("key.dcuniverse.mapa", InputConstants.KEY_M, CATEGORIA);
 
     private Teclas() {}
 }

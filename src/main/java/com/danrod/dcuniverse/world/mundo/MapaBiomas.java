@@ -14,7 +14,7 @@ import java.util.Map;
 public final class MapaBiomas {
     private MapaBiomas() {}
 
-    private static final Map<String, Integer> CORES = Map.ofEntries(
+    static final Map<String, Integer> CORES = Map.ofEntries(
         Map.entry("plains", 0x8DB360), Map.entry("sunflower_plains", 0xB5DB88), Map.entry("meadow", 0x9ED67A),
         Map.entry("forest", 0x056621), Map.entry("flower_forest", 0x2D8E49), Map.entry("birch_forest", 0x307444),
         Map.entry("old_growth_birch_forest", 0x589C6C), Map.entry("dark_forest", 0x40511A), Map.entry("pale_garden", 0x8A8F86),
@@ -42,14 +42,10 @@ public final class MapaBiomas {
         var sampler = level.getChunkSource().randomState().sampler();
         int n = 2 * raio / passo;
         BufferedImage img = new BufferedImage(n, n, BufferedImage.TYPE_INT_RGB);
-        int qy = QuartPos.fromBlock(level.getSeaLevel());
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 int x = cx - raio + i * passo, z = cz - raio + j * passo;
-                var b = fonte.getNoiseBiome(QuartPos.fromBlock(x), qy, QuartPos.fromBlock(z), sampler);
-                // Debaixo de morro o nível do mar já é caverna: sobe até achar o bioma da superfície.
-                for (int y = level.getSeaLevel() + 48; y < level.getMaxY() && CAVERNAS.contains(b.unwrapKey().map(k -> k.identifier().getPath()).orElse("")); y += 48)
-                    b = fonte.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), sampler);
+                var b = superficie(fonte, sampler, x, z, level.getSeaLevel(), level.getMaxY());
                 String id = b.unwrapKey().map(k -> k.identifier().getPath()).orElse("?");
                 if (!CORES.containsKey(id)) SEM_COR.add(id);
                 int cor = CORES.getOrDefault(id, id.hashCode() & 0xFFFFFF);
@@ -97,6 +93,21 @@ public final class MapaBiomas {
                 }
             }
         return x + "," + z + ": terra " + (100 * terra / Math.max(1, n)) + "%, altura " + (terra == 0 ? 0 : soma / terra);
+    }
+
+    /** Bioma da superfície em (x, z): no nível do mar, ou mais alto quando ali já é caverna (debaixo de um morro). */
+    public static net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> superficie(net.minecraft.world.level.biome.BiomeSource fonte,
+            net.minecraft.world.level.biome.Climate.Sampler sampler, int x, int z, int mar, int maxY) {
+        var b = fonte.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(mar), QuartPos.fromBlock(z), sampler);
+        for (int y = mar + 48; y < maxY && CAVERNAS.contains(b.unwrapKey().map(k -> k.identifier().getPath()).orElse("")); y += 48)
+            b = fonte.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), sampler);
+        return b;
+    }
+
+    /** Cor do bioma no mapa (biomas de outros mods ganham uma cor fixa tirada do nome). */
+    public static int cor(net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> b) {
+        String id = b.unwrapKey().map(k -> k.identifier().getPath()).orElse("?");
+        return CORES.getOrDefault(id, id.hashCode() & 0xFFFFFF);
     }
 
     private static void pinta(BufferedImage img, int x, int y, int cor) {

@@ -24,6 +24,10 @@
   "rewards": {
     "items": [
       {
+        "item": "dcuniverse:jaqueta_conner",
+        "count": 1
+      },
+      {
         "item": "minecraft:golden_carrot",
         "count": 4
       }

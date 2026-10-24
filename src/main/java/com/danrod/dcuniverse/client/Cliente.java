@@ -35,6 +35,7 @@ public final class Cliente {
             e.register(Teclas.DESTRANSFORMAR);
             e.register(Teclas.GUIA);
             e.register(Teclas.DIARIO);
+            e.register(Teclas.MAPA);
         });
         AddGuiOverlayLayersEvent.BUS.addListener(e -> {
             e.getLayeredDraw().add(ForgeLayeredDraw.PRE_SLEEP_STACK,
@@ -101,6 +102,7 @@ public final class Cliente {
         GuiaItem.abrir = GuiaScreen::abrir;
         com.danrod.dcuniverse.core.EstadoCliente.batcomputador = BatcomputadorScreen::receber;
         EstadoCliente.npcAbrir = com.danrod.dcuniverse.client.npc.DialogoScreen::receber;
+        EstadoCliente.inicio = InicioScreen::receber;
         EstadoCliente.npcFala = com.danrod.dcuniverse.client.npc.DialogoScreen::falar;
         Skins.registrar();
         Pecas.registrar();
@@ -128,6 +130,9 @@ public final class Cliente {
         }
         while (Teclas.DIARIO.consumeClick()) {
             if (livre) GuiaScreen.abrirDiario();
+        }
+        while (Teclas.MAPA.consumeClick()) {
+            if (livre) Rede.CANAL.send(new Rede.MapaPedir(), net.minecraftforge.network.PacketDistributor.SERVER.noArg());
         }
         LigaHud.tick(mc);
         for (Rede.MissaoAviso a; (a = EstadoCliente.AVISOS.poll()) != null; ) {
