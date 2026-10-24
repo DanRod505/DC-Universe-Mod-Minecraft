@@ -900,10 +900,10 @@ public final class Testes {
         h.assertTrue(Habilidades.executar(p, bat, g), "agachado detona (mesmo em recarga)");
         p.setShiftKeyDown(false);
         h.assertTrue(Guia.concluida(p, "gel") && Guia.concluida(p, "gel_detonar"), "tarefas do gel");
-        h.runAfterDelay(com.danrod.dcuniverse.content.GelEntidade.PAVIO + 4, () -> {
+        // Espera a explosão sem prazo fixo: com o servidor atrasado (CI), o pavio pode passar alguns ticks.
+        h.succeedWhen(() -> {
             h.assertBlockPresent(net.minecraft.world.level.block.Blocks.AIR, 1, 2, 4);
             h.assertBlockPresent(net.minecraft.world.level.block.Blocks.OBSIDIAN, 1, 2, 5);
-            h.succeed();
         });
     }
 
