@@ -85,8 +85,9 @@ jobs:
         if: steps.versao.outputs.publicar == 'true' && github.ref_type != 'tag'
         run: |
           TAG="${{ steps.versao.outputs.tag }}"
+          # Sem a tag, o gh imprime o JSON do erro: só vale um SHA de verdade.
           ATUAL=$(gh api "repos/$GH_REPO/commits/$TAG" --jq .sha 2>/dev/null || true)
-          if [[ -n "$ATUAL" && "$ATUAL" != "$GITHUB_SHA" ]]; then
+          if [[ "$ATUAL" =~ ^[0-9a-f]{40}$ && "$ATUAL" != "$GITHUB_SHA" ]]; then
             echo "Tag $TAG estava em $ATUAL; movendo para $GITHUB_SHA."
             gh api -X PATCH "repos/$GH_REPO/git/refs/tags/$TAG" -f sha="$GITHUB_SHA" -F force=true
           fi
