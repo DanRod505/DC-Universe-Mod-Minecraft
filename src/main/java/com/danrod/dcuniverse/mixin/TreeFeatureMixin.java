@@ -18,6 +18,7 @@ public abstract class TreeFeatureMixin {
         // Só na geração do mundo: muda plantada pelo jogador cresce normalmente.
         if (!(ctx.level() instanceof net.minecraft.server.level.WorldGenRegion)) return;
         var o = ctx.origin();
-        if (BiomaLocal.noPlato(ctx.level().getChunk(o), o.getX(), o.getZ())) cir.setReturnValue(false);
+        // Com folga da copa: a árvore da borda podia deixar folhas por cima do platô quando o tronco era cortado depois.
+        if (BiomaLocal.perto(ctx.level().getChunk(o), o.getX(), o.getZ(), 7, false)) cir.setReturnValue(false);
     }
 }

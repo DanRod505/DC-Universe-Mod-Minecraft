@@ -146,7 +146,7 @@ public final class LocalEstrutura extends Structure {
         Local.Terreno t = new Local.Terreno(ctx);
         Local l = Estruturas.LOCAIS.get(local);
         ChunkPos melhor = null;
-        int melhorNota = Integer.MAX_VALUE;
+        float melhorNota = Float.MAX_VALUE;
         for (int i = 0; i < candidatos.size(); i++) {
             ChunkPos c = candidatos.get(i);
             int x = c.getMiddleBlockX(), z = c.getMiddleBlockZ();
@@ -169,8 +169,10 @@ public final class LocalEstrutura extends Structure {
             // Desnível sem os extremos (um morro isolado na borda não estraga a cidade).
             int desnivel = alturas.get(alturas.size() * 9 / 10) - alturas.get(alturas.size() / 10);
             // Água pesa mais que desnível: rio no meio da cidade estraga mais que um morro. Os anéis de fora
-            // ficam mais longe do ponto de nascimento, então perdem um pouco.
-            int nota = Math.max(0, desnivel - DESNIVEL_PLANO) * 3 + molhados * 400 / amostras + (i < 8 ? 0 : 40);
+            // ficam mais longe do ponto de nascimento, então perdem um pouco. Vizinhança fora do tema (neve e gelo
+            // em volta do Kansas) pesa quase como água.
+            float nota = Math.max(0, desnivel - DESNIVEL_PLANO) * 3 + molhados * 400 / amostras + (i < 8 ? 0 : i < 16 ? 40 : 90);
+            nota += vizinhosEstranhos(ctx, t, r) * 600;
             if (temVila(ctx, estado, r)) nota += 1000;
             if (nota < melhorNota) {
                 melhorNota = nota;
@@ -179,6 +181,26 @@ public final class LocalEstrutura extends Structure {
         }
         if (melhor != null) com.danrod.dcuniverse.DCUniverse.LOGGER.info("Local {} no chunk {} (nota do terreno {})", local, melhor, melhorNota);
         return Optional.ofNullable(melhor);
+    }
+
+    /**
+     * Fração (0 a 1) da vizinhança do local, numa faixa de ~100 blocos em volta da rampa, com bioma fora da tag
+     * {@code dcuniverse:<local>_vizinhanca} (ex.: neve e gelo colados numa vila do Kansas). Sem a tag, 0.
+     */
+    private float vizinhosEstranhos(GenerationContext ctx, Local.Terreno t, int[] r) {
+        var tag = net.minecraft.tags.TagKey.create(Registries.BIOME,
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(com.danrod.dcuniverse.DCUniverse.MODID, local + "_vizinhanca"));
+        if (ctx.registryAccess().lookupOrThrow(Registries.BIOME).get(tag).isEmpty()) return 0;
+        int dentro = PecaPlato.RAMPA, fora = 112, estranhos = 0, amostras = 0;
+        for (int x = r[0] - fora; x <= r[2] + fora; x += 32) {
+            for (int z = r[1] - fora; z <= r[3] + fora; z += 32) {
+                if (x > r[0] - dentro && x < r[2] + dentro && z > r[1] - dentro && z < r[3] + dentro) continue;
+                amostras++;
+                var b = ctx.biomeSource().getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(t.superficie(x, z)), QuartPos.fromBlock(z), ctx.randomState().sampler());
+                if (!b.is(tag)) estranhos++;
+            }
+        }
+        return amostras == 0 ? 0 : estranhos / (float) amostras;
     }
 
     /** Estado de estruturas do mundo que está gerando (anéis e posições das outras estruturas). */

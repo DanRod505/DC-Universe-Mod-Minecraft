@@ -131,7 +131,9 @@ public final class PecaPlato extends StructurePiece implements PieceBeardifierMo
     }
 
     private void coluna(WorldGenLevel level, BlockPos.MutableBlockPos p, int x, int z, double n, int mar, Heightmap.Types alturas) {
-        int topo = level.getHeight(alturas, x, z) - 1;
+        // O mapa de altura "de geração" não vê o que a vegetação dos chunks vizinhos já pôs aqui (capim, flores,
+        // galhos): o de superfície vê, então vale o mais alto dos dois.
+        int topo = Math.max(level.getHeight(alturas, x, z), level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z)) - 1;
         int min = level.getMinY();
         // Chão natural: o primeiro bloco firme de cima para baixo (sem água, folhas, troncos e plantas).
         int g = topo;

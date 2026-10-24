@@ -10,6 +10,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -80,13 +81,24 @@ public final class Locais {
         var caixa = plato.getBoundingBox();
         int y = plato.y();
         int agua = 0, buracos = 0, fora = 0, colunas = 0, degrau = 0;
-        String ondeAgua = "", ondeFora = "", ondeBuraco = "";
+        String ondeAgua = "", ondeFora = "", ondeBuraco = "", ondeSolto = "";
+        int soltos = 0, soltosRampa = 0;
         java.util.Map<String, Integer> biomas = new java.util.TreeMap<>();
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (int x = caixa.minX(); x <= caixa.maxX(); x++) {
             for (int z = caixa.minZ(); z <= caixa.maxZ(); z++) {
                 level.getChunk(x >> 4, z >> 4);
-                if (!plato.noPlato(x, z)) continue;
+                if (!plato.noPlato(x, z)) {
+                    // Na rampa: nada solto no ar acima do chão (folhas, troncos e cipós das árvores não contam).
+                    int chaoRampa = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+                    for (int yy = chaoRampa + 2; yy <= chaoRampa + 24; yy++) {
+                        var b = level.getBlockState(p.set(x, yy, z));
+                        if (b.isAir() || b.is(net.minecraft.tags.BlockTags.LEAVES) || b.is(net.minecraft.tags.BlockTags.LOGS) || b.is(Blocks.VINE)) continue;
+                        if (level.getBlockState(p.set(x, yy - 1, z)).isAir() && soltosRampa++ < 3) ondeSolto += " rampa:" + x + "," + yy + "," + z + "="
+                            + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(b.getBlock()).getPath() + "(chão " + chaoRampa + ")";
+                    }
+                    continue;
+                }
                 colunas++;
                 boolean obra = false;
                 for (var b : obras) if (b.isInside(x, b.minY(), z)) { obra = true; break; }
@@ -98,6 +110,12 @@ public final class Locais {
                 var chao = level.getBlockState(p.set(x, y, z));
                 if ((chao.isAir() || !chao.getFluidState().isEmpty()) && buracos++ < 3) ondeBuraco += " " + x + "," + z;
                 int topo = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+                // Solto no ar: um bloco sem nada embaixo acima do chão (capim e flor só valem em cima do chão).
+                for (int yy = y + 2; yy <= y + 24; yy++) {
+                    var b = level.getBlockState(p.set(x, yy, z));
+                    if (!b.isAir() && level.getBlockState(p.set(x, yy - 1, z)).isAir() && soltos++ < 3) ondeSolto += " " + x + "," + yy + "," + z + "="
+                        + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(b.getBlock()).getPath();
+                }
                 if (topo != y && fora++ < 3) ondeFora += " " + x + "," + topo + "," + z + "="
                     + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(p.set(x, topo, z)).getBlock()).getPath();
                 if (Math.floorMod(x, 8) == 0 && Math.floorMod(z, 8) == 0)
@@ -115,8 +133,19 @@ public final class Locais {
                 antes = topo;
             }
         }
+        // Vizinhança: biomas fora da tag <local>_vizinhanca numa faixa de ~100 blocos em volta.
+        var tag = net.minecraft.tags.TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(DCUniverse.MODID, local + "_vizinhanca"));
+        java.util.Map<String, Integer> estranhos = new java.util.TreeMap<>();
+        for (int x = caixa.minX() - 96; x <= caixa.maxX() + 96; x += 32)
+            for (int z = caixa.minZ() - 96; z <= caixa.maxZ() + 96; z += 32) {
+                if (caixa.isInside(x, caixa.minY(), z)) continue;
+                level.getChunk(x >> 4, z >> 4);
+                int sy = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+                var b = level.getBiome(new BlockPos(x, sy, z));
+                if (!b.is(tag)) estranhos.merge(b.unwrapKey().map(k -> k.identifier().getPath()).orElse("?"), 1, Integer::sum);
+            }
         BlockPos c = caixa.getCenter();
         return local + " em " + c.getX() + "," + y + "," + c.getZ() + ": colunas " + colunas + ", água fora das construções " + agua + (agua > 0 ? " (" + ondeAgua + ")" : "")
-            + ", buracos " + buracos + (buracos > 0 ? " (" + ondeBuraco.trim() + ")" : "") + ", chão fora do nível " + fora + (fora > 0 ? " (" + ondeFora.trim() + ")" : "") + ", maior degrau da rampa " + degrau + ", biomas " + biomas;
+            + ", buracos " + buracos + (buracos > 0 ? " (" + ondeBuraco.trim() + ")" : "") + ", chão fora do nível " + fora + (fora > 0 ? " (" + ondeFora.trim() + ")" : "") + ", soltos no ar " + soltos + " no platô e " + soltosRampa + " na rampa" + (soltos + soltosRampa > 0 ? " (" + ondeSolto.trim() + ")" : "") + ", maior degrau da rampa " + degrau + ", biomas " + biomas + ", vizinhos estranhos " + estranhos;
     }
 }

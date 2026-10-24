@@ -28,13 +28,22 @@ public final class BiomaLocal {
      * TreeFeatureMixin): na vegetação, que vem depois das estruturas, uma árvore podia parar na frente de uma porta.
      */
     public static boolean noPlato(ChunkAccess chunk, int x, int z) {
+        return perto(chunk, x, z, 2, false);
+    }
+
+    /**
+     * A posição fica a até {@code margem} blocos do platô (com a rampa, se {@code comRampa}) de um local do mod?
+     */
+    public static boolean perto(ChunkAccess chunk, int x, int z, int margem, boolean comRampa) {
         for (var e : chunk.getAllReferences().entrySet()) {
             if (!(e.getKey() instanceof LocalEstrutura le)) continue;
             Local l = Estruturas.LOCAIS.get(le.local());
             if (l == null) continue;
             for (long inicio : e.getValue()) {
                 int[] r = LocalEstrutura.plato(l, ChunkPos.unpack(inicio));
-                if (x >= r[0] - 2 && x <= r[2] + 2 && z >= r[1] - 2 && z <= r[3] + 2) return true;
+                int[] rp = comRampa ? LocalEstrutura.rampa(l) : new int[2];
+                int mx = margem + rp[0], mz = margem + rp[1];
+                if (x >= r[0] - mx && x <= r[2] + mx && z >= r[1] - mz && z <= r[3] + mz) return true;
             }
         }
         return false;

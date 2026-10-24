@@ -18,6 +18,7 @@
   "mixins": [
     "ChunkAccessMixin",
     "TreeFeatureMixin",
+    "MultifaceGrowthFeatureMixin",
     "ServerGamePacketListenerImplAccessor",
     "ServerGamePacketListenerImplMixin"
   ]
