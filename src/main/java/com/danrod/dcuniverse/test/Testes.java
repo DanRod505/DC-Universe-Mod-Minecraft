@@ -86,6 +86,7 @@ public final class Testes {
         FUNCOES.register("kryptonian_ship", () -> Testes::nave);
         FUNCOES.register("telekinesis", () -> Testes::telecinese);
         FUNCOES.register("floating_island", () -> Testes::ilha);
+        FUNCOES.register("batch_v03", () -> Testes::loteV03);
     }
 
     private Testes() {}
@@ -1215,6 +1216,9 @@ public final class Testes {
         h.assertTrue(k.isTame() && k.isOwnedBy(p), "Osso de Cristal doma na hora");
         h.assertTrue(com.danrod.dcuniverse.npc.Mascotes.tem(p, "krypto"), "Krypto registrado no jogador");
         h.assertValueEqual(com.danrod.dcuniverse.missao.Diario.ativas(p).get(m).objetivo(), 1, "domar avança a missão");
+        h.assertValueEqual(p.getInventory().countItem(Itens.COLEIRA_S.get()), 1, "domar o Krypto dá a Coleira do S");
+        com.danrod.dcuniverse.npc.Coleira.recompensa(p);
+        h.assertValueEqual(p.getInventory().countItem(Itens.COLEIRA_S.get()), 1, "a coleira da conquista vem uma vez só");
         var k2 = com.danrod.dcuniverse.content.Entidades.KRYPTO.get().create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
         k2.snapTo(pos.getX() + 2.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
         h.getLevel().addFreshEntity(k2);
@@ -1396,5 +1400,54 @@ public final class Testes {
             com.danrod.dcuniverse.ability.active.Ilha.limpar();
             h.succeed();
         });
+    }
+
+    /**
+     * Lote da v0.3: a Torta da Martha alimenta, dá Regeneração e devolve 10% da energia só a kryptonianos; a Coleira
+     * do S veste um cão domado pelo próprio jogador e não pega em animal dos outros.
+     */
+    static void loteV03(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem sup = e.personagem();
+        Energia.adicionar(p, sup, -10_000);
+        Energia.adicionar(p, sup, sup.energia().max() * 0.2f);
+        float antes = e.energia();
+        // O jogador falso não tem conexão para receber o efeito, então a comida e a Regeneração são conferidas nos
+        // componentes do item e a energia pelo mesmo caminho que finishUsingItem usa.
+        ItemStack torta = new ItemStack(Itens.TORTA_MARTHA.get());
+        var comida = torta.get(net.minecraft.core.component.DataComponents.FOOD);
+        h.assertTrue(comida != null && comida.nutrition() == 8, "torta enche 8 de fome");
+        var consumo = torta.get(net.minecraft.core.component.DataComponents.CONSUMABLE);
+        h.assertTrue(consumo != null && consumo.onConsumeEffects().stream().anyMatch(c -> c instanceof net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect a
+            && a.effects().stream().anyMatch(m -> m.is(net.minecraft.world.effect.MobEffects.REGENERATION) && m.getDuration() == 200)), "torta dá Regeneração I por 10 s");
+        h.assertTrue(com.danrod.dcuniverse.content.TortaItem.recarregar(p), "Superman é kryptoniano");
+        h.assertTrue(Math.abs(e.energia() - antes - sup.energia().max() * 0.1f) < 0.5f, "torta devolve 10% da energia (" + antes + " -> " + e.energia() + ")");
+        Transformacao.destransformar(p);
+        Transformacao.transformar(p, BATMAN, true);
+        h.assertFalse(com.danrod.dcuniverse.content.TortaItem.recarregar(p), "Batman não é kryptoniano");
+
+        BlockPos pos = h.absolutePos(new BlockPos(2, 1, 2));
+        var lobo = net.minecraft.world.entity.EntityTypes.WOLF.create(h.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        lobo.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0f, 0f);
+        lobo.setInvulnerable(true);
+        h.getLevel().addFreshEntity(lobo);
+        ItemStack coleira = new ItemStack(Itens.COLEIRA_S.get());
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, coleira);
+        p.interactOn(lobo, net.minecraft.world.InteractionHand.MAIN_HAND, lobo.position());
+        h.assertFalse(com.danrod.dcuniverse.npc.Coleira.usa(lobo), "não veste cão selvagem");
+        lobo.tame(p);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, coleira);
+        p.interactOn(lobo, net.minecraft.world.InteractionHand.MAIN_HAND, lobo.position());
+        h.assertTrue(com.danrod.dcuniverse.npc.Coleira.usa(lobo), "veste o próprio cão domado");
+        h.assertFalse(lobo.isOrderedToSit(), "vestir não manda o cão sentar");
+        h.assertTrue(coleira.isEmpty(), "a coleira sai da mão");
+        ItemStack outra = new ItemStack(Itens.COLEIRA_S.get());
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, outra);
+        p.interactOn(lobo, net.minecraft.world.InteractionHand.MAIN_HAND, lobo.position());
+        h.assertValueEqual(outra.getCount(), 1, "não veste duas vezes");
+        lobo.discard();
+        h.succeed();
     }
 }

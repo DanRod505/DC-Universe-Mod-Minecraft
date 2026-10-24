@@ -121,7 +121,17 @@
    "obter": true
   },
   {
+   "id": "torta_martha",
+   "cat": "utilidade",
+   "obter": true
+  },
+  {
    "id": "osso_cristal",
+   "cat": "utilidade",
+   "obter": true
+  },
+  {
+   "id": "coleira_s",
    "cat": "utilidade",
    "obter": true
   },
@@ -521,6 +531,18 @@
    "result": {
     "id": "dcuniverse:tecido_tatico",
     "count": 4
+   }
+  },
+  {
+   "type": "minecraft:crafting_shapeless",
+   "ingredients": [
+    "minecraft:apple",
+    "minecraft:wheat",
+    "minecraft:sugar",
+    "minecraft:egg"
+   ],
+   "result": {
+    "id": "dcuniverse:torta_martha"
    }
   },
   {

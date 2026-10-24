@@ -896,7 +896,7 @@ Entregue a Lois e Jimmy (missões e venda); fotos de boss valem mais.
 
 Comida: 8 de fome e Regeneração I por 10 s; recarrega 10% da energia de kryptonianos.
 
-**Obtenção:** Também trocada com Martha Kent por colheitas.
+**Obtenção:** Também trocada com Martha Kent (6 trigos, 3 maçãs e 1 ovo por 2 tortas).
 
 Sem forma: Maçã, Trigo, Açúcar, Ovo
 
@@ -905,6 +905,12 @@ Sem forma: Maçã, Trigo, Açúcar, Ovo
 Doma o Krypto (um por jogador) e o cura quando ferido.
 
 Sem forma: Osso, Cristal Kryptoniano
+
+### Coleira do S
+
+Cosmético para cães e gatos domados: capa vermelha com o S.
+
+**Obtenção:** Conquista Melhor Amigo do Homem de Aço (domar o Krypto); mais coleiras com Martha Kent (afinidade 50).
 
 ### Muda do Verde
 
@@ -1204,12 +1210,6 @@ A = Bloco de Ouro; B = Bloco de Cobre
 Cidade kryptoniana miniatura dentro de uma garrafa, animada. Colocada perto da Câmara Solar, dobra a recarga de kryptonianos.
 
 **Obtenção:** Drop do Brainiac.
-
-### Coleira do S
-
-Cosmético para animais domados (Krypto, Ace, Streaky): capa vermelha com o S.
-
-**Obtenção:** Conquista Melhor Amigo do Homem de Aço.
 
 ### Pintura da Liga Reunida
 

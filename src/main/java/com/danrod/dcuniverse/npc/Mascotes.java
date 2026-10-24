@@ -51,6 +51,7 @@ public final class Mascotes {
             r.morador("");
         }
         Guia.concluir(p, "domar_" + tipo);
+        if (tipo.equals("krypto")) Coleira.recompensa(p);
         Diario.domou(p, pet);
     }
 

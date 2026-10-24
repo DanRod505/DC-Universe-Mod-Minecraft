@@ -22,6 +22,8 @@ public final class EstadoCliente {
 
     /** Aparência de cada jogador visível transformado (id da entidade), para trocar a skin. */
     public static final Map<Integer, Rede.Aparencia> APARENCIAS = new ConcurrentHashMap<>();
+    /** Animais (ids de entidade) que estão usando a Coleira do S. */
+    public static final java.util.Set<Integer> COLEIRAS = ConcurrentHashMap.newKeySet();
     /** Jogadores que acabaram de transformar (o cliente toca o efeito de transformação e tira da fila). */
     public static final Map<Integer, Rede.Aparencia> TRANSFORMOU = new ConcurrentHashMap<>();
 
@@ -139,6 +141,7 @@ public final class EstadoCliente {
         liga = new Rede.LigaSync(java.util.List.of());
         ponto = null;
         APARENCIAS.clear();
+        COLEIRAS.clear();
         TRANSFORMOU.clear();
         MANOBRAS.clear();
         GANCHOS.clear();

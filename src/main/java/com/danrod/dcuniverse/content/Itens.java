@@ -73,6 +73,8 @@ public final class Itens {
 
     // Utilidades
     public static final RegistryObject<Item> OSSO_CRISTAL = item("osso_cristal", p -> new Item(p.stacksTo(16).rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> TORTA_MARTHA = item("torta_martha", p -> new TortaItem(p.stacksTo(16).rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> COLEIRA_S = item("coleira_s", p -> new com.danrod.dcuniverse.npc.Coleira.ColeiraItem(p.stacksTo(1).rarity(Rarity.RARE)));
     public static final RegistryObject<Item> COMUNICADOR_LIGA = item("comunicador_liga", p -> new com.danrod.dcuniverse.liga.ComunicadorItem(p.stacksTo(1).rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> GUIA_HEROI = item("guia_heroi", p -> new GuiaItem(p.stacksTo(1)));
 

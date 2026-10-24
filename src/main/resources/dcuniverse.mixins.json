@@ -8,6 +8,7 @@
     "CameraMixin",
     "MusicManagerMixin",
     "EntityRendererMixin",
+    "EntityRenderStateMixin",
     "LevelRendererMixin",
     "PlayerModelMixin"
   ],

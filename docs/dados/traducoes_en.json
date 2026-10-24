@@ -27,6 +27,7 @@
     "placa_circuito": "Circuit Board",
     "tecido_tatico": "Tactical Fabric",
     "torta_martha": "Martha's Pie",
+    "coleira_s": "S Collar",
     "visor_tatico": "Tactical Visor",
     "osso_cristal": "Kryptonian Crystal Bone",
     "cristal_supergirl": "Crystal of the House of Zor-El",
@@ -132,6 +133,14 @@
     "osso_cristal": {
       "desc": "An ordinary bone wrapped in a Kryptonian crystal that glows from within. It is the only treat Krypto the Superdog accepts: give him one to tame him (one Krypto per player). If he is hurt, another bone heals him completely.",
       "obter": "Crafted from a Bone and a Kryptonian Crystal. Martha Kent also gives you one when you accept the mission \"A Four-Legged Friend\"."
+    },
+    "torta_martha": {
+      "desc": "Martha Kent's famous apple pie, with a golden lattice and still warm. Eating one fills 8 hunger and gives Regeneration I for 10 seconds. On Kryptonian heroes (Superman, Supergirl, Superboy) it also restores 10% energy. Stacks to 16.",
+      "obter": "Shapeless craft from an Apple, a Wheat, a Sugar and an Egg. Martha Kent also trades: 6 Wheat, 3 Apples and 1 Egg for 2 pies."
+    },
+    "coleira_s": {
+      "desc": "A leather collar with a little red cape and the S shield, just like Krypto's. Right-click a dog or cat you tamed to put it on: the cape sways as it runs. Krypto and Streaky already have their own capes. Use shears on the animal to take the collar back; if it dies, the collar drops.",
+      "obter": "Given once when you tame Krypto (advancement \"Man of Steel's Best Friend\"). After that, Martha Kent trades more (affinity 50): 3 Leather, 1 Red Wool and 1 Gold Ingot."
     },
     "comunicador_liga": {
       "desc": "Pocket radio bearing the Justice League symbol. Right-click another player to link the two of you (again to unlink). Linked allies who also carry a communicator show at the top of the screen with direction and distance. Right-click in the air to mark a meeting point where you aim (up to 160 blocks): it shows for you and your allies.",

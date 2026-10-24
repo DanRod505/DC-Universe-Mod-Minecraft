@@ -107,6 +107,26 @@
           "count": 6
         },
         {
+          "item": "minecraft:apple",
+          "count": 3
+        },
+        {
+          "item": "minecraft:egg",
+          "count": 1
+        }
+      ],
+      "out": {
+        "item": "dcuniverse:torta_martha",
+        "count": 2
+      }
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:wheat",
+          "count": 6
+        },
+        {
           "item": "minecraft:cocoa_beans",
           "count": 2
         }
@@ -134,6 +154,27 @@
       ],
       "out": {
         "item": "minecraft:cake",
+        "count": 1
+      },
+      "min": 50
+    },
+    {
+      "in": [
+        {
+          "item": "minecraft:leather",
+          "count": 3
+        },
+        {
+          "item": "minecraft:red_wool",
+          "count": 1
+        },
+        {
+          "item": "minecraft:gold_ingot",
+          "count": 1
+        }
+      ],
+      "out": {
+        "item": "dcuniverse:coleira_s",
         "count": 1
       },
       "min": 50

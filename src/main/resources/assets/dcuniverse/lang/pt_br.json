@@ -878,5 +878,15 @@
   "personagem.dcuniverse.supergirl.exp": "Kryptoniana mais ágil e impetuosa: mais velocidade e combate aéreo, menos força bruta.",
   "personagem.dcuniverse.superboy.exp": "Meio kryptoniano: telecinese tátil no lugar da visão de calor.",
   "dcuniverse.guia.item.cristal_supergirl": "Clique direito para vestir o traje da Supergirl e ganhar os poderes dela. A tecla H volta ao normal.",
-  "dcuniverse.guia.item.jaqueta_conner": "Clique direito para vestir o traje do Superboy e ganhar os poderes dele. A tecla H volta ao normal."
+  "dcuniverse.guia.item.jaqueta_conner": "Clique direito para vestir o traje do Superboy e ganhar os poderes dele. A tecla H volta ao normal.",
+  "dcuniverse.coleira.nao_e_seu": "Esse animal não é seu.",
+  "dcuniverse.coleira.ja_tem_capa": "Ele já tem a própria capa!",
+  "dcuniverse.coleira.ja_usa": "Ele já está usando uma Coleira do S.",
+  "dcuniverse.coleira.conquista": "Melhor Amigo do Homem de Aço! Você ganhou uma Coleira do S para vestir um cão ou gato domado.",
+  "item.dcuniverse.torta_martha": "Torta da Martha",
+  "dcuniverse.guia.item.coleira_s": "Coleira de couro com uma capinha vermelha e o escudo do S, igual à do Krypto. Clique direito num cão ou gato domado por você para vesti-la: a capa balança quando ele corre. Krypto e Streaky já têm a capa deles. Use uma tesoura no animal para tirar a coleira de volta; se ele morrer, ela cai no chão.",
+  "dcuniverse.guia.item.coleira_s.obter": "Ganha uma vez ao domar o Krypto (conquista \"Melhor Amigo do Homem de Aço\"). Depois, a Martha Kent troca mais (afinidade 50): 3 Couros, 1 Lã Vermelha e 1 Lingote de Ouro.",
+  "dcuniverse.guia.item.torta_martha": "A famosa torta de maçã da Martha Kent, com treliça dourada e ainda quentinha. Comer uma enche 8 de fome e dá Regeneração I por 10 segundos. Em heróis kryptonianos (Superman, Supergirl, Superboy) ela também recarrega 10% da energia. Empilha até 16.",
+  "dcuniverse.guia.item.torta_martha.obter": "Fabricada sem forma com uma Maçã, um Trigo, um Açúcar e um Ovo. A Martha Kent também troca: 6 Trigos, 3 Maçãs e 1 Ovo por 2 tortas.",
+  "item.dcuniverse.coleira_s": "Coleira do S"
 }

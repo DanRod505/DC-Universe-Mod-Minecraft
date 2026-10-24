@@ -183,6 +183,9 @@ public final class Rede {
 
     public record Destransformar() {}
 
+    /** O animal passou a usar (ou tirou) a Coleira do S. */
+    public record Coleira(int entidade, boolean usa) {}
+
     /** Custo de uma receita no Batcomputador: item que representa o ingrediente, quantos pede e quantos o jogador tem. */
     public record BatCusto(String item, int qtd, int tem) {}
 
@@ -486,6 +489,15 @@ public final class Rede {
             .decoder(b -> new ManobraVista(b.readVarInt(), b.readVarInt()))
             .consumerMainThread((m, ctx) -> EstadoCliente.MANOBRAS.add(m))
             .add();
+        CANAL.messageBuilder(Coleira.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeBoolean(m.usa()))
+            .decoder(b -> new Coleira(b.readVarInt(), b.readBoolean()))
+            .consumerMainThread((m, ctx) -> {
+                if (m.usa()) EstadoCliente.COLEIRAS.add(m.entidade());
+                else EstadoCliente.COLEIRAS.remove(m.entidade());
+            })
+            .add();
         CANAL.messageBuilder(Destransformar.class)
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> {}).decoder(b -> new Destransformar())
@@ -650,6 +662,17 @@ public final class Rede {
     public static void manobraVista(ServerPlayer player, int tipo) {
         if (player.connection == null) return;
         CANAL.send(new ManobraVista(player.getId(), tipo), PacketDistributor.TRACKING_ENTITY.with(player));
+    }
+
+    /** Avisa quem está vendo o animal que ele pôs ou tirou a Coleira do S. */
+    public static void coleira(net.minecraft.world.entity.Entity e, boolean usa) {
+        if (e.level().isClientSide()) return;
+        CANAL.send(new Coleira(e.getId(), usa), PacketDistributor.TRACKING_ENTITY.with(e));
+    }
+
+    public static void coleiraPara(ServerPlayer quemVe, net.minecraft.world.entity.Entity e) {
+        if (quemVe.connection == null) return;
+        CANAL.send(new Coleira(e.getId(), true), PacketDistributor.PLAYER.with(quemVe));
     }
 
     /** Manda a aparência de alvo só para quem começou a ver ele. */

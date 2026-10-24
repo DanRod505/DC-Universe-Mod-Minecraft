@@ -104,6 +104,7 @@ public final class Cliente {
         EstadoCliente.npcFala = com.danrod.dcuniverse.client.npc.DialogoScreen::falar;
         Skins.registrar();
         Pecas.registrar();
+        com.danrod.dcuniverse.client.npc.ColeiraCamada.registrar();
         Voador.registrar();
         Planador.registrar();
         Efeitos.registrarFeixe();

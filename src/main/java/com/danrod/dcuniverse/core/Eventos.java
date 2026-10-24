@@ -142,6 +142,7 @@ public final class Eventos {
         com.danrod.dcuniverse.content.Teias.registrar();
         com.danrod.dcuniverse.content.BatwingEntidade.registrar();
         com.danrod.dcuniverse.content.NaveKryptoniana.registrar();
+        com.danrod.dcuniverse.npc.Coleira.registrar();
         com.danrod.dcuniverse.ability.Congelamento.registrar();
         com.danrod.dcuniverse.ability.active.Detetive.registrar();
         com.danrod.dcuniverse.ability.passive.Furtividade.registrar();

@@ -299,7 +299,7 @@ def verificar_teclas(raiz, erros):
 
 
 def verificar_testes(raiz, recursos, erros):
-    funcoes = set(re.findall(r'FUNCOES\.register\("([a-z_/]+)"', (raiz / JAVA / "test/Testes.java").read_text(encoding="utf-8")))
+    funcoes = set(re.findall(r'FUNCOES\.register\("([a-z0-9_/]+)"', (raiz / JAVA / "test/Testes.java").read_text(encoding="utf-8")))
     usadas = set()
     for arq in sorted(recursos.glob("data/dcuniverse/test_instance/*.json")):
         t = ler_json(arq, erros) or {}
