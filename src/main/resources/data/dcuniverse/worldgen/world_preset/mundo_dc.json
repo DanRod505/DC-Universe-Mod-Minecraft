@@ -1,0 +1,712 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "dcuniverse:mundo_dc",
+          "base": {
+            "type": "minecraft:multi_noise",
+            "preset": "minecraft:overworld"
+          },
+          "intocados": "#dcuniverse:mundo_dc/intocados",
+          "locais": [
+            {
+              "local": "smallville",
+              "x": 0,
+              "z": 0,
+              "busca": 192,
+              "raio": 480,
+              "manter": "#dcuniverse:mundo_dc/temperado",
+              "padrao": "minecraft:plains",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_ocean",
+                    "minecraft:cold_ocean"
+                  ],
+                  "para": "minecraft:ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                },
+                {
+                  "de": [
+                    "minecraft:jagged_peaks",
+                    "minecraft:frozen_peaks",
+                    "minecraft:stony_peaks",
+                    "minecraft:snowy_slopes",
+                    "minecraft:grove"
+                  ],
+                  "para": "minecraft:meadow"
+                },
+                {
+                  "de": [
+                    "minecraft:old_growth_pine_taiga",
+                    "minecraft:old_growth_spruce_taiga",
+                    "minecraft:taiga",
+                    "minecraft:snowy_taiga",
+                    "minecraft:windswept_forest"
+                  ],
+                  "para": "minecraft:forest"
+                }
+              ]
+            },
+            {
+              "local": "metropolis",
+              "x": 1800,
+              "z": 300,
+              "busca": 256,
+              "raio": 560,
+              "manter": "#dcuniverse:mundo_dc/cidade",
+              "padrao": "minecraft:plains",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_ocean",
+                    "minecraft:cold_ocean"
+                  ],
+                  "para": "minecraft:ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                },
+                {
+                  "de": [
+                    "minecraft:jagged_peaks",
+                    "minecraft:frozen_peaks",
+                    "minecraft:stony_peaks",
+                    "minecraft:snowy_slopes",
+                    "minecraft:grove"
+                  ],
+                  "para": "minecraft:meadow"
+                },
+                {
+                  "de": [
+                    "minecraft:old_growth_pine_taiga",
+                    "minecraft:old_growth_spruce_taiga",
+                    "minecraft:taiga",
+                    "minecraft:snowy_taiga",
+                    "minecraft:windswept_forest"
+                  ],
+                  "para": "minecraft:forest"
+                }
+              ]
+            },
+            {
+              "local": "gotham",
+              "x": 3000,
+              "z": -2200,
+              "busca": 320,
+              "raio": 640,
+              "manter": "#dcuniverse:mundo_dc/cidade",
+              "padrao": "minecraft:plains",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_ocean",
+                    "minecraft:cold_ocean"
+                  ],
+                  "para": "minecraft:ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                },
+                {
+                  "de": [
+                    "minecraft:jagged_peaks",
+                    "minecraft:frozen_peaks",
+                    "minecraft:stony_peaks",
+                    "minecraft:snowy_slopes",
+                    "minecraft:grove"
+                  ],
+                  "para": "minecraft:meadow"
+                },
+                {
+                  "de": [
+                    "minecraft:old_growth_pine_taiga",
+                    "minecraft:old_growth_spruce_taiga",
+                    "minecraft:taiga",
+                    "minecraft:snowy_taiga",
+                    "minecraft:windswept_forest"
+                  ],
+                  "para": "minecraft:forest"
+                }
+              ]
+            },
+            {
+              "local": "central_city",
+              "x": -600,
+              "z": -2000,
+              "busca": 256,
+              "raio": 520,
+              "manter": "#dcuniverse:mundo_dc/cidade",
+              "padrao": "minecraft:plains",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_ocean",
+                    "minecraft:cold_ocean"
+                  ],
+                  "para": "minecraft:ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                },
+                {
+                  "de": [
+                    "minecraft:jagged_peaks",
+                    "minecraft:frozen_peaks",
+                    "minecraft:stony_peaks",
+                    "minecraft:snowy_slopes",
+                    "minecraft:grove"
+                  ],
+                  "para": "minecraft:meadow"
+                },
+                {
+                  "de": [
+                    "minecraft:old_growth_pine_taiga",
+                    "minecraft:old_growth_spruce_taiga",
+                    "minecraft:taiga",
+                    "minecraft:snowy_taiga",
+                    "minecraft:windswept_forest"
+                  ],
+                  "para": "minecraft:forest"
+                }
+              ]
+            },
+            {
+              "local": "torre_do_destino",
+              "x": -1600,
+              "z": -1200,
+              "raio": 360,
+              "manter": "#dcuniverse:mundo_dc/floresta_escura",
+              "padrao": "minecraft:dark_forest",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_ocean",
+                    "minecraft:cold_ocean"
+                  ],
+                  "para": "minecraft:ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                },
+                {
+                  "de": [
+                    "minecraft:jagged_peaks",
+                    "minecraft:frozen_peaks",
+                    "minecraft:stony_peaks",
+                    "minecraft:snowy_slopes",
+                    "minecraft:grove"
+                  ],
+                  "para": "minecraft:meadow"
+                },
+                {
+                  "de": [
+                    "minecraft:old_growth_pine_taiga",
+                    "minecraft:old_growth_spruce_taiga",
+                    "minecraft:taiga",
+                    "minecraft:snowy_taiga",
+                    "minecraft:windswept_forest"
+                  ],
+                  "para": "minecraft:forest"
+                }
+              ]
+            },
+            {
+              "local": "kahndaq",
+              "x": -2600,
+              "z": 600,
+              "busca": 256,
+              "raio": 640,
+              "manter": "#dcuniverse:mundo_dc/deserto",
+              "padrao": "minecraft:desert",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_lukewarm_ocean"
+                },
+                {
+                  "de": "#minecraft:is_ocean",
+                  "para": "minecraft:warm_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                }
+              ]
+            },
+            {
+              "local": "salao_da_perdicao",
+              "x": -1000,
+              "z": 1500,
+              "raio": 380,
+              "manter": "#dcuniverse:mundo_dc/pantano",
+              "padrao": "minecraft:swamp",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_ocean",
+                    "minecraft:cold_ocean"
+                  ],
+                  "para": "minecraft:ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                },
+                {
+                  "de": [
+                    "minecraft:jagged_peaks",
+                    "minecraft:frozen_peaks",
+                    "minecraft:stony_peaks",
+                    "minecraft:snowy_slopes",
+                    "minecraft:grove"
+                  ],
+                  "para": "minecraft:meadow"
+                },
+                {
+                  "de": [
+                    "minecraft:old_growth_pine_taiga",
+                    "minecraft:old_growth_spruce_taiga",
+                    "minecraft:taiga",
+                    "minecraft:snowy_taiga",
+                    "minecraft:windswept_forest"
+                  ],
+                  "para": "minecraft:forest"
+                }
+              ]
+            },
+            {
+              "local": "cidade_dos_gorilas",
+              "x": -1000,
+              "z": 3400,
+              "busca": 256,
+              "raio": 560,
+              "manter": "#dcuniverse:mundo_dc/selva",
+              "padrao": "minecraft:jungle",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_lukewarm_ocean"
+                },
+                {
+                  "de": "#minecraft:is_ocean",
+                  "para": "minecraft:warm_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                }
+              ]
+            },
+            {
+              "local": "parlamento_das_arvores",
+              "x": 1400,
+              "z": 2200,
+              "raio": 420,
+              "manter": "#dcuniverse:mundo_dc/pantano",
+              "padrao": "minecraft:mangrove_swamp",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_lukewarm_ocean"
+                },
+                {
+                  "de": "#minecraft:is_ocean",
+                  "para": "minecraft:warm_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                }
+              ]
+            },
+            {
+              "local": "belle_reve",
+              "x": 3400,
+              "z": 1500,
+              "raio": 400,
+              "manter": "#dcuniverse:mundo_dc/pantano",
+              "padrao": "minecraft:swamp",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_ocean",
+                    "minecraft:cold_ocean"
+                  ],
+                  "para": "minecraft:ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                },
+                {
+                  "de": [
+                    "minecraft:jagged_peaks",
+                    "minecraft:frozen_peaks",
+                    "minecraft:stony_peaks",
+                    "minecraft:snowy_slopes",
+                    "minecraft:grove"
+                  ],
+                  "para": "minecraft:meadow"
+                },
+                {
+                  "de": [
+                    "minecraft:old_growth_pine_taiga",
+                    "minecraft:old_growth_spruce_taiga",
+                    "minecraft:taiga",
+                    "minecraft:snowy_taiga",
+                    "minecraft:windswept_forest"
+                  ],
+                  "para": "minecraft:forest"
+                }
+              ]
+            },
+            {
+              "local": "themyscira",
+              "x": 800,
+              "z": 4400,
+              "busca": 384,
+              "raio": 720,
+              "manter": "#dcuniverse:mundo_dc/ilha_quente",
+              "padrao": "minecraft:meadow",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_lukewarm_ocean"
+                },
+                {
+                  "de": "#minecraft:is_ocean",
+                  "para": "minecraft:warm_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                }
+              ]
+            },
+            {
+              "local": "atlantida",
+              "x": 3600,
+              "z": 3000,
+              "busca": 384,
+              "raio": 720,
+              "manter": "#dcuniverse:mundo_dc/oceano",
+              "padrao": "minecraft:plains",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_ocean",
+                    "minecraft:cold_ocean"
+                  ],
+                  "para": "minecraft:ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                },
+                {
+                  "de": [
+                    "minecraft:jagged_peaks",
+                    "minecraft:frozen_peaks",
+                    "minecraft:stony_peaks",
+                    "minecraft:snowy_slopes",
+                    "minecraft:grove"
+                  ],
+                  "para": "minecraft:meadow"
+                },
+                {
+                  "de": [
+                    "minecraft:old_growth_pine_taiga",
+                    "minecraft:old_growth_spruce_taiga",
+                    "minecraft:taiga",
+                    "minecraft:snowy_taiga",
+                    "minecraft:windswept_forest"
+                  ],
+                  "para": "minecraft:forest"
+                }
+              ]
+            },
+            {
+              "local": "a_fossa",
+              "x": 5600,
+              "z": 3600,
+              "busca": 384,
+              "raio": 600,
+              "manter": "#dcuniverse:mundo_dc/oceano",
+              "padrao": "minecraft:plains",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_ocean",
+                    "minecraft:cold_ocean"
+                  ],
+                  "para": "minecraft:ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:frozen_river"
+                  ],
+                  "para": "minecraft:river"
+                },
+                {
+                  "de": [
+                    "minecraft:snowy_beach"
+                  ],
+                  "para": "minecraft:beach"
+                },
+                {
+                  "de": [
+                    "minecraft:jagged_peaks",
+                    "minecraft:frozen_peaks",
+                    "minecraft:stony_peaks",
+                    "minecraft:snowy_slopes",
+                    "minecraft:grove"
+                  ],
+                  "para": "minecraft:meadow"
+                },
+                {
+                  "de": [
+                    "minecraft:old_growth_pine_taiga",
+                    "minecraft:old_growth_spruce_taiga",
+                    "minecraft:taiga",
+                    "minecraft:snowy_taiga",
+                    "minecraft:windswept_forest"
+                  ],
+                  "para": "minecraft:forest"
+                }
+              ]
+            },
+            {
+              "local": "nanda_parbat",
+              "x": -3800,
+              "z": -3000,
+              "busca": 320,
+              "raio": 560,
+              "manter": "#dcuniverse:mundo_dc/montanha_nevada",
+              "padrao": "minecraft:snowy_taiga",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_frozen_ocean"
+                },
+                {
+                  "de": "#minecraft:is_ocean",
+                  "para": "minecraft:frozen_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:river"
+                  ],
+                  "para": "minecraft:frozen_river"
+                },
+                {
+                  "de": [
+                    "minecraft:beach",
+                    "minecraft:stony_shore"
+                  ],
+                  "para": "minecraft:snowy_beach"
+                }
+              ]
+            },
+            {
+              "local": "fortaleza_da_solidao",
+              "x": 0,
+              "z": -4200,
+              "busca": 384,
+              "raio": 720,
+              "manter": "#dcuniverse:mundo_dc/gelo",
+              "padrao": "minecraft:snowy_plains",
+              "trocas": [
+                {
+                  "de": "#minecraft:is_deep_ocean",
+                  "para": "minecraft:deep_frozen_ocean"
+                },
+                {
+                  "de": "#minecraft:is_ocean",
+                  "para": "minecraft:frozen_ocean"
+                },
+                {
+                  "de": [
+                    "minecraft:river"
+                  ],
+                  "para": "minecraft:frozen_river"
+                },
+                {
+                  "de": [
+                    "minecraft:beach",
+                    "minecraft:stony_shore"
+                  ],
+                  "para": "minecraft:snowy_beach"
+                }
+              ]
+            }
+          ]
+        },
+        "settings": "minecraft:overworld"
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "minecraft:the_end"
+        },
+        "settings": "minecraft:end"
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "minecraft:multi_noise",
+          "preset": "minecraft:nether"
+        },
+        "settings": "minecraft:nether"
+      }
+    }
+  }
+}

@@ -147,13 +147,18 @@ public final class LocalEstrutura extends Structure {
         Local l = Estruturas.LOCAIS.get(local);
         ChunkPos melhor = null;
         float melhorNota = Float.MAX_VALUE;
+        // No Mundo DC os candidatos são a grade em volta do ponto marcado (ver FonteMundoDC): o bioma já é o do
+        // tema e o local tem de nascer ali de qualquer jeito, então nenhum candidato é descartado.
+        var mundoDC = ctx.biomeSource() instanceof com.danrod.dcuniverse.world.mundo.FonteMundoDC f ? f.regiao(local) : Optional.<com.danrod.dcuniverse.world.mundo.FonteMundoDC.Regiao>empty();
         for (int i = 0; i < candidatos.size(); i++) {
             ChunkPos c = candidatos.get(i);
             int x = c.getMiddleBlockX(), z = c.getMiddleBlockZ();
-            if (t.agua(x, z)) continue;
-            int y = t.fundo(x, z);
-            var bioma = ctx.biomeSource().getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), ctx.randomState().sampler());
-            if (!biomes().contains(bioma)) continue;
+            if (mundoDC.isEmpty()) {
+                if (t.agua(x, z)) continue;
+                int y = t.fundo(x, z);
+                var bioma = ctx.biomeSource().getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), ctx.randomState().sampler());
+                if (!biomes().contains(bioma)) continue;
+            }
             List<Integer> alturas = new java.util.ArrayList<>();
             int molhados = 0, amostras = 0;
             int[] r = plato(l, c);
@@ -164,15 +169,17 @@ public final class LocalEstrutura extends Structure {
                     else alturas.add(t.fundo(ax, az));
                 }
             }
-            if (alturas.isEmpty()) continue;
+            if (alturas.isEmpty() && mundoDC.isEmpty()) continue;
+            if (alturas.isEmpty()) alturas.add(0);
             java.util.Collections.sort(alturas);
             // Desnível sem os extremos (um morro isolado na borda não estraga a cidade).
             int desnivel = alturas.get(alturas.size() * 9 / 10) - alturas.get(alturas.size() / 10);
             // Água pesa mais que desnível: rio no meio da cidade estraga mais que um morro. Os anéis de fora
             // ficam mais longe do ponto de nascimento, então perdem um pouco. Vizinhança fora do tema (neve e gelo
             // em volta do Kansas) pesa quase como água.
-            float nota = Math.max(0, desnivel - DESNIVEL_PLANO) * 3 + molhados * 400 / amostras + (i < 8 ? 0 : i < 16 ? 40 : 90);
-            nota += vizinhosEstranhos(ctx, t, r) * 600;
+            float nota = Math.max(0, desnivel - DESNIVEL_PLANO) * 3 + molhados * 400 / amostras;
+            if (mundoDC.isPresent()) nota += (float) Math.hypot(x - mundoDC.get().x(), z - mundoDC.get().z()) / 8;
+            else nota += (i < 8 ? 0 : i < 16 ? 40 : 90) + vizinhosEstranhos(ctx, t, r) * 600;
             if (temVila(ctx, estado, r)) nota += 1000;
             if (nota < melhorNota) {
                 melhorNota = nota;

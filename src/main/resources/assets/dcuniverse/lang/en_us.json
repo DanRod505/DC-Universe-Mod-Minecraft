@@ -888,5 +888,6 @@
   "dcuniverse.guia.item.coleira_s.obter": "Given once when you tame Krypto (advancement \"Man of Steel's Best Friend\"). After that, Martha Kent trades more (affinity 50): 3 Leather, 1 Red Wool and 1 Gold Ingot.",
   "dcuniverse.guia.item.torta_martha": "Martha Kent's famous apple pie, with a golden lattice and still warm. Eating one fills 8 hunger and gives Regeneration I for 10 seconds. On Kryptonian heroes (Superman, Supergirl, Superboy) it also restores 10% energy. Stacks to 16.",
   "dcuniverse.guia.item.torta_martha.obter": "Shapeless craft from an Apple, a Wheat, a Sugar and an Egg. Martha Kent also trades: 6 Wheat, 3 Apples and 1 Egg for 2 pies.",
-  "item.dcuniverse.coleira_s": "S Collar"
+  "item.dcuniverse.coleira_s": "S Collar",
+  "generator.dcuniverse.mundo_dc": "DC World"
 }
