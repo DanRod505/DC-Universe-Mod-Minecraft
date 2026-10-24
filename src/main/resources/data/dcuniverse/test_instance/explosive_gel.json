@@ -1,7 +1,7 @@
 {
   "type": "minecraft:function",
   "function": "dcuniverse:explosive_gel",
-  "environment": "minecraft:default",
-  "structure": "minecraft:empty",
+  "environment": "dcuniverse:arena",
+  "structure": "dcuniverse:arena_vazia",
   "max_ticks": 100
 }

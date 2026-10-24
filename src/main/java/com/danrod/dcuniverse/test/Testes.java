@@ -881,14 +881,12 @@ public final class Testes {
     /** Gel explosivo: cola na parede mirada, agachado detona e o bloco quebra; obsidiana resiste. */
     static void gel(GameTestHelper h) {
         ServerPlayer p = jogador(h);
-        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
         p.setPos(aqui.x, aqui.y, aqui.z);
         p.setYRot(0);
         p.setXRot(0);
-        // Corredor limpo até a parede (os testes vizinhos podem deixar blocos por perto).
-        for (int x = 0; x <= 2; x++) for (int y = 1; y <= 3; y++) for (int z = 1; z <= 3; z++) h.setBlock(x, y, z, net.minecraft.world.level.block.Blocks.AIR);
-        h.setBlock(1, 2, 4, net.minecraft.world.level.block.Blocks.STONE);
-        h.setBlock(1, 2, 5, net.minecraft.world.level.block.Blocks.OBSIDIAN);
+        h.setBlock(1, 3, 4, net.minecraft.world.level.block.Blocks.STONE);
+        h.setBlock(1, 3, 5, net.minecraft.world.level.block.Blocks.OBSIDIAN);
         Transformacao.transformar(p, BATMAN, true);
         EstadoJogador e = EstadoJogador.de(p);
         Personagem bat = e.personagem();
@@ -900,10 +898,13 @@ public final class Testes {
         h.assertTrue(Habilidades.executar(p, bat, g), "agachado detona (mesmo em recarga)");
         p.setShiftKeyDown(false);
         h.assertTrue(Guia.concluida(p, "gel") && Guia.concluida(p, "gel_detonar"), "tarefas do gel");
+        // Longe da explosão (o jogador de teste não pode levar dano).
+        var longe = h.absoluteVec(new net.minecraft.world.phys.Vec3(13.5, 2, 13.5));
+        p.setPos(longe.x, longe.y, longe.z);
         // Espera a explosão sem prazo fixo: com o servidor atrasado (CI), o pavio pode passar alguns ticks.
         h.succeedWhen(() -> {
-            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.AIR, 1, 2, 4);
-            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.OBSIDIAN, 1, 2, 5);
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.AIR, 1, 3, 4);
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.OBSIDIAN, 1, 3, 5);
         });
     }
 

@@ -12,6 +12,9 @@ import net.minecraft.world.level.Level;
 
 /** Item de transformação: usar transforma no personagem; usar de novo destransforma (seção 2.4). */
 public final class TransformacaoItem extends Item {
+    /** Ticks até o item poder ser usado de novo. */
+    public static final int RECARGA = 30;
+
     private final Identifier personagem;
 
     public TransformacaoItem(String personagem, Properties properties) {
@@ -26,6 +29,9 @@ public final class TransformacaoItem extends Item {
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (player instanceof ServerPlayer sp) Transformacao.usarItem(sp, personagem);
+        // Segurar o botão repete o uso a cada 4 ticks: um clique um pouco mais longo transformava e já pedia para
+        // destransformar. A recarga curta do item segura essa repetição.
+        player.getCooldowns().addCooldown(player.getItemInHand(hand), RECARGA);
         return InteractionResult.SUCCESS;
     }
 }

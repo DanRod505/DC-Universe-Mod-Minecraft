@@ -103,7 +103,9 @@ public final class Obra {
         BlockPos p = mundo(x, y, z);
         if (!recorte.isInside(p)) return;
         if (level.getBlockState(p).is(Blocks.BEDROCK)) return;
-        level.setBlock(p, st.rotate(rot), 2);
+        // Sem onPlace, como na geração do mundo: na abóbora de Halloween ele procura o padrão do golem nos vizinhos e
+        // quebra (NullPointerException) quando um deles está num chunk ainda não carregado.
+        level.setBlock(p, st.rotate(rot), Block.UPDATE_CLIENTS | Block.UPDATE_SKIP_ON_PLACE);
         if (!st.getFluidState().isEmpty()) level.scheduleTick(p, st.getFluidState().getType(), 0);
         // Cercas, vidraças, muros e escadas se ligam aos vizinhos quando o chunk termina de gerar.
         Block b = st.getBlock();
