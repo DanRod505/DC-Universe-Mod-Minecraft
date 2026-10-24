@@ -2,8 +2,9 @@
   "type": "dcuniverse:local",
   "local": "smallville",
   "unico": true,
+  "bioma": "minecraft:plains",
   "biomes": "#dcuniverse:has_structure/smallville",
   "spawn_overrides": {},
   "step": "surface_structures",
-  "terrain_adaptation": "none"
+  "terrain_adaptation": "beard_thin"
 }

@@ -148,6 +148,17 @@ public final class Comandos {
                         })
                         .executes(c -> irPara(c.getSource(), com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"),
                             com.mojang.brigadier.arguments.StringArgumentType.getString(c, "ponto"))))))
+            // Confere o nivelamento de um local gerado: /dcu conferir_local smallville
+            .then(Commands.literal("conferir_local")
+                .then(Commands.argument("local", com.mojang.brigadier.arguments.StringArgumentType.word())
+                    .suggests((c, b) -> SharedSuggestionProvider.suggest(com.danrod.dcuniverse.world.estrutura.Estruturas.LOCAIS.keySet(), b))
+                    .executes(c -> {
+                        var src = c.getSource();
+                        String r = com.danrod.dcuniverse.world.estrutura.Locais.conferir(src.getLevel(),
+                            com.mojang.brigadier.arguments.StringArgumentType.getString(c, "local"), net.minecraft.core.BlockPos.containing(src.getPosition()));
+                        src.sendSuccess(() -> Component.literal(r), false);
+                        return 1;
+                    })))
             // Afinidade com um grupo de NPC: /dcu afinidade Dev martha_kent 60
             .then(Commands.literal("afinidade")
                 .then(Commands.argument("jogador", EntityArgument.player())

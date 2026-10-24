@@ -12,12 +12,22 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilde
 public interface Local {
     void tracar(Terreno terreno, BlockPos centro, StructurePiecesBuilder pecas, long semente);
 
-    /** Pontos com nome para o comando /dcu local (planta + posição local dentro dela). */
-    /** Retângulo que o local ocupa em volta do centro (x1, z1, x2, z2); usado para escolher um lugar plano e seco. */
+    /**
+     * Retângulo que o local ocupa em volta do centro (x1, z1, x2, z2). Vira o platô nivelado (com a
+     * rampa em volta), recebe o bioma do local e serve para escolher um lugar
+     * plano e seco. Toda peça do traçado (com a folga da caixa dela) tem de caber nele, e o
+     * lado maior não passa de ~250 blocos (o teste "levelled_locations" confere).
+     */
     default int[] area() {
         return new int[]{-64, -48, 64, 48};
     }
 
+    /** Bloco do chão do platô (o de baixo é terra até 3 blocos e pedra depois). */
+    default net.minecraft.world.level.block.state.BlockState solo() {
+        return net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState();
+    }
+
+    /** Pontos com nome para o comando /dcu local (planta + posição local dentro dela). */
     default java.util.Map<String, Ponto> pontos() {
         return java.util.Map.of();
     }
@@ -39,14 +49,44 @@ public interface Local {
     /** Posição dentro de uma planta; {@code chao} = subir até a superfície naquela coluna. */
     record Ponto(String planta, int x, int y, int z, boolean chao) {}
 
-    /** Medidor de altura do terreno antes de ele existir (direto do gerador de ruído). */
-    record Terreno(Structure.GenerationContext ctx) {
+    /**
+     * Medidor de altura do terreno antes de ele existir (direto do gerador de ruído). Num local nivelado o
+     * traçado recebe {@link #plano}: o chão é o platô inteiro, na mesma altura, sem água, e a planta sai igual
+     * em qualquer mundo.
+     */
+    final class Terreno {
+        private final Structure.GenerationContext ctx;
+        /** Altura do topo do platô; {@link Integer#MIN_VALUE} = terreno natural. */
+        private final int plato;
+
+        public Terreno(Structure.GenerationContext ctx) {
+            this(ctx, Integer.MIN_VALUE);
+        }
+
+        private Terreno(Structure.GenerationContext ctx, int plato) {
+            this.ctx = ctx;
+            this.plato = plato;
+        }
+
+        /** Terreno todo plano com o topo do chão em {@code y} (o platô do local). */
+        public static Terreno plano(int y) {
+            return new Terreno(null, y);
+        }
+
+        public boolean nivelado() {
+            return plato != Integer.MIN_VALUE;
+        }
+
+        /** Primeira altura livre acima do chão ou da água. */
         public int superficie(int x, int z) {
+            if (nivelado()) return plato + 1;
             return ctx.chunkGenerator().getFirstOccupiedHeight(x, z, net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG,
                 ctx.heightAccessor(), ctx.randomState());
         }
 
+        /** Primeira altura livre acima do chão (debaixo d'água, o leito). */
         public int fundo(int x, int z) {
+            if (nivelado()) return plato + 1;
             return ctx.chunkGenerator().getFirstOccupiedHeight(x, z, net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG,
                 ctx.heightAccessor(), ctx.randomState());
         }

@@ -30,12 +30,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * mundo: dos candidatos do anel, fica o de terreno mais plano e seco, longe das vilas do jogo (os outros
  * não geram nada).
  * Assim um mundo com mar de um lado ainda ganha o local do outro.
+ * <p>
+ * Todo local é nivelado (v0.4): a primeira peça é um {@link PecaPlato} na altura mediana da área, o traçado
+ * recebe um terreno plano ({@link Local.Terreno#plano}) e uma semente fixa, então a planta sai igual em qualquer
+ * mundo, e o campo {@code "bioma"} pinta o bioma do local na área ({@link BiomaLocal}).
  */
 public final class LocalEstrutura extends Structure {
     public static final MapCodec<LocalEstrutura> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
         settingsCodec(i),
         Codec.STRING.fieldOf("local").forGetter(e -> e.local),
-        Codec.BOOL.optionalFieldOf("unico", false).forGetter(e -> e.unico)
+        Codec.BOOL.optionalFieldOf("unico", false).forGetter(e -> e.unico),
+        net.minecraft.world.level.biome.Biome.CODEC.optionalFieldOf("bioma").forGetter(e -> e.bioma)
     ).apply(i, LocalEstrutura::new));
 
     /** Desnível máximo (em blocos) para um candidato contar como plano. */
@@ -43,18 +48,55 @@ public final class LocalEstrutura extends Structure {
 
     private final String local;
     private final boolean unico;
+    /** Bioma pintado no platô e em metade da rampa (ver mixin ChunkAccessMixin); vazio = o do mundo. */
+    private final Optional<net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> bioma;
     /** Escolhido por semente do mundo (o servidor pode trocar de mundo sem reiniciar). */
     private final Map<Long, Optional<ChunkPos>> escolhido = new ConcurrentHashMap<>();
 
-    public LocalEstrutura(StructureSettings settings, String local, boolean unico) {
+    public LocalEstrutura(StructureSettings settings, String local, boolean unico,
+                          Optional<net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> bioma) {
         super(settings);
         this.local = local;
         this.unico = unico;
+        this.bioma = bioma;
     }
 
     /** Nome do local (o mesmo de {@link Estruturas#LOCAIS}). */
     public String local() {
         return local;
+    }
+
+    public Optional<net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> bioma() {
+        return bioma;
+    }
+
+    /**
+     * Centro do traçado para um início no chunk {@code c}: a área do local fica centrada no meio do chunk, para
+     * caber no alcance das estruturas (8 chunks para cada lado, ~135 blocos).
+     */
+    public static int[] centro(Local l, ChunkPos c) {
+        int[] a = l.area();
+        return new int[]{c.getMiddleBlockX() - (a[0] + a[2]) / 2, c.getMiddleBlockZ() - (a[1] + a[3]) / 2};
+    }
+
+    /** Retângulo do platô (x1, z1, x2, z2) no mundo para o início no chunk {@code c}. */
+    public static int[] plato(Local l, ChunkPos c) {
+        int[] a = l.area(), m = centro(l, c);
+        return new int[]{m[0] + a[0], m[1] + a[1], m[0] + a[2], m[1] + a[3]};
+    }
+
+    /**
+     * Largura da rampa do local nos lados leste/oeste e norte/sul: até {@link PecaPlato#RAMPA}, mas platô e rampa
+     * juntos têm de caber no alcance de 8 chunks em volta do chunk do início (135 blocos do meio dele), senão a borda
+     * não é gerada.
+     */
+    public static int[] rampa(Local l) {
+        int[] a = l.area();
+        return new int[]{rampa((a[2] - a[0] + 2) / 2), rampa((a[3] - a[1] + 2) / 2)};
+    }
+
+    private static int rampa(int meiaLargura) {
+        return Math.max(6, Math.min(PecaPlato.RAMPA, 135 - meiaLargura));
     }
 
     @Override
@@ -65,11 +107,31 @@ public final class LocalEstrutura extends Structure {
             Optional<ChunkPos> c = escolhido.computeIfAbsent(ctx.seed(), s -> escolher(ctx));
             if (c.isPresent() && !c.get().equals(ctx.chunkPos())) return Optional.empty();
         }
-        int x = ctx.chunkPos().getMiddleBlockX(), z = ctx.chunkPos().getMiddleBlockZ();
-        Local.Terreno t = new Local.Terreno(ctx);
-        BlockPos centro = new BlockPos(x, t.fundo(x, z), z);
-        long semente = ctx.seed() ^ ctx.chunkPos().pack() * 0x5DEECE66DL ^ local.hashCode();
-        return Optional.of(new GenerationStub(centro, b -> l.tracar(t, centro, b, semente)));
+        int[] m = centro(l, ctx.chunkPos()), r = plato(l, ctx.chunkPos());
+        int y = nivelPlato(new Local.Terreno(ctx), r, ctx.chunkGenerator().getSeaLevel());
+        BlockPos centro = new BlockPos(m[0], y + 1, m[1]);
+        // A planta não depende da semente do mundo: o local sai igual em todo mundo (só a altura muda).
+        long semente = local.hashCode() * 0x5DEECE66DL;
+        BlockPos meio = new BlockPos(ctx.chunkPos().getMiddleBlockX(), y + 1, ctx.chunkPos().getMiddleBlockZ());
+        return Optional.of(new GenerationStub(meio, b -> {
+            int[] rp = rampa(l);
+            b.addPiece(new PecaPlato(r[0], r[1], r[2], r[3], y, rp[0], rp[1], l.solo()));
+            l.tracar(Local.Terreno.plano(y), centro, b, semente);
+        }));
+    }
+
+    /**
+     * Altura do platô: a mediana do chão seco numa grade de 16 em 16 blocos (metade da área é cortada, metade
+     * aterrada), nunca abaixo do nível do mar (o platô fica seco mesmo à beira d'água).
+     */
+    static int nivelPlato(Local.Terreno t, int[] r, int mar) {
+        List<Integer> alturas = new java.util.ArrayList<>();
+        for (int x = r[0]; x <= r[2]; x += 16)
+            for (int z = r[1]; z <= r[3]; z += 16)
+                if (!t.agua(x, z)) alturas.add(t.fundo(x, z) - 1);
+        if (alturas.isEmpty()) return mar + 1;
+        java.util.Collections.sort(alturas);
+        return Math.max(mar + 1, alturas.get(alturas.size() / 2));
     }
 
     /**
@@ -82,7 +144,7 @@ public final class LocalEstrutura extends Structure {
         List<ChunkPos> candidatos = candidatos(ctx, estado);
         if (candidatos.isEmpty()) return Optional.empty();
         Local.Terreno t = new Local.Terreno(ctx);
-        int[] area = Estruturas.LOCAIS.get(local).area();
+        Local l = Estruturas.LOCAIS.get(local);
         ChunkPos melhor = null;
         int melhorNota = Integer.MAX_VALUE;
         for (int i = 0; i < candidatos.size(); i++) {
@@ -94,11 +156,12 @@ public final class LocalEstrutura extends Structure {
             if (!biomes().contains(bioma)) continue;
             List<Integer> alturas = new java.util.ArrayList<>();
             int molhados = 0, amostras = 0;
-            for (int dx = area[0]; dx <= area[2]; dx += 16) {
-                for (int dz = area[1]; dz <= area[3]; dz += 16) {
+            int[] r = plato(l, c);
+            for (int ax = r[0]; ax <= r[2]; ax += 16) {
+                for (int az = r[1]; az <= r[3]; az += 16) {
                     amostras++;
-                    if (t.agua(x + dx, z + dz)) molhados++;
-                    else alturas.add(t.fundo(x + dx, z + dz));
+                    if (t.agua(ax, az)) molhados++;
+                    else alturas.add(t.fundo(ax, az));
                 }
             }
             if (alturas.isEmpty()) continue;
@@ -108,7 +171,7 @@ public final class LocalEstrutura extends Structure {
             // Água pesa mais que desnível: rio no meio da cidade estraga mais que um morro. Os anéis de fora
             // ficam mais longe do ponto de nascimento, então perdem um pouco.
             int nota = Math.max(0, desnivel - DESNIVEL_PLANO) * 3 + molhados * 400 / amostras + (i < 8 ? 0 : 40);
-            if (temVila(ctx, estado, x, z, area)) nota += 1000;
+            if (temVila(ctx, estado, r)) nota += 1000;
             if (nota < melhorNota) {
                 melhorNota = nota;
                 melhor = c;
@@ -140,13 +203,13 @@ public final class LocalEstrutura extends Structure {
     }
 
     /** Alguma vila do jogo pode nascer na área (com folga de 4 chunks)? Vila colada na cidade fica feio. */
-    private static boolean temVila(GenerationContext ctx, ChunkGeneratorStructureState estado, int x, int z, int[] area) {
+    private static boolean temVila(GenerationContext ctx, ChunkGeneratorStructureState estado, int[] r) {
         var sets = ctx.registryAccess().lookupOrThrow(Registries.STRUCTURE_SET);
         var vilas = sets.get(BuiltinStructureSets.VILLAGES);
         if (vilas.isEmpty()) return false;
         StructurePlacement p = vilas.get().value().placement();
-        for (int cx = ((x + area[0]) >> 4) - 4; cx <= ((x + area[2]) >> 4) + 4; cx++)
-            for (int cz = ((z + area[1]) >> 4) - 4; cz <= ((z + area[3]) >> 4) + 4; cz++)
+        for (int cx = (r[0] >> 4) - 4; cx <= (r[2] >> 4) + 4; cx++)
+            for (int cz = (r[1] >> 4) - 4; cz <= (r[3] >> 4) + 4; cz++)
                 if (p.isStructureChunk(estado, cx, cz)) return true;
         return false;
     }

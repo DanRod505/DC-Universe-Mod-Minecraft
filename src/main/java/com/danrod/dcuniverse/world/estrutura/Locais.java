@@ -62,4 +62,61 @@ public final class Locais {
         }
         return Optional.of(alvo);
     }
+
+    /**
+     * Confere o nivelamento de um local já gerado (comando /dcu conferir_local): altura do platô, água, buracos e
+     * chão fora do nível onde não há construção, degrau máximo da rampa e os biomas do platô.
+     */
+    public static String conferir(ServerLevel level, String local, BlockPos perto) {
+        Optional<StructureStart> s = achar(level, local, perto);
+        if (s.isEmpty()) return local + ": não achado";
+        PecaPlato plato = null;
+        java.util.List<net.minecraft.world.level.levelgen.structure.BoundingBox> obras = new java.util.ArrayList<>();
+        for (StructurePiece pc : s.get().getPieces()) {
+            if (pc instanceof PecaPlato pp) plato = pp;
+            else if (pc instanceof PecaObra) obras.add(pc.getBoundingBox());
+        }
+        if (plato == null) return local + ": sem platô (gerado antes da v0.4)";
+        var caixa = plato.getBoundingBox();
+        int y = plato.y();
+        int agua = 0, buracos = 0, fora = 0, colunas = 0, degrau = 0;
+        String ondeAgua = "", ondeFora = "", ondeBuraco = "";
+        java.util.Map<String, Integer> biomas = new java.util.TreeMap<>();
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int x = caixa.minX(); x <= caixa.maxX(); x++) {
+            for (int z = caixa.minZ(); z <= caixa.maxZ(); z++) {
+                level.getChunk(x >> 4, z >> 4);
+                if (!plato.noPlato(x, z)) continue;
+                colunas++;
+                boolean obra = false;
+                for (var b : obras) if (b.isInside(x, b.minY(), z)) { obra = true; break; }
+                // Água de propósito (bebedouro, poço) fica dentro das construções; fora delas não pode haver.
+                if (obra) continue;
+                for (int yy = y - 2; yy <= y + 3; yy++) if (!level.getFluidState(p.set(x, yy, z)).isEmpty()) {
+                    if (agua++ == 0) ondeAgua = x + "," + yy + "," + z;
+                }
+                var chao = level.getBlockState(p.set(x, y, z));
+                if ((chao.isAir() || !chao.getFluidState().isEmpty()) && buracos++ < 3) ondeBuraco += " " + x + "," + z;
+                int topo = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+                if (topo != y && fora++ < 3) ondeFora += " " + x + "," + topo + "," + z + "="
+                    + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(p.set(x, topo, z)).getBlock()).getPath();
+                if (Math.floorMod(x, 8) == 0 && Math.floorMod(z, 8) == 0)
+                    biomas.merge(level.getBiome(p.set(x, y + 1, z)).unwrapKey().map(k -> k.identifier().getPath()).orElse("?"), 1, Integer::sum);
+            }
+        }
+        // Rampa: quatro linhas saindo do meio de cada lado do platô.
+        int cx = (caixa.minX() + caixa.maxX()) / 2, cz = (caixa.minZ() + caixa.maxZ()) / 2;
+        int[][] linhas = {{caixa.minX(), cz, 1, 0}, {caixa.maxX(), cz, -1, 0}, {cx, caixa.minZ(), 0, 1}, {cx, caixa.maxZ(), 0, -1}};
+        for (int[] l : linhas) {
+            int antes = Integer.MIN_VALUE;
+            for (int x = l[0], z = l[1]; !plato.noPlato(x, z); x += l[2], z += l[3]) {
+                int topo = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+                if (antes != Integer.MIN_VALUE) degrau = Math.max(degrau, Math.abs(topo - antes));
+                antes = topo;
+            }
+        }
+        BlockPos c = caixa.getCenter();
+        return local + " em " + c.getX() + "," + y + "," + c.getZ() + ": colunas " + colunas + ", água fora das construções " + agua + (agua > 0 ? " (" + ondeAgua + ")" : "")
+            + ", buracos " + buracos + (buracos > 0 ? " (" + ondeBuraco.trim() + ")" : "") + ", chão fora do nível " + fora + (fora > 0 ? " (" + ondeFora.trim() + ")" : "") + ", maior degrau da rampa " + degrau + ", biomas " + biomas;
+    }
 }
