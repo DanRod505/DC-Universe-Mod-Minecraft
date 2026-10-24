@@ -24,6 +24,8 @@ public final class Trilha {
     /** Quanto o volume de cada camada anda por tick: sobe em ~4 s, desce em ~6 s. */
     private static final float SOBE = 0.0125f, DESCE = 0.008f;
 
+    private static final Trilha[] TODAS = {VOO, PLANAR};
+
     private final SoundEvent[] camadas;
     private final SoundEvent impacto;
     private final Camada[] tocando;
@@ -69,8 +71,14 @@ public final class Trilha {
         } else if (!algum && toca) {
             parar();
         }
-        // A música normal do jogo fica calada enquanto a trilha toca.
-        if (tocando[0] != null) mc.getMusicManager().stopPlaying();
+        // A música normal do jogo para quando a trilha começa (e o MusicManagerMixin não deixa voltar).
+        if (tocando[0] != null && !toca) mc.getMusicManager().stopPlaying();
+    }
+
+    /** Alguma trilha está tocando (o MusicManagerMixin segura a música normal). */
+    public static boolean tocando() {
+        for (Trilha t : TODAS) if (t.tocando[0] != null) return true;
+        return false;
     }
 
     /** O impacto por cima das camadas (só se a trilha está tocando). */

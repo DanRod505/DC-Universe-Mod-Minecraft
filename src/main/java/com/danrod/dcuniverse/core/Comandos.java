@@ -82,6 +82,17 @@ public final class Comandos {
                         c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + ": recargas zeradas"), false);
                         return 1;
                     })))
+            .then(Commands.literal("fly")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .executes(c -> {
+                        // Para testes: liga o voo de quem pode voar, como o pulo duplo.
+                        ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                        if (!alvo.getAbilities().mayfly) return 0;
+                        alvo.getAbilities().flying = true;
+                        alvo.onUpdateAbilities();
+                        c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + ": voando"), false);
+                        return 1;
+                    })))
             .then(Commands.literal("status")
                 .then(Commands.argument("jogador", EntityArgument.player())
                     .executes(c -> {

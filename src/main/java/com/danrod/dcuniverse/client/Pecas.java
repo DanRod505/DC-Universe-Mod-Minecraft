@@ -29,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 
@@ -456,46 +457,81 @@ public final class Pecas {
         // Segue o alto da capa (que já foi simulada neste quadro), um pouco menos inclinado e sempre por fora dela.
         float a = p == null ? 0.08f : Math.max(0.08f, p.tras[1] * 0.85f);
         float b = p == null ? 0 : p.lado[1] * 0.7f;
+        // A raiz da mecha fica presa na nuca (espaço da cabeça) e o resto cai pelas costas (espaço do tronco): virando
+        // ou inclinando a cabeça, a mecha acompanha sem abrir um corte entre ela e o cabelo da cabeça.
+        PoseStack tmp = new PoseStack();
+        m.head.translateAndRotate(tmp);
+        Matrix4f cab = new Matrix4f(tmp.last().pose());
+        tmp = new PoseStack();
+        m.body.translateAndRotate(tmp);
+        Matrix4f tronco = new Matrix4f(tmp.last().pose());
         ps.pushPose();
         m.root().translateAndRotate(ps);
-        m.body.translateAndRotate(ps);
         col.submitCustomGeometry(ps, RenderTypes.entityCutout(tex), (pose, buf) -> {
-            float comp = 10, z0 = 2.75f;
+            float comp = 7.6f, z0 = 2.75f, meia = 0.5f, yOmbro = 2.2f, vRaiz = 6.5f;
             Vector3f dir = new Vector3f(Mth.sin(b), Mth.cos(b) * Mth.cos(a), Mth.cos(b) * Mth.sin(a)).mul(comp);
             Vector3f n = new Vector3f(0, -Mth.sin(a), Mth.cos(a));
-            float meia = 0.5f;
-            for (int lado = -1; lado <= 1; lado += 2) {
-                // fora (costas) e dentro: o mesmo painel deslocado meio pixel para cada lado
-                Vector3f off = new Vector3f(n).mul(meia * lado);
-                Vector3f a0 = new Vector3f(-4, -0.6f, z0).add(off), a1 = new Vector3f(4, -0.6f, z0).add(off);
-                Vector3f b1 = new Vector3f(a1).add(dir), b0 = new Vector3f(a0).add(dir);
-                float u0 = lado > 0 ? 0 : 16, u1 = u0 + 16;
-                Vector3f nn = new Vector3f(n).mul(lado);
-                if (lado > 0) {
-                    ponto(buf, pose, a1, u0 / 64f, 0, nn, luz, over);
-                    ponto(buf, pose, a0, u1 / 64f, 0, nn, luz, over);
-                    ponto(buf, pose, b0, u1 / 64f, 20 / 64f, nn, luz, over);
-                    ponto(buf, pose, b1, u0 / 64f, 20 / 64f, nn, luz, over);
-                } else {
-                    ponto(buf, pose, a0, u0 / 64f, 0, nn, luz, over);
-                    ponto(buf, pose, a1, u1 / 64f, 0, nn, luz, over);
-                    ponto(buf, pose, b1, u1 / 64f, 20 / 64f, nn, luz, over);
-                    ponto(buf, pose, b0, u0 / 64f, 20 / 64f, nn, luz, over);
-                }
+            // [lado: 0 fora, 1 dentro][linha: 0 nuca, 1 ombro, 2 ponta][x: 0 = -4, 1 = +4]
+            Vector3f[][][] v = new Vector3f[2][3][2];
+            for (int k = 0; k < 2; k++) {
+                float x = k == 0 ? -4 : 4;
+                v[0][0][k] = em(cab, x, -2.6f, 4.45f);
+                v[1][0][k] = em(cab, x, -2.6f, 3.5f);
+                Vector3f o = new Vector3f(x, yOmbro, z0);
+                v[0][1][k] = em(tronco, new Vector3f(o).add(new Vector3f(n).mul(meia)));
+                v[1][1][k] = em(tronco, new Vector3f(o).add(new Vector3f(n).mul(-meia)));
+                v[0][2][k] = em(tronco, new Vector3f(o).add(dir).add(new Vector3f(n).mul(meia)));
+                v[1][2][k] = em(tronco, new Vector3f(o).add(dir).add(new Vector3f(n).mul(-meia)));
             }
-            // bordas laterais
-            for (int lado = -1; lado <= 1; lado += 2) {
-                float x = 4 * lado;
-                Vector3f f = new Vector3f(x, -0.6f, z0).add(new Vector3f(n).mul(meia)), t = new Vector3f(x, -0.6f, z0).add(new Vector3f(n).mul(-meia));
-                Vector3f fb = new Vector3f(f).add(dir), tb = new Vector3f(t).add(dir);
-                Vector3f nx = new Vector3f(lado, 0, 0);
-                ponto(buf, pose, f, 32 / 64f, 0, nx, luz, over);
-                ponto(buf, pose, t, 34 / 64f, 0, nx, luz, over);
-                ponto(buf, pose, tb, 34 / 64f, 20 / 64f, nx, luz, over);
-                ponto(buf, pose, fb, 32 / 64f, 20 / 64f, nx, luz, over);
+            float[] vv = {0, vRaiz / 64f, 20 / 64f};
+            for (int seg = 0; seg < 2; seg++) {
+                for (int lado = 0; lado < 2; lado++) {
+                    Vector3f[] c = v[lado][seg], d = v[lado][seg + 1];
+                    // normal da face: para trás (fora) ou para o corpo (dentro)
+                    Vector3f nn = new Vector3f(c[1]).sub(c[0]).cross(new Vector3f(d[0]).sub(c[0])).normalize();
+                    if (lado == 1) nn.negate();
+                    float u0 = lado == 0 ? 0 : 16, u1 = u0 + 16;
+                    if (lado == 0) {
+                        ponto(buf, pose, c[1], u0 / 64f, vv[seg], nn, luz, over);
+                        ponto(buf, pose, c[0], u1 / 64f, vv[seg], nn, luz, over);
+                        ponto(buf, pose, d[0], u1 / 64f, vv[seg + 1], nn, luz, over);
+                        ponto(buf, pose, d[1], u0 / 64f, vv[seg + 1], nn, luz, over);
+                    } else {
+                        ponto(buf, pose, c[0], u0 / 64f, vv[seg], nn, luz, over);
+                        ponto(buf, pose, c[1], u1 / 64f, vv[seg], nn, luz, over);
+                        ponto(buf, pose, d[1], u1 / 64f, vv[seg + 1], nn, luz, over);
+                        ponto(buf, pose, d[0], u0 / 64f, vv[seg + 1], nn, luz, over);
+                    }
+                }
+                // bordas laterais
+                for (int k = 0; k < 2; k++) {
+                    Vector3f nx = new Vector3f(k == 0 ? -1 : 1, 0, 0);
+                    Vector3f f = v[0][seg][k], t = v[1][seg][k], fb = v[0][seg + 1][k], tb = v[1][seg + 1][k];
+                    if (k == 0) {
+                        ponto(buf, pose, t, 34 / 64f, vv[seg], nx, luz, over);
+                        ponto(buf, pose, f, 32 / 64f, vv[seg], nx, luz, over);
+                        ponto(buf, pose, fb, 32 / 64f, vv[seg + 1], nx, luz, over);
+                        ponto(buf, pose, tb, 34 / 64f, vv[seg + 1], nx, luz, over);
+                    } else {
+                        ponto(buf, pose, f, 32 / 64f, vv[seg], nx, luz, over);
+                        ponto(buf, pose, t, 34 / 64f, vv[seg], nx, luz, over);
+                        ponto(buf, pose, tb, 34 / 64f, vv[seg + 1], nx, luz, over);
+                        ponto(buf, pose, fb, 32 / 64f, vv[seg + 1], nx, luz, over);
+                    }
+                }
             }
         });
         ps.popPose();
+    }
+
+    /** Ponto em pixels do modelo, levado de uma parte (cabeça, tronco) para o espaço da raiz; volta em pixels. */
+    private static Vector3f em(Matrix4f parte, float x, float y, float z) {
+        return em(parte, new Vector3f(x, y, z));
+    }
+
+    private static Vector3f em(Matrix4f parte, Vector3f p) {
+        Vector3f r = parte.transformPosition(new Vector3f(p).div(16));
+        return r.mul(16);
     }
 
     /** Saia: um anel em volta do quadril, do cinto (y 9,6) até o meio da coxa, abrindo para baixo. */

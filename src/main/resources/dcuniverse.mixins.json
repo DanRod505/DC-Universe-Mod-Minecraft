@@ -6,6 +6,7 @@
   "client": [
     "AbstractClientPlayerMixin",
     "CameraMixin",
+    "MusicManagerMixin",
     "EntityRendererMixin",
     "LevelRendererMixin",
     "PlayerModelMixin"

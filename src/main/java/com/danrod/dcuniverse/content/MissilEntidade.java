@@ -113,7 +113,7 @@ public class MissilEntidade extends Projectile {
         BlockHitResult bloco = level().clip(new ClipContext(de, ate, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         Vec3 limite = bloco.getType() == HitResult.Type.MISS ? ate : bloco.getLocation();
         EntityHitResult ent = ProjectileUtil.getEntityHitResult(level(), this, de, limite, getBoundingBox().expandTowards(v).inflate(0.8),
-            e -> e instanceof LivingEntity && e.isAlive() && e != getOwner() && !(getOwner() != null && e.getVehicle() != null && e.getVehicle() == getOwner().getVehicle()));
+            e -> Alvos.atingivel(e) && e.isAlive() && e != getOwner() && !(getOwner() != null && e.getVehicle() != null && e.getVehicle() == getOwner().getVehicle()));
         if (ent != null) {
             explodir(ent.getLocation());
         } else if (bloco.getType() != HitResult.Type.MISS || tickCount > 120) {
@@ -161,6 +161,7 @@ public class MissilEntidade extends Projectile {
             e.push(fora.x * 1.2 * f, 0.6 * f, fora.z * 1.2 * f);
             e.hurtMarked = true;
         }
+        Alvos.cristais(dono, new AABB(onde, onde).inflate(raio), damageSources().explosion(this, dono));
         discard();
     }
 }

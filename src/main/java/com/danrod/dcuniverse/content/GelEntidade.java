@@ -146,6 +146,7 @@ public class GelEntidade extends Entity {
             e.push(fora.x * 1.1 * f, 0.5 * f + 0.1, fora.z * 1.1 * f);
             e.hurtMarked = true;
         }
+        Alvos.cristais(quem, new AABB(aqui, aqui).inflate(alcance), damageSources().explosion(this, quem));
         discard();
     }
 

@@ -42,6 +42,7 @@ public final class Cone implements TipoHabilidade {
             Alvos.ferir(player, e, level.damageSources().freeze(), Alvos.dano(p, prm.d("damage_mult", 0.2)) / 2);
             if (congela) Congelamento.expor(e);
         }
+        Alvos.cristais(player, new AABB(olhos, olhos.add(dir.scale(alcance))).inflate(1.5), level.damageSources().freeze());
         if (congela && player.mayBuild()) congelarBlocos(level, player, olhos, dir, alcance);
     }
 

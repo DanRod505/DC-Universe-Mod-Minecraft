@@ -177,10 +177,10 @@ def sg_tronco(n, rnd):
     # brasão menor, curvado pelo busto (luz no alto de cada seio, sombra embaixo)
     for camada in ("corpo", "jaqueta"):
         p = n.face(camada, "frente")
-        brasao(p, 3, 5, ESCUDO_SG, fundo=OURO_SG, letra=VERM_SG, borda=VERM_SG, contorno=CONTORNO_SG)
+        brasao(p, 5, 5, ESCUDO_SG, fundo=OURO_SG, letra=VERM_SG, borda=VERM_SG, contorno=CONTORNO_SG)
         m = dilatar(dilatar(mascara(ESCUDO_SG)))
         for x, y in m:
-            px, py = 3 + x - 2, 5 + y - 2
+            px, py = 5 + x - 2, 5 + y - 2
             hx = altura(BUSTO, px + 0.5, py) - altura(BUSTO, px - 0.5, py)
             hy = altura(BUSTO, px, py + 0.5) - altura(BUSTO, px, py - 0.5)
             p.m(px, py, -0.45 * (0.5 * hx + hy) + 0.04 * altura(BUSTO, px, py))
@@ -560,7 +560,7 @@ def sb_tronco(n):
     for x in range(6, 10):
         f.p(x, 1, tom(CAMISETA, 0.10))
     # escudo do Conner: S vermelho sobre preto, com borda vermelha e chanfro
-    brasao(f, 3, 4, ESCUDO_SB, fundo=hexa("#131317"), letra=VERM_SB, borda=VERM_SB, contorno=hexa("#0C0C0F"))
+    brasao(f, 5, 4, ESCUDO_SB, fundo=hexa("#131317"), letra=VERM_SB, borda=VERM_SB, contorno=hexa("#0C0C0F"))
     # dobras da malha embaixo do escudo
     for x, y in ((5, 15), (6, 16), (9, 17), (10, 16), (4, 18), (11, 19)):
         f.m(x, y, 0.06); f.m(x, y + 1, -0.06)

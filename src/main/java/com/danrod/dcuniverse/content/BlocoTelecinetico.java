@@ -194,6 +194,7 @@ public class BlocoTelecinetico extends Entity {
                 e.hurtMarked = true;
                 vel = vel.scale(0.55);
             }
+            Alvos.cristais(dono, caixa, level.damageSources().thrown(this, dono));
         }
         BlockHitResult hit = level.clip(new ClipContext(de, ate, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         if (hit.getType() != HitResult.Type.MISS) {

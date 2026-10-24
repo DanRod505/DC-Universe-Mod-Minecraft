@@ -100,6 +100,7 @@ public final class Investida implements TipoHabilidade {
             level.sendParticles(ParticleTypes.CRIT, e.getX(), e.getY() + e.getBbHeight() / 2, e.getZ(), 14, 0.3, 0.3, 0.3, 0.35);
             level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2f, 0.7f);
         }
+        Alvos.cristais(p, caminho, level.damageSources().playerAttack(p));
         if (a.quebra && p.mayBuild()) quebrarFrageis(level, p, p.getBoundingBox().inflate(0.45).expandTowards(dir.scale(0.8)));
         a.antes = agora;
         if (a.parado >= 2) {
