@@ -17,4 +17,4 @@ Saídas:
 - `build/libs/dcuniverse-<versão>.jar`: o mod, para colocar na pasta `mods`.
 - `build/distributions/DC-Universe-<versão>-perfil-curseforge.zip`: perfil para o CurseForge (Criar perfil personalizado → Importar), já com Minecraft 26.2, Forge 65.1.0 e o mod.
 
-Cada tag `v*` publica os dois arquivos como release no GitHub. Os documentos de planejamento ficam em `docs/` e são gerados por `python3 tools/gerar_docs.py`.
+Ao entrar na `main` uma versão final (`mod_version` sem `-alpha`), o CI cria sozinho a tag `vX.Y.Z` e a release no GitHub com os dois arquivos. Os documentos de planejamento ficam em `docs/` e são gerados por `python3 tools/gerar_docs.py`.

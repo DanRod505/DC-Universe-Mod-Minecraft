@@ -46,19 +46,64 @@ jobs:
             build/libs/*.jar
             build/distributions/*.zip
 
+  # Release automática: todo push na main com mod_version final (sem "-alpha")
+  # publica a tag vX.Y.Z e a release com o .jar e o perfil .zip, se ainda não
+  # existir. Tag v* criada à mão continua funcionando.
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Decidir se publica
+        id: versao
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            TAG="$GITHUB_REF_NAME"
+          else
+            V=$(grep -E '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')
+            TAG="v$V"
+            if [[ "$V" == *-* ]]; then
+              echo "Versão $V é de teste; sem release."; echo "publicar=false" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG já existe; nada a fazer."; echo "publicar=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "publicar=true" >> "$GITHUB_OUTPUT"
+
+      # Tag sobrando sem release (ex.: release apagada) apontando para outro
+      # commit: move para o commit deste push.
+      - name: Ajustar tag existente
+        if: steps.versao.outputs.publicar == 'true' && github.ref_type != 'tag'
+        run: |
+          TAG="${{ steps.versao.outputs.tag }}"
+          ATUAL=$(gh api "repos/$GH_REPO/commits/$TAG" --jq .sha 2>/dev/null || true)
+          if [[ -n "$ATUAL" && "$ATUAL" != "$GITHUB_SHA" ]]; then
+            echo "Tag $TAG estava em $ATUAL; movendo para $GITHUB_SHA."
+            gh api -X PATCH "repos/$GH_REPO/git/refs/tags/$TAG" -f sha="$GITHUB_SHA" -F force=true
+          fi
+
       - uses: actions/download-artifact@v4
+        if: steps.versao.outputs.publicar == 'true'
         with:
           name: dcuniverse
+
       - uses: softprops/action-gh-release@v2
+        if: steps.versao.outputs.publicar == 'true'
         with:
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          tag_name: ${{ steps.versao.outputs.tag }}
+          name: ${{ steps.versao.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          prerelease: ${{ contains(steps.versao.outputs.tag, '-') }}
           files: |
             libs/*.jar
             distributions/*.zip
