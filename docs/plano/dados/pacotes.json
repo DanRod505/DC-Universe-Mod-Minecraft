@@ -1,0 +1,21 @@
+[
+{"id": "familia_morcego", "nome": "Família Morcego", "n": [46, 47, 56, 33], "extra": "Missão: a noite em que Gotham ficou sem o Batman."},
+{"id": "galeria_gotham", "nome": "Galeria de Gotham", "n": [79, 80, 81, 82], "extra": "Os enigmas do Charada espalhados por Gotham viram uma caçada."},
+{"id": "sombras_gotham", "nome": "Sombras de Gotham", "n": [84, 85, 86, 87], "extra": "Área nova: os esgotos de Gotham e o Poço de Lázaro."},
+{"id": "tropa_lanternas", "nome": "Tropa dos Lanternas Verdes", "n": [7, 10, 9, 43], "extra": "Área nova: o Quartel da Tropa em Oa."},
+{"id": "espectro_emocional", "nome": "Espectro Emocional", "n": [8, 11, 69, 98], "extra": "Evento: a Noite Mais Densa, com Lanternas Negros."},
+{"id": "velocistas", "nome": "Família Flash", "n": [5, 49, 76, 93], "extra": "Corridas pela cidade e a Força de Aceleração como área."},
+{"id": "atlantida", "nome": "Coroa de Atlântida", "n": [13, 50, 92, 96], "extra": "Atlântida aberta para os vilões e uma guerra pelo trono."},
+{"id": "esquadrao_suicida", "nome": "Esquadrão Suicida", "n": [64, 65, 66, 67], "extra": "Área nova: Belle Reve, com missões em grupo de vilões."},
+{"id": "jovens_titas", "nome": "Jovens Titãs", "n": [29, 30, 31, 51], "extra": "Área nova: a Torre Titã."},
+{"id": "lado_mistico", "nome": "Lado Místico", "n": [22, 60, 61, 23], "extra": "Área nova: a Torre do Destino e o Inferno."},
+{"id": "justica_sombria", "nome": "Justiça Sombria", "n": [40, 62, 44, 28], "extra": "Área nova: o Pântano e o Verde."},
+{"id": "quarto_mundo", "nome": "Quarto Mundo", "n": [38, 39, 42, 58], "extra": "Área nova: Nova Gênese."},
+{"id": "guerra_apokolips", "nome": "Guerra de Apokolips", "n": [73, 99, 15, 45], "extra": "Expansão de história: a invasão de Darkseid e o planeta Apokolips."},
+{"id": "ameacas_krypton", "nome": "Ameaças de Krypton", "n": [90, 91, 100, 89], "extra": "Mundo Bizarro e a volta de Apocalypse."},
+{"id": "ceus", "nome": "Guardiões dos Céus", "n": [20, 21, 36, 34], "extra": "Área nova: Thanagar e a Sociedade da Justiça."},
+{"id": "ciencia", "nome": "Gênios e Viajantes", "n": [24, 25, 26, 27], "extra": "O Microverso e uma viagem ao século 25."},
+{"id": "jovem_justica", "nome": "Jovem Justiça", "n": [52, 53, 54, 55], "extra": "Missões furtivas da equipe de jovens heróis."},
+{"id": "heroi_de_rua", "nome": "Heróis de Rua", "n": [19, 41, 68, 70], "extra": "Investigações e o Velho Oeste."},
+{"id": "mentes_brilhantes", "nome": "Mentes Brilhantes", "n": [35, 37, 97, 94], "extra": "Área nova: Cidade dos Gorilas."}
+]

@@ -1,0 +1,64 @@
+{
+"locais": [
+ {"id": "smallville", "nome": "Smallville", "tipo": "cidade", "desc": "Cidadezinha de fazendas no Kansas, com a fazenda Kent, a cratera do meteoro e a nave de Kal-El. É o lugar do prólogo e onde o jogador aprende a jogar.", "atividades": ["Ajudar fazendeiros (trabalho com superforça)", "Resgatar gado de tornados", "Corridas de voo pelos milharais", "Colecionáveis: pedaços de meteoro"]},
+ {"id": "metropolis", "nome": "Metrópolis", "tipo": "cidade", "desc": "Cidade do amanhã, com prédios de vidro, o Planeta Diário e a torre da LexCorp. Ensolarada e cheia de gente.", "atividades": ["Crimes e assaltos em andamento", "Resgatar civis de prédios em chamas e de acidentes", "Desafios de voo entre os arranha-céus", "Reportagens para o Planeta Diário (identidade secreta)"]},
+ {"id": "gotham", "nome": "Gotham", "tipo": "cidade", "desc": "Cidade gótica, chuvosa e escura, com gárgulas, becos, o porto e as gangues dos vilões. Sempre de noite enquanto o jogador está lá.", "atividades": ["Gangues atacando bairros", "Troféus do Charada", "Investigações com o Modo Detetive", "Telhados para predador e planar"]},
+ {"id": "central_city", "nome": "Central City", "tipo": "cidade", "desc": "Cidade de tijolos vermelhos com o laboratório S.T.A.R. e ruas longas e retas, feitas para correr.", "atividades": ["Corridas contra o tempo", "Roubos dos Vilões", "Evacuar áreas em segundos", "Fendas da Força de Aceleração"]},
+ {"id": "star_city", "nome": "Star City", "tipo": "cidade", "desc": "Cidade portuária dividida entre a orla rica e o bairro pobre de Glades, perfeita para tirolesas e flechas.", "atividades": ["Proteger Glades", "Contratos de mercenário", "Caçar traficantes", "Torres de rádio para hackear"]},
+ {"id": "themyscira", "nome": "Themyscira", "tipo": "reino", "desc": "Ilha escondida das amazonas, com templos gregos de mármore, arenas e florestas. Só se entra a convite ou pela história.", "atividades": ["Treinos e torneios na arena", "Provas dos deuses", "Bestas mitológicas", "Forja de Hefesto"]},
+ {"id": "atlantida", "nome": "Atlântida", "tipo": "reino", "desc": "Reino submerso com cúpulas de luz, jardins de coral e as fossas profundas onde vivem criaturas antigas.", "atividades": ["Corridas de montaria marinha", "Ruínas e tesouros afundados", "Expedições à Fossa", "Defesa contra caçadores de baleias"]},
+ {"id": "kahndaq", "nome": "Kahndaq", "tipo": "reino", "desc": "Reino do deserto com cidades de pedra, templos egípcios e a tumba de Teth-Adam.", "atividades": ["Tumbas com armadilhas", "Libertar vilarejos", "Tempestades de areia", "Relíquias dos deuses"]},
+ {"id": "oa", "nome": "Oa", "tipo": "reino", "desc": "Planeta no centro do universo, sede da Tropa dos Lanternas Verdes e da Bateria Central. Chega-se por um portal do anel.", "atividades": ["Treino de construtos", "Missões em outros setores", "Defesa da Bateria Central", "Provas de vontade"]},
+ {"id": "rocha_eternidade", "nome": "Rocha da Eternidade", "tipo": "reino", "desc": "Templo mágico fora do tempo, onde vive o mago Shazam e estão presos os Sete Pecados.", "atividades": ["Portas mágicas para outros lugares", "Provas dos deuses", "Prender pecados fugitivos"]},
+ {"id": "zona_fantasma", "nome": "Zona Fantasma", "tipo": "reino", "desc": "Dimensão-prisão de Krypton, branca e silenciosa, sem gravidade normal.", "atividades": ["Escapar sem poderes", "Prisioneiros kryptonianos", "Fendas de volta"]},
+ {"id": "torre_vigilancia", "nome": "Torre de Vigilância", "tipo": "base", "desc": "Satélite da Liga da Justiça em órbita. Base dos heróis: troca de personagem, missões da Liga, sala de troféus e teleporte para as cidades.", "atividades": ["Troca livre de personagem", "Bancada de melhorias", "Sala de treino (Desafios de Combate)", "Teleporte"]},
+ {"id": "salao_legiao", "nome": "Salão da Legião do Mal", "tipo": "base", "desc": "A base dos vilões, escondida num pântano, com o capacete gigante. Missões de vilão, troca de personagem e loja do mercado negro.", "atividades": ["Troca livre de personagem", "Contratos de vilão", "Mercado negro", "Teleporte"]},
+ {"id": "batcaverna", "nome": "Batcaverna", "tipo": "base", "desc": "Debaixo da Mansão Wayne. Batcomputador, veículos, troféus e a garagem.", "atividades": ["Batcomputador (investigação e fabricação de gadgets)", "Garagem de veículos", "Treino"]},
+ {"id": "fortaleza", "nome": "Fortaleza da Solidão", "tipo": "base", "desc": "Cristal no Ártico com a memória de Krypton, o zoológico intergaláctico e a Kandor engarrafada.", "atividades": ["Câmara solar", "Arquivos de Krypton (lore)", "Prova da Zona Fantasma"]},
+ {"id": "arkham", "nome": "Asilo Arkham", "tipo": "masmorra", "desc": "Asilo na ilha de Gotham tomado pelo Coringa. Alas fechadas com quebra-cabeças, capangas e vilões presos em cada uma.", "atividades": ["Alas com chefes intermediários", "Gravações dos internos (lore)", "Fuga em massa"]},
+ {"id": "lexcorp", "nome": "Torre LexCorp", "tipo": "masmorra", "desc": "Arranha-céu de Lex em Metrópolis, andar por andar até o laboratório secreto no topo.", "atividades": ["Andares com segurança robótica", "Laboratórios de kryptonita", "Fuga pelo elevador"]},
+ {"id": "nave_cranio", "nome": "Nave Crânio de Brainiac", "tipo": "masmorra", "desc": "Nave gigante em forma de crânio que coleciona cidades em garrafas. É a masmorra final do jogo base.", "atividades": ["Cidades engarrafadas para libertar", "Drones e robôs de coleta", "Núcleo de Brainiac"]}
+],
+"chefes": [
+ {"id": "sonda_brainiac", "nome": "Sonda de Brainiac", "local": "smallville", "fases": ["Drone gigante que escaneia a fazenda", "Garras que arrancam pedaços do terreno", "Núcleo exposto"], "jogavel": false},
+ {"id": "coringa", "nome": "Coringa", "local": "arkham", "fases": ["Show de horrores com capangas e armadilhas", "Coringa com gás e bombas", "Coringa monstruoso com Titã (veneno de Bane)"], "jogavel": true},
+ {"id": "bane", "nome": "Bane", "local": "gotham", "fases": ["Duelo tático", "Bane com Veneno", "Bane Titã quebrando a arena"], "jogavel": true},
+ {"id": "lex_luthor", "nome": "Lex Luthor", "local": "lexcorp", "fases": ["Drones e torres", "Armadura de guerra", "Armadura suprema com kryptonita"], "jogavel": true},
+ {"id": "zod", "nome": "General Zod", "local": "metropolis", "fases": ["Luta no céu", "Zod com soldados", "Zod na armadura com a cidade desabando"], "jogavel": true},
+ {"id": "flash_reverso", "nome": "Flash Reverso", "local": "central_city", "fases": ["Perseguição pela cidade", "Paradoxos (cópias dele)", "Duelo na Força de Aceleração"], "jogavel": true},
+ {"id": "capitao_frio", "nome": "Capitão Frio e os Vilões", "local": "central_city", "fases": ["Assalto ao banco", "Rinque de gelo", "Todos os Vilões juntos"], "jogavel": true},
+ {"id": "sinestro", "nome": "Sinestro", "local": "oa", "fases": ["Duelo de construtos", "Tropa Sinestro", "Parallax"], "jogavel": true},
+ {"id": "ares", "nome": "Ares", "local": "themyscira", "fases": ["Exército de esqueletos", "Ares com armas da guerra", "Ares gigante"], "jogavel": false},
+ {"id": "orm", "nome": "Mestre dos Oceanos", "local": "atlantida", "fases": ["Duelo na arena atlante", "Exército de Orm", "Criatura da Fossa"], "jogavel": false},
+ {"id": "adao_negro", "nome": "Adão Negro", "local": "kahndaq", "fases": ["Duelo no deserto", "Tempestade de areia", "Fúria dos deuses"], "jogavel": true},
+ {"id": "brainiac", "nome": "Brainiac", "local": "nave_cranio", "fases": ["Brainiac e drones", "Brainiac absorve poderes dos heróis", "Brainiac Coluan gigante no núcleo"], "jogavel": false}
+],
+"inimigos": [
+ {"nome": "Capanga", "papel": "Básico: ataca em grupo e espera a vez."},
+ {"nome": "Capanga com escudo", "papel": "Bloqueia de frente: precisa de salto, investida ou quebra de guarda."},
+ {"nome": "Atirador", "papel": "Fica longe e atira: precisa de mobilidade ou reflexo."},
+ {"nome": "Brutamontes", "papel": "Não cambaleia: esquive e ataque pelas costas."},
+ {"nome": "Ágil", "papel": "Esquiva e ataca rápido: precisa de controle."},
+ {"nome": "Especialista", "papel": "Cura, eletrifica ou dá escudo aos outros: derrube primeiro."},
+ {"nome": "Mini-chefe", "papel": "Um capanga especial com nome, fases curtas e um golpe próprio."}
+],
+"faccoes": [
+ {"nome": "Gangue do Coringa", "local": "gotham"}, {"nome": "Homens do Bane", "local": "gotham"}, {"nome": "Segurança LexCorp", "local": "metropolis"},
+ {"nome": "Soldados Kryptonianos", "local": "metropolis"}, {"nome": "Vilões de Central City", "local": "central_city"}, {"nome": "Tropa Sinestro", "local": "oa"},
+ {"nome": "Exército de Ares", "local": "themyscira"}, {"nome": "Guarda de Orm", "local": "atlantida"}, {"nome": "Drones de Brainiac", "local": "nave_cranio"}
+],
+"capitulos": [
+ {"id": "prologo", "ato": "Prólogo", "nome": "O Último Filho", "local": "smallville", "chefe": "sonda_brainiac", "missoes": ["Acordar na fazenda e escolher quem você é (o prólogo se adapta ao personagem escolhido)", "A nave de Kal-El e o primeiro aviso de Brainiac", "A Sonda ataca Smallville"]},
+ {"id": "gotham", "ato": "Ato 1: Cidades em Perigo", "nome": "A Piada Mortal", "local": "arkham", "chefe": "coringa", "missoes": ["Gotham sem luz: o Coringa toma o Arkham", "As alas do Arkham", "O show do Coringa"]},
+ {"id": "quebra", "ato": "Ato 1: Cidades em Perigo", "nome": "A Queda do Morcego", "local": "gotham", "chefe": "bane", "missoes": ["Os presos fugiram", "Bane quebra Gotham bairro por bairro", "Duelo no telhado"]},
+ {"id": "lexcorp", "ato": "Ato 1: Cidades em Perigo", "nome": "Homem do Amanhã", "local": "lexcorp", "chefe": "lex_luthor", "missoes": ["Lex compra tecnologia de Brainiac", "Invadir a LexCorp", "A armadura de guerra"]},
+ {"id": "zod", "ato": "Ato 1: Cidades em Perigo", "nome": "Ajoelhe-se diante de Zod", "local": "metropolis", "chefe": "zod", "missoes": ["A Zona Fantasma se abre", "Metrópolis invadida", "Batalha no céu"]},
+ {"id": "central", "ato": "Ato 2: Velocidade e Vontade", "nome": "Os Vilões", "local": "central_city", "chefe": "capitao_frio", "missoes": ["Assaltos em toda a cidade", "O plano de Snart", "Rinque de gelo"]},
+ {"id": "reverso", "ato": "Ato 2: Velocidade e Vontade", "nome": "Ponto de Ignição", "local": "central_city", "chefe": "flash_reverso", "missoes": ["A linha do tempo quebra", "Ecos de outro mundo", "Corrida pela Força de Aceleração"]},
+ {"id": "oa", "ato": "Ato 2: Velocidade e Vontade", "nome": "A Guerra dos Anéis", "local": "oa", "chefe": "sinestro", "missoes": ["O chamado do anel", "Oa sitiada", "Parallax"]},
+ {"id": "themyscira", "ato": "Ato 3: Reinos Ocultos", "nome": "Deuses e Guerreiras", "local": "themyscira", "chefe": "ares", "missoes": ["A ilha escondida", "As provas dos deuses", "A guerra de Ares"]},
+ {"id": "atlantida", "ato": "Ato 3: Reinos Ocultos", "nome": "O Trono de Atlântida", "local": "atlantida", "chefe": "orm", "missoes": ["Ataque à costa", "Descida a Atlântida", "Duelo pelo trono"]},
+ {"id": "kahndaq", "ato": "Ato 3: Reinos Ocultos", "nome": "O Campeão Esquecido", "local": "kahndaq", "chefe": "adao_negro", "missoes": ["A tumba de Teth-Adam", "Kahndaq livre", "Shazam contra Adão Negro"]},
+ {"id": "colecao", "ato": "Ato 4: A Coleção", "nome": "A Coleção", "local": "nave_cranio", "chefe": "brainiac", "missoes": ["Brainiac engarrafa Metrópolis", "Liga e Legião juntas (heróis e vilões lado a lado)", "As cidades engarrafadas", "O núcleo de Brainiac"]}
+]
+}

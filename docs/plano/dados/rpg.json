@@ -1,0 +1,37 @@
+{
+"atributos": [
+ {"nome": "Força", "desc": "Dano dos golpes corpo a corpo e peso que dá para levantar."},
+ {"nome": "Poder", "desc": "Dano e alcance das habilidades."},
+ {"nome": "Defesa", "desc": "Redução de dano e resistência a cambalear."},
+ {"nome": "Vitalidade", "desc": "Vida máxima e regeneração."},
+ {"nome": "Energia", "desc": "Tamanho e recarga do recurso do personagem."},
+ {"nome": "Agilidade", "desc": "Velocidade de ataque, janela de esquiva e de aparar."}
+],
+"progressao": [
+ "Cada personagem tem nível próprio, de 1 a 30, ganho lutando, completando missões, atividades e desafios.",
+ "Cada nível dá 1 ponto de habilidade para a árvore do personagem (3 ramos, com melhorias e golpes novos).",
+ "Os atributos sobem com o nível conforme o arquétipo, e o equipamento dá o resto.",
+ "Nível da Liga (conta): soma dos níveis de todos os personagens. Ele destrava trajes, áreas e a dificuldade Lenda.",
+ "Nada se perde ao trocar de personagem: cada um guarda o próprio nível, a árvore, os trajes e o equipamento."
+],
+"equipamento": [
+ {"slot": "Traje", "desc": "Muda o visual e dá um bônus passivo. Cada personagem tem 3 no jogo base, e outros vêm de desafios e pacotes."},
+ {"slot": "Emblema", "desc": "Símbolo do herói ou do vilão, com atributos principais. Ex.: Emblema de Krypton (Força e Poder)."},
+ {"slot": "Acessório", "desc": "Anel, bracelete, cinto, máscara. Atributos e um efeito extra."},
+ {"slot": "Artefato", "desc": "Objeto raro com um efeito único (ex.: Pena de Mercúrio: esquiva dupla; Pedra de Lázaro: volta uma vez com metade da vida)."}
+],
+"raridades": ["Comum", "Raro", "Épico", "Lendário"],
+"materiais": [
+ {"nome": "Fragmento de Kryptonita", "origem": "Cratera de Smallville, LexCorp, soldados de Zod"},
+ {"nome": "Tecnologia Alienígena", "origem": "Drones e sondas de Brainiac"},
+ {"nome": "Peças LexCorp", "origem": "Robôs e drones da LexCorp"},
+ {"nome": "Insígnia de Gangue", "origem": "Capangas de Gotham e de Central City"},
+ {"nome": "Oricalco", "origem": "Themyscira e Atlântida"},
+ {"nome": "Energia do Espectro", "origem": "Oa e a Tropa Sinestro"},
+ {"nome": "Relíquia dos Deuses", "origem": "Kahndaq, Themyscira e a Rocha da Eternidade"},
+ {"nome": "Núcleo de Chefe", "origem": "Um por chefe, usado em itens lendários"}
+],
+"melhoria": "Equipamento e trajes melhoram na bancada das bases (Torre de Vigilância, Batcaverna, Salão da Legião, Fortaleza) usando materiais. O Batcomputador continua sendo a fábrica de gadgets.",
+"sandbox": "Minerar, construir e craftar itens do Minecraft continuam iguais. Os minérios do mod (kryptonita, oricalco, metal Nth) continuam no mundo como fonte de materiais. O servidor pode ligar o modo sandbox: todos os personagens desde o início, sem nível mínimo e com emblemas craftáveis.",
+"dificuldades": ["História (combate leve)", "Herói (padrão)", "Lenda (inimigos mais espertos, menos avisos, loot melhor)"]
+}
