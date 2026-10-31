@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
  * Peça genérica de estrutura: guarda só o id da planta, a origem, a rotação e a semente; a planta
  * (registrada em {@link Estruturas#PLANTAS}) redesenha tudo em cada chunk que a peça toca.
  */
-public final class PecaObra extends StructurePiece implements net.minecraftforge.common.world.PieceBeardifierModifier {
+public final class PecaObra extends StructurePiece implements net.neoforged.neoforge.common.world.PieceBeardifierModifier {
     private final String planta;
     private final BlockPos origem;
     private final Rotation rot;

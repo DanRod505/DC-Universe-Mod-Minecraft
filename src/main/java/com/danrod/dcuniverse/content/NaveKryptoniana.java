@@ -26,10 +26,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import org.joml.Vector3f;
 
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * A nave kryptoniana da Supergirl (vehicle, model nave_kryptoniana): a cápsula de cristal de Argo vinda do céu, que
@@ -179,11 +181,11 @@ public class NaveKryptoniana extends BatwingEntidade {
 
     /** Com o escudo ligado, quem está dentro da nave não se machuca e o golpe acende a onda no cristal. */
     public static void registrar() {
-        LivingAttackEvent.BUS.addListener((Predicate<LivingAttackEvent>) e -> {
+        NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, Eventos.cancela((Predicate<LivingIncomingDamageEvent>) e -> {
             if (!(e.getEntity().getVehicle() instanceof NaveKryptoniana n) || !n.escudoAtivo()) return false;
             n.golpe();
             return true;
-        });
+        }));
     }
 
     private void golpe() {

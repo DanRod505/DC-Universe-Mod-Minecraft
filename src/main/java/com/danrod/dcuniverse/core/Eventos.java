@@ -16,19 +16,26 @@ import com.danrod.dcuniverse.guia.Guia;
 import com.danrod.dcuniverse.suit.Traje;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.listener.Priority;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.EventPriority;
 
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.DCUniverse;
+import net.neoforged.neoforge.common.NeoForge;
 
 /** Eventos do lado do servidor (lógico). */
 public final class Eventos {
@@ -37,48 +44,59 @@ public final class Eventos {
 
     private Eventos() {}
 
+    /** Ouvinte que cancela o evento quando o teste dá true (o jeito do EventBus do Forge, que o mod usava). */
+    private static net.minecraft.resources.Identifier id(String nome) {
+        return net.minecraft.resources.Identifier.fromNamespaceAndPath(com.danrod.dcuniverse.DCUniverse.MODID, nome);
+    }
+
+    public static <E extends Event & ICancellableEvent> Consumer<E> cancela(Predicate<E> teste) {
+        return e -> {
+            if (teste.test(e)) e.setCanceled(true);
+        };
+    }
+
     public static void registrar() {
-        AddReloadListenerEvent.BUS.addListener(e -> {
-            e.addListener(new Personagens());
-            e.addListener(new com.danrod.dcuniverse.npc.Npcs.CarregarNpcs());
-            e.addListener(new com.danrod.dcuniverse.npc.Npcs.CarregarMissoes());
+        NeoForge.EVENT_BUS.addListener(AddServerReloadListenersEvent.class, e -> {
+            e.addListener(id("personagens"), new Personagens());
+            e.addListener(id("npcs"), new com.danrod.dcuniverse.npc.Npcs.CarregarNpcs());
+            e.addListener(id("missoes"), new com.danrod.dcuniverse.npc.Npcs.CarregarMissoes());
         });
-        net.minecraftforge.event.entity.EntityAttributeCreationEvent.BUS.addListener(e -> {
+        DCUniverse.modBus().addListener(net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent.class, e -> {
             e.put(com.danrod.dcuniverse.content.Entidades.NPC.get(), com.danrod.dcuniverse.npc.NpcEntidade.atributos().build());
             e.put(com.danrod.dcuniverse.content.Entidades.NPC_SLIM.get(), com.danrod.dcuniverse.npc.NpcEntidade.atributos().build());
             e.put(com.danrod.dcuniverse.content.Entidades.KRYPTO.get(), com.danrod.dcuniverse.npc.Krypto.atributos().build());
             e.put(com.danrod.dcuniverse.content.Entidades.STREAKY.get(), com.danrod.dcuniverse.npc.Streaky.atributos().build());
         });
-        RegisterCommandsEvent.BUS.addListener(e -> Comandos.registrar(e.getDispatcher()));
+        NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, e -> Comandos.registrar(e.getDispatcher()));
         // Vale no login e a cada /reload: o Guia mostra os personagens exatamente como o servidor os carregou.
-        OnDatapackSyncEvent.BUS.addListener(e -> e.getPlayers().forEach(p -> {
+        NeoForge.EVENT_BUS.addListener(OnDatapackSyncEvent.class, e -> e.getRelevantPlayers().forEach(p -> {
             Rede.catalogo(p);
             Rede.npcCatalogo(p);
         }));
-        TickEvent.PlayerTickEvent.Post.BUS.addListener(e -> {
-            if (e.player() instanceof ServerPlayer sp) tick(sp);
+        NeoForge.EVENT_BUS.addListener(PlayerTickEvent.Post.class, e -> {
+            if (e.getEntity() instanceof ServerPlayer sp) tick(sp);
         });
-        LivingDeathEvent.BUS.addListener(Priority.HIGHEST, (Predicate<LivingDeathEvent>) e -> {
+        NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.HIGHEST, false, LivingDeathEvent.class, Eventos.cancela((Predicate<LivingDeathEvent>) e -> {
             // Decisão 3: destransforma antes do drop; a armadura original cai normalmente, o traje nunca.
             if (e.getEntity() instanceof ServerPlayer sp && EstadoJogador.de(sp).transformado()) Transformacao.destransformar(sp);
             return false;
-        });
-        LivingDeathEvent.BUS.addListener(e -> {
+        }));
+        NeoForge.EVENT_BUS.addListener(LivingDeathEvent.class, e -> {
             if (e.getSource().getEntity() instanceof ServerPlayer sp && !(e.getEntity() instanceof net.minecraft.world.entity.player.Player)) {
                 com.danrod.dcuniverse.missao.Diario.abateu(sp, e.getEntity());
                 if (e.getEntity() instanceof net.minecraft.world.entity.monster.Enemy) com.danrod.dcuniverse.npc.Afinidade.protegeu(sp, e.getEntity());
             }
         });
-        PlayerEvent.ItemCraftedEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.ItemCraftedEvent.class, e -> {
             if (e.getEntity() instanceof ServerPlayer sp) com.danrod.dcuniverse.missao.Diario.fabricou(sp, e.getCrafting());
         });
-        EntityJoinLevelEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(EntityJoinLevelEvent.class, e -> {
             if (e.getEntity() instanceof net.minecraft.world.entity.monster.Creeper c && !e.getLevel().isClientSide()) com.danrod.dcuniverse.npc.Streaky.assustar(c);
         });
-        LivingFallEvent.BUS.addListener((Predicate<LivingFallEvent>) e -> e.getEntity() instanceof ServerPlayer sp && Passivas.semQueda(sp));
-        ItemTossEvent.BUS.addListener((Predicate<ItemTossEvent>) e -> Traje.ehTraje(e.getEntity().getItem()));
-        EntityJoinLevelEvent.BUS.addListener((Predicate<EntityJoinLevelEvent>) e -> e.getEntity() instanceof ItemEntity item && Traje.ehTraje(item.getItem()));
-        PlayerEvent.PlayerLoggedInEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(LivingFallEvent.class, Eventos.cancela((Predicate<LivingFallEvent>) e -> e.getEntity() instanceof ServerPlayer sp && Passivas.semQueda(sp)));
+        NeoForge.EVENT_BUS.addListener(ItemTossEvent.class, Eventos.cancela((Predicate<ItemTossEvent>) e -> Traje.ehTraje(e.getEntity().getItem())));
+        NeoForge.EVENT_BUS.addListener(EntityJoinLevelEvent.class, Eventos.cancela((Predicate<EntityJoinLevelEvent>) e -> e.getEntity() instanceof ItemEntity item && Traje.ehTraje(item.getItem())));
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedInEvent.class, e -> {
             if (e.getEntity() instanceof ServerPlayer p) {
                 Guia.darGuia(p);
                 Rede.guia(p, "");
@@ -87,15 +105,15 @@ public final class Eventos {
             }
             sync(e.getEntity());
         });
-        PlayerEvent.PlayerRespawnEvent.BUS.addListener(e -> sync(e.getEntity()));
-        PlayerEvent.PlayerLoggedOutEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerRespawnEvent.class, e -> sync(e.getEntity()));
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedOutEvent.class, e -> {
             if (e.getEntity() instanceof ServerPlayer sp) {
                 DemoHud.parar(sp);
                 com.danrod.dcuniverse.world.estrutura.Chegada.sair(sp);
                 com.danrod.dcuniverse.npc.Dialogo.fechar(sp);
             }
         });
-        PlayerEvent.StartTracking.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.StartTracking.class, e -> {
             if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof com.danrod.dcuniverse.content.IlhaTelecinetica ilha) {
                 Rede.ilha(quem, ilha.pacote());
             }
@@ -106,25 +124,25 @@ public final class Eventos {
                 if (id != null) Guia.descobrir(quem, id);
             }
         });
-        PlayerEvent.PlayerChangedDimensionEvent.BUS.addListener(e -> sync(e.getEntity()));
-        TickEvent.ServerTickEvent.Post.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerChangedDimensionEvent.class, e -> sync(e.getEntity()));
+        NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, e -> {
             Onda.tick();
             com.danrod.dcuniverse.ability.Congelamento.tick();
             Fortaleza.tick();
             com.danrod.dcuniverse.missao.Cenas.tick();
             com.danrod.dcuniverse.missao.Cenas.tickFumaca();
-            com.danrod.dcuniverse.liga.Liga.tick(e.server());
+            com.danrod.dcuniverse.liga.Liga.tick(e.getServer());
             com.danrod.dcuniverse.ability.active.Gancho.tick();
-            com.danrod.dcuniverse.ability.active.Fumaca.tick(e.server());
+            com.danrod.dcuniverse.ability.active.Fumaca.tick(e.getServer());
             com.danrod.dcuniverse.ability.active.Disruptor.tick();
             com.danrod.dcuniverse.ability.active.Investida.tick();
-            com.danrod.dcuniverse.ability.active.Telecinese.tick(e.server());
+            com.danrod.dcuniverse.ability.active.Telecinese.tick(e.getServer());
             com.danrod.dcuniverse.ability.active.EscudoTk.tick();
             com.danrod.dcuniverse.ability.active.Ilha.tick();
-            for (var level : e.server().getAllLevels()) com.danrod.dcuniverse.content.Teias.tick(level);
+            for (var level : e.getServer().getAllLevels()) com.danrod.dcuniverse.content.Teias.tick(level);
         });
-        net.minecraftforge.event.server.ServerStartedEvent.BUS.addListener(e -> com.danrod.dcuniverse.inicio.Inicio.ajustarNascimento(e.getServer()));
-        ServerStoppingEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.server.ServerStartedEvent.class, e -> com.danrod.dcuniverse.inicio.Inicio.ajustarNascimento(e.getServer()));
+        NeoForge.EVENT_BUS.addListener(ServerStoppingEvent.class, e -> {
             com.danrod.dcuniverse.inicio.Inicio.limpar();
             Onda.limpar();
             com.danrod.dcuniverse.ability.Congelamento.limpar();

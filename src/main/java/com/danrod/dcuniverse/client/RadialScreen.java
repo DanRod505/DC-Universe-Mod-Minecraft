@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.Locale;
@@ -74,7 +73,7 @@ public final class RadialScreen extends Screen {
     private void escolherEFechar() {
         int i = hover();
         if (i >= 0 && i != EstadoCliente.atual.selecionada()) {
-            Rede.CANAL.send(new Rede.Selecionar(i), PacketDistributor.SERVER.noArg());
+            Rede.CANAL.send(new Rede.Selecionar(i), com.danrod.dcuniverse.core.Canal.SERVIDOR);
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.4f, 0.5f));
         }
         onClose();

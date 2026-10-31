@@ -21,7 +21,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
@@ -200,7 +199,7 @@ public final class Gancheador {
         c.recolheEm = agora;
         puxando = 0;
         parado = 0;
-        Rede.CANAL.send(new Rede.GanchoFim(), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.GanchoFim(), com.danrod.dcuniverse.core.Canal.SERVIDOR);
     }
 
     /** Ponto onde a garra está presa (segue a entidade presa). */

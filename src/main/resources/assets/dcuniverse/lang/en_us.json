@@ -928,5 +928,17 @@
   "dcuniverse.local.atlantida": "Atlantis",
   "dcuniverse.local.fossa": "The Trench",
   "dcuniverse.local.nanda_parbat": "Nanda Parbat",
-  "dcuniverse.local.fortaleza": "Fortress of Solitude"
+  "dcuniverse.local.fortaleza": "Fortress of Solitude",
+  "key.dcuniverse.diretor": "Director Mode (free camera for recording)",
+  "key.dcuniverse.diretor_lento": "Director Mode: slow motion",
+  "key.dcuniverse.diretor_rapido": "Director Mode: normal speed",
+  "dcuniverse.diretor.entrou": "Director Mode: WASD, space and shift move the camera, Ctrl speeds up, the mouse wheel changes speed, [ and ] control slow motion. F6 exits.",
+  "dcuniverse.diretor.tempo": "Director Mode: world at %s%% speed.",
+  "dcuniverse.diretor.sem_permissao": "Slow motion is only for players who can use commands in this world.",
+  "dcuniverse.flashback.instalar": "Install Flashback (recording)",
+  "dcuniverse.flashback.baixando": "Downloading Flashback: %s%%",
+  "dcuniverse.flashback.pronto": "Flashback ready: restart",
+  "dcuniverse.flashback.erro": "Download failed: try again",
+  "dcuniverse.flashback.pergunta": "Install Flashback?",
+  "dcuniverse.flashback.explica": "Flashback (by Moulberry) records replays for editing videos. It can't ship inside the pack, so the game downloads version %s, tested with DC Universe, from Modrinth (about 200 MB) into the mods folder. Then just restart the game."
 }

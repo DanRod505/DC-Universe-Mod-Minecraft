@@ -31,7 +31,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -923,7 +923,7 @@ public final class Testes {
         p.setShiftKeyDown(true);
         // Só a passiva do contra-ataque (a visão noturna manda pacote, que o jogador de teste não tem).
         com.danrod.dcuniverse.ability.TiposPassiva.TIPOS.get("counter").tick(p, bat.passiva("counter").params());
-        // (O jogador de teste não pode levar dano: chama direto o que o LivingAttackEvent chama.)
+        // (O jogador de teste não pode levar dano: chama direto o que o LivingIncomingDamageEvent chama.)
         h.assertTrue(com.danrod.dcuniverse.ability.passive.ContraAtaque.defender(p, zumbi, zumbi), "golpe anulado");
         h.assertTrue(zumbi.getHealth() < vidaZumbi, "devolveu o golpe");
         h.assertTrue(zumbi.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "atordoado");

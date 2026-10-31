@@ -12,10 +12,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Passivas "naturais", que agem pelos eventos do jogo em vez de um tick:
@@ -26,15 +28,15 @@ public final class Naturais {
     private Naturais() {}
 
     public static void registrar() {
-        PlayerEvent.BreakSpeed.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.BreakSpeed.class, e -> {
             float vel = velocidadeMao(e.getEntity(), e.getState());
             if (vel > 0) e.setNewSpeed(Math.max(e.getOriginalSpeed(), vel));
         });
-        PlayerEvent.HarvestCheck.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.HarvestCheck.class, e -> {
             if (!e.canHarvest() && velocidadeMao(e.getEntity(), e.getTargetBlock()) > 0) e.setCanHarvest(true);
         });
-        LivingAttackEvent.BUS.addListener((Predicate<LivingAttackEvent>) e -> e.getEntity() instanceof ServerPlayer sp
-            && ricocheteia(sp, e.getSource().is(DamageTypeTags.IS_PROJECTILE), e.getAmount(), e.getSource().getDirectEntity()));
+        NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, Eventos.cancela((Predicate<LivingIncomingDamageEvent>) e -> e.getEntity() instanceof ServerPlayer sp
+            && ricocheteia(sp, e.getSource().is(DamageTypeTags.IS_PROJECTILE), e.getAmount(), e.getSource().getDirectEntity())));
     }
 
     /** Velocidade de quebra da superforça com a mão vazia para esse bloco (0 = não vale). */

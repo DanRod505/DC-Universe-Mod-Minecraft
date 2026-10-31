@@ -13,7 +13,7 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityTypes;
-import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 /**
  * Coleira do S nos cães e gatos do jogo: a mesma capinha do Krypto (vermelha com o S), presa no pescoço. Filhotes não
@@ -33,9 +33,9 @@ public final class ColeiraCamada<S extends LivingEntityRenderState, M extends En
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void registrar() {
-        EntityRenderersEvent.AddLayers.BUS.addListener(e -> {
-            if (e.getEntityRenderer(EntityTypes.WOLF) instanceof LivingEntityRenderer r) r.addLayer(new ColeiraCamada(r, true));
-            if (e.getEntityRenderer(EntityTypes.CAT) instanceof LivingEntityRenderer r) r.addLayer(new ColeiraCamada(r, false));
+        DCUniverse.modBus().addListener(EntityRenderersEvent.AddLayers.class, e -> {
+            if (e.getRenderer(EntityTypes.WOLF) instanceof LivingEntityRenderer r) r.addLayer(new ColeiraCamada(r, true));
+            if (e.getRenderer(EntityTypes.CAT) instanceof LivingEntityRenderer r) r.addLayer(new ColeiraCamada(r, false));
         });
     }
 

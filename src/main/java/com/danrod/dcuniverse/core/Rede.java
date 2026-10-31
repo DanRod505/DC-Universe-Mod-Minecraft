@@ -16,10 +16,6 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.network.CustomPayloadEvent;
-import net.minecraftforge.network.ChannelBuilder;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.SimpleChannel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +25,7 @@ import java.util.function.Consumer;
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
     private static final int VERSAO = 13;
-    public static final SimpleChannel CANAL = ChannelBuilder
-        .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
-        .networkProtocolVersion(VERSAO)
-        .simpleChannel();
+    public static final Canal CANAL = new Canal(VERSAO);
 
     /**
      * Uma habilidade como o cliente precisa ver: menu radial e HUD. Gadgets com munição mandam as cargas
@@ -490,6 +483,9 @@ public final class Rede {
     /** Pedido do mapa do mundo (tecla M). */
     public record MapaPedir() {}
 
+    /** Modo Diretor: câmera lenta (fração da velocidade normal do mundo). */
+    public record DiretorTempo(float fator) {}
+
     private Rede() {}
 
     public static void registrar() {
@@ -510,6 +506,11 @@ public final class Rede {
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> {}).decoder(b -> new MapaPedir())
             .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.inicio.Inicio.abrir(p, false)))
+            .add();
+        CANAL.messageBuilder(DiretorTempo.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeFloat(m.fator())).decoder(b -> new DiretorTempo(b.readFloat()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Diretor.tempo(p, m.fator())))
             .add();
         CANAL.messageBuilder(Sync.class)
             .direction(PacketFlow.CLIENTBOUND)
@@ -711,22 +712,22 @@ public final class Rede {
     /** Mostra um efeito para todos perto do ponto (até 96 blocos). */
     public static void efeito(ServerLevel level, double x, double y, double z, String tipo, float a, float b, int cor) {
         CANAL.send(new Efeito(tipo, x, y, z, a, b, cor),
-            PacketDistributor.NEAR.with(new PacketDistributor.TargetPoint(x, y, z, 96 * 96, level.dimension())));
+            Canal.perto(level, x, y, z, 96));
     }
 
     /** Cabo do gancho do jogador, para ele e para quem está vendo. */
     public static void gancho(ServerPlayer player, int modo, net.minecraft.world.phys.Vec3 ancora, int alvo, float vel) {
         if (player.connection == null) return;
-        CANAL.send(new GanchoVisto(player.getId(), modo, ancora.x, ancora.y, ancora.z, alvo, vel), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(player));
+        CANAL.send(new GanchoVisto(player.getId(), modo, ancora.x, ancora.y, ancora.z, alvo, vel), Canal.rastreandoEProprio(player));
     }
 
     /** Mostra um efeito só para um jogador (ex.: raio X, que só quem usa enxerga). */
     public static void efeitoPara(ServerPlayer player, String tipo, double x, double y, double z, float a, float b, int cor) {
         if (player.connection == null) return;
-        CANAL.send(new Efeito(tipo, x, y, z, a, b, cor), PacketDistributor.PLAYER.with(player));
+        CANAL.send(new Efeito(tipo, x, y, z, a, b, cor), Canal.jogador(player));
     }
 
-    private static void comJogador(CustomPayloadEvent.Context ctx, Consumer<ServerPlayer> acao) {
+    private static void comJogador(Canal.Contexto ctx, Consumer<ServerPlayer> acao) {
         ServerPlayer p = ctx.getSender();
         if (p != null) acao.accept(p);
     }
@@ -734,30 +735,30 @@ public final class Rede {
     /** Avisa o próprio jogador e quem está vendo ele que a skin mudou. Jogadores sem conexão (testes) são ignorados. */
     public static void aparencia(ServerPlayer player) {
         if (player.connection == null) return;
-        CANAL.send(montarAparencia(player), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(player));
+        CANAL.send(montarAparencia(player), Canal.rastreandoEProprio(player));
     }
 
     /** Avisa só quem está vendo o jogador (ele mesmo já animou a manobra). */
     public static void manobraVista(ServerPlayer player, int tipo) {
         if (player.connection == null) return;
-        CANAL.send(new ManobraVista(player.getId(), tipo), PacketDistributor.TRACKING_ENTITY.with(player));
+        CANAL.send(new ManobraVista(player.getId(), tipo), Canal.rastreando(player));
     }
 
     /** Avisa quem está vendo o animal que ele pôs ou tirou a Coleira do S. */
     public static void coleira(net.minecraft.world.entity.Entity e, boolean usa) {
         if (e.level().isClientSide()) return;
-        CANAL.send(new Coleira(e.getId(), usa), PacketDistributor.TRACKING_ENTITY.with(e));
+        CANAL.send(new Coleira(e.getId(), usa), Canal.rastreando(e));
     }
 
     public static void coleiraPara(ServerPlayer quemVe, net.minecraft.world.entity.Entity e) {
         if (quemVe.connection == null) return;
-        CANAL.send(new Coleira(e.getId(), true), PacketDistributor.PLAYER.with(quemVe));
+        CANAL.send(new Coleira(e.getId(), true), Canal.jogador(quemVe));
     }
 
     /** Manda a aparência de alvo só para quem começou a ver ele. */
     public static void aparenciaPara(ServerPlayer quemVe, ServerPlayer alvo) {
         if (quemVe.connection == null) return;
-        CANAL.send(montarAparencia(alvo), PacketDistributor.PLAYER.with(quemVe));
+        CANAL.send(montarAparencia(alvo), Canal.jogador(quemVe));
     }
 
     /** Terceira cor padrão do rastro: a principal quase branca. */
@@ -785,7 +786,7 @@ public final class Rede {
     /** Envia o estado completo ao próprio jogador. */
     public static void sincronizar(ServerPlayer player) {
         if (player.connection == null) return;
-        CANAL.send(montar(player), PacketDistributor.PLAYER.with(player));
+        CANAL.send(montar(player), Canal.jogador(player));
     }
 
     public static Sync montar(ServerPlayer player) {
@@ -822,56 +823,56 @@ public final class Rede {
 
     public static void catalogo(ServerPlayer player) {
         if (player.connection == null) return;
-        CANAL.send(new Catalogo(Personagens.jsons()), PacketDistributor.PLAYER.with(player));
+        CANAL.send(new Catalogo(Personagens.jsons()), Canal.jogador(player));
     }
 
     public static void guia(ServerPlayer player, String novaTarefa) {
         if (player.connection == null) return;
-        CANAL.send(Guia.montar(player, novaTarefa), PacketDistributor.PLAYER.with(player));
+        CANAL.send(Guia.montar(player, novaTarefa), Canal.jogador(player));
     }
 
     public static void inicio(ServerPlayer player, InicioAbrir m) {
-        if (player.connection != null) CANAL.send(m, PacketDistributor.PLAYER.with(player));
+        if (player.connection != null) CANAL.send(m, Canal.jogador(player));
     }
 
     public static void npcCatalogo(ServerPlayer player) {
         if (player.connection == null) return;
-        CANAL.send(new NpcCatalogo(com.danrod.dcuniverse.npc.Npcs.jsonNpcs(), com.danrod.dcuniverse.npc.Npcs.jsonMissoes()), PacketDistributor.PLAYER.with(player));
+        CANAL.send(new NpcCatalogo(com.danrod.dcuniverse.npc.Npcs.jsonNpcs(), com.danrod.dcuniverse.npc.Npcs.jsonMissoes()), Canal.jogador(player));
     }
 
     public static void npcAbrir(ServerPlayer player, NpcAbrir m) {
         if (player.connection == null) return;
-        CANAL.send(m, PacketDistributor.PLAYER.with(player));
+        CANAL.send(m, Canal.jogador(player));
     }
 
     public static void npcFala(ServerPlayer player, int entidade, String npc, String texto, List<String> args) {
         if (player.connection == null) return;
-        CANAL.send(new NpcFala(entidade, npc, texto, args), PacketDistributor.PLAYER.with(player));
+        CANAL.send(new NpcFala(entidade, npc, texto, args), Canal.jogador(player));
     }
 
     public static void diario(ServerPlayer player) {
         if (player.connection == null) return;
-        CANAL.send(com.danrod.dcuniverse.missao.Diario.montar(player), PacketDistributor.PLAYER.with(player));
+        CANAL.send(com.danrod.dcuniverse.missao.Diario.montar(player), Canal.jogador(player));
     }
 
     public static void missaoAviso(ServerPlayer player, String tipo, String missao) {
         if (player.connection == null) return;
-        CANAL.send(new MissaoAviso(tipo, missao), PacketDistributor.PLAYER.with(player));
+        CANAL.send(new MissaoAviso(tipo, missao), Canal.jogador(player));
     }
 
     public static void liga(ServerPlayer player, LigaSync m) {
         if (player.connection == null) return;
-        CANAL.send(m, PacketDistributor.PLAYER.with(player));
+        CANAL.send(m, Canal.jogador(player));
     }
 
     public static void ligaPonto(ServerPlayer player, LigaPonto m) {
         if (player.connection == null) return;
-        CANAL.send(m, PacketDistributor.PLAYER.with(player));
+        CANAL.send(m, Canal.jogador(player));
     }
 
     /** Os blocos da ilha para quem passou a ver a entidade. */
     public static void ilha(ServerPlayer player, IlhaBlocos m) {
         if (player.connection == null) return;
-        CANAL.send(m, PacketDistributor.PLAYER.with(player));
+        CANAL.send(m, Canal.jogador(player));
     }
 }
