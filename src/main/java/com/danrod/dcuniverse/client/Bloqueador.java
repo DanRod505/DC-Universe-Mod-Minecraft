@@ -115,14 +115,12 @@ public final class Bloqueador {
         var renderer = mc.getEntityRenderDispatcher().getPlayerRenderer(p);
         var skin = Skins.skinDe(p.getId());
         var tex = skin != null ? skin.body().texturePath() : p.getSkin().body().texturePath();
-        // Tremidinha leve enquanto segura (os braceletes vibrando de leve).
-        float t = p.tickCount + mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-        float treme = 0.004f * Mth.sin(t * 1.7f);
         for (int lado = 1; lado >= -1; lado -= 2) {
             float inv = lado;
             ps.pushPose();
             // Posição do braço comum, puxada para o meio e para cima conforme sobe.
-            ps.translate(inv * Mth.lerp(g, 0.64f, 0.13f), Mth.lerp(g, -0.6f, -0.17f) + treme * inv, Mth.lerp(g, -0.72f, -0.66f));
+            // O braço direito fica um pouco à frente do esquerdo: onde se cruzam, um cobre o outro sem piscar.
+            ps.translate(inv * Mth.lerp(g, 0.64f, 0.13f), Mth.lerp(g, -0.6f, -0.17f), Mth.lerp(g, -0.72f, -0.66f) + (lado > 0 ? 0.03f : -0.03f) * g);
             // Inclina o antebraço para o meio (visto da câmera), para cruzar em X com o outro.
             ps.mulPose(Axis.ZP.rotationDegrees(-inv * Mth.lerp(g, 0, 16)));
             ps.mulPose(Axis.YP.rotationDegrees(inv * 45.0f));
