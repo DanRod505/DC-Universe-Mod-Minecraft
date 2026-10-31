@@ -8,6 +8,7 @@
     "AbstractClientPlayerMixin",
     "CameraMixin",
     "MouseHandlerMixin",
+    "FlashbackEditorStateMixin",
     "MusicManagerMixin",
     "EntityRendererMixin",
     "EntityRenderStateMixin",
