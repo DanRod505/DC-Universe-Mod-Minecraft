@@ -66,6 +66,9 @@ public final class Cliente {
         EntityRenderersEvent.RegisterRenderers.BUS.addListener(e -> {
             e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new);
             e.registerEntityRenderer(Entidades.BATARANGUE.get(), BatarangueRenderer::new);
+            // A corda e a laçada são desenhadas por client/Laceador (precisa da mão do dono, fora da entidade).
+            e.registerEntityRenderer(Entidades.LACO.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+            e.registerEntityRenderer(Entidades.ARMA_ARREMESSADA.get(), com.danrod.dcuniverse.client.render.ArmaRenderer::new);
             e.registerEntityRenderer(Entidades.BATWING.get(), BatwingRenderer::new);
             e.registerEntityRenderer(Entidades.MISSIL.get(), MissilRenderer::new);
             e.registerEntityRenderer(Entidades.GEL.get(), com.danrod.dcuniverse.client.render.GelRenderer::new);
@@ -94,6 +97,8 @@ public final class Cliente {
             SomCanal.limpar();
             Saltador.limpar();
             Gancheador.limpar();
+            Laceador.limpar();
+            Bloqueador.limpar();
             Piloto.limpar();
             Motorista.limpar();
             Ilhas.limpar();
@@ -114,6 +119,7 @@ public final class Cliente {
         Detetive.registrar();
         Visor.registrar();
         Saltador.registrar();
+        Bloqueador.registrar();
         Piloto.registrar();
         Motorista.registrar();
         Ilhas.registrar();
@@ -165,6 +171,8 @@ public final class Cliente {
         Efeitos.tick(mc);
         Mundo.tick(mc);
         Gancheador.tick(mc);
+        Laceador.tick(mc);
+        Bloqueador.tick(mc, livre);
         Piloto.tick(mc);
         Motorista.tick(mc);
         if (mc.level != null) SomCanal.tick(mc, mc.level);

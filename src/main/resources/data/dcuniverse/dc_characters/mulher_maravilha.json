@@ -1,0 +1,30 @@
+{
+  "n": 3,
+  "category": "heroi",
+  "level": 4,
+  "color": "#D4202F",
+  "scale": 0.99,
+  "stats": { "vida": 36, "armadura": 22, "dano": 10, "terra": 6.2 },
+  "energy": {
+    "max": 250,
+    "regen": 1.5,
+    "recharge": []
+  },
+  "suit": [ "chest", "legs", "feet" ],
+  "passives": [
+    { "type": "flight", "speed": 44, "drain": 0.5, "boost_drain": 2.6, "dash_cost": 12,
+      "trail_color": "#E0263A", "trail_color2": "#F5C542", "trail_color3": "#3D63D8" },
+    { "type": "fall_immunity" },
+    { "type": "super_strength", "speed": 7, "max_hardness": 30 },
+    { "type": "deflect", "angle": 140, "perfect_window": 0.3, "reflect_mult": 2.0, "explosion_reduction": 0.8,
+      "energy_per_heart": 1.5, "slow": 0.5, "stagger": 1.5 }
+  ],
+  "abilities": [
+    { "id": "laco_da_verdade", "type": "lasso", "cost": 12, "cooldown": 4,
+      "range": 24, "speed": 2.2, "damage_mult": 0.2, "pull_speed": 26, "heavy_size": 2.6, "leash": 3, "max_time": 90,
+      "color": "#FFC93C" },
+    { "id": "tiara", "type": "thrown_weapon", "cost": 8, "cooldown": 2,
+      "range": 20, "speed": 1.9, "damage_mult": 0.4, "ricochet": 2, "item": "dcuniverse:tiara_mulher_maravilha",
+      "spin": "disc", "color": "#FFD86A" }
+  ]
+}

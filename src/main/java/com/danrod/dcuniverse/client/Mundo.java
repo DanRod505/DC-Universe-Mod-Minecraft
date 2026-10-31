@@ -105,6 +105,7 @@ public final class Mundo {
                 sonicoInicio(mc, level, e);
                 adicionar(e, agora);
             }
+            case "deflect", "faisca", "laco" -> adicionar(e, agora);
             default -> {}
         }
     }
@@ -124,6 +125,9 @@ public final class Mundo {
             case "tiro" -> t > 2;
             case "sonico" -> t > SONICO_TICKS + 8;
             case "smoke" -> Fumaca.tick(level, a.e, t);
+            case "deflect" -> t > (a.e.a() > 0 ? 14 : 7);
+            case "faisca" -> t > 4;
+            case "laco" -> t > 14;
             default -> true;
         };
     }
@@ -263,15 +267,83 @@ public final class Mundo {
                 case "tiro" -> tiro(ps, col, cam, a.e, t);
                 case "sonico" -> sonico(ps, col, cam, a.e, t);
                 case "smoke" -> Fumaca.desenhar(ps, col, cam, a.e, t);
+                case "deflect", "faisca" -> estrela(ps, col, cam, a.e, t);
+                case "laco" -> lacada(ps, col, cam, a.e, t);
                 default -> {}
             }
         }
         Gancheador.desenhar(ps, col, cam, pt);
+        Laceador.desenhar(ps, col, cam, pt);
         RaioX.desenhar(ps, col, cam, pt);
         Detetive.desenhar(ps, col, cam, pt);
         Efeitos.feixePrimeiraPessoa(ps, col, cam, pt);
         Gelo.desenhar(ps, col, cam, pt);
         Bolha.desenhar(ps, col, cam, pt);
+    }
+
+    /**
+     * Brilho do bloqueio (deflect, a = 1 no perfeito) e da arma batendo (faisca, a = tamanho): raios de luz virados
+     * para a câmera que crescem e somem; no perfeito, também um anel que se abre como uma onda.
+     */
+    private static void estrela(PoseStack ps, SubmitNodeCollector col, Vec3 cam, Rede.Efeito e, float t) {
+        boolean faisca = e.tipo().equals("faisca");
+        boolean perfeito = !faisca && e.a() > 0;
+        float dura = faisca ? 4 : perfeito ? 14 : 7;
+        float u = Mth.clamp(t / dura, 0, 1);
+        float alfa = (1 - u) * (1 - u);
+        Vec3 c = new Vec3(e.x(), e.y(), e.z()).subtract(cam);
+        Vec3 olhar = c.lengthSqr() < 1e-6 ? new Vec3(0, 0, 1) : c.normalize();
+        Vec3 x1 = olhar.cross(new Vec3(0, 1, 0));
+        Vec3 u1 = x1.lengthSqr() < 1e-6 ? new Vec3(1, 0, 0) : x1.normalize();
+        Vec3 u2 = u1.cross(olhar).normalize();
+        int raios = faisca ? 4 : perfeito ? 12 : 8;
+        double tam = (faisca ? e.a() : perfeito ? 1.4 : 0.7) * (0.4 + 0.6 * Math.sqrt(u));
+        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Matrix4f m = pose.pose();
+            for (int i = 0; i < raios; i++) {
+                double a = i * Math.PI * 2 / raios + (perfeito ? 0.2 : 0.4) + e.x() * 3;
+                double l = tam * (i % 2 == 0 ? 1 : 0.55);
+                Vec3 ponta = c.add(u1.scale(Math.cos(a) * l)).add(u2.scale(Math.sin(a) * l));
+                fita(m, buf, c, ponta, perfeito ? 0.09f : 0.06f, e.cor(), 0.9f * alfa);
+                fita(m, buf, c, c.lerp(ponta, 0.6), 0.03f, 0xFFFFFF, alfa);
+            }
+            if (perfeito) {
+                double r = 0.2 + 1.8 * frente(u);
+                int n = 32;
+                Vec3 ant = null;
+                for (int i = 0; i <= n; i++) {
+                    double a = i * Math.PI * 2 / n;
+                    Vec3 p = c.add(u1.scale(Math.cos(a) * r)).add(u2.scale(Math.sin(a) * r));
+                    if (ant != null) {
+                        fita(m, buf, ant, p, 0.16f, e.cor(), 0.5f * alfa);
+                        fita(m, buf, ant, p, 0.05f, 0xFFFFFF, 0.8f * alfa);
+                    }
+                    ant = p;
+                }
+            }
+        });
+    }
+
+    /** Laçada fechando no alvo: um anel dourado deitado que aperta da largura de fora até o corpo e some. */
+    private static void lacada(PoseStack ps, SubmitNodeCollector col, Vec3 cam, Rede.Efeito e, float t) {
+        float u = Mth.clamp(t / 10f, 0, 1);
+        float alfa = t < 10 ? 1 : Mth.clamp(1 - (t - 10) / 4f, 0, 1);
+        double r = e.a() * (2.2 - 1.2 * frente(u));
+        Vec3 c = new Vec3(e.x(), e.y(), e.z()).subtract(cam);
+        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Matrix4f m = pose.pose();
+            int n = 40;
+            Vec3 ant = null;
+            for (int i = 0; i <= n; i++) {
+                double a = i * Math.PI * 2 / n;
+                Vec3 p = c.add(Math.cos(a) * r, Math.sin(a * 2 + t) * 0.04, Math.sin(a) * r);
+                if (ant != null) {
+                    fita(m, buf, ant, p, 0.28f, e.cor(), 0.35f * alfa);
+                    fita(m, buf, ant, p, 0.07f, 0xFFF6D0, 0.9f * alfa);
+                }
+                ant = p;
+            }
+        });
     }
 
     /** Anel claro que corre pelo chão, com um segundo anel mais fraco atrás. */
@@ -465,7 +537,7 @@ public final class Mundo {
     }
 
     /** Fita virada para a câmera entre dois pontos (relativos à câmera). */
-    private static void fita(Matrix4f m, VertexConsumer buf, Vec3 a, Vec3 b, float largura, int cor, float alfa) {
+    static void fita(Matrix4f m, VertexConsumer buf, Vec3 a, Vec3 b, float largura, int cor, float alfa) {
         Vec3 dir = b.subtract(a);
         Vec3 lado = dir.cross(a.add(b).scale(0.5));
         if (lado.lengthSqr() < 1e-8) return;

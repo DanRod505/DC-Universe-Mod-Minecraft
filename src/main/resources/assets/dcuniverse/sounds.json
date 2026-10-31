@@ -603,5 +603,109 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.nave_escudo_desliga"
+  },
+  "habilidade.braceletes_ergue": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/braceletes_ergue"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.braceletes_ergue"
+  },
+  "habilidade.bloqueio": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/bloqueio"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.bloqueio"
+  },
+  "habilidade.bloqueio_perfeito": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/bloqueio_perfeito"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.bloqueio_perfeito"
+  },
+  "habilidade.bloqueio_quebra": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/bloqueio_quebra"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.bloqueio_quebra"
+  },
+  "habilidade.laco_arremesso": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_arremesso"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_arremesso"
+  },
+  "habilidade.laco_giro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_giro"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_giro"
+  },
+  "habilidade.laco_prende": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_prende"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_prende"
+  },
+  "habilidade.laco_puxa": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_puxa"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_puxa"
+  },
+  "habilidade.laco_solta": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_solta"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_solta"
+  },
+  "habilidade.arma_arremesso": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/arma_arremesso"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.arma_arremesso"
+  },
+  "habilidade.arma_giro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/arma_giro"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.arma_giro"
+  },
+  "habilidade.arma_acerta": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/arma_acerta"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.arma_acerta"
+  },
+  "habilidade.arma_pega": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/arma_pega"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.arma_pega"
   }
 }

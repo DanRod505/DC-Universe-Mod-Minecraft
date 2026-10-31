@@ -86,6 +86,21 @@ public final class Sons {
 
     private Sons() {}
 
+    // Mulher-Maravilha (v0.5): braceletes, laço e arma arremessável que volta
+    public static final RegistryObject<SoundEvent> BRACELETES_ERGUE = som("habilidade.braceletes_ergue");
+    public static final RegistryObject<SoundEvent> BLOQUEIO = som("habilidade.bloqueio");
+    public static final RegistryObject<SoundEvent> BLOQUEIO_PERFEITO = som("habilidade.bloqueio_perfeito");
+    public static final RegistryObject<SoundEvent> BLOQUEIO_QUEBRA = som("habilidade.bloqueio_quebra");
+    public static final RegistryObject<SoundEvent> LACO_ARREMESSO = som("habilidade.laco_arremesso");
+    public static final RegistryObject<SoundEvent> LACO_GIRO = som("habilidade.laco_giro");
+    public static final RegistryObject<SoundEvent> LACO_PRENDE = som("habilidade.laco_prende");
+    public static final RegistryObject<SoundEvent> LACO_PUXA = som("habilidade.laco_puxa");
+    public static final RegistryObject<SoundEvent> LACO_SOLTA = som("habilidade.laco_solta");
+    public static final RegistryObject<SoundEvent> ARMA_ARREMESSO = som("habilidade.arma_arremesso");
+    public static final RegistryObject<SoundEvent> ARMA_GIRO = som("habilidade.arma_giro");
+    public static final RegistryObject<SoundEvent> ARMA_ACERTA = som("habilidade.arma_acerta");
+    public static final RegistryObject<SoundEvent> ARMA_PEGA = som("habilidade.arma_pega");
+
     private static RegistryObject<SoundEvent> som(String nome) {
         return SONS.register(nome, () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(DCUniverse.MODID, nome)));
     }

@@ -72,6 +72,20 @@ Supergirl e Superboy (v0.3):
 - nave_orbe.ogg         orbe solar lançado: sopro subindo e um estouro de energia brilhante
 - nave_escudo_liga.ogg  escudo da nave ligando: sinos de cristal crescendo e o zumbido
 - nave_escudo_desliga.ogg  escudo da nave desligando: sinos descendo e sumindo
+Mulher-Maravilha (v0.5):
+- braceletes_ergue.ogg  os braceletes cruzando na frente do rosto: raspão de metal e um anel curto
+- bloqueio.ogg          projétil ricocheteando no bracelete: "tim" agudo de metal e o zunido indo embora
+- bloqueio_perfeito.ogg bloqueio perfeito: pancada de metal grande, acorde dourado brilhando e o sopro de volta
+- bloqueio_quebra.ogg   guarda quebrada (sem energia): baque surdo e o metal chacoalhando para baixo
+- laco_arremesso.ogg    o laço girando e saindo da mão: três chicotadas de corda subindo e um brilho mágico
+- laco_giro.ogg         a corda girando no ar (toca a cada 1/4 s enquanto o laço voa)
+- laco_prende.ogg       o laço fechando no alvo: corda apertando e rangendo, e o sino dourado do Laço da Verdade
+- laco_puxa.ogg         puxão: a corda esticando e rangendo e o ar passando
+- laco_solta.ogg        o laço afrouxando: corda escorregando e o brilho descendo
+- arma_arremesso.ogg    arma arremessada: metal cortando o ar ao sair da mão
+- arma_giro.ogg         zunido metálico da arma girando (toca a cada 1/4 s enquanto voa)
+- arma_acerta.ogg       a arma batendo: estalo de metal grosso
+- arma_pega.ogg         a arma volta e é pega: metal batendo na palma e o aperto
 
 Uso: python3 tools/arte/sons.py --raiz .  (precisa de numpy, scipy e ffmpeg)
 """
@@ -1218,6 +1232,174 @@ def nave_escudo_desliga():
     return finalizar(normalizar(x[: int(seg * SR)], 0.78), 0.2)
 
 
+# ---------------------------------------------------------------- Mulher-Maravilha (v0.5)
+
+def n_(seg):
+    """Amostras de `seg` segundos, arredondadas como em t_ (para os envelopes casarem com os tons)."""
+    return int(round(seg * SR))
+
+
+def metal(f, seg, queda=0.5, brilho=1.0):
+    """Metal batido (bracelete, escudo): parciais inarmônicas de placa, mais densas e ásperas que o sino."""
+    t = t_(seg)
+    out = np.zeros_like(t)
+    for mult, g, q in ((1, 1, 1), (1.59, 0.7, 0.8), (2.14, 0.55 * brilho, 0.6), (2.65, 0.4 * brilho, 0.45),
+                       (3.91, 0.3 * brilho, 0.3), (5.2, 0.18 * brilho, 0.2)):
+        if f * mult < SR / 2.2:
+            out += g * np.sin(2 * np.pi * f * mult * t + RNG.random() * 6) * np.exp(-t / (queda * q))
+    return out * np.clip(t / 0.0015, 0, 1)
+
+
+def corda(seg, tensao=1.0):
+    """Corda trançada rangendo: atrito em pulsos irregulares passando por ressonâncias de fibra."""
+    n = n_(seg)
+    pulsos = np.zeros(n)
+    i = 0
+    while i < n:
+        pulsos[i] = RNG.uniform(0.4, 1)
+        i += int(SR / (RNG.uniform(90, 160) * tensao))
+    fibra = sum(filtro(pulsos, "bandpass", [f * 0.85, f * 1.15]) * g for f, g in ((420 * tensao, 1), (1150 * tensao, 0.6), (2600, 0.3)))
+    return fibra + filtro(ruido(seg), "bandpass", [1500, 6000]) * 0.08
+
+
+def chicotada(seg=0.22, f0=900, f1=2800):
+    """Corda cortando o ar: chiado com o filtro subindo e caindo (passagem)."""
+    n = n_(seg)
+    t = np.arange(n) / SR
+    x = ruido(seg)
+    centro = f0 + (f1 - f0) * np.sin(np.pi * t / seg) ** 2
+    out = np.zeros(n)
+    passo = 256
+    for a in range(0, n, passo):
+        c = centro[a]
+        out[a:a + passo] = filtro(x[max(0, a - 2048):a + passo], "bandpass", [c * 0.7, c * 1.3])[-len(out[a:a + passo]):]
+    return out * np.sin(np.pi * t / seg) ** 1.5
+
+
+def brilho_magico(seg, f=1568, sobe=1.0):
+    """Cintilação dourada: notas de sino curtinhas espalhadas, subindo (sobe > 1) ou descendo."""
+    out = np.zeros(n_(seg))
+    for k in range(10):
+        i = int(k / 10 * seg * 0.8 * SR)
+        nota_f = f * (sobe ** (k / 9)) * RNG.choice([1, 1.25, 1.5, 2])
+        s_ = sino(nota_f, 0.5, 0.18, 0.6) * RNG.uniform(0.3, 0.6)
+        out[i:i + len(s_)] += s_[: len(out) - i]
+    return out
+
+
+def braceletes_ergue():
+    seg = 0.5
+    raspao = filtro(ruido(0.12), "bandpass", [2500, 9000]) * env(n_(0.12), 0.01, 0.04) * 0.7
+    anel = metal(1320, 0.45, 0.25, 0.8) * 0.5 + metal(1760, 0.45, 0.2, 0.6) * 0.35
+    x = misturar((0, raspao), (0.04, anel))
+    return finalizar(normalizar(eco(x, 0.4, 0.12)[: int(seg * SR)], 0.75), 0.1)
+
+
+def bloqueio():
+    seg = 0.7
+    golpe = filtro(ruido(0.02), "highpass", 2500) * env(n_(0.02), 0.0003, 0.004) * 1.5
+    tim = metal(2650, 0.6, 0.35, 1.0)
+    zunido = varredura(3400, 1500, 0.35, 0.7) * env(n_(0.35), 0.01, 0.12) * 0.25
+    x = misturar((0, golpe), (0, tim), (0.03, zunido))
+    return finalizar(normalizar(eco(x, 0.6, 0.18)[: int(seg * SR)], 0.85), 0.15)
+
+
+def bloqueio_perfeito():
+    seg = 1.6
+    pancada = filtro(ruido(0.05), "bandpass", [800, 7000]) * env(n_(0.05), 0.0004, 0.012) * 1.8
+    grave = varredura(160, 90, 0.4, 0.5) * env(n_(0.4), 0.001, 0.12) * 0.9
+    clang = metal(980, 1.4, 0.9, 1.0) + metal(1470, 1.4, 0.7, 0.7) * 0.6
+    acorde = sum(sino(f, 1.4, 0.9, 0.5) for f in (1046.5, 1318.5, 1568, 2093)) * 0.3
+    sopro_ = filtro(ruido(0.5), "bandpass", [600, 3500]) * env(n_(0.5), 0.12, 0.12) * 0.4
+    x = misturar((0, pancada), (0, grave), (0, clang), (0.02, acorde), (0.08, brilho_magico(0.8, 2093, 1.5) * 0.5), (0.1, sopro_))
+    return finalizar(normalizar(eco(x, 1.4, 0.3)[: int(seg * SR)], 0.9), 0.3)
+
+
+def bloqueio_quebra():
+    seg = 0.9
+    baque = filtro(ruido(0.15), "lowpass", 500) * env(n_(0.15), 0.001, 0.05) * 1.6
+    chacoalha = np.zeros(int(0.6 * SR))
+    for k in range(6):
+        m = metal(900 - k * 90, 0.25, 0.06, 0.8) * (0.8 - k * 0.1)
+        i = int((k * 0.07 + RNG.uniform(0, 0.02)) * SR)
+        chacoalha[i:i + len(m)] += m[: len(chacoalha) - i]
+    queda = varredura(400, 120, 0.4, 0.6) * env(n_(0.4), 0.01, 0.15) * 0.3
+    x = misturar((0, baque), (0.02, chacoalha), (0.05, queda))
+    return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.85), 0.2)
+
+
+def laco_arremesso():
+    seg = 0.9
+    x = misturar((0, chicotada(0.2, 600, 1800) * 0.6), (0.16, chicotada(0.2, 800, 2400) * 0.8),
+                 (0.3, chicotada(0.35, 1000, 3600)), (0.3, brilho_magico(0.6, 1568, 1.6) * 0.35))
+    return finalizar(normalizar(eco(x, 0.6, 0.15)[: int(seg * SR)], 0.85), 0.15)
+
+
+def laco_giro():
+    seg = 0.3
+    x = misturar((0, chicotada(0.28, 700, 2200)), (0, brilho_magico(0.25, 2349, 1.0) * 0.08))
+    return finalizar(normalizar(x, 0.6), 0.05)
+
+
+def laco_prende():
+    seg = 1.4
+    aperto = corda(0.35, 1.2) * env(n_(0.35), 0.01, 0.12)
+    estalo = filtro(ruido(0.03), "bandpass", [1200, 6000]) * env(n_(0.03), 0.0005, 0.008) * 1.2
+    sino_ = sino(1318.5, 1.2, 0.9, 0.6) * 0.5 + sino(1975.5, 1.2, 0.7, 0.5) * 0.35
+    x = misturar((0, estalo), (0.01, aperto), (0.06, sino_), (0.1, brilho_magico(0.7, 1568, 1.25) * 0.3))
+    return finalizar(normalizar(eco(x, 1.0, 0.25)[: int(seg * SR)], 0.85), 0.25)
+
+
+def laco_puxa():
+    seg = 0.9
+    tenso = corda(0.7, 1.6) * env(n_(0.7), 0.03, 0.25)
+    ar = filtro(ruido(0.7), "bandpass", [400, 2500]) * env(n_(0.7), 0.15, 0.2) * 0.6
+    x = misturar((0, tenso), (0.05, ar), (0, sino(1046.5, 0.6, 0.3, 0.4) * 0.15))
+    return finalizar(normalizar(x, 0.8), 0.2)
+
+
+def laco_solta():
+    seg = 0.8
+    escorrega = corda(0.4, 0.8) * env(n_(0.4), 0.005, 0.12) * 0.7
+    x = misturar((0, escorrega), (0.05, brilho_magico(0.6, 2093, 0.6) * 0.4))
+    return finalizar(normalizar(eco(x, 0.7, 0.2)[: int(seg * SR)], 0.75), 0.2)
+
+
+def arma_arremesso():
+    seg = 0.5
+    corte = chicotada(0.3, 1500, 5000)
+    shing = metal(2200, 0.35, 0.15, 0.8) * 0.35
+    x = misturar((0, corte), (0.02, shing))
+    return finalizar(normalizar(x, 0.8), 0.1)
+
+
+def arma_giro():
+    seg = 0.28
+    t = t_(seg)
+    # Zunido de disco: um tom com batimento rápido (as pontas passando) e o ar cortado.
+    tom = np.sin(2 * np.pi * 620 * t) * (0.5 + 0.5 * np.sin(2 * np.pi * 38 * t)) * 0.4
+    ar = filtro(ruido(seg), "bandpass", [2000, 6000]) * (0.5 + 0.5 * np.sin(2 * np.pi * 38 * t + 1)) * 0.35
+    x = (tom + ar) * np.sin(np.pi * t / seg)
+    return finalizar(normalizar(x, 0.6), 0.03)
+
+
+def arma_acerta():
+    seg = 0.6
+    golpe = filtro(ruido(0.04), "bandpass", [700, 6000]) * env(n_(0.04), 0.0004, 0.01) * 1.6
+    corpo = metal(760, 0.5, 0.25, 0.9) * 0.6
+    x = misturar((0, golpe), (0, corpo))
+    return finalizar(normalizar(eco(x, 0.5, 0.15)[: int(seg * SR)], 0.85), 0.15)
+
+
+def arma_pega():
+    seg = 0.4
+    t = t_(0.3)
+    palma = filtro(ruido(0.3), "lowpass", 1400) * env(len(t), 0.001, 0.02)
+    tinido = metal(1900, 0.3, 0.06, 0.6) * 0.3
+    x = misturar((0, palma), (0.005, tinido))
+    return finalizar(normalizar(x, 0.8), 0.1)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -1241,6 +1423,10 @@ SONS = {
     "escudo_tk_impacto": escudo_tk_impacto, "ilha_arranca": ilha_arranca, "ilha_motor": ilha_motor,
     "ilha_pousa": ilha_pousa, "nave_chega": nave_chega, "nave_motor": nave_motor, "nave_canhao": nave_canhao,
     "nave_orbe": nave_orbe, "nave_escudo_liga": nave_escudo_liga, "nave_escudo_desliga": nave_escudo_desliga,
+    "braceletes_ergue": braceletes_ergue, "bloqueio": bloqueio, "bloqueio_perfeito": bloqueio_perfeito,
+    "bloqueio_quebra": bloqueio_quebra, "laco_arremesso": laco_arremesso, "laco_giro": laco_giro,
+    "laco_prende": laco_prende, "laco_puxa": laco_puxa, "laco_solta": laco_solta, "arma_arremesso": arma_arremesso,
+    "arma_giro": arma_giro, "arma_acerta": arma_acerta, "arma_pega": arma_pega,
 }
 
 

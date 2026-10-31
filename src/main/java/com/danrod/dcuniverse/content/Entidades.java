@@ -20,6 +20,16 @@ public final class Entidades {
             .noLootTable().sized(0.5f, 0.25f).clientTrackingRange(6).updateInterval(1)
             .build(TIPOS.key("batarangue")));
 
+    public static final RegistryObject<EntityType<LacoEntidade>> LACO = TIPOS.register("laco",
+        () -> EntityType.Builder.<LacoEntidade>of(LacoEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.4f, 0.4f).clientTrackingRange(8).updateInterval(1)
+            .build(TIPOS.key("laco")));
+
+    public static final RegistryObject<EntityType<ArmaArremessadaEntidade>> ARMA_ARREMESSADA = TIPOS.register("arma_arremessada",
+        () -> EntityType.Builder.<ArmaArremessadaEntidade>of(ArmaArremessadaEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.5f, 0.25f).clientTrackingRange(6).updateInterval(1)
+            .build(TIPOS.key("arma_arremessada")));
+
     public static final RegistryObject<EntityType<BatwingEntidade>> BATWING = TIPOS.register("batwing",
         () -> EntityType.Builder.<BatwingEntidade>of(BatwingEntidade::new, MobCategory.MISC)
             .noLootTable().sized(5.6f, 1.6f).clientTrackingRange(12).updateInterval(1)

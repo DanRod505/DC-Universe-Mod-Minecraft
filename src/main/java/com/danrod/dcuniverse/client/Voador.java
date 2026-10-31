@@ -153,6 +153,11 @@ public final class Voador {
             investir(p);
             return;
         }
+        // O laço está puxando (até um bloco ou um alvo pesado): a corda manda no movimento.
+        if (Laceador.puxando(p)) {
+            vel = null;
+            return;
+        }
         if (!voando(p)) {
             vel = null;
             armado = true;

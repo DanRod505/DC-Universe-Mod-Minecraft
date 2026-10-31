@@ -89,6 +89,7 @@ public final class Transformacao {
         Personagem p = estado.personagem();
         Passivas.aoDestransformar(player, p);
         com.danrod.dcuniverse.ability.active.Gancho.aoDestransformar(player);
+        com.danrod.dcuniverse.content.LacoEntidade.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.Veiculo.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.Telecinese.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.EscudoTk.aoDestransformar(player);

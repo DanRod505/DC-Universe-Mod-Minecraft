@@ -217,7 +217,7 @@ public final class Gancheador {
     // ------------------------------------------------------------------ desenho
 
     /** Ponta da mão direita de onde sai o cabo. Na primeira pessoa, embaixo à direita da tela. */
-    private static Vec3 mao(Minecraft mc, Player p, float pt) {
+    static Vec3 mao(Minecraft mc, Player p, float pt) {
         boolean primeira = p == mc.player && mc.options.getCameraType().isFirstPerson();
         float yaw = (primeira ? p.getViewYRot(pt) : Mth.rotLerp(pt, p.yBodyRotO, p.yBodyRot)) * Mth.DEG_TO_RAD;
         Vec3 base = p.getPosition(pt);

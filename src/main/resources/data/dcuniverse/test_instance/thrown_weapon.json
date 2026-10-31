@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "dcuniverse:thrown_weapon",
+  "environment": "minecraft:default",
+  "structure": "dcuniverse:arena_vazia",
+  "max_ticks": 160
+}

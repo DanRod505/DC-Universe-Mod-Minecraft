@@ -101,6 +101,7 @@ public final class Eventos {
             }
             if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof ServerPlayer alvo) {
                 Rede.aparenciaPara(quem, alvo);
+                if (com.danrod.dcuniverse.ability.passive.Bloqueio.erguido(alvo)) Rede.bloqueioPara(quem, alvo);
                 // Ver outro jogador transformado também libera a página do personagem no Guia.
                 var id = EstadoJogador.de(alvo).personagemId();
                 if (id != null) Guia.descobrir(quem, id);
@@ -131,6 +132,7 @@ public final class Eventos {
             Fortaleza.limpar();
             com.danrod.dcuniverse.missao.Cenas.limpar();
             com.danrod.dcuniverse.ability.active.Gancho.limpar();
+            com.danrod.dcuniverse.content.LacoEntidade.limpar();
             com.danrod.dcuniverse.ability.active.Veiculo.limpar();
             com.danrod.dcuniverse.ability.active.Fumaca.limpar();
             com.danrod.dcuniverse.ability.active.Disruptor.limpar();
@@ -150,6 +152,7 @@ public final class Eventos {
         com.danrod.dcuniverse.ability.active.Detetive.registrar();
         com.danrod.dcuniverse.ability.passive.Furtividade.registrar();
         com.danrod.dcuniverse.ability.passive.ContraAtaque.registrar();
+        com.danrod.dcuniverse.ability.passive.Bloqueio.registrar();
         com.danrod.dcuniverse.ability.active.EscudoTk.registrar();
     }
 

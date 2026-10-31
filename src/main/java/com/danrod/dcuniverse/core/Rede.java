@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 13;
+    private static final int VERSAO = 14;
     public static final SimpleChannel CANAL = ChannelBuilder
         .named(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "main"))
         .networkProtocolVersion(VERSAO)
@@ -313,6 +313,12 @@ public final class Rede {
         }
     }
 
+    /** Braceletes erguidos (true) ou abaixados (false): clique direito segurado com a mão vazia (ability/passive/Bloqueio). */
+    public record Bloqueio(boolean erguer) {}
+
+    /** Estado do bloqueio de um jogador para quem vê (Bloqueio.SOLTO, ERGUIDO ou QUEBRADO). */
+    public record BloqueioVisto(int entidade, int estado) {}
+
     /** O dono do gancho chegou ao ponto ou soltou o cabo. */
     public record GanchoFim() {}
 
@@ -592,6 +598,20 @@ public final class Rede {
             .encoder(GanchoVisto::encode).decoder(GanchoVisto::decode)
             .consumerMainThread((m, ctx) -> EstadoCliente.GANCHOS.add(m))
             .add();
+        CANAL.messageBuilder(Bloqueio.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeBoolean(m.erguer())).decoder(b -> new Bloqueio(b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.ability.passive.Bloqueio.definir(p, m.erguer())))
+            .add();
+        CANAL.messageBuilder(BloqueioVisto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeVarInt(m.estado()))
+            .decoder(b -> new BloqueioVisto(b.readVarInt(), b.readVarInt()))
+            .consumerMainThread((m, ctx) -> {
+                if (m.estado() == 0) EstadoCliente.BLOQUEIOS.remove(m.entidade());
+                else EstadoCliente.BLOQUEIOS.put(m.entidade(), m.estado());
+            })
+            .add();
         CANAL.messageBuilder(GanchoFim.class)
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> {}).decoder(b -> new GanchoFim())
@@ -718,6 +738,17 @@ public final class Rede {
     public static void gancho(ServerPlayer player, int modo, net.minecraft.world.phys.Vec3 ancora, int alvo, float vel) {
         if (player.connection == null) return;
         CANAL.send(new GanchoVisto(player.getId(), modo, ancora.x, ancora.y, ancora.z, alvo, vel), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(player));
+    }
+
+    /** Braceletes de um jogador, para ele e para quem está vendo. */
+    public static void bloqueio(ServerPlayer player, int estado) {
+        if (player.connection == null) return;
+        CANAL.send(new BloqueioVisto(player.getId(), estado), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(player));
+    }
+
+    public static void bloqueioPara(ServerPlayer quemVe, ServerPlayer alvo) {
+        if (quemVe.connection == null) return;
+        CANAL.send(new BloqueioVisto(alvo.getId(), 1), PacketDistributor.PLAYER.with(quemVe));
     }
 
     /** Mostra um efeito só para um jogador (ex.: raio X, que só quem usa enxerga). */
