@@ -283,8 +283,10 @@ public final class Bloqueio implements Passiva {
 
     private static void efeito(ServerPlayer player, ServerLevel level, Vec3 onde, boolean perfeito, boolean golpe) {
         Vec3 m = maos(player).lerp(onde, golpe ? 0.3 : 0.15);
-        level.sendParticles(ParticleTypes.CRIT, m.x, m.y, m.z, perfeito ? 18 : 8, 0.15, 0.15, 0.15, 0.4);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, m.x, m.y, m.z, perfeito ? 14 : 5, 0.1, 0.1, 0.1, 0.25);
+        // As faíscas saem um pouco mais à frente, para não taparem a visão de quem bloqueia.
+        Vec3 f = m.add(player.getLookAngle().scale(0.6));
+        level.sendParticles(ParticleTypes.CRIT, f.x, f.y, f.z, perfeito ? 14 : 6, 0.15, 0.15, 0.15, 0.35);
+        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, f.x, f.y, f.z, perfeito ? 8 : 3, 0.1, 0.1, 0.1, 0.2);
         level.playSound(null, m.x, m.y, m.z, perfeito ? Sons.BLOQUEIO_PERFEITO.get() : Sons.BLOQUEIO.get(), SoundSource.PLAYERS,
             perfeito ? 1.2f : 0.9f, 0.9f + level.getRandom().nextFloat() * 0.2f);
         Rede.efeito(level, m.x, m.y, m.z, "deflect", perfeito ? 1 : 0, 0, perfeito ? 0xFFE7A0 : 0xE8F2FF);

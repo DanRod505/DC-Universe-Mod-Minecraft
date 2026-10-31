@@ -122,10 +122,10 @@ public final class Bloqueador {
             float inv = lado;
             ps.pushPose();
             // Posição do braço comum, puxada para o meio e para cima conforme sobe.
-            ps.translate(inv * Mth.lerp(g, 0.64f, 0.30f), Mth.lerp(g, -0.6f, -0.42f) + treme * inv, Mth.lerp(g, -0.72f, -0.62f));
+            ps.translate(inv * Mth.lerp(g, 0.64f, 0.13f), Mth.lerp(g, -0.6f, -0.17f) + treme * inv, Mth.lerp(g, -0.72f, -0.66f));
+            // Inclina o antebraço para o meio (visto da câmera), para cruzar em X com o outro.
+            ps.mulPose(Axis.ZP.rotationDegrees(-inv * Mth.lerp(g, 0, 16)));
             ps.mulPose(Axis.YP.rotationDegrees(inv * 45.0f));
-            // Gira o antebraço para cruzar com o outro: inclina para dentro e deita um pouco.
-            ps.mulPose(Axis.ZP.rotationDegrees(inv * Mth.lerp(g, 0, 32)));
             ps.mulPose(Axis.XP.rotationDegrees(Mth.lerp(g, 0, -18)));
             ps.translate(inv * -1.0f, 3.6f, 3.5f);
             ps.mulPose(Axis.ZP.rotationDegrees(inv * 120.0f));

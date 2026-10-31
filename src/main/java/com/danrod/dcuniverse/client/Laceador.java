@@ -255,6 +255,11 @@ public final class Laceador {
         vert(buf, pose, a.subtract(lado), u1, v0, n);
         vert(buf, pose, b.subtract(lado), u1, v1, n);
         vert(buf, pose, b.add(lado), u0, v1, n);
+        // O verso (o tipo de desenho descarta a face de trás): a corda aparece de qualquer lado.
+        vert(buf, pose, b.add(lado), u0, v1, n);
+        vert(buf, pose, b.subtract(lado), u1, v1, n);
+        vert(buf, pose, a.subtract(lado), u1, v0, n);
+        vert(buf, pose, a.add(lado), u0, v0, n);
     }
 
     private static void vert(VertexConsumer buf, PoseStack.Pose pose, Vec3 p, float u, float v, Vector3f n) {

@@ -236,8 +236,8 @@ public class LacoEntidade extends Projectile {
         Vec3 de = position(), ate = de.add(v);
         BlockHitResult bloco = level().clip(new ClipContext(de, ate, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         Vec3 limite = bloco.getType() == HitResult.Type.MISS ? ate : bloco.getLocation();
-        EntityHitResult ent = ProjectileUtil.getEntityHitResult(level(), this, de, limite, getBoundingBox().expandTowards(v).inflate(0.7),
-            e -> podeLacar(dono, e));
+        EntityHitResult ent = ProjectileUtil.getEntityHitResult(level(), this, de, limite, getBoundingBox().expandTowards(v).inflate(1.5),
+            e -> podeLacar(dono, e), 0.75f); // a laçada é larga: pega quem passa a até 3/4 de bloco
         if (ent != null) {
             prender(dono, ent.getEntity());
             return;
