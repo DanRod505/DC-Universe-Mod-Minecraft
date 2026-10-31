@@ -42,6 +42,8 @@ neoForge {
         }
         gameTestServer {
             type = 'gameTestServer'
+            // Pasta própria: os mods do modpack em run/mods (tools/modpack.py) não entram nos testes.
+            gameDirectory = project.file('run-testes')
         }
         data {
             clientData()
@@ -102,7 +104,8 @@ def recursosProvisorios = tasks.register('recursosProvisorios', Exec) {
 }
 tasks.named('processResources') { dependsOn recursosProvisorios }
 
-// Perfil importável no CurseForge: manifest.json + overrides/mods/<jar> + overrides/server.properties (Mundo DC).
+// Perfil importável no CurseForge: manifest.json (mods do modpack em src/perfil/modpack.json) + overrides/mods/<jar>
+// + overrides com server.properties (Mundo DC), configs (Iris, NeoForge) e opções dos shaders.
 def manifestoDir = layout.buildDirectory.dir('perfil')
 def manifesto = tasks.register('manifestoPerfil') {
     def saida = manifestoDir.map { it.file('manifest.json') }
@@ -111,17 +114,21 @@ def manifesto = tasks.register('manifestoPerfil') {
     def autor = providers.gradleProperty('mod_authors').get()
     inputs.property('versao', versaoMod)
     inputs.property('mc', mcVersion)
+    def listaMods = layout.projectDirectory.file('src/perfil/modpack.json')
     inputs.property('neo', neoVersion)
+    inputs.file(listaMods)
     outputs.file(saida)
     doLast {
+        def mods = new groovy.json.JsonSlurper().parse(listaMods.asFile).mods
+            .collect { [projectID: it.projectID, fileID: it.fileID, required: true] }
         def json = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
-            minecraft: [version: mcVersion, modLoaders: [[id: "neoforge-${neoVersion}".toString(), primary: true]]],
+            minecraft: [version: mcVersion, modLoaders: [[id: "neoforge-${neoVersion}".toString(), primary: true]], recommendedRam: 6144],
             manifestType: 'minecraftModpack',
             manifestVersion: 1,
             name: nome,
             version: versaoMod,
             author: autor,
-            files: [],
+            files: mods,
             overrides: 'overrides',
         ]))
         saida.get().asFile.text = json + '\n'
@@ -135,7 +142,10 @@ tasks.register('perfilCurseForge', Zip) {
     destinationDirectory = layout.buildDirectory.dir('distributions')
     from(manifesto)
     from(tasks.named('jar')) { into 'overrides/mods' }
-    from('src/perfil') { into 'overrides' }
+    from('src/perfil') {
+        into 'overrides'
+        exclude 'modpack.json'
+    }
 }
 
 tasks.named('assemble') { dependsOn 'perfilCurseForge' }

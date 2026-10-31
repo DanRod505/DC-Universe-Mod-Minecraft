@@ -1,0 +1,2 @@
+# DC Universe: sem a tela de avisos de carregamento (mods do modpack ainda usam propriedades antigas do mods.toml).
+showLoadWarnings = false

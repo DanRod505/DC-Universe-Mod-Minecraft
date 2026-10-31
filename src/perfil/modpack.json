@@ -1,0 +1,19 @@
+{
+  "_comentario": "Mods do perfil do CurseForge (NeoForge 26.2). O CurseForge baixa cada arquivo pelo projectID/fileID; tools/modpack.py baixa para testes.",
+  "mods": [
+    {"nome": "Sodium", "papel": "desempenho (renderização)", "tipo": "mod", "lado": "cliente", "projectID": 394468, "fileID": 8859536, "arquivo": "sodium-neoforge-0.9.2+mc26.2.jar"},
+    {"nome": "Sodium Extra", "papel": "opções extras do Sodium", "tipo": "mod", "lado": "cliente", "projectID": 447673, "fileID": 9324155, "arquivo": "sodium-extra-neoforge-0.9.5+mc26.2.jar"},
+    {"nome": "Lithium", "papel": "desempenho (servidor e lógica)", "tipo": "mod", "lado": "ambos", "projectID": 360438, "fileID": 8533306, "arquivo": "lithium-neoforge-0.25.3+mc26.2.jar"},
+    {"nome": "Concurrent Chunk Management Engine", "papel": "geração de chunks em paralelo", "tipo": "mod", "lado": "ambos", "projectID": 533097, "fileID": 9048639, "arquivo": "c2me-neoforge-mc26.2-0.4.2-alpha.0.98.jar"},
+    {"nome": "FerriteCore", "papel": "menos memória", "tipo": "mod", "lado": "ambos", "projectID": 429235, "fileID": 7806039, "arquivo": "ferritecore-9.0.0-neoforge.jar"},
+    {"nome": "ImmediatelyFast", "papel": "desempenho (HUD e textos)", "tipo": "mod", "lado": "cliente", "projectID": 686911, "fileID": 8898471, "arquivo": "ImmediatelyFast-NeoForge-1.16.5+26.2.jar"},
+    {"nome": "Entity Culling", "papel": "não desenha entidades escondidas", "tipo": "mod", "lado": "cliente", "projectID": 448233, "fileID": 9100314, "arquivo": "entityculling-neoforge-1.11.3-mc26.2.jar"},
+    {"nome": "MoreCulling", "papel": "não desenha faces escondidas", "tipo": "mod", "lado": "cliente", "projectID": 630104, "fileID": 8563685, "arquivo": "moreculling-neoforge-26.2-1.8.1.jar"},
+    {"nome": "Dynamic FPS", "papel": "menos FPS com o jogo em segundo plano", "tipo": "mod", "lado": "cliente", "projectID": 335493, "fileID": 8260229, "arquivo": "dynamic-fps-3.11.9+minecraft-26.2.0-neoforge.jar"},
+    {"nome": "Iris Shaders", "papel": "shaders", "tipo": "mod", "lado": "cliente", "projectID": 455508, "fileID": 8868972, "arquivo": "iris-neoforge-1.11.4+mc26.2.jar"},
+    {"nome": "Distant Horizons", "papel": "paisagem distante", "tipo": "mod", "lado": "ambos", "projectID": 508933, "fileID": 9004780, "arquivo": "DistantHorizons-3.3.3-26.2-fabric-neoforge.jar"},
+    {"nome": "Complementary Shaders - Reimagined", "papel": "shader Leve", "tipo": "shader", "lado": "cliente", "projectID": 627557, "fileID": 8884654, "arquivo": "ComplementaryReimagined_r5.9.3.zip"},
+    {"nome": "Complementary Shaders - Unbound", "papel": "shader Cinemático", "tipo": "shader", "lado": "cliente", "projectID": 385587, "fileID": 8884656, "arquivo": "ComplementaryUnbound_r5.9.3.zip"},
+    {"nome": "Cloth Config API", "papel": "dependência do MoreCulling", "tipo": "mod", "lado": "cliente", "projectID": 348521, "fileID": 8269700, "arquivo": "cloth-config-26.2.155.jar"}
+  ]
+}

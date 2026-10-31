@@ -1,0 +1,10 @@
+# DC Universe: o modpack fixa a versão do Distant Horizons (sem atualizador) e não avisa do coletor de lixo no chat.
+[common]
+	[common.logging]
+		[common.logging.warning]
+			showGarbageCollectorWarning = false
+
+[client]
+	[client.advanced]
+		[client.advanced.autoUpdater]
+			enableAutoUpdater = false

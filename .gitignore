@@ -21,6 +21,7 @@ eclipse
 # execução local
 run
 run-data
+run-testes
 
 # Arquivos do MDK
 forge_README.txt

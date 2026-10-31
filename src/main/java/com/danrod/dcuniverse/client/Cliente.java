@@ -125,6 +125,7 @@ public final class Cliente {
 
     private static void tick() {
         Minecraft mc = Minecraft.getInstance();
+        Teclas.liberar(mc);
         if (mc.player == null) return;
         boolean livre = mc.gui.screen() == null;
         while (Teclas.GUIA.consumeClick()) {

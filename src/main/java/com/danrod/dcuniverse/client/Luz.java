@@ -20,7 +20,7 @@ import net.minecraft.resources.Identifier;
 public final class Luz {
     private Luz() {}
 
-    private static final RenderPipeline PIPELINE = RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)
+    private static final RenderPipeline PIPELINE = Iris.comoVanilla(RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("dcuniverse", "pipeline/luz"))
         .withVertexShader("core/rendertype_lightning")
         .withFragmentShader("core/rendertype_lightning")
@@ -28,13 +28,13 @@ public final class Luz {
         .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
         .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
-        .build();
+        .build(), RenderPipelines.LIGHTNING);
 
     private static final RenderType TIPO = RenderType.create("dcuniverse_luz",
         RenderSetup.builder(PIPELINE).setOutputTarget(OutputTarget.WEATHER_TARGET).sortOnUpload().createRenderSetup());
 
     /** Superfície translúcida com textura (casca de gelo): também não grava profundidade, pelo mesmo motivo. */
-    private static final RenderPipeline PIPELINE_TEXTURA = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
+    private static final RenderPipeline PIPELINE_TEXTURA = Iris.comoVanilla(RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath("dcuniverse", "pipeline/translucido"))
         .withShaderDefine("ALPHA_CUTOUT", 0.1F)
         .withShaderDefine("PER_FACE_LIGHTING")
@@ -42,7 +42,7 @@ public final class Luz {
         .withColorTargetState(new ColorTargetState(com.mojang.blaze3d.pipeline.BlendFunction.TRANSLUCENT))
         .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
         .withCull(false)
-        .build();
+        .build(), RenderPipelines.ENTITY_TRANSLUCENT);
 
     private static final java.util.Map<Identifier, RenderType> TEXTURAS = new java.util.HashMap<>();
 
