@@ -155,6 +155,12 @@ public final class Obra {
         return s.isSolid() && !s.is(BlockTags.LEAVES) && !s.is(BlockTags.LOGS) && !s.is(Blocks.BAMBOO);
     }
 
+    /** Chão do terreno natural (terra, grama, pedra, areia, neve, água...), não de uma construção ou rua. */
+    public static boolean natural(BlockState s) {
+        return !s.getFluidState().isEmpty() || (s.is(BlockTags.DIRT) && !s.is(Blocks.DIRT_PATH)) || s.is(BlockTags.SAND) || s.is(BlockTags.BASE_STONE_OVERWORLD)
+            || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY) || s.is(Blocks.SNOW_BLOCK) || s.is(BlockTags.TERRACOTTA) || s.is(Blocks.SANDSTONE);
+    }
+
     /** Altura local do topo do chão natural na coluna (procura de cima para baixo). */
     public int chao(int x, int z, int deY, int ateY) {
         for (int y = deY; y >= ateY; y--) {
@@ -183,6 +189,9 @@ public final class Obra {
                 int topoTerreno = Math.max(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, w.getX(), w.getZ()),
                     level.getHeight(Heightmap.Types.WORLD_SURFACE, w.getX(), w.getZ())) - w.getY();
                 int g = chao(x, z, Math.min(Math.max(topoTerreno, alturaLivre + 8), 64), -30);
+                // Na rampa em volta, só mexe em chão natural: com a construção vizinha colada, o "chão" achado era o
+                // telhado ou a parede dela, que era cortada e ganhava grama (virando terra) lá no alto.
+                if (d > 0 && !natural(ler(x, g, z))) continue;
                 double f = d / (margem + 1.0);
                 f = f * f * (3 - 2 * f);
                 int t = (int) Math.round(g * f);

@@ -65,6 +65,30 @@ public final class Locais {
     }
 
     /**
+     * Terreno solto no ar na coluna (terra, grama, pedra ou areia com ar logo embaixo), do topo até 6 blocos
+     * abaixo do platô; null se não houver.
+     */
+    private static String terraSolta(ServerLevel level, BlockPos.MutableBlockPos p, int x, int z, int y) {
+        int topo = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
+        for (int yy = topo; yy > y - 6; yy--) {
+            var b = level.getBlockState(p.set(x, yy, z));
+            if (!b.is(net.minecraft.tags.BlockTags.DIRT) && !b.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) && !b.is(net.minecraft.tags.BlockTags.SAND)) continue;
+            // cave_air é de lago subterrâneo (feature natural), não de terreno pendurado.
+            if (level.getBlockState(p.set(x, yy - 1, z)).is(Blocks.AIR))
+                return x + "," + yy + "," + z + "=" + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(b.getBlock()).getPath();
+        }
+        return null;
+    }
+
+    /** Plantas das peças que contêm o bloco (para achar de onde veio um bloco errado). */
+    private static String pecas(StructureStart s, int x, int y, int z) {
+        StringBuilder b = new StringBuilder();
+        for (StructurePiece pc : s.getPieces())
+            if (pc instanceof PecaObra o && pc.getBoundingBox().isInside(x, y, z)) b.append(b.isEmpty() ? "[" : "/").append(o.planta());
+        return b.isEmpty() ? "" : b.append(']').toString();
+    }
+
+    /**
      * Confere o nivelamento de um local já gerado (comando /dcu conferir_local): altura do platô, água, buracos e
      * chão fora do nível onde não há construção, degrau máximo da rampa e os biomas do platô.
      */
@@ -82,24 +106,25 @@ public final class Locais {
         int y = plato.y();
         int agua = 0, buracos = 0, fora = 0, colunas = 0, degrau = 0;
         String ondeAgua = "", ondeFora = "", ondeBuraco = "", ondeSolto = "";
-        int soltos = 0, soltosRampa = 0;
+        int soltos = 0, soltosRampa = 0, terraAlto = 0;
+        String ondeTerra = "";
         java.util.Map<String, Integer> biomas = new java.util.TreeMap<>();
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (int x = caixa.minX(); x <= caixa.maxX(); x++) {
             for (int z = caixa.minZ(); z <= caixa.maxZ(); z++) {
                 level.getChunk(x >> 4, z >> 4);
                 if (!plato.noPlato(x, z)) {
-                    // Na rampa: nada solto no ar acima do chão (folhas, troncos e cipós das árvores não contam).
-                    int chaoRampa = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
-                    for (int yy = chaoRampa + 2; yy <= chaoRampa + 24; yy++) {
-                        var b = level.getBlockState(p.set(x, yy, z));
-                        if (b.isAir() || b.is(net.minecraft.tags.BlockTags.LEAVES) || b.is(net.minecraft.tags.BlockTags.LOGS) || b.is(Blocks.VINE)) continue;
-                        if (level.getBlockState(p.set(x, yy - 1, z)).isAir() && soltosRampa++ < 3) ondeSolto += " rampa:" + x + "," + yy + "," + z + "="
-                            + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(b.getBlock()).getPath() + "(chão " + chaoRampa + ")";
-                    }
+                    // Na rampa: nenhum pedaço de terreno solto no ar (folhas, troncos e cipós das árvores não contam).
+                    String solto = terraSolta(level, p, x, z, y);
+                    if (solto != null && soltosRampa++ < 3) ondeSolto += " rampa:" + solto;
                     continue;
                 }
                 colunas++;
+                // Terra no alto: grama ou terra acima do chão do platô (sobra de terraplenagem dentro das construções).
+                for (int yy = y + 2; yy <= y + 30; yy++) {
+                    var b = level.getBlockState(p.set(x, yy, z));
+                    if ((b.is(Blocks.DIRT) || b.is(Blocks.GRASS_BLOCK) || b.is(Blocks.COARSE_DIRT)) && terraAlto++ < 3) ondeTerra += " " + x + "," + yy + "," + z + pecas(s.get(), x, yy, z);
+                }
                 boolean obra = false;
                 for (var b : obras) if (b.isInside(x, b.minY(), z)) { obra = true; break; }
                 // Água de propósito (bebedouro, poço) fica dentro das construções; fora delas não pode haver.
@@ -122,6 +147,15 @@ public final class Locais {
                     biomas.merge(level.getBiome(p.set(x, y + 1, z)).unwrapKey().map(k -> k.identifier().getPath()).orElse("?"), 1, Integer::sum);
             }
         }
+        // Em volta da rampa (16 blocos): também nada de terreno solto no ar.
+        int soltosFora = 0;
+        for (int x = caixa.minX() - 16; x <= caixa.maxX() + 16; x++)
+            for (int z = caixa.minZ() - 16; z <= caixa.maxZ() + 16; z++) {
+                if (caixa.isInside(x, caixa.minY(), z)) continue;
+                level.getChunk(x >> 4, z >> 4);
+                String solto = terraSolta(level, p, x, z, y);
+                if (solto != null && soltosFora++ < 3) ondeSolto += " fora:" + solto;
+            }
         // Rampa: quatro linhas saindo do meio de cada lado do platô.
         int cx = (caixa.minX() + caixa.maxX()) / 2, cz = (caixa.minZ() + caixa.maxZ()) / 2;
         int[][] linhas = {{caixa.minX(), cz, 1, 0}, {caixa.maxX(), cz, -1, 0}, {cx, caixa.minZ(), 0, 1}, {cx, caixa.maxZ(), 0, -1}};
@@ -146,6 +180,6 @@ public final class Locais {
             }
         BlockPos c = caixa.getCenter();
         return local + " em " + c.getX() + "," + y + "," + c.getZ() + ": colunas " + colunas + ", água fora das construções " + agua + (agua > 0 ? " (" + ondeAgua + ")" : "")
-            + ", buracos " + buracos + (buracos > 0 ? " (" + ondeBuraco.trim() + ")" : "") + ", chão fora do nível " + fora + (fora > 0 ? " (" + ondeFora.trim() + ")" : "") + ", soltos no ar " + soltos + " no platô e " + soltosRampa + " na rampa" + (soltos + soltosRampa > 0 ? " (" + ondeSolto.trim() + ")" : "") + ", maior degrau da rampa " + degrau + ", biomas " + biomas + ", vizinhos estranhos " + estranhos;
+            + ", buracos " + buracos + (buracos > 0 ? " (" + ondeBuraco.trim() + ")" : "") + ", chão fora do nível " + fora + (fora > 0 ? " (" + ondeFora.trim() + ")" : "") + ", soltos no ar " + soltos + " no platô, " + soltosRampa + " na rampa e " + soltosFora + " em volta" + (soltos + soltosRampa + soltosFora > 0 ? " (" + ondeSolto.trim() + ")" : "") + ", terra no alto " + terraAlto + (terraAlto > 0 ? " (" + ondeTerra.trim() + ")" : "") + ", maior degrau da rampa " + degrau + ", biomas " + biomas + ", vizinhos estranhos " + estranhos;
     }
 }
