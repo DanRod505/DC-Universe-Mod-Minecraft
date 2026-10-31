@@ -9,12 +9,15 @@ import com.danrod.dcuniverse.core.Eventos;
 import com.danrod.dcuniverse.core.Rede;
 import com.danrod.dcuniverse.test.Testes;
 import com.mojang.logging.LogUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import org.slf4j.Logger;
 
 @Mod(DCUniverse.MODID)
@@ -22,8 +25,20 @@ public final class DCUniverse {
     public static final String MODID = "dcuniverse";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public DCUniverse(FMLJavaModLoadingContext context) {
-        var bus = context.getModBusGroup();
+    private static IEventBus modBus;
+
+    /** Chave de registro de um id do mod (para o setId dos itens, blocos e entidades). */
+    public static <T> ResourceKey<T> chave(DeferredRegister<T> registro, String id) {
+        return ResourceKey.create(registro.getRegistryKey(), Identifier.fromNamespaceAndPath(MODID, id));
+    }
+
+    /** Barramento do mod (registro de renderizadores, teclas, atributos...). */
+    public static IEventBus modBus() {
+        return modBus;
+    }
+
+    public DCUniverse(IEventBus bus, ModContainer container) {
+        modBus = bus;
         Itens.ITEMS.register(bus);
         Itens.ABAS.register(bus);
         Entidades.TIPOS.register(bus);
@@ -34,9 +49,10 @@ public final class DCUniverse {
         com.danrod.dcuniverse.world.estrutura.Estruturas.PECAS.register(bus);
         com.danrod.dcuniverse.world.mundo.MundoDC.FONTES.register(bus);
         Testes.FUNCOES.register(bus);
-        context.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
-        FMLCommonSetupEvent.getBus(bus).addListener(e -> Rede.registrar());
+        container.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
+        Rede.registrar();
+        bus.addListener(RegisterPayloadHandlersEvent.class, Rede.CANAL::registrar);
         Eventos.registrar();
-        if (FMLEnvironment.dist == Dist.CLIENT) com.danrod.dcuniverse.client.Cliente.registrar();
+        if (FMLEnvironment.getDist().isClient()) com.danrod.dcuniverse.client.Cliente.registrar();
     }
 }

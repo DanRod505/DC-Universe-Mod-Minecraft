@@ -391,7 +391,7 @@ public class BatarangueEntidade extends Projectile {
             for (BlockPos p : BlockPos.betweenClosed(c.offset(-VIDRO_RAIO, -VIDRO_RAIO, -VIDRO_RAIO), c.offset(VIDRO_RAIO, VIDRO_RAIO, VIDRO_RAIO))) {
                 if (p.distSqr(c) > VIDRO_RAIO * VIDRO_RAIO) continue;
                 BlockState st = level.getBlockState(p);
-                if ((st.is(net.minecraftforge.common.Tags.Blocks.GLASS_BLOCKS) || st.is(net.minecraftforge.common.Tags.Blocks.GLASS_PANES))
+                if ((st.is(net.neoforged.neoforge.common.Tags.Blocks.GLASS_BLOCKS) || st.is(net.neoforged.neoforge.common.Tags.Blocks.GLASS_PANES))
                     && podeMexer(level, p)) {
                     level.destroyBlock(p, false, getOwner());
                 }

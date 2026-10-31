@@ -19,17 +19,20 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.ComputeFovModifierEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.joml.Matrix4fc;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Planar com a capa (passiva glide), calculado no cliente como o élitro. No ar, o pulo abre a capa (e fecha de novo);
@@ -99,9 +102,9 @@ public final class Planador {
     private Planador() {}
 
     public static void registrar() {
-        TickEvent.ClientTickEvent.Pre.BUS.addListener(e -> fisica(Minecraft.getInstance()));
-        ViewportEvent.ComputeCameraAngles.BUS.addListener(Planador::camera);
-        ComputeFovModifierEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(ClientTickEvent.Pre.class, e -> fisica(Minecraft.getInstance()));
+        NeoForge.EVENT_BUS.addListener(ViewportEvent.ComputeCameraAngles.class, Planador::camera);
+        NeoForge.EVENT_BUS.addListener(ComputeFovModifierEvent.class, e -> {
             if (e.getPlayer() != Minecraft.getInstance().player || estado == Planar.FECHADA) return;
             double c = cruzeiro();
             if (c <= 0) return;
@@ -110,12 +113,12 @@ public final class Planador {
             double forte = Minecraft.getInstance().options.getCameraType().isFirstPerson() ? 1 : 0.4;
             e.setNewFovModifier(e.getNewFovModifier() * (float) (1 + (0.3 * frac * frac + soco) * forte));
         });
-        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
-            if (e.getState() instanceof AvatarRenderState s) pose(s);
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, Eventos.cancela((Predicate<RenderLivingEvent.Pre>) e -> {
+            if (e.getRenderState() instanceof AvatarRenderState s) pose(s);
             return false;
-        });
-        RenderLivingEvent.Post.BUS.addListener(e -> {
-            if (e.getState() instanceof AvatarRenderState s) rastros(e, s);
+        }));
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
+            if (e.getRenderState() instanceof AvatarRenderState s) rastros(e, s);
         });
     }
 
@@ -286,7 +289,7 @@ public final class Planador {
     }
 
     private static void enviar() {
-        Rede.CANAL.send(new Rede.Planar(estado), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.Planar(estado), com.danrod.dcuniverse.core.Canal.SERVIDOR);
     }
 
     /** Toque duplo em A/D gira de lado; em W, impulso da capa (gasta energia, menos no criativo). */
@@ -323,7 +326,7 @@ public final class Planador {
             ps.manobra = tipo;
             ps.manobraT = 0;
         }
-        Rede.CANAL.send(new Rede.Manobra(tipo), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.Manobra(tipo), com.danrod.dcuniverse.core.Canal.SERVIDOR);
     }
 
     /** Outro jogador fez uma manobra planando (chega pelo mesmo pacote das manobras de voo). */
@@ -484,7 +487,7 @@ public final class Planador {
         Vec3[][] p = ps.pontas.toArray(new Vec3[0][]);
         Long[] nasc = ps.nascidas.toArray(new Long[0]);
         Float[] forca = ps.forcas.toArray(new Float[0]);
-        e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.debugQuads(), (pose, buf) -> {
+        e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.debugQuads(), (pose, buf) -> {
             Matrix4fc m = pose.pose();
             for (int lado = 0; lado < 2; lado++) {
                 for (int i = 0; i < p.length - 1; i++) {

@@ -20,12 +20,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * counter (Contra-ataque): apertar agachar (ou levantar o escudo) logo antes de levar um golpe é a defesa. Se o golpe
@@ -39,8 +41,8 @@ public final class ContraAtaque implements Passiva {
     private static final Map<UUID, Boolean> AGACHADO = new ConcurrentHashMap<>();
 
     public static void registrar() {
-        LivingAttackEvent.BUS.addListener((Predicate<LivingAttackEvent>) e -> e.getEntity() instanceof ServerPlayer sp
-            && defender(sp, e.getSource().getEntity(), e.getSource().getDirectEntity()));
+        NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, Eventos.cancela((Predicate<LivingIncomingDamageEvent>) e -> e.getEntity() instanceof ServerPlayer sp
+            && defender(sp, e.getSource().getEntity(), e.getSource().getDirectEntity())));
     }
 
     @Override

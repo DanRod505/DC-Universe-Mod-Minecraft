@@ -16,7 +16,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.TerrainAdjustment;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
-import net.minecraftforge.common.world.PieceBeardifierModifier;
+import net.neoforged.neoforge.common.world.PieceBeardifierModifier;
 
 /**
  * Platô de um local: a primeira peça de todo local nivelado. Deixa a área inteira num nível só, seca e limpa, e

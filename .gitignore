@@ -21,8 +21,9 @@ eclipse
 # execução local
 run
 run-data
+run-testes
 
-# Arquivos do Forge MDK
+# Arquivos do MDK
 forge_README.txt
 forge*changelog.txt
 run2

@@ -19,7 +19,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -46,6 +46,8 @@ import org.joml.Vector3f;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * O Batwing, veículo da suprema do Batman (tipo vehicle). Chega voando, embarca o dono como piloto e tem um
@@ -229,14 +231,14 @@ public class BatwingEntidade extends Entity implements VeiculoDono {
      * sufoca), afogamento (a cabine é fechada), queda do jato, aperto e os próprios tiros e mísseis.
      */
     public static void registrar() {
-        LivingAttackEvent.BUS.addListener((Predicate<LivingAttackEvent>) e -> {
+        NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, Eventos.cancela((Predicate<LivingIncomingDamageEvent>) e -> {
             // Vale para todos os veículos da suprema (content/VeiculoDono).
             if (!(e.getEntity().getVehicle() instanceof VeiculoDono) || !(e.getEntity().getVehicle() instanceof Entity b)) return false;
             DamageSource f = e.getSource();
             return f.is(DamageTypes.IN_WALL) || f.is(DamageTypes.DROWN) || f.is(DamageTypes.FALL) || f.is(DamageTypes.FLY_INTO_WALL) || f.is(DamageTypes.CRAMMING)
                 || f.getEntity() != null && (f.getEntity() == b || b.hasPassenger(f.getEntity()))
                 || f.getDirectEntity() == b;
-        });
+        }));
     }
 
     @Override

@@ -1,13 +1,13 @@
-// Projeto do mod DC Universe (Forge 26.2). Base: MDK forge-26.2-65.1.0.
+// Projeto do mod DC Universe (NeoForge 26.2, ModDevGradle).
 plugins {
-    id 'java'
+    id 'java-library'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
 def modId = providers.gradleProperty('mod_id').get()
 def mcVersion = providers.gradleProperty('minecraft_version').get()
-def forgeVersion = providers.gradleProperty('forge_version').get()
+def neoVersion = providers.gradleProperty('neo_version').get()
 
 version = providers.gradleProperty('mod_version').get()
 group = providers.gradleProperty('mod_group').get()
@@ -21,45 +21,46 @@ sourceSets.main.resources {
     srcDir layout.buildDirectory.dir('generated/provisorio')
 }
 
-minecraft {
+neoForge {
+    version = neoVersion
+
     runs {
         configureEach {
-            workingDir = layout.projectDirectory.dir('run')
-            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
-            systemProperty 'forge.enabledGameTestNamespaces', modId
-            args '--mixin.config', "${modId}.mixins.json"
+            gameDirectory = project.file('run')
+            systemProperty 'neoforge.enabledGameTestNamespaces', modId
+            logLevel = org.slf4j.event.Level.INFO
         }
-
-        register('client')
-
-        register('server') {
-            args '--nogui'
+        client {
+            client()
+            programArguments.addAll '--username', 'Dev'
+            // ./gradlew runClient -PdcuEntrar: entra direto no servidor local (testes com Xvfb).
+            if (providers.gradleProperty('dcuEntrar').isPresent()) programArguments.addAll '--quickPlayMultiplayer', 'localhost:25565'
         }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        gameTestServer {
+            type = 'gameTestServer'
+            // Pasta própria: os mods do modpack em run/mods (tools/modpack.py) não entram nos testes.
+            gameDirectory = project.file('run-testes')
+        }
+        data {
+            clientData()
+            gameDirectory = project.file('run-data')
+            programArguments.addAll '--mod', modId, '--all', '--output', file('src/generated/resources').absolutePath, '--existing', file('src/main/resources').absolutePath
+        }
+    }
 
-        register('gameTestServer')
-
-        register('data') {
-            workingDir = layout.projectDirectory.dir('run-data')
-            args '--mod', modId, '--all', '--output', layout.projectDirectory.dir('src/generated/resources'), '--existing', layout.projectDirectory.dir('src/main/resources')
+    mods {
+        "${modId}" {
+            sourceSet(sourceSets.main)
         }
     }
 }
 
 repositories {
-    minecraft.mavenizer(it)
-    maven fg.forgeMaven
-    maven fg.minecraftLibsMaven
     mavenCentral()
-}
-
-dependencies {
-    implementation minecraft.dependency("net.minecraftforge:forge:${mcVersion}-${forgeVersion}")
-    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.5'
-}
-
-// Mixins do mod (só o rastro do voo, por enquanto): o Forge lê a lista no manifesto do jar.
-tasks.named('jar', Jar) {
-    manifest.attributes('MixinConfigs': "${modId}.mixins.json")
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -73,11 +74,10 @@ tasks.named('processResources', ProcessResources) {
         mod_version: version.toString(),
         mod_authors: providers.gradleProperty('mod_authors').get(),
         minecraft_version: mcVersion,
-        forge_version: forgeVersion,
-        forge_major: forgeVersion.tokenize('.')[0],
+        neo_version: neoVersion,
     ]
     inputs.properties(props)
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
         expand(props)
     }
 }
@@ -104,7 +104,8 @@ def recursosProvisorios = tasks.register('recursosProvisorios', Exec) {
 }
 tasks.named('processResources') { dependsOn recursosProvisorios }
 
-// Perfil importável no CurseForge: manifest.json + overrides/mods/<jar> + overrides/server.properties (Mundo DC).
+// Perfil importável no CurseForge: manifest.json (mods do modpack em src/perfil/modpack.json) + overrides/mods/<jar>
+// + overrides com server.properties (Mundo DC), configs (Iris, NeoForge) e opções dos shaders.
 def manifestoDir = layout.buildDirectory.dir('perfil')
 def manifesto = tasks.register('manifestoPerfil') {
     def saida = manifestoDir.map { it.file('manifest.json') }
@@ -113,17 +114,23 @@ def manifesto = tasks.register('manifestoPerfil') {
     def autor = providers.gradleProperty('mod_authors').get()
     inputs.property('versao', versaoMod)
     inputs.property('mc', mcVersion)
-    inputs.property('forge', forgeVersion)
+    def listaMods = layout.projectDirectory.file('src/perfil/modpack.json')
+    inputs.property('neo', neoVersion)
+    inputs.file(listaMods)
     outputs.file(saida)
     doLast {
+        // Mods só de servidor dedicado (lado "servidor") não entram no perfil do jogador.
+        def mods = new groovy.json.JsonSlurper().parse(listaMods.asFile).mods
+            .findAll { it.lado != 'servidor' }
+            .collect { [projectID: it.projectID, fileID: it.fileID, required: true] }
         def json = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
-            minecraft: [version: mcVersion, modLoaders: [[id: "forge-${forgeVersion}".toString(), primary: true]]],
+            minecraft: [version: mcVersion, modLoaders: [[id: "neoforge-${neoVersion}".toString(), primary: true]], recommendedRam: 6144],
             manifestType: 'minecraftModpack',
             manifestVersion: 1,
             name: nome,
             version: versaoMod,
             author: autor,
-            files: [],
+            files: mods,
             overrides: 'overrides',
         ]))
         saida.get().asFile.text = json + '\n'
@@ -137,7 +144,10 @@ tasks.register('perfilCurseForge', Zip) {
     destinationDirectory = layout.buildDirectory.dir('distributions')
     from(manifesto)
     from(tasks.named('jar')) { into 'overrides/mods' }
-    from('src/perfil') { into 'overrides' }
+    from('src/perfil') {
+        into 'overrides'
+        exclude 'modpack.json'
+    }
 }
 
 tasks.named('assemble') { dependsOn 'perfilCurseForge' }

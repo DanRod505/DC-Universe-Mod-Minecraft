@@ -11,12 +11,14 @@ import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
 import com.danrod.dcuniverse.suit.TrajeItem;
-import net.minecraftforge.client.event.RenderArmEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.RenderArmEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Troca a skin de quem está transformado: textures/skin/<personagem>.png (128x128) e, se existir,
@@ -32,8 +34,8 @@ public final class Skins {
     private Skins() {}
 
     public static void registrar() {
-        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
-            if (e.getState() instanceof AvatarRenderState s) {
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, Eventos.cancela((Predicate<RenderLivingEvent.Pre>) e -> {
+            if (e.getRenderState() instanceof AvatarRenderState s) {
                 PlayerSkin skin = skinDe(s.id);
                 if (skin != null) {
                     s.skin = skin;
@@ -51,9 +53,9 @@ public final class Skins {
                 }
             }
             return false;
-        });
+        }));
         // Braço em primeira pessoa com a skin do personagem.
-        RenderArmEvent.BUS.addListener((Predicate<RenderArmEvent>) e -> {
+        NeoForge.EVENT_BUS.addListener(RenderArmEvent.class, Eventos.cancela((Predicate<RenderArmEvent>) e -> {
             if (desenhandoBraco) return false;
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return false;
@@ -64,17 +66,17 @@ public final class Skins {
             desenhandoBraco = true;
             try {
                 if (e.getArm() == HumanoidArm.RIGHT) {
-                    renderer.renderRightHand(e.getPoseStack(), e.getNodeCollector(), e.getPackedLight(), tex,
+                    renderer.renderRightHand(e.getPoseStack(), e.getSubmitNodeCollector(), e.getLightCoords(), tex,
                         mc.player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE));
                 } else {
-                    renderer.renderLeftHand(e.getPoseStack(), e.getNodeCollector(), e.getPackedLight(), tex,
+                    renderer.renderLeftHand(e.getPoseStack(), e.getSubmitNodeCollector(), e.getLightCoords(), tex,
                         mc.player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE));
                 }
             } finally {
                 desenhandoBraco = false;
             }
             return true;
-        });
+        }));
     }
 
     public static void limpar() {

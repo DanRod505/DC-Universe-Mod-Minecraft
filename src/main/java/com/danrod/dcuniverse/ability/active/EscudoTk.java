@@ -14,11 +14,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * tk_shield: escudo telecinético. Uma bolha em volta do jogador por duration segundos (usar de novo desliga antes):
@@ -63,7 +64,7 @@ public final class EscudoTk implements TipoHabilidade {
     }
 
     public static void registrar() {
-        LivingHurtEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, e -> {
             if (!(e.getEntity() instanceof ServerPlayer sp)) return;
             Ativo a = ATIVOS.get(sp.getUUID());
             if (a == null) return;

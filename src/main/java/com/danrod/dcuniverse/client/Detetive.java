@@ -38,7 +38,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector3fc;
 
@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Modo Detetive do Batman, só no cliente de quem usa (o servidor manda o efeito "detective" ao ligar e desligar).
@@ -90,10 +92,10 @@ public final class Detetive {
     private Detetive() {}
 
     public static void registrar() {
-        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
-            contorno(e.getState());
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, Eventos.cancela((Predicate<RenderLivingEvent.Pre>) e -> {
+            contorno(e.getRenderState());
             return false;
-        });
+        }));
     }
 
     public static boolean ativo() {

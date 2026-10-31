@@ -42,7 +42,7 @@ public final class NaveKryptonianaRenderer extends EntityRenderer<NaveKryptonian
     private static final Identifier ESCUDO = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "textures/entity/nave_kryptoniana_escudo.png");
 
     /** Escudo: textura somada à cena (energia), sem gravar profundidade e visível dos dois lados (também de dentro). */
-    private static final RenderPipeline PIPELINE_ESCUDO = RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)
+    private static final RenderPipeline PIPELINE_ESCUDO = com.danrod.dcuniverse.client.Iris.comoVanilla(RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)
         .withLocation(Identifier.fromNamespaceAndPath(DCUniverse.MODID, "pipeline/escudo"))
         .withVertexShader("core/entity")
         .withFragmentShader("core/entity")
@@ -55,7 +55,7 @@ public final class NaveKryptonianaRenderer extends EntityRenderer<NaveKryptonian
         .withVertexBinding(0, DefaultVertexFormat.ENTITY)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
         .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
-        .build();
+        .build(), RenderPipelines.EYES);
     private static final RenderType TIPO_ESCUDO = RenderType.create("dcuniverse_escudo",
         RenderSetup.builder(PIPELINE_ESCUDO).withTexture("Sampler0", ESCUDO).sortOnUpload().createRenderSetup());
 

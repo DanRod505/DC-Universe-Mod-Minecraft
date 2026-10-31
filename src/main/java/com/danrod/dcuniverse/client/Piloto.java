@@ -28,12 +28,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.ComputeFovModifierEvent;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.sound.PlaySoundEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 
 import org.joml.Vector3f;
 
@@ -42,6 +41,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Pilotar o Batwing no cliente. Física (chamada pelo tick da própria entidade quando o piloto é o jogador local):
@@ -67,7 +68,7 @@ public final class Piloto {
     public static void registrar() {
         BatwingEntidade.controleCliente = Piloto::controlar;
         // Os botões do mouse viram as armas: nada de quebrar blocos ou usar itens pilotando.
-        InputEvent.InteractionKeyMappingTriggered.BUS.addListener((Predicate<InputEvent.InteractionKeyMappingTriggered>) e -> {
+        NeoForge.EVENT_BUS.addListener(InputEvent.InteractionKeyMappingTriggered.class, Eventos.cancela((Predicate<InputEvent.InteractionKeyMappingTriggered>) e -> {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null || BatwingEntidade.pilotando(mc.player) == null) return false;
             e.setSwingHand(false);
@@ -75,8 +76,8 @@ public final class Piloto {
                 enviar(BatwingEntidade.MISSIL);
             }
             return true;
-        });
-        ComputeFovModifierEvent.BUS.addListener(e -> {
+        }));
+        NeoForge.EVENT_BUS.addListener(ComputeFovModifierEvent.class, e -> {
             Minecraft mc = Minecraft.getInstance();
             if (e.getPlayer() != mc.player) return;
             BatwingEntidade b = BatwingEntidade.pilotando(mc.player);
@@ -84,11 +85,11 @@ public final class Piloto {
             float frac = Mth.clamp(b.velocidade * 20 / Math.max(1, params().f("boost_speed", 60)), 0, 1.2f);
             e.setNewFovModifier(e.getNewFovModifier() * (1 + 0.22f * frac * frac));
         });
-        ViewportEvent.ComputeCameraAngles.BUS.addListener(Piloto::camera);
-        PlaySoundEvent.BUS.addListener(Piloto::somNaCabine);
+        NeoForge.EVENT_BUS.addListener(ViewportEvent.ComputeCameraAngles.class, Piloto::camera);
+        NeoForge.EVENT_BUS.addListener(PlaySoundEvent.class, Piloto::somNaCabine);
         // Quem está sentado no Batwing inclina com ele, girando em volta do próprio assento.
-        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
-            if (!(e.getState() instanceof AvatarRenderState s)) return false;
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, Eventos.cancela((Predicate<RenderLivingEvent.Pre>) e -> {
+            if (!(e.getRenderState() instanceof AvatarRenderState s)) return false;
             Minecraft mc = Minecraft.getInstance();
             if (mc.level == null || !(mc.level.getEntity(s.id) instanceof Entity p) || !(p.getVehicle() instanceof BatwingEntidade b)) return false;
             var ps = e.getPoseStack();
@@ -98,9 +99,9 @@ public final class Piloto {
             ps.translate(0, -ASSENTO, 0);
             GIRADOS.add(s.id);
             return false;
-        });
-        RenderLivingEvent.Post.BUS.addListener(e -> {
-            if (e.getState() instanceof AvatarRenderState s && GIRADOS.remove(s.id)) e.getPoseStack().popPose();
+        }));
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
+            if (e.getRenderState() instanceof AvatarRenderState s && GIRADOS.remove(s.id)) e.getPoseStack().popPose();
         });
     }
 
@@ -156,7 +157,7 @@ public final class Piloto {
     }
 
     private static void enviar(int acao) {
-        Rede.CANAL.send(new Rede.Veiculo(acao), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.Veiculo(acao), com.danrod.dcuniverse.core.Canal.SERVIDOR);
     }
 
     /** Parâmetros do veículo do personagem do jogador local (do catálogo de personagens). */

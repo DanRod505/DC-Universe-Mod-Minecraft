@@ -928,5 +928,17 @@
   "dcuniverse.local.atlantida": "Atlântida",
   "dcuniverse.local.fossa": "A Fossa",
   "dcuniverse.local.nanda_parbat": "Nanda Parbat",
-  "dcuniverse.local.fortaleza": "Fortaleza da Solidão"
+  "dcuniverse.local.fortaleza": "Fortaleza da Solidão",
+  "key.dcuniverse.diretor": "Modo Diretor (câmera livre para gravar)",
+  "key.dcuniverse.diretor_lento": "Modo Diretor: câmera lenta",
+  "key.dcuniverse.diretor_rapido": "Modo Diretor: tempo normal",
+  "dcuniverse.diretor.entrou": "Modo Diretor: WASD, espaço e shift movem a câmera, Ctrl acelera, a roda do mouse muda a velocidade, [ e ] controlam a câmera lenta. F6 sai.",
+  "dcuniverse.diretor.tempo": "Modo Diretor: mundo a %s%% da velocidade.",
+  "dcuniverse.diretor.sem_permissao": "Câmera lenta só para quem pode usar comandos neste mundo.",
+  "dcuniverse.flashback.instalar": "Instalar Flashback (gravar)",
+  "dcuniverse.flashback.baixando": "Baixando Flashback: %s%%",
+  "dcuniverse.flashback.pronto": "Flashback pronto: reinicie",
+  "dcuniverse.flashback.erro": "Erro ao baixar: tentar de novo",
+  "dcuniverse.flashback.pergunta": "Instalar o Flashback?",
+  "dcuniverse.flashback.explica": "O Flashback (de Moulberry) grava replays para editar vídeos. Ele não pode vir dentro do pacote, então o jogo baixa a versão %s testada com o DC Universe do Modrinth (cerca de 200 MB) para a pasta mods. Depois é só reiniciar o jogo."
 }

@@ -18,7 +18,6 @@ import com.danrod.dcuniverse.missao.DefMissao;
 import com.danrod.dcuniverse.npc.DefNpc;
 import com.danrod.dcuniverse.npc.ItemRef;
 import net.minecraft.locale.Language;
-import net.minecraftforge.network.PacketDistributor;
 import com.google.gson.JsonParser;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -611,14 +610,14 @@ public final class GuiaScreen extends Screen {
             boolean rastreada = id.equals(EstadoCliente.diario.rastreada());
             out.add(botao(Component.translatable(rastreada ? "dcuniverse.guia.missoes.parar" : "dcuniverse.guia.missoes.rastrear"), TINTA, () -> {
                 clique();
-                Rede.CANAL.send(new Rede.DiarioAcao(0, rastreada ? "" : id), PacketDistributor.SERVER.noArg());
+                Rede.CANAL.send(new Rede.DiarioAcao(0, rastreada ? "" : id), com.danrod.dcuniverse.core.Canal.SERVIDOR);
             }));
             boolean confirmar = System.currentTimeMillis() < confirmarAte;
             out.add(botao(Component.translatable(confirmar ? "dcuniverse.guia.missoes.confirmar" : "dcuniverse.guia.missoes.abandonar"), TITULO, () -> {
                 clique();
                 if (System.currentTimeMillis() < confirmarAte) {
                     confirmarAte = 0;
-                    Rede.CANAL.send(new Rede.DiarioAcao(1, id), PacketDistributor.SERVER.noArg());
+                    Rede.CANAL.send(new Rede.DiarioAcao(1, id), com.danrod.dcuniverse.core.Canal.SERVIDOR);
                 } else {
                     confirmarAte = System.currentTimeMillis() + 3000;
                 }
