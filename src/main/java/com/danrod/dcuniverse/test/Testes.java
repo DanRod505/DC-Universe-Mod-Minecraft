@@ -1077,6 +1077,9 @@ public final class Testes {
         }
         for (int x = 22; x < 28; x++) for (int z = 22; z < 28; z++) for (int y = y0 - 6; y <= y0 + 2; y++) level.setBlock(o.offset(x, 0, z).atY(y), agua, 2);
         for (int y = y0 + 3; y < y0 + 8; y++) level.setBlock(o.offset(20, 0, 34).atY(y), net.minecraft.world.level.block.Blocks.OAK_LOG.defaultBlockState(), 2);
+        // Oco embaixo da casca do chão na rampa sul (o beard do ruído deixa assim no pé de morros e sobre lagos).
+        for (int x = 28; x < 32; x++) for (int z = 44; z < 48; z++) for (int y = y0 - 3; y <= y0 + 1; y++)
+            level.setBlock(o.offset(x, 0, z).atY(y), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
         var plato = new com.danrod.dcuniverse.world.estrutura.PecaPlato(o.getX() + 22, o.getZ() + 22, o.getX() + 37, o.getZ() + 37, y0, 20, 20, grama);
         var caixa = new net.minecraft.world.level.levelgen.structure.BoundingBox(o.getX(), level.getMinY(), o.getZ(), o.getX() + n - 1, level.getMaxY(), o.getZ() + n - 1);
         plato.acertar(level, caixa, y0 - 20, net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE);
@@ -1098,6 +1101,20 @@ public final class Testes {
             antes = agora;
         }
         h.assertValueEqual(chao.apply(1, 30), y0 + 2, "a rampa termina no chão natural");
+        for (int x = 28; x < 32; x++) for (int z = 44; z < 48; z++) for (int y = y0 - 6; y < chao.apply(x, z); y++)
+            h.assertTrue(!level.getBlockState(o.offset(x, 0, z).atY(y)).isAir(), "rampa sem oco embaixo em " + x + "," + y + "," + z);
+
+        // Terraplenagem de uma construção colada a outra: a rampa em volta não corta a vizinha nem põe grama nela.
+        var q = o.offset(0, 0, 90);
+        var tijolo = net.minecraft.world.level.block.Blocks.STONE_BRICKS.defaultBlockState();
+        for (int x = 0; x < 24; x++) for (int z = 0; z < 16; z++) for (int y = y0 - 4; y <= y0 + 12; y++)
+            level.setBlock(q.offset(x, 0, z).atY(y), y < y0 ? pedra : y == y0 ? grama : net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+        for (int z = 2; z <= 10; z++) for (int y = y0 + 1; y <= y0 + 6; y++) level.setBlock(q.offset(14, 0, z).atY(y), tijolo, 2);
+        var obra = new com.danrod.dcuniverse.world.estrutura.Obra(level, caixa.moved(0, 0, 90), q.offset(2, 0, 2).atY(y0),
+            net.minecraft.world.level.block.Rotation.NONE, 1L);
+        obra.terraplenar(0, 0, 8, 8, 4, grama, net.minecraft.world.level.block.Blocks.COBBLESTONE.defaultBlockState(), 10);
+        for (int z = 2; z <= 10; z++) for (int y = y0 + 1; y <= y0 + 6; y++)
+            h.assertTrue(level.getBlockState(q.offset(14, 0, z).atY(y)).is(tijolo.getBlock()), "construção vizinha intacta em 14," + y + "," + z);
         h.succeed();
     }
 

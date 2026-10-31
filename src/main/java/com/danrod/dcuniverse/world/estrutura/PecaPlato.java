@@ -35,6 +35,8 @@ public final class PecaPlato extends StructurePiece implements PieceBeardifierMo
     public static final int RAMPA = 20;
     /** Quanto aterrar no máximo por baixo do platô (vales mais fundos ganham um "pé" de pedra). */
     private static final int ATERRO = 48;
+    /** Até onde (abaixo do platô) o beard mexe no terreno e pode deixar vãos: ver {@link #fecharVaos}. */
+    private static final int VAO = 14;
 
     /** Retângulo do platô (já com a folga) e altura do topo do chão. */
     private final int x1, z1, x2, z2, y, rampaX, rampaZ;
@@ -151,6 +153,7 @@ public final class PecaPlato extends StructurePiece implements PieceBeardifierMo
                 if (yy < y - 3 && firme(s)) break;
                 por(level, p, yy >= y - 3 ? Blocks.DIRT.defaultBlockState() : Blocks.STONE.defaultBlockState());
             }
+            fecharVaos(level, p, x, z, y, true);
             return;
         }
         // Rampa: do nível do platô até o chão natural, com curva suave (sem degrau na borda nem no fim).
@@ -166,6 +169,7 @@ public final class PecaPlato extends StructurePiece implements PieceBeardifierMo
                 BlockState s = level.getBlockState(p.set(x, yy, z));
                 if (!s.getFluidState().isEmpty() || (!s.isAir() && !s.is(BlockTags.LEAVES) && !s.is(BlockTags.LOGS))) limpar(level, p);
             }
+            fecharVaos(level, p, x, z, t, true);
         } else if (t < g) {
             // Corte: tira o morro acima da rampa (com as árvores) e refaz a grama.
             for (int yy = topo; yy > t; yy--) {
@@ -174,7 +178,27 @@ public final class PecaPlato extends StructurePiece implements PieceBeardifierMo
                 if (yy < mar && !s.getFluidState().isEmpty()) continue;
                 limpar(level, p);
             }
-            if (t >= mar || !agua) por(level, p.set(x, t, z), cobertura);
+            if (t >= mar || !agua) {
+                por(level, p.set(x, t, z), cobertura);
+                fecharVaos(level, p, x, z, t, t >= mar);
+            }
+        } else {
+            // No nível certo: só os vãos embaixo (um oco no pé do morro no fim da rampa).
+            fecharVaos(level, p, x, z, t, !agua && t >= mar);
+        }
+    }
+
+    /**
+     * Fecha os vãos embaixo do chão novo (topo em {@code chao}) até {@link #VAO} blocos abaixo do platô. O "beard"
+     * do ruído só puxa o terreno para o nível do platô perto dele: num vale ou lago sobra uma casca fina de terra com
+     * o vazio embaixo, e no pé de um morro ele escava um oco por baixo, que o corte da rampa deixava pendurado.
+     * {@code agua}: também aterra água (a rampa saiu do nível do mar).
+     */
+    private void fecharVaos(WorldGenLevel level, BlockPos.MutableBlockPos p, int x, int z, int chao, boolean agua) {
+        for (int yy = chao - 1; yy >= y - VAO; yy--) {
+            BlockState s = level.getBlockState(p.set(x, yy, z));
+            if (firme(s) || (!agua && !s.getFluidState().isEmpty())) continue;
+            por(level, p, yy >= chao - 3 ? Blocks.DIRT.defaultBlockState() : Blocks.STONE.defaultBlockState());
         }
     }
 
