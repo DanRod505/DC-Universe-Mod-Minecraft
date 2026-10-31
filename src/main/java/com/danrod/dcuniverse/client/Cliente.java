@@ -123,6 +123,7 @@ public final class Cliente {
         Motorista.registrar();
         Diretor.registrar();
         FlashbackInstalador.registrar();
+        com.danrod.dcuniverse.core.EstadoCliente.emReplay = Flashback::emReplay;
         Ilhas.registrar();
         LigaHud.registrar();
         com.danrod.dcuniverse.client.npc.NpcRenderer.registrar();
@@ -153,6 +154,8 @@ public final class Cliente {
         while (Teclas.DIRETOR_RAPIDO.consumeClick()) Diretor.tempo(mc, -1);
         Diretor.tick(mc);
         Flashback.tick();
+        if (Flashback.emReplay() && com.danrod.dcuniverse.core.EstadoCliente.transformado())
+            com.danrod.dcuniverse.core.EstadoCliente.atual = Rede.Sync.VAZIO;
         while (Teclas.MAPA.consumeClick()) {
             if (livre) Rede.CANAL.send(new Rede.MapaPedir(), com.danrod.dcuniverse.core.Canal.SERVIDOR);
         }

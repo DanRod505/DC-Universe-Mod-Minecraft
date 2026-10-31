@@ -13,6 +13,13 @@ public final class EstadoCliente {
     public static final java.util.Map<Integer, Rede.IlhaBlocos> ILHAS = new java.util.concurrent.ConcurrentHashMap<>();
 
     public static volatile Rede.Sync atual = Rede.Sync.VAZIO;
+
+    /**
+     * Assistindo um replay do Flashback (o cliente troca por client/Flashback::emReplay). No replay os pacotes
+     * gravados do personagem chegam de novo, mas quem anda é a câmera do editor: o estado dele fica de fora, senão
+     * voo, planador e turbo (Ctrl) mexeriam na câmera.
+     */
+    public static java.util.function.BooleanSupplier emReplay = () -> false;
     /** JSON de cada personagem do servidor (id -> JSON), para o Guia. */
     public static volatile Map<String, String> catalogo = Map.of();
     /** Progresso do Guia do jogador local. */

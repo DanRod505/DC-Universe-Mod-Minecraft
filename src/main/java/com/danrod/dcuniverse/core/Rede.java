@@ -526,7 +526,7 @@ public final class Rede {
         CANAL.messageBuilder(Sync.class)
             .direction(PacketFlow.CLIENTBOUND)
             .encoder(Sync::encode).decoder(Sync::decode)
-            .consumerMainThread((m, ctx) -> EstadoCliente.atual = m)
+            .consumerMainThread((m, ctx) -> EstadoCliente.atual = EstadoCliente.emReplay.getAsBoolean() ? Sync.VAZIO : m)
             .add();
         CANAL.messageBuilder(Aparencia.class)
             .direction(PacketFlow.CLIENTBOUND)
