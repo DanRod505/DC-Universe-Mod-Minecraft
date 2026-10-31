@@ -483,6 +483,9 @@ public final class Rede {
     /** Pedido do mapa do mundo (tecla M). */
     public record MapaPedir() {}
 
+    /** Modo Diretor: câmera lenta (fração da velocidade normal do mundo). */
+    public record DiretorTempo(float fator) {}
+
     private Rede() {}
 
     public static void registrar() {
@@ -503,6 +506,11 @@ public final class Rede {
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> {}).decoder(b -> new MapaPedir())
             .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.inicio.Inicio.abrir(p, false)))
+            .add();
+        CANAL.messageBuilder(DiretorTempo.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeFloat(m.fator())).decoder(b -> new DiretorTempo(b.readFloat()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Diretor.tempo(p, m.fator())))
             .add();
         CANAL.messageBuilder(Sync.class)
             .direction(PacketFlow.CLIENTBOUND)

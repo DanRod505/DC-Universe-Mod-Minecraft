@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Em primeira pessoa no Batwing (e nos outros veículos), o olho acompanha a cabeça inclinada junto com o jato (client/Piloto). */
+/** Câmera livre do Modo Diretor (client/Diretor). Em primeira pessoa no Batwing (e nos outros veículos), o olho acompanha a cabeça inclinada junto com o jato (client/Piloto). */
 @Mixin(Camera.class)
 public abstract class CameraMixin {
     @Shadow
@@ -36,8 +36,17 @@ public abstract class CameraMixin {
         if (d < cir.getReturnValue()) cir.setReturnValue(d);
     }
 
+    @Shadow
+    private boolean detached;
+
     @Inject(method = "alignWithEntity", at = @At("TAIL"))
     private void dcuniverse$cabine(float partialTicks, CallbackInfo ci) {
+        if (com.danrod.dcuniverse.client.Diretor.ativo()) {
+            // Modo Diretor: câmera livre, o personagem aparece como em terceira pessoa.
+            detached = true;
+            com.danrod.dcuniverse.client.Diretor.posicionar((Camera) (Object) this, this::setPosition);
+            return;
+        }
         if (isDetached()) return;
         Vec3 d = Piloto.olhoNaCabine(entity(), partialTicks);
         if (d == null) d = com.danrod.dcuniverse.client.Motorista.olhoNoBanco(entity(), partialTicks);

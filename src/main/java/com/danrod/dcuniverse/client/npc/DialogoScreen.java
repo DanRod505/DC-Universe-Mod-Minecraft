@@ -49,6 +49,7 @@ public final class DialogoScreen extends Screen {
 
     /** Chegou uma fala nova: atualiza a tela aberta da mesma conversa ou abre uma. */
     public static void receber(Rede.NpcAbrir m) {
+        if (com.danrod.dcuniverse.client.Flashback.emReplay()) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.gui.screen() instanceof DialogoScreen d && d.m.entidade() == m.entidade()) {
             d.trocar(m);

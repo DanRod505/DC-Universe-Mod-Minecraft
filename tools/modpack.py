@@ -1,7 +1,7 @@
 """Baixa os mods e shaders do perfil (src/perfil/modpack.json) da CDN do CurseForge, para testar com ./gradlew runClient.
 
 Uso: python3 -I tools/modpack.py --raiz . --saida run [--lado ambos]
-Mods vão para <saida>/mods e shaders para <saida>/shaderpacks. --lado ambos baixa só os mods de servidor.
+Mods vão para <saida>/mods e shaders para <saida>/shaderpacks. --lado ambos baixa os mods do servidor dedicado (lado "ambos" e "servidor"); sem ele, os do jogador ("cliente" e "ambos").
 """
 import argparse
 import json
@@ -19,7 +19,9 @@ def main():
     raiz = pathlib.Path(a.raiz)
     lista = json.loads((raiz / "src/perfil/modpack.json").read_text(encoding="utf-8"))["mods"]
     for m in lista:
-        if a.lado == "ambos" and m["lado"] != "ambos":
+        if a.lado == "ambos" and m["lado"] == "cliente":
+            continue
+        if a.lado == "todos" and m["lado"] == "servidor":
             continue
         pasta = pathlib.Path(a.saida) / ("shaderpacks" if m["tipo"] == "shader" else "mods")
         pasta.mkdir(parents=True, exist_ok=True)

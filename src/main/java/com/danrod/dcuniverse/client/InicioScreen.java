@@ -79,6 +79,7 @@ public final class InicioScreen extends Screen {
 
     /** O servidor mandou o mapa (pacote InicioAbrir). */
     public static void receber(Rede.InicioAbrir m) {
+        if (com.danrod.dcuniverse.client.Flashback.emReplay()) return;
         Minecraft mc = Minecraft.getInstance();
         if (!m.escolher() && mc.gui.screen() != null) return;
         if (naTextura != m.mapa()) {

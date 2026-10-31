@@ -19,10 +19,13 @@ public final class Teclas {
     public static final KeyMapping GUIA = new KeyMapping("key.dcuniverse.guia", InputConstants.KEY_G, CATEGORIA);
     public static final KeyMapping DIARIO = new KeyMapping("key.dcuniverse.diario", InputConstants.KEY_J, CATEGORIA);
     public static final KeyMapping MAPA = new KeyMapping("key.dcuniverse.mapa", InputConstants.KEY_M, CATEGORIA);
+    public static final KeyMapping DIRETOR = new KeyMapping("key.dcuniverse.diretor", InputConstants.KEY_F6, CATEGORIA);
+    public static final KeyMapping DIRETOR_LENTO = new KeyMapping("key.dcuniverse.diretor_lento", InputConstants.KEY_LBRACKET, CATEGORIA);
+    public static final KeyMapping DIRETOR_RAPIDO = new KeyMapping("key.dcuniverse.diretor_rapido", InputConstants.KEY_RBRACKET, CATEGORIA);
 
     /** Teclas de outros mods do modpack que caem nas nossas por padrão (o recarregar shaders do Iris é R, o do radial). */
     private static final Set<String> CEDEM = Set.of("iris.keybind.reload");
-    private static final List<KeyMapping> NOSSAS = List.of(RADIAL, USAR, DESTRANSFORMAR, GUIA, DIARIO, MAPA);
+    private static final List<KeyMapping> NOSSAS = List.of(RADIAL, USAR, DESTRANSFORMAR, GUIA, DIARIO, MAPA, DIRETOR, DIRETOR_LENTO, DIRETOR_RAPIDO);
     private static boolean conferido;
 
     private Teclas() {}

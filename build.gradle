@@ -119,7 +119,9 @@ def manifesto = tasks.register('manifestoPerfil') {
     inputs.file(listaMods)
     outputs.file(saida)
     doLast {
+        // Mods só de servidor dedicado (lado "servidor") não entram no perfil do jogador.
         def mods = new groovy.json.JsonSlurper().parse(listaMods.asFile).mods
+            .findAll { it.lado != 'servidor' }
             .collect { [projectID: it.projectID, fileID: it.fileID, required: true] }
         def json = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
             minecraft: [version: mcVersion, modLoaders: [[id: "neoforge-${neoVersion}".toString(), primary: true]], recommendedRam: 6144],
