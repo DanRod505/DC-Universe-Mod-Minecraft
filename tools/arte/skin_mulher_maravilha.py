@@ -51,12 +51,13 @@ BUSTO = [(4.5, 7.5, 3.4, 2.4, 1.0), (11.5, 7.5, 3.4, 2.4, 1.0)]
 
 # Águia dourada do peito (16 de largura, começa em y=3): as asas abertas formam o duplo W.
 AGUIA = [
-    "GG............GG",
-    "GGG..........GGG",
-    ".GGG..G..G..GGG.",
-    "..GGGGGGGGGGGG..",
-    "...GGG.GG.GGG...",
-    "....G..GG..G....",
+    "L..............L",
+    "GL............LG",
+    "DGL....LL....LGD",
+    ".DGL..LGGL..LGD.",
+    "..DGLLGGGGLLGD..",
+    "...DGGDGGDGGD...",
+    "....DD.DD.DD....",
 ]
 
 
@@ -79,16 +80,17 @@ def cabelo(n):
     pintar_cabelo(n, cab, "cabeca", base, topo=lambda x, y: True, parte_x=8, brilho=(2, 3, 4))
     pintar_cabelo(n, cab, "chapeu", capa, topo=lambda x, y: 1 <= x <= 14 and 1 <= y <= 14, parte_x=8,
                   brilho=(1, 2, 3))
-    # ondas: listras claras inclinadas nas mechas dos lados
+    # ondas largas: faixas claras que serpenteiam (seno), com a sombra logo abaixo de cada crista
     for camada in ("cabeca", "chapeu"):
         for lado in ("dir", "esq", "tras"):
             f = n.face(camada, lado)
             for y in range(f.h):
                 for x in range(f.w):
-                    if (x + y * 2 + (3 if lado == "esq" else 0)) % 7 == 0:
-                        f.mix(x, y, cab.claro, 0.22)
-                    elif (x + y * 2) % 7 == 3:
-                        f.m(x, y, -0.06)
+                    onda = math.sin((y + 2.2 * math.sin(x * 0.8 + (1.3 if lado == "esq" else 0))) * 0.9)
+                    if onda > 0.8:
+                        f.mix(x, y, cab.claro, 0.18 + 0.1 * (y < 6))
+                    elif onda < -0.75:
+                        f.m(x, y, -0.07)
     b = n.face("cabeca", "baixo")
     for y in range(8, 16):
         for x in range(16):
@@ -195,24 +197,30 @@ def tronco(n, rnd):
         tr.m(7, y, -0.12)
         if y % 3 == 0:
             tr.p(8, y, tom(OURO, -0.15))  # ilhoses do cordão nas costas
-    # águia/duplo W dourado sobre o busto, curvado pelo relevo, nas duas camadas
+    # águia dourada de asas abertas (o W duplo) sobre o busto, em relevo metálico: luz em cima, sombra embaixo,
+    # brilho especular no alto de cada seio e contorno escuro por baixo das asas (nas duas camadas)
+    cores = {"L": OURO_CLARO, "G": OURO, "D": OURO_ESC}
     for camada in ("corpo", "jaqueta"):
         p = n.face(camada, "frente")
         for j, l in enumerate(AGUIA):
             for i, ch in enumerate(l):
-                if ch != "G":
+                if ch not in cores:
                     continue
                 px, py = i, 4 + j
                 hy = altura(BUSTO, px, py + 0.5) - altura(BUSTO, px, py - 0.5)
-                s = 0.10 - 0.06 * j - 0.6 * hy
-                cor = OURO_CLARO if j == 0 or (j <= 2 and (i + j) % 5 == 0) else OURO
-                p.p(px, py, tom(cor, s))
-        for i in range(16):  # contorno escuro embaixo das asas
-            for j in range(len(AGUIA) - 1, -1, -1):
-                if AGUIA[j][i] == "G":
-                    if 5 + j < 24 and camada == "corpo":
-                        p.mix(i, 5 + j, CONTORNO, 0.45)
-                    break
+                c = tom(cores[ch], 0.06 - 0.03 * j - 0.5 * hy)
+                if ch == "G" and hy < -0.05 and (i + j) % 3 == 0:
+                    c = mistura(c, OURO_CLARO, 0.5)
+                p.p(px, py, c)
+        if camada == "corpo":
+            for i in range(16):
+                for j in range(len(AGUIA) - 1, -1, -1):
+                    if AGUIA[j][i] != ".":
+                        p.mix(i, 5 + j, CONTORNO, 0.5)
+                        break
+            for i, j in ((7, 6), (8, 6)):
+                p.p(i, j, OURO_CLARO)  # cabeça da águia
+            p.p(7, 5, OURO_ESC); p.p(8, 5, tom(OURO, 0.1))
     # cinto dourado (y 17-18) com o W na fivela, saia azul estrelada de tiras (y 19-23)
     for camada in ("corpo", "jaqueta"):
         A = Anel(n.t, camada)
@@ -228,13 +236,16 @@ def tronco(n, rnd):
                 A.p(x, y, c)
             if camada == "corpo":
                 A.m(x, 16, -0.22)
+    # medalhão dourado do cinto com um rubi no meio
     for camada in ("corpo", "jaqueta"):
         p = n.face(camada, "frente")
-        p.ret(6, 16, 4, 4, OURO_ESC)
-        p.ret(6, 17, 4, 2, OURO)
-        for x, y in ((6, 17), (7, 18), (8, 18), (9, 17)):
-            p.p(x, y, OURO_CLARO)  # W em relevo
-        p.p(7, 17, OURO_ESC); p.p(8, 17, OURO_ESC)
+        p.ret(6, 16, 4, 4, OURO)
+        for x, y in ((6, 16), (9, 16), (6, 19), (9, 19)):
+            p.p(x, y, OURO_ESC)
+        p.p(7, 16, OURO_CLARO); p.p(8, 16, OURO_CLARO); p.p(6, 17, OURO_CLARO)
+        p.p(9, 18, OURO_ESC); p.p(8, 19, OURO_ESC); p.p(7, 19, tom(OURO, -0.12))
+        p.p(7, 17, tom(VERM, 0.25)); p.p(8, 17, VERM); p.p(7, 18, VERM); p.p(8, 18, VERM_ESC)
+        p.p(7, 17, hexa("#FF8A8A"))
     # laço enrolado no quadril direito (lado "dir" do tronco e a beirada da frente)
     s = n.face("jaqueta", "dir")
     for y in range(16, 22):
@@ -342,16 +353,19 @@ def pernas(n, rnd):
                 if lx in (0, lw - 1):
                     s -= 0.10
                 c = tom(VERM, s)
-                if face == "frente" and lx in (3, 4) and 13 <= y <= 21:
-                    c = tom(BRANCO, s - 0.08)  # friso branco
+                if face == "frente" and lx in (0, 7) and 13 <= y <= 21:
+                    c = tom(OURO, s - 0.04)  # frisos dourados nas laterais da canela
+                elif face in ("dir", "esq") and lx in (3, 4) and 13 <= y <= 21:
+                    c = tom(OURO, s - 0.10) if lx == 3 else tom(OURO_ESC, s)
                 if y == 23:
                     c = tom(VERM_ESC, luz * 0.5)
                 elif y == 22:
                     c = tom(VERM, s - 0.22)
                 L.p(x, y, c)
-            L.p(x, y0, tom(BRANCO, luz - 0.05))
+            L.p(x, y0, tom(OURO, luz + 0.05))
+            L.p(x, y0 + 1, tom(OURO_ESC, luz + 0.05))
             L.m(x, y0 - 1, -0.18)
-            C.p(x, y0, tom(BRANCO, luz + 0.02))
+            C.p(x, y0, tom(OURO_CLARO, luz))
             # joelheira dourada (só na frente), em relevo na segunda camada
             if face == "frente":
                 for y in (10, 11, 12):
@@ -533,10 +547,35 @@ def emblema():
     return t
 
 
+def rosto_diana(n):
+    """Retoques: boca fechada com um meio sorriso confiante, sobrancelhas fortes, maçãs do rosto e maxilar marcados."""
+    f = n.face("cabeca", "frente")
+    lab = hexa("#B23A48")
+    for x in range(5, 11):
+        f.p(x, 12, tom(PELE, -0.04))
+        f.p(x, 13, tom(PELE, 0.0))
+    for x in range(6, 10):
+        f.p(x, 12, tom(lab, -0.12))  # lábio de cima
+    for x in (7, 8):
+        f.p(x, 13, tom(lab, 0.06))  # lábio de baixo, mais claro
+    f.p(7, 13, tom(lab, 0.22))
+    f.p(6, 13, mistura(lab, PELE, 0.55)); f.p(9, 13, mistura(lab, PELE, 0.55))
+    f.p(10, 12, tom(PELE, -0.16)); f.p(5, 12, tom(PELE, -0.10))  # canto do sorriso
+    f.m(10, 11, -0.06)
+    for x, y in ((2, 4), (13, 4), (3, 4), (12, 4)):
+        f.p(x, y, hexa("#1A1418"))  # sobrancelha mais grossa e reta no começo
+    f.m(7, 14, 0.05)
+    for x, y in ((3, 10), (12, 10), (4, 10), (11, 10)):
+        f.m(x, y, 0.04)
+    for x, y in ((2, 12), (13, 12), (3, 13), (12, 13)):
+        f.m(x, y, -0.07)
+
+
 def mulher_maravilha(n, glow):
     rnd = random.Random(33)
     cabeca_pele(n, PELE)
     rosto(n, PELE, OLHO, hexa("#1A1418"), fem=True, labio=hexa("#B23A48"), rubor=0.10, cilios=hexa("#120C10"))
+    rosto_diana(n)
     tronco(n, rnd)
     cabelo(n)
     tiara(n)
