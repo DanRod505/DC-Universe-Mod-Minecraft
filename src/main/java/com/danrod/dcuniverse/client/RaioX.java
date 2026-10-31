@@ -27,13 +27,15 @@ import net.minecraft.world.level.block.entity.TrialSpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.common.Tags;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Visão de raio X (habilidade vision, modo xray), só no cliente de quem usou: varre os blocos em volta aos
@@ -59,10 +61,10 @@ public final class RaioX {
     private RaioX() {}
 
     public static void registrar() {
-        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
-            contorno(e.getState());
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, Eventos.cancela((Predicate<RenderLivingEvent.Pre>) e -> {
+            contorno(e.getRenderState());
             return false;
-        });
+        }));
     }
 
     public static boolean ativo(Minecraft mc) {

@@ -9,9 +9,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
@@ -21,50 +20,50 @@ import java.util.function.Function;
 
 /** Itens do mod. O lote de itens da versão (minérios, cristais, núcleos) entra na última etapa dela. */
 public final class Itens {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, DCUniverse.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, DCUniverse.MODID);
     public static final DeferredRegister<CreativeModeTab> ABAS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, DCUniverse.MODID);
 
     // Traje travado (uma peça por slot, igual para todos os personagens; o visual vem da skin)
-    public static final RegistryObject<Item> TRAJE_CABECA = traje("traje_cabeca", EquipmentSlot.HEAD);
-    public static final RegistryObject<Item> TRAJE_PEITO = traje("traje_peito", EquipmentSlot.CHEST);
-    public static final RegistryObject<Item> TRAJE_PERNAS = traje("traje_pernas", EquipmentSlot.LEGS);
-    public static final RegistryObject<Item> TRAJE_PES = traje("traje_pes", EquipmentSlot.FEET);
+    public static final DeferredHolder<Item, Item> TRAJE_CABECA = traje("traje_cabeca", EquipmentSlot.HEAD);
+    public static final DeferredHolder<Item, Item> TRAJE_PEITO = traje("traje_peito", EquipmentSlot.CHEST);
+    public static final DeferredHolder<Item, Item> TRAJE_PERNAS = traje("traje_pernas", EquipmentSlot.LEGS);
+    public static final DeferredHolder<Item, Item> TRAJE_PES = traje("traje_pes", EquipmentSlot.FEET);
 
     // Itens de transformação (ids de docs/dados/personagens.json)
-    public static final RegistryObject<Item> CRISTAL_SUPERMAN = item("cristal_superman",
+    public static final DeferredHolder<Item, Item> CRISTAL_SUPERMAN = item("cristal_superman",
         p -> new TransformacaoItem("superman", p.rarity(Rarity.EPIC)));
-    public static final RegistryObject<Item> CINTO_BATMAN = item("cinto_batman",
+    public static final DeferredHolder<Item, Item> CINTO_BATMAN = item("cinto_batman",
         p -> new TransformacaoItem("batman", p.rarity(Rarity.EPIC)));
-    public static final RegistryObject<Item> CRISTAL_SUPERGIRL = item("cristal_supergirl",
+    public static final DeferredHolder<Item, Item> CRISTAL_SUPERGIRL = item("cristal_supergirl",
         p -> new TransformacaoItem("supergirl", p.rarity(Rarity.EPIC)));
-    public static final RegistryObject<Item> JAQUETA_CONNER = item("jaqueta_conner",
+    public static final DeferredHolder<Item, Item> JAQUETA_CONNER = item("jaqueta_conner",
         p -> new TransformacaoItem("superboy", p.rarity(Rarity.EPIC)));
 
     // Lote da v0.1: kryptonita e Krypton
-    public static final RegistryObject<Item> FRAGMENTO_KRYPTONITA = item("fragmento_kryptonita", p -> new Item(p.rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> CRISTAL_KRYPTONIANO = item("cristal_kryptoniano", p -> new Item(p.rarity(Rarity.RARE)));
-    public static final RegistryObject<Item> FRAGMENTO_ALIENIGENA = item("fragmento_alienigena", p -> new Item(p.rarity(Rarity.UNCOMMON)));
+    public static final DeferredHolder<Item, Item> FRAGMENTO_KRYPTONITA = item("fragmento_kryptonita", p -> new Item(p.rarity(Rarity.UNCOMMON)));
+    public static final DeferredHolder<Item, Item> CRISTAL_KRYPTONIANO = item("cristal_kryptoniano", p -> new Item(p.rarity(Rarity.RARE)));
+    public static final DeferredHolder<Item, Item> FRAGMENTO_ALIENIGENA = item("fragmento_alienigena", p -> new Item(p.rarity(Rarity.UNCOMMON)));
 
     // Componentes: base das receitas dos itens de transformação e dos trajes
-    public static final RegistryObject<Item> TECIDO_TATICO = item("tecido_tatico", Item::new);
-    public static final RegistryObject<Item> NUCLEO_META_1 = item("nucleo_meta_1", Item::new);
-    public static final RegistryObject<Item> NUCLEO_META_2 = item("nucleo_meta_2", p -> new Item(p.rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> NUCLEO_META_3 = item("nucleo_meta_3", p -> new Item(p.rarity(Rarity.RARE)));
-    public static final RegistryObject<Item> NUCLEO_META_4 = item("nucleo_meta_4", p -> new Item(p.rarity(Rarity.EPIC).fireResistant()));
+    public static final DeferredHolder<Item, Item> TECIDO_TATICO = item("tecido_tatico", Item::new);
+    public static final DeferredHolder<Item, Item> NUCLEO_META_1 = item("nucleo_meta_1", Item::new);
+    public static final DeferredHolder<Item, Item> NUCLEO_META_2 = item("nucleo_meta_2", p -> new Item(p.rarity(Rarity.UNCOMMON)));
+    public static final DeferredHolder<Item, Item> NUCLEO_META_3 = item("nucleo_meta_3", p -> new Item(p.rarity(Rarity.RARE)));
+    public static final DeferredHolder<Item, Item> NUCLEO_META_4 = item("nucleo_meta_4", p -> new Item(p.rarity(Rarity.EPIC).fireResistant()));
 
     // Lote da v0.2: prométio e tecnologia (Batman)
-    public static final RegistryObject<Item> LINGOTE_PROMETIO = item("lingote_prometio", p -> new Item(p.rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> PLACA_CIRCUITO = item("placa_circuito", Item::new);
-    public static final RegistryObject<Item> COMPONENTE_TECNOLOGICO = item("componente_tecnologico", Item::new);
-    public static final RegistryObject<Item> NUCLEO_ENERGIA = item("nucleo_energia", p -> new Item(p.rarity(Rarity.RARE)));
+    public static final DeferredHolder<Item, Item> LINGOTE_PROMETIO = item("lingote_prometio", p -> new Item(p.rarity(Rarity.UNCOMMON)));
+    public static final DeferredHolder<Item, Item> PLACA_CIRCUITO = item("placa_circuito", Item::new);
+    public static final DeferredHolder<Item, Item> COMPONENTE_TECNOLOGICO = item("componente_tecnologico", Item::new);
+    public static final DeferredHolder<Item, Item> NUCLEO_ENERGIA = item("nucleo_energia", p -> new Item(p.rarity(Rarity.RARE)));
 
     // Equipamentos sem poderes (qualquer jogador usa)
-    public static final RegistryObject<Item> BATARANGUE_SIMPLES = item("batarangue_simples", p -> new BatarangueItem(p.stacksTo(16)));
-    public static final RegistryObject<Item> GANCHO_ESCALADA = item("gancho_escalada", p -> new GanchoItem(p.durability(GanchoItem.USOS)
+    public static final DeferredHolder<Item, Item> BATARANGUE_SIMPLES = item("batarangue_simples", p -> new BatarangueItem(p.stacksTo(16)));
+    public static final DeferredHolder<Item, Item> GANCHO_ESCALADA = item("gancho_escalada", p -> new GanchoItem(p.durability(GanchoItem.USOS)
         .repairable(net.minecraft.world.item.Items.STRING)));
-    public static final RegistryObject<Item> CAPA_PLANADOR = item("capa_planador", p -> new Item(p.stacksTo(1)
+    public static final DeferredHolder<Item, Item> CAPA_PLANADOR = item("capa_planador", p -> new Item(p.stacksTo(1)
         .equippable(EquipmentSlot.CHEST).rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> VISOR_TATICO = item("visor_tatico", p -> new Item(p.durability(Equipamentos.VISOR_DURACAO)
+    public static final DeferredHolder<Item, Item> VISOR_TATICO = item("visor_tatico", p -> new Item(p.durability(Equipamentos.VISOR_DURACAO)
         .component(net.minecraft.core.component.DataComponents.EQUIPPABLE, net.minecraft.world.item.equipment.Equippable.builder(EquipmentSlot.HEAD)
             .setAsset(net.minecraft.resources.ResourceKey.create(net.minecraft.world.item.equipment.EquipmentAssets.ROOT_ID,
                 net.minecraft.resources.Identifier.fromNamespaceAndPath(DCUniverse.MODID, "visor_tatico")))
@@ -72,11 +71,11 @@ public final class Itens {
         .repairable(PLACA_CIRCUITO.get()).rarity(Rarity.UNCOMMON)));
 
     // Utilidades
-    public static final RegistryObject<Item> OSSO_CRISTAL = item("osso_cristal", p -> new Item(p.stacksTo(16).rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> TORTA_MARTHA = item("torta_martha", p -> new TortaItem(p.stacksTo(16).rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> COLEIRA_S = item("coleira_s", p -> new com.danrod.dcuniverse.npc.Coleira.ColeiraItem(p.stacksTo(1).rarity(Rarity.RARE)));
-    public static final RegistryObject<Item> COMUNICADOR_LIGA = item("comunicador_liga", p -> new com.danrod.dcuniverse.liga.ComunicadorItem(p.stacksTo(1).rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> GUIA_HEROI = item("guia_heroi", p -> new GuiaItem(p.stacksTo(1)));
+    public static final DeferredHolder<Item, Item> OSSO_CRISTAL = item("osso_cristal", p -> new Item(p.stacksTo(16).rarity(Rarity.UNCOMMON)));
+    public static final DeferredHolder<Item, Item> TORTA_MARTHA = item("torta_martha", p -> new TortaItem(p.stacksTo(16).rarity(Rarity.UNCOMMON)));
+    public static final DeferredHolder<Item, Item> COLEIRA_S = item("coleira_s", p -> new com.danrod.dcuniverse.npc.Coleira.ColeiraItem(p.stacksTo(1).rarity(Rarity.RARE)));
+    public static final DeferredHolder<Item, Item> COMUNICADOR_LIGA = item("comunicador_liga", p -> new com.danrod.dcuniverse.liga.ComunicadorItem(p.stacksTo(1).rarity(Rarity.UNCOMMON)));
+    public static final DeferredHolder<Item, Item> GUIA_HEROI = item("guia_heroi", p -> new GuiaItem(p.stacksTo(1)));
 
     /**
      * Abas do inventário criativo, uma por tipo de item. O tipo é o "cat" de docs/dados (o mesmo dos grupos do Guia):
@@ -94,7 +93,7 @@ public final class Itens {
         public final String id;
         public final TagKey<Item> tag;
         final String icone;
-        RegistryObject<CreativeModeTab> aba;
+        DeferredHolder<CreativeModeTab, CreativeModeTab> aba;
 
         Aba(String id, String tag, String icone) {
             this.id = id;
@@ -124,7 +123,7 @@ public final class Itens {
                 CreativeModeTab.Builder b = CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + a.id))
                     .icon(() -> new ItemStack(ITEMS.getEntries().stream().filter(r -> r.getId().getPath().equals(a.icone))
-                        .findFirst().map(RegistryObject::get).orElse(CRISTAL_SUPERMAN.get())))
+                        .findFirst().<Item>map(DeferredHolder::get).orElse(CRISTAL_SUPERMAN.get())))
                     .displayItems((params, out) -> ITEMS.getEntries().stream()
                         .filter(r -> !(r.get() instanceof TrajeItem) && Aba.de(params.holders(), r.get()) == a)
                         .forEach(r -> out.accept(r.get())));
@@ -146,11 +145,11 @@ public final class Itens {
         };
     }
 
-    private static RegistryObject<Item> item(String id, Function<Item.Properties, Item> fabrica) {
-        return ITEMS.register(id, () -> fabrica.apply(new Item.Properties().setId(ITEMS.key(id))));
+    private static DeferredHolder<Item, Item> item(String id, Function<Item.Properties, Item> fabrica) {
+        return ITEMS.register(id, () -> fabrica.apply(new Item.Properties().setId(DCUniverse.chave(ITEMS, id))));
     }
 
-    private static RegistryObject<Item> traje(String id, EquipmentSlot slot) {
+    private static DeferredHolder<Item, Item> traje(String id, EquipmentSlot slot) {
         return item(id, p -> new TrajeItem(p.stacksTo(1).equippableUnswappable(slot)));
     }
 }

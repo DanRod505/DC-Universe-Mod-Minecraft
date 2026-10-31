@@ -30,7 +30,7 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Batcomputador (o bloco é {@link BatcomputadorBloco}): o clique direito abre a tela (client/BatcomputadorScreen) com
@@ -99,7 +100,7 @@ public final class Batcomputador {
     }
 
     public static void registrar() {
-        LivingHurtEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, e -> {
             if (!(e.getEntity() instanceof Mob m) || !(e.getSource().getEntity() instanceof ServerPlayer sp)) return;
             if (analisados(sp).contains(id(familia(m.getType())))) e.setAmount(e.getAmount() * (1 + BONUS_PCT / 100f));
         });
@@ -108,7 +109,7 @@ public final class Batcomputador {
     // ---------------------------------------------------------------- tela
 
     public static void abrir(ServerPlayer player, BlockPos pos) {
-        Rede.CANAL.send(montar(player, pos), net.minecraftforge.network.PacketDistributor.PLAYER.with(player));
+        Rede.CANAL.send(montar(player, pos), com.danrod.dcuniverse.core.Canal.jogador(player));
     }
 
     public static Rede.BatAbrir montar(ServerPlayer player, BlockPos pos) {

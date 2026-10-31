@@ -27,10 +27,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.ComputeFovModifierEvent;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
@@ -38,6 +37,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Dirigir o Batmóvel, a Batmoto e o Batbarco no cliente (content/VeiculoBat). Física de quem pilota:
@@ -59,14 +60,14 @@ public final class Motorista {
 
     public static void registrar() {
         VeiculoBat.controleCliente = Motorista::controlar;
-        InputEvent.InteractionKeyMappingTriggered.BUS.addListener((Predicate<InputEvent.InteractionKeyMappingTriggered>) e -> {
+        NeoForge.EVENT_BUS.addListener(InputEvent.InteractionKeyMappingTriggered.class, Eventos.cancela((Predicate<InputEvent.InteractionKeyMappingTriggered>) e -> {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null || VeiculoBat.pilotando(mc.player) == null) return false;
             e.setSwingHand(false);
             if (e.isUseItem() && e.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) enviar(VeiculoDono.SECUNDARIA);
             return true;
-        });
-        ComputeFovModifierEvent.BUS.addListener(e -> {
+        }));
+        NeoForge.EVENT_BUS.addListener(ComputeFovModifierEvent.class, e -> {
             Minecraft mc = Minecraft.getInstance();
             if (e.getPlayer() != mc.player) return;
             VeiculoBat v = VeiculoBat.pilotando(mc.player);
@@ -75,8 +76,8 @@ public final class Motorista {
             e.setNewFovModifier(e.getNewFovModifier() * (1 + (v.turboLigado ? 0.2f : 0.12f) * frac * frac));
         });
         // Quem está montado inclina junto (a moto deita nas curvas), girando em volta do próprio assento.
-        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
-            if (!(e.getState() instanceof AvatarRenderState s)) return false;
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, Eventos.cancela((Predicate<RenderLivingEvent.Pre>) e -> {
+            if (!(e.getRenderState() instanceof AvatarRenderState s)) return false;
             Minecraft mc = Minecraft.getInstance();
             if (mc.level == null || !(mc.level.getEntity(s.id) instanceof Entity p) || !(p.getVehicle() instanceof VeiculoBat v)) return false;
             // O Batmóvel é baixo demais para um corpo inteiro: quem vai dentro some atrás do vidro escuro, em vez de
@@ -91,9 +92,9 @@ public final class Motorista {
             ps.translate(0, -ASSENTO, 0);
             GIRADOS.add(s.id);
             return false;
-        });
-        RenderLivingEvent.Post.BUS.addListener(e -> {
-            if (e.getState() instanceof AvatarRenderState s && GIRADOS.remove(s.id)) e.getPoseStack().popPose();
+        }));
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
+            if (e.getRenderState() instanceof AvatarRenderState s && GIRADOS.remove(s.id)) e.getPoseStack().popPose();
         });
     }
 
@@ -129,7 +130,7 @@ public final class Motorista {
     }
 
     private static void enviar(int acao) {
-        Rede.CANAL.send(new Rede.Veiculo(acao), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.Veiculo(acao), com.danrod.dcuniverse.core.Canal.SERVIDOR);
     }
 
     /** Parâmetros da habilidade do veículo (a do mesmo "model"), do catálogo do personagem do jogador local. */

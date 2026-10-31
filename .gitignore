@@ -22,7 +22,7 @@ eclipse
 run
 run-data
 
-# Arquivos do Forge MDK
+# Arquivos do MDK
 forge_README.txt
 forge*changelog.txt
 run2

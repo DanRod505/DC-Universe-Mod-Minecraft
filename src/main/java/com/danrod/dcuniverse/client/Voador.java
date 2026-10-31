@@ -23,17 +23,20 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.ComputeFovModifierEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.joml.Matrix4fc;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Física do voo (passiva flight), calculada no cliente como a do élitro: o pulo duplo liga o voo do próprio
@@ -117,19 +120,19 @@ public final class Voador {
     private Voador() {}
 
     public static void registrar() {
-        TickEvent.ClientTickEvent.Pre.BUS.addListener(e -> fisica(Minecraft.getInstance()));
-        ViewportEvent.ComputeCameraAngles.BUS.addListener(Voador::camera);
-        ComputeFovModifierEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(ClientTickEvent.Pre.class, e -> fisica(Minecraft.getInstance()));
+        NeoForge.EVENT_BUS.addListener(ViewportEvent.ComputeCameraAngles.class, Voador::camera);
+        NeoForge.EVENT_BUS.addListener(ComputeFovModifierEvent.class, e -> {
             if (e.getPlayer() != Minecraft.getInstance().player || vel == null) return;
             double frac = Math.min(1.3, vel.length() * 20 / Math.max(1, EstadoCliente.atual.voo()));
             e.setNewFovModifier(e.getNewFovModifier() * (float) (1 + 0.32 * frac * frac + soco));
         });
-        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
-            if (e.getState() instanceof AvatarRenderState s) pose(s);
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, Eventos.cancela((Predicate<RenderLivingEvent.Pre>) e -> {
+            if (e.getRenderState() instanceof AvatarRenderState s) pose(s);
             return false;
-        });
-        RenderLivingEvent.Post.BUS.addListener(e -> {
-            if (e.getState() instanceof AvatarRenderState s) cone(e, s);
+        }));
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
+            if (e.getRenderState() instanceof AvatarRenderState s) cone(e, s);
         });
         Cauda.registrar();
     }
@@ -214,7 +217,7 @@ public final class Voador {
             soco = 0.3f;
             clarao = 1f;
             Trilha.VOO.impacto(mc);
-            Rede.CANAL.send(new Rede.Estrondo(), PacketDistributor.SERVER.noArg());
+            Rede.CANAL.send(new Rede.Estrondo(), com.danrod.dcuniverse.core.Canal.SERVIDOR);
         }
     }
 
@@ -288,7 +291,7 @@ public final class Voador {
             ps.manobra = tipo;
             ps.manobraT = 0;
         }
-        Rede.CANAL.send(new Rede.Manobra(tipo), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.Manobra(tipo), com.danrod.dcuniverse.core.Canal.SERVIDOR);
     }
 
     private static int duracao(int tipo) {
@@ -412,7 +415,7 @@ public final class Voador {
             {-1.0f, 1.55f, 0.0f}};
         int lados = 28;
         float forca = ps.cone;
-        e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.debugQuads(), (pose, buf) -> {
+        e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.debugQuads(), (pose, buf) -> {
             Matrix4fc m = pose.pose();
             for (int a = 0; a < aneis.length - 1; a++) {
                 for (int k = 0; k < lados; k++) {

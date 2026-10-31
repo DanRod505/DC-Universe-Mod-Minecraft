@@ -14,13 +14,14 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import org.joml.Matrix4fc;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Efeitos visuais desenhados no próprio cliente (sem pacotes de partícula): raios e sopros canalizados,
@@ -127,8 +128,8 @@ public final class Efeitos {
 
     /** Feixe de luz (mistura aditiva, brilha no escuro) saindo dos olhos de quem é visto em terceira pessoa. */
     public static void registrarFeixe() {
-        RenderLivingEvent.Post.BUS.addListener(e -> {
-            if (!(e.getState() instanceof AvatarRenderState st)) return;
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
+            if (!(e.getRenderState() instanceof AvatarRenderState st)) return;
             Rede.Aparencia a = EstadoCliente.APARENCIAS.get(st.id);
             ClientLevel level = Minecraft.getInstance().level;
             if (a == null || !a.efeito().equals("projectile_beam") || level == null
@@ -143,7 +144,7 @@ public final class Efeitos {
             int claro = misturar(cor, 0xFFF4D0, 0.75f);
             for (int s = -1; s <= 1; s += 2) {
                 Vec3 de = base.add(lado.scale(0.125 * s));
-                e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> {
+                e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> {
                     feixe(pose.pose(), buf, de, fim, 0.16f, cor, 0.18f);
                     feixe(pose.pose(), buf, de, fim, 0.07f, cor, 0.55f);
                     feixe(pose.pose(), buf, de, fim, 0.03f, claro, 0.95f);

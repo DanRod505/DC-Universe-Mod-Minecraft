@@ -26,7 +26,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -509,7 +508,7 @@ public final class InicioScreen extends Screen {
 
     private void comecar() {
         String p = personagens.isEmpty() ? "" : personagens.get(escolhido).id().toString();
-        Rede.CANAL.send(new Rede.InicioEscolha(local, p), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.InicioEscolha(local, p), com.danrod.dcuniverse.core.Canal.SERVIDOR);
         minecraft.gui.setScreen(null);
     }
 

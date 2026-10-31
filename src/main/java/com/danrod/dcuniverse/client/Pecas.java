@@ -26,8 +26,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
@@ -39,6 +39,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.DCUniverse;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Peças 3D dos personagens (docs/SKINS.md), ligadas por nome em assets/<ns>/skins/<personagem>.json:
@@ -69,8 +72,8 @@ public final class Pecas {
     private Pecas() {}
 
     public static void registrar() {
-        EntityRenderersEvent.AddLayers.BUS.addListener(e -> {
-            for (var tipo : e.getModelTypes()) {
+        DCUniverse.modBus().addListener(EntityRenderersEvent.AddLayers.class, e -> {
+            for (var tipo : e.getSkins()) {
                 if (e.getPlayerRenderer(tipo) instanceof AvatarRenderer<?> r) {
                     @SuppressWarnings("unchecked")
                     var pai = (AvatarRenderer<net.minecraft.client.player.AbstractClientPlayer>) r;
@@ -78,10 +81,10 @@ public final class Pecas {
                 }
             }
         });
-        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
-            if (e.getState() instanceof AvatarRenderState s) planar(s);
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, Eventos.cancela((Predicate<RenderLivingEvent.Pre>) e -> {
+            if (e.getRenderState() instanceof AvatarRenderState s) planar(s);
             return false;
-        });
+        }));
     }
 
     public static void limpar() {

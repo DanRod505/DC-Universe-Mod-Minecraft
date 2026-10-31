@@ -14,7 +14,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import org.joml.Matrix4fc;
 
 import java.util.ArrayDeque;
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Rastro luminoso do voo no boost, como a cauda de um cometa: dois fios de luz (trail_color e trail_color2)
@@ -60,8 +61,8 @@ public final class Cauda {
     private Cauda() {}
 
     public static void registrar() {
-        RenderLivingEvent.Post.BUS.addListener(e -> {
-            if (e.getState() instanceof AvatarRenderState st && !st.isInvisible) desenhar(e, st);
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
+            if (e.getRenderState() instanceof AvatarRenderState st && !st.isInvisible) desenhar(e, st);
         });
     }
 
@@ -217,7 +218,7 @@ public final class Cauda {
         int claro = Efeitos.misturar(r.cor, 0xFFFFFF, 0.85f);
         // Dois fios (cor 1 e cor 2) lado a lado e um miolo claro bem fino entre eles. Cor de verdade (mistura comum,
         // aparece de dia) por baixo; luz (mistura aditiva, brilha à noite) por cima.
-        e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.debugQuads(), (pose, buf) -> {
+        e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), RenderTypes.debugQuads(), (pose, buf) -> {
             Matrix4fc m = pose.pose();
             // Halo largo e fraco, e o fio de cor viva no meio de cada um.
             fita(m, buf, rel, lado, paraCam, 0f, larg, 0.3f, 0.7f, r.cor, brilho, 0.12f, false);
@@ -225,7 +226,7 @@ public final class Cauda {
             fita(m, buf, rel, lado, paraCam, 0.02f, larg, 0.3f, 0.2f, r.cor, brilho, 0.75f, false);
             fita(m, buf, rel, lado, paraCam, 0.03f, larg, -0.3f, 0.2f, r.cor2, brilho, 0.75f, false);
         });
-        e.getNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> {
+        e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> {
             Matrix4fc m = pose.pose();
             // Cada camada um pouco mais perto da câmera, para não brigar com a de baixo no teste de profundidade.
             fita(m, buf, rel, lado, paraCam, 0.04f, larg, 0.3f, 0.3f, r.cor, brilho, 0.3f, true);

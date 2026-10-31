@@ -7,8 +7,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 /**
  * Tipo de mundo Mundo DC (v0.4, decisão 11): o padrão ao criar um mundo, com a semente oficial já preenchida.
@@ -17,7 +17,7 @@ import net.minecraftforge.registries.RegistryObject;
  */
 public final class MundoDC {
     public static final DeferredRegister<MapCodec<? extends BiomeSource>> FONTES = DeferredRegister.create(Registries.BIOME_SOURCE, DCUniverse.MODID);
-    public static final RegistryObject<MapCodec<FonteMundoDC>> FONTE = FONTES.register("mundo_dc", () -> FonteMundoDC.CODEC);
+    public static final DeferredHolder<MapCodec<? extends BiomeSource>, MapCodec<FonteMundoDC>> FONTE = FONTES.register("mundo_dc", () -> FonteMundoDC.CODEC);
 
     public static final ResourceKey<WorldPreset> PRESET = ResourceKey.create(Registries.WORLD_PRESET, Identifier.fromNamespaceAndPath(DCUniverse.MODID, "mundo_dc"));
     /** Semente oficial: com ela o Mundo DC sai igual, bloco a bloco, para todo mundo. */

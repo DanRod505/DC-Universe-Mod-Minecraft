@@ -5,7 +5,8 @@ import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.character.Params;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * stealth (Furtividade): agachado num lugar escuro (luz até max_light), os mobs só percebem o jogador bem mais
@@ -14,7 +15,7 @@ import net.minecraftforge.event.entity.living.LivingEvent;
  */
 public final class Furtividade implements Passiva {
     public static void registrar() {
-        LivingEvent.LivingVisibilityEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(LivingEvent.LivingVisibilityEvent.class, e -> {
             if (!(e.getEntity() instanceof Player player)) return;
             Params prm = Passivas.params(player, "stealth");
             if (prm != null && escondido(player, prm)) e.modifyVisibility(prm.f("visibility", 0.3f));

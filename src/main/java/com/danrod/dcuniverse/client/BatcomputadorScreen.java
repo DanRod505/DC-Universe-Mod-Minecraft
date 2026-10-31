@@ -33,7 +33,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,7 +113,7 @@ public final class BatcomputadorScreen extends Screen {
     }
 
     private void enviar(int tipo, String arg) {
-        Rede.CANAL.send(new Rede.BatAcao(dados.pos(), tipo, arg), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.BatAcao(dados.pos(), tipo, arg), com.danrod.dcuniverse.core.Canal.SERVIDOR);
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.6f, 0.5f));
     }
 

@@ -11,7 +11,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Modo Detetive (habilidade vision, modo detective): liga e desliga com a tecla de uso. Ligado, gasta drain de
@@ -24,7 +25,7 @@ public final class Detetive {
     private Detetive() {}
 
     public static void registrar() {
-        LivingHurtEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, e -> {
             if (!(e.getEntity() instanceof Mob) || !(e.getSource().getEntity() instanceof ServerPlayer sp)) return;
             Params prm = params(sp);
             if (prm != null && EstadoJogador.de(sp).detetive()) e.setAmount(e.getAmount() * prm.f("weak_point_mult", 1.25f));

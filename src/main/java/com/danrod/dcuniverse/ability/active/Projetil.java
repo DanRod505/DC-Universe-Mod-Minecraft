@@ -12,7 +12,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 
 /**
  * projectile: disparo único (soco sônico, batarangue, rajada). Parâmetros: visual ("sonic" = onda de choque
@@ -26,7 +27,7 @@ public final class Projetil implements TipoHabilidade {
         boolean sonico = "sonic".equals(prm.s("visual", ""));
         ItemStack visual = ItemStack.EMPTY;
         if (!sonico) {
-            Item item = ForgeRegistries.ITEMS.getValue(Identifier.tryParse(prm.s("item", "minecraft:snowball")));
+            Item item = BuiltInRegistries.ITEM.getValue(Identifier.tryParse(prm.s("item", "minecraft:snowball")));
             visual = new ItemStack(item == null ? Items.SNOWBALL : item);
         }
         float vel = prm.f("speed", 1.8f);

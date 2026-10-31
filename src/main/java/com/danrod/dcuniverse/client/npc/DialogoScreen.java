@@ -20,7 +20,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -282,13 +281,13 @@ public final class DialogoScreen extends Screen {
         if (i < 0 || i >= m.opcoes().size() || !m.opcoes().get(i).ativa()) return;
         String id = m.opcoes().get(i).id();
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1f, 0.35f));
-        Rede.CANAL.send(new Rede.NpcEscolha(m.entidade(), id), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.NpcEscolha(m.entidade(), id), com.danrod.dcuniverse.core.Canal.SERVIDOR);
         if (id.equals("tchau")) minecraft.gui.setScreen(null);
     }
 
     @Override
     public void onClose() {
-        Rede.CANAL.send(new Rede.NpcEscolha(m.entidade(), "tchau"), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.NpcEscolha(m.entidade(), "tchau"), com.danrod.dcuniverse.core.Canal.SERVIDOR);
         super.onClose();
     }
 

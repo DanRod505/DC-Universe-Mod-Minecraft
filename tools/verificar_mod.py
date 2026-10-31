@@ -3,7 +3,7 @@
 Verificações:
 - lang: pt_br e en_us existem, são JSON válido, têm as mesmas chaves e nenhum texto vazio;
 - receitas: JSON válido e nenhuma receita duplicada (mesma forma, contando espelhamento e posição);
-- mod id: o modId do mods.toml e a constante MODID do código batem;
+- mod id: o modId do neoforge.mods.toml e a constante MODID do código batem;
 - personagens: ficha igual à de docs/dados/personagens.json, tipos de habilidade/passiva/recarga
   existentes no código, nome traduzido de cada personagem e habilidade e skin 128x128;
 - HUD: emblema 48x48 de cada personagem e ícone 32x32 de cada habilidade (também as do /dcu hud demo);
@@ -102,11 +102,11 @@ def verificar_receitas(pastas, erros):
 
 
 def verificar_mod_id(raiz, erros):
-    toml = (raiz / "src/main/resources/META-INF/mods.toml").read_text(encoding="utf-8")
+    toml = (raiz / "src/main/resources/META-INF/neoforge.mods.toml").read_text(encoding="utf-8")
     props = (raiz / "gradle.properties").read_text(encoding="utf-8")
     esperado = re.search(r"^mod_id=(\S+)", props, re.M).group(1)
     if 'modId="${mod_id}"' not in toml:
-        erros.append("mods.toml: modId deve vir de ${mod_id}")
+        erros.append("neoforge.mods.toml: modId deve vir de ${mod_id}")
     for arq in (raiz / "src/main/java").rglob("*.java"):
         m = re.search(r'String MODID\s*=\s*"([^"]+)"', arq.read_text(encoding="utf-8"))
         if m and m.group(1) != esperado:
@@ -320,7 +320,7 @@ def verificar_registro(raiz, pastas, erros):
     erros.extend(f"Java: {i} registrado sem nome no lang" for i in sorted(registrados - nomes))
     for recursos in pastas:
         for arq in sorted(recursos.glob("data/*/*/**/*.json")):
-            if any(x in arq.as_posix() for x in ("/worldgen/", "/test_instance/", "/forge/", "/dc_characters/", "/npc/", "/missao/")):
+            if any(x in arq.as_posix() for x in ("/worldgen/", "/test_instance/", "/neoforge/", "/dc_characters/", "/npc/", "/missao/")):
                 continue  # ids de feature, função de teste e personagem não são itens; NPCs e missões têm conferência própria
             for i in sorted(set(re.findall(r'"dcuniverse:([a-z0-9_]+)"', arq.read_text(encoding="utf-8")))):
                 if i not in nomes:

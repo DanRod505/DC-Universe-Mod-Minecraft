@@ -20,9 +20,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import com.danrod.dcuniverse.core.Eventos;
+import java.util.function.Predicate;
 
 /**
  * Coleira do S: a capinha vermelha com o S do Krypto e do Streaky para qualquer cão ou gato domado do jogador. Fica
@@ -102,13 +105,13 @@ public final class Coleira {
 
     public static void registrar() {
         // Coleira num cão ou gato: roda antes do clique do animal, senão o domado só senta/levanta.
-        PlayerInteractEvent.EntityInteractSpecific.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(PlayerInteractEvent.EntityInteract.class, Eventos.cancela((Predicate<PlayerInteractEvent.EntityInteract>) e -> {
             if (!e.getItemStack().is(Itens.COLEIRA_S.get()) || !(e.getTarget() instanceof TamableAnimal pet) || !aceita(pet)) return false;
             e.setCancellationResult(vestir(e.getEntity(), e.getItemStack(), pet));
             return true;
-        });
+        }));
         // Tesoura no próprio animal: tira a coleira e devolve o item.
-        PlayerInteractEvent.EntityInteractSpecific.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(PlayerInteractEvent.EntityInteract.class, Eventos.cancela((Predicate<PlayerInteractEvent.EntityInteract>) e -> {
             Entity alvo = e.getTarget();
             if (!e.getItemStack().is(Items.SHEARS) || !usa(alvo) || !(alvo instanceof TamableAnimal pet) || !pet.isOwnedBy(e.getEntity())) return false;
             if (e.getEntity() instanceof ServerPlayer sp) {
@@ -119,15 +122,15 @@ public final class Coleira {
             }
             e.setCancellationResult(InteractionResult.SUCCESS);
             return true;
-        });
-        LivingDeathEvent.BUS.addListener(e -> {
+        }));
+        NeoForge.EVENT_BUS.addListener(LivingDeathEvent.class, e -> {
             LivingEntity morto = e.getEntity();
             if (usa(morto) && morto.level() instanceof ServerLevel level) {
                 morto.spawnAtLocation(level, new ItemStack(Itens.COLEIRA_S.get()));
                 morto.getPersistentData().remove(CHAVE);
             }
         });
-        PlayerEvent.StartTracking.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.StartTracking.class, e -> {
             if (e.getEntity() instanceof ServerPlayer quem && usa(e.getTarget())) Rede.coleiraPara(quem, e.getTarget());
         });
     }

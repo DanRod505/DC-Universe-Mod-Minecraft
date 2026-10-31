@@ -15,8 +15,8 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.MovementInputUpdateEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Super-salto (passiva super_jump) no cliente: no chão, segurando agachar e pulo o salto carrega (o pulo
@@ -31,7 +31,7 @@ public final class Saltador {
     private Saltador() {}
 
     public static void registrar() {
-        MovementInputUpdateEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(MovementInputUpdateEvent.class, e -> {
             if (e.getEntity() instanceof LocalPlayer p) entrada(p, e.getInput().keyPresses, e.getInput());
         });
     }
@@ -49,13 +49,13 @@ public final class Saltador {
                 cancelar();
             } else {
                 carga = Math.min(1, carga + 1f / Math.max(1, prm.f("charge", 1) * 20));
-                ci.keyPresses = in.jump(false);
+                ci.keyPresses = new net.minecraft.world.entity.player.Input(in.forward(), in.backward(), in.left(), in.right(), false, in.shift(), in.sprint());
                 poeira(p);
             }
         } else if (in.jump() && in.shift() && p.onGround()) {
             carregando = true;
             carga = 0;
-            ci.keyPresses = in.jump(false);
+            ci.keyPresses = new net.minecraft.world.entity.player.Input(in.forward(), in.backward(), in.left(), in.right(), false, in.shift(), in.sprint());
             som = new SimpleSoundInstance(Sons.SALTO_CARGA.get(), SoundSource.PLAYERS, 0.8f, 1f, p.getRandom(), p.getX(), p.getY(), p.getZ());
             Minecraft.getInstance().getSoundManager().play(som);
         }
@@ -73,7 +73,7 @@ public final class Saltador {
         Vec3 dm = p.getDeltaMovement();
         p.setDeltaMovement(dm.x + frente.x, v, dm.z + frente.z);
         p.setOnGround(false);
-        Rede.CANAL.send(new Rede.Salto(f), PacketDistributor.SERVER.noArg());
+        Rede.CANAL.send(new Rede.Salto(f), com.danrod.dcuniverse.core.Canal.SERVIDOR);
     }
 
     private static void cancelar() {

@@ -7,12 +7,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Teias temporárias da rede do Batman (content/RedeEntidade): blocos de teia de verdade, que prendem quem estiver
@@ -27,11 +29,11 @@ public final class Teias {
     private Teias() {}
 
     public static void registrar() {
-        BlockEvent.BreakEvent.BUS.addListener((Predicate<BlockEvent.BreakEvent>) e -> {
+        NeoForge.EVENT_BUS.addListener(BreakBlockEvent.class, Eventos.cancela((Predicate<BreakBlockEvent>) e -> {
             if (!(e.getLevel() instanceof ServerLevel level) || ATE.remove(new Chave(level, e.getPos().immutable())) == null) return false;
             level.removeBlock(e.getPos(), false);
             return true;
-        });
+        }));
     }
 
     /** Põe uma teia em pos (só no ar ou em plantas que se substituem) até o tick ate. @return true se pôs */

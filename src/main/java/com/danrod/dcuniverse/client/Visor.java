@@ -12,9 +12,11 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Visor Tático no cliente de quem o veste (content/Equipamentos cuida da visão noturna e do desgaste): mobs hostis a
@@ -29,10 +31,10 @@ public final class Visor {
     private Visor() {}
 
     public static void registrar() {
-        RenderLivingEvent.Pre.BUS.addListener((Predicate<RenderLivingEvent.Pre>) e -> {
-            contorno(e.getState());
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, Eventos.cancela((Predicate<RenderLivingEvent.Pre>) e -> {
+            contorno(e.getRenderState());
             return false;
-        });
+        }));
     }
 
     static boolean ativo(Minecraft mc) {

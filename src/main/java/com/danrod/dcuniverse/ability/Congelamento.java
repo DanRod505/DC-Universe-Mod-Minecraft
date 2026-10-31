@@ -12,14 +12,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
+import com.danrod.dcuniverse.core.Eventos;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * Congelamento do sopro: 1 s de sopro contínuo prende o mob num bloco de gelo (parado, sem atacar) por 3 s,
@@ -44,10 +46,10 @@ public final class Congelamento {
 
     public static void registrar() {
         // Mob congelado não fere ninguém (nem com o que já tinha disparado).
-        LivingAttackEvent.BUS.addListener((Predicate<LivingAttackEvent>) e ->
-            e.getSource().getEntity() instanceof LivingEntity atacante && congelado(atacante));
+        NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, Eventos.cancela((Predicate<LivingIncomingDamageEvent>) e ->
+            e.getSource().getEntity() instanceof LivingEntity atacante && congelado(atacante)));
         // Mob que ficou salvo congelado (servidor fechou no meio) volta ao normal.
-        EntityJoinLevelEvent.BUS.addListener(e -> {
+        NeoForge.EVENT_BUS.addListener(EntityJoinLevelEvent.class, e -> {
             if (!e.getLevel().isClientSide() && e.getEntity() instanceof Mob m && m.getPersistentData().getBooleanOr(MARCA, false)) {
                 m.getPersistentData().remove(MARCA);
                 m.setNoAi(false);

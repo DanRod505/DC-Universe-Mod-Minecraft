@@ -19,7 +19,8 @@ import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 /** NPC humano com o modelo de jogador (largo ou fino) e a skin do JSON dele. */
 public final class NpcRenderer extends HumanoidMobRenderer<NpcEntidade, AvatarRenderState, PlayerModel> {
@@ -57,8 +58,8 @@ public final class NpcRenderer extends HumanoidMobRenderer<NpcEntidade, AvatarRe
      * sobre a cabeça entra pelo evento de depois do desenho: "!" tem missão para oferecer, "?" espera você.
      */
     public static void registrar() {
-        RenderLivingEvent.Post.BUS.addListener(e -> {
-            if (e.getState() instanceof AvatarRenderState s) marcador(s, e.getPoseStack(), e.getNodeCollector(), e.getCameraState());
+        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
+            if (e.getRenderState() instanceof AvatarRenderState s) marcador(s, e.getPoseStack(), e.getSubmitNodeCollector(), Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState);
         });
     }
 
