@@ -152,6 +152,7 @@ public final class Cliente {
         while (Teclas.DIRETOR_LENTO.consumeClick()) Diretor.tempo(mc, 1);
         while (Teclas.DIRETOR_RAPIDO.consumeClick()) Diretor.tempo(mc, -1);
         Diretor.tick(mc);
+        Flashback.tick();
         while (Teclas.MAPA.consumeClick()) {
             if (livre) Rede.CANAL.send(new Rede.MapaPedir(), com.danrod.dcuniverse.core.Canal.SERVIDOR);
         }

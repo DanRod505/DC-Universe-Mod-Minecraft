@@ -486,6 +486,9 @@ public final class Rede {
     /** Modo Diretor: câmera lenta (fração da velocidade normal do mundo). */
     public record DiretorTempo(float fator) {}
 
+    /** O cliente começou a gravar um replay (Flashback): pede de novo a aparência de quem está por perto. */
+    public record AparenciasPedir() {}
+
     private Rede() {}
 
     public static void registrar() {
@@ -511,6 +514,14 @@ public final class Rede {
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> b.writeFloat(m.fator())).decoder(b -> new DiretorTempo(b.readFloat()))
             .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Diretor.tempo(p, m.fator())))
+            .add();
+        CANAL.messageBuilder(AparenciasPedir.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> {}).decoder(b -> new AparenciasPedir())
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> {
+                for (ServerPlayer q : p.level().players())
+                    if (q == p || q.distanceToSqr(p) < 160 * 160) aparenciaPara(p, q);
+            }))
             .add();
         CANAL.messageBuilder(Sync.class)
             .direction(PacketFlow.CLIENTBOUND)
