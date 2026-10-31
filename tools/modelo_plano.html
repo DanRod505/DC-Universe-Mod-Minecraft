@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DC Universe Plano 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Plano de jogo: cabeçalho com números, abas por assunto, cartões de personagem com faixa da cor do lado, roteiro em linha do tempo por fase */
+:root {
+  --bg: #f2f4f8; --surface: #ffffff; --fg: #121829; --muted: #586179; --line: #d8dde8;
+  --gold: #a86b12; --heroi: #1f4fd1; --vilao: #c0262e; --anti: #7b3fd6;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1020; --surface: #141b2e; --fg: #e7ebf5; --muted: #97a1b9; --line: #263049;
+  --gold: #f0bf4c; --heroi: #7ea4ff; --vilao: #ff7a80; --anti: #bd98ff; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1020; --surface: #141b2e; --fg: #e7ebf5; --muted: #97a1b9; --line: #263049;
+  --gold: #f0bf4c; --heroi: #7ea4ff; --vilao: #ff7a80; --anti: #bd98ff; color-scheme: dark }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 56px; }
+header { display: grid; gap: 8px; padding-bottom: 16px; border-bottom: 2px solid var(--fg); }
+.eyebrow { font: 700 13px var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+h1 { font: 700 clamp(34px, 6vw, 58px)/1 var(--display); margin: 0; text-wrap: balance; }
+h2, h3, h4 { font-family: var(--display); text-wrap: balance; line-height: 1.1; }
+h2 { font-size: 32px; margin: 28px 0 10px; } h3 { font-size: 24px; margin: 22px 0 8px; } h4 { font-size: 19px; margin: 14px 0 6px; }
+.meta { color: var(--muted); margin: 0; max-width: 70ch; }
+.counts { display: flex; flex-wrap: wrap; gap: 8px; }
+.count { font: 600 14px var(--body); padding: 3px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); font-variant-numeric: tabular-nums; }
+.count b { color: var(--gold); }
+nav { display: flex; flex-wrap: wrap; gap: 2px; margin: 18px 0 16px; border-bottom: 1px solid var(--line); }
+nav a { font: 700 19px var(--display); letter-spacing: .03em; text-transform: uppercase; color: var(--muted); padding: 8px 12px; text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+nav a[aria-current="page"] { color: var(--fg); border-color: var(--gold); }
+a:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+section[hidden] { display: none; }
+.prosa { max-width: 900px; }
+.prosa p, .prosa li { max-width: 72ch; }
+.tabela { overflow-x: auto; margin: 10px 0 16px; }
+table { border-collapse: collapse; width: 100%; background: var(--surface); font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font: 700 15px var(--display); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+code { font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+.chip { font: 600 14px var(--body); padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+select { font: 600 14px var(--body); padding: 5px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--c); border-radius: 6px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card h3 { margin: 0; font-size: 26px; }
+.card .sub { color: var(--muted); font-size: 14px; }
+.pill { display: inline-block; font: 700 12px var(--body); letter-spacing: .06em; text-transform: uppercase; padding: 1px 8px; border-radius: 4px; color: var(--bg); background: var(--c); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 13px; padding: 1px 8px; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); }
+.hab { display: grid; gap: 2px; padding: 8px 0; border-top: 1px solid var(--line); }
+.hab b { font-weight: 700; }
+.hab .papel { font: 700 11px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.hab .cor { color: var(--muted); font-size: 14px; }
+details summary { cursor: pointer; font-weight: 700; color: var(--fg); }
+details[open] summary { margin-bottom: 6px; }
+.lista { margin: 4px 0 0; padding-left: 18px; }
+.lista li { margin: 2px 0; }
+.fase { margin-top: 26px; }
+.versao { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.versao .num { font: 700 26px var(--display); color: var(--gold); font-variant-numeric: tabular-nums; }
+.versao h4 { margin: 0 0 4px; font-size: 22px; }
+.versao ol { margin: 6px 0 0; padding-left: 20px; color: var(--fg); }
+.versao .nota { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+.demo { border-left: 4px solid var(--gold); padding-left: 8px; }
+.cap { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; }
+.caps { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.heroi { --c: var(--heroi); } .vilao { --c: var(--vilao); } .anti { --c: var(--anti); }
+.sistema { --c: var(--muted); } .personagem { --c: var(--heroi); } .local { --c: #2f8f6b; } .chefe { --c: var(--vilao); } .pacote { --c: var(--anti); }
+@media (max-width: 480px) { .versao { grid-template-columns: 1fr; gap: 2px; } .grade, .caps { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Mod DC Universe para Minecraft · NeoForge 26.2 · Plano 2</div>
+  <h1>DC Universe: ação, aventura e RPG</h1>
+  <p class="meta">Escolha quem você quer ser, entre heróis e vilões, e viva uma campanha cinematográfica pelas cidades e reinos da DC, com combate coreografado e um personagem que evolui com você.</p>
+  <div class="counts" id="counts"></div>
+</header>
+<nav id="abas" aria-label="Seções do plano"></nav>
+<main>
+  <section id="visao" class="prosa"><!--VISAO--></section>
+  <section id="elenco"></section>
+  <section id="pacotes"></section>
+  <section id="mundo"></section>
+  <section id="campanha"></section>
+  <section id="sistemas"></section>
+  <section id="rpg"></section>
+  <section id="roteiro"></section>
+</main>
+</div>
+<script>
+const D = /*DADOS*/null;
+const ABAS = [["visao", "Visão"], ["elenco", "Elenco"], ["pacotes", "Pacotes"], ["mundo", "Mundo"], ["campanha", "Campanha"], ["sistemas", "Sistemas"], ["rpg", "RPG"], ["roteiro", "Roteiro"]];
+const CATS = {heroi: "Herói", vilao: "Vilão", anti: "Anti-herói"};
+const TIPOS = {cidade: "Cidades", reino: "Reinos", base: "Bases", masmorra: "Masmorras"};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const arq = Object.fromEntries(D.arquetipos.map(a => [a.id, a]));
+const locais = Object.fromEntries(D.mundo.locais.map(l => [l.id, l]));
+const chefes = Object.fromEntries(D.mundo.chefes.map(c => [c.id, c]));
+const estreia = {}, vloc = {}, vcap = {}, vsis = {};
+for (const v of D.versoes) {
+  if (v.tipo === "personagem") estreia[v.ref] = v.v;
+  if (v.tipo === "local") vloc[v.ref] = v.v;
+  for (const o of v.outros || []) vloc[o] = v.v;
+  for (const c of v.capitulos || []) vcap[c] = v.v;
+  for (const s of v.sistemas || []) vsis[s] = v.v;
+}
+const etapas = D.versoes.reduce((n, v) => n + v.etapas.length, 0);
+document.getElementById("counts").innerHTML = [
+  [D.elenco.length, "personagens no jogo base"], [D.pacotes.length, "pacotes de 4"], [D.arquetipos.length, "arquétipos de luta"],
+  [D.mundo.locais.length, "locais"], [D.mundo.capitulos.length, "capítulos"], [D.mundo.chefes.length, "chefes"],
+  [D.versoes.length, "versões"], [etapas, "etapas"]
+].map(([n, t]) => `<span class="count"><b>${n}</b> ${t}</span>`).join("");
+
+// Elenco
+const filtro = {lado: "todos", arq: ""};
+function cartao(c) {
+  const habs = c.habilidades.map(h => `<div class="hab"><span class="papel">${esc(h.papel)}</span><b>${esc(h.nome)}</b><span>${esc(h.desc)}</span><span class="cor">${esc(h.coreografia)}</span>${h.mundo ? `<span class="cor">No mundo: ${esc(h.mundo)}</span>` : ""}</div>`).join("");
+  const arv = Object.entries(c.arvore).map(([r, i]) => `<li><b>${esc(r)}:</b> ${i.map(esc).join(", ")}</li>`).join("");
+  return `<article class="card ${c.cat}">
+    <div class="tags"><span class="pill">${CATS[c.cat]}</span><span class="tag">${esc(arq[c.arquetipo].nome)}</span><span class="tag">${esc(locais[c.origem].nome)}</span><span class="tag">estreia v${estreia[c.id] || "?"}</span></div>
+    <h3>${esc(c.nome)}</h3><div class="sub">${esc(c.civil)}</div>
+    <p style="margin:0">${esc(c.lore)}</p>
+    <div><b>Suprema: ${esc(c.suprema.nome)}.</b> ${esc(c.suprema.cena)}</div>
+    <details><summary>Kit completo</summary>
+      <div><b>Combo.</b> ${esc(c.combo)}</div>${habs}
+      <div class="hab"><span class="papel">defesa</span><span>${esc(c.defesa)}</span></div>
+      <div class="hab"><span class="papel">mecânica única</span><span>${esc(c.unica)}</span></div>
+      <div class="hab"><span class="papel">recurso</span><span>${esc(c.recurso)}</span></div>
+      <div class="hab"><span class="papel">travessia</span><span>${c.travessia.map(esc).join(" · ")}</span></div>
+      <div class="hab"><span class="papel">árvore</span><ul class="lista">${arv}</ul></div>
+      <div class="hab"><span class="papel">trajes</span><span>${c.trajes.map(esc).join(" · ")}</span></div>
+    </details></article>`;
+}
+function desenharElenco() {
+  const lista = D.elenco.filter(c => (filtro.lado === "todos" || (filtro.lado === "heroi" ? c.cat === "heroi" : c.cat !== "heroi")) && (!filtro.arq || c.arquetipo === filtro.arq));
+  document.getElementById("grade-elenco").innerHTML = lista.map(cartao).join("") || "<p>Nenhum personagem com esse filtro.</p>";
+}
+document.getElementById("elenco").innerHTML = `<h2>Jogo base: ${D.elenco.length} personagens</h2>
+  <p class="meta">Metade heróis, metade vilões e anti-heróis. Todos seguem o mesmo molde: combo, 4 habilidades coreografadas (mobilidade, controle, dano, utilidade), defesa, mecânica única, suprema cinematográfica, árvore com 3 ramos e 3 trajes.</p>
+  <div class="filtros" role="group" aria-label="Filtrar elenco">
+    <button class="chip" data-lado="todos" aria-pressed="true">Todos</button>
+    <button class="chip" data-lado="heroi" aria-pressed="false">Heróis</button>
+    <button class="chip" data-lado="vilao" aria-pressed="false">Vilões e anti-heróis</button>
+    <label for="f-arq" class="sub">Arquétipo</label>
+    <select id="f-arq"><option value="">Todos</option>${D.arquetipos.map(a => `<option value="${a.id}">${esc(a.nome)}</option>`).join("")}</select>
+  </div>
+  <div class="grade" id="grade-elenco"></div>
+  <h2>Arquétipos de luta</h2>
+  <div class="tabela"><table><thead><tr><th>Arquétipo</th><th>Estilo</th><th>Base de animações</th><th>Quem usa</th></tr></thead><tbody>
+  ${D.arquetipos.map(a => `<tr><td><b>${esc(a.nome)}</b></td><td>${esc(a.desc)}</td><td>${a.base.map(esc).join("; ")}</td><td>${D.elenco.filter(c => c.arquetipo === a.id).map(c => esc(c.nome)).join(", ")}</td></tr>`).join("")}
+  </tbody></table></div>`;
+document.querySelectorAll("[data-lado]").forEach(b => b.addEventListener("click", () => {
+  filtro.lado = b.dataset.lado;
+  document.querySelectorAll("[data-lado]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  desenharElenco();
+}));
+document.getElementById("f-arq").addEventListener("change", e => { filtro.arq = e.target.value; desenharElenco(); });
+desenharElenco();
+
+// Pacotes
+const vpac = Object.fromEntries(D.versoes.filter(v => v.tipo === "pacote").map(v => [v.ref, v.v]));
+document.getElementById("pacotes").innerHTML = `<h2>Pacotes de personagens</h2>
+  <p class="meta">Depois do jogo base, cada atualização traz 4 personagens e uma missão ou área nova. Os ${D.pacotes.length} pacotes completam o catálogo de 100 personagens; a ordem pode mudar.</p>
+  <div class="caps">${D.pacotes.map(p => `<div class="cap"><div class="tags"><span class="tag">v${vpac[p.id]}</span></div><h3 style="margin:6px 0">${esc(p.nome)}</h3>
+  <ul class="lista">${p.n.map(n => { const c = D.catalogo[n]; return `<li class="${c.cat}"><span class="pill">${CATS[c.cat] || "Ajudante"}</span> ${esc(c.nome)}</li>`; }).join("")}</ul>
+  <p class="sub" style="margin:8px 0 0">${esc(p.extra)}</p></div>`).join("")}</div>`;
+
+// Mundo
+document.getElementById("mundo").innerHTML = `<h2>Locais</h2><p class="meta">O Mundo DC fixo continua: cada local tem posição reservada. Construir, minerar e explorar seguem iguais; o foco vira a aventura.</p>` +
+  Object.entries(TIPOS).map(([t, nome]) => `<h3>${nome}</h3><div class="caps">${D.mundo.locais.filter(l => l.tipo === t).map(l => `<div class="cap"><div class="tags"><span class="tag">v${vloc[l.id] || "?"}</span></div>
+  <h4>${esc(l.nome)}</h4><p style="margin:0">${esc(l.desc)}</p><ul class="lista">${l.atividades.map(a => `<li>${esc(a)}</li>`).join("")}</ul></div>`).join("")}</div>`).join("") +
+  `<h2>Inimigos</h2><div class="tabela"><table><thead><tr><th>Papel</th><th>Como lidar</th></tr></thead><tbody>${D.mundo.inimigos.map(i => `<tr><td><b>${esc(i.nome)}</b></td><td>${esc(i.papel)}</td></tr>`).join("")}</tbody></table></div>
+  <p class="meta">Facções: ${D.mundo.faccoes.map(f => `${esc(f.nome)} (${esc(locais[f.local].nome)})`).join("; ")}.</p>`;
+
+// Campanha
+let ato = "", htmlCamp = `<h2>Campanha: A Coleção</h2><p class="meta">Brainiac está colecionando as cidades da Terra em garrafas. A campanha se adapta ao personagem escolhido; no Ato 4 heróis e vilões lutam lado a lado.</p>`;
+for (const c of D.mundo.capitulos) {
+  if (c.ato !== ato) { htmlCamp += (ato ? "</div>" : "") + `<h3>${esc(c.ato)}</h3><div class="caps">`; ato = c.ato; }
+  const ch = chefes[c.chefe];
+  htmlCamp += `<div class="cap"><div class="tags"><span class="tag">v${vcap[c.id] || "?"}</span><span class="tag">${esc(locais[c.local].nome)}</span></div><h4>${esc(c.nome)}</h4>
+  <ol class="lista">${c.missoes.map(m => `<li>${esc(m)}</li>`).join("")}</ol><p class="sub" style="margin:6px 0 0"><b>Chefe: ${esc(ch.nome)}.</b> ${ch.fases.map(esc).join(" → ")}</p></div>`;
+}
+document.getElementById("campanha").innerHTML = htmlCamp + "</div>";
+
+// Sistemas
+let grupo = "", htmlSis = "";
+for (const s of D.sistemas) {
+  if (s.grupo !== grupo) { htmlSis += (grupo ? "</tbody></table></div>" : "") + `<h2>${esc(s.grupo)}</h2><div class="tabela"><table><thead><tr><th>Sistema</th><th>O que faz</th><th>Versão</th></tr></thead><tbody>`; grupo = s.grupo; }
+  htmlSis += `<tr><td><b>${esc(s.nome)}</b></td><td>${esc(s.desc)}</td><td>v${vsis[s.id] || "?"}</td></tr>`;
+}
+document.getElementById("sistemas").innerHTML = htmlSis + "</tbody></table></div>";
+
+// RPG
+const R = D.rpg;
+document.getElementById("rpg").innerHTML = `<h2>Atributos</h2><div class="tabela"><table><tbody>${R.atributos.map(a => `<tr><td><b>${esc(a.nome)}</b></td><td>${esc(a.desc)}</td></tr>`).join("")}</tbody></table></div>
+  <h2>Progressão</h2><ul class="lista">${R.progressao.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+  <h2>Equipamento</h2><div class="tabela"><table><tbody>${R.equipamento.map(e => `<tr><td><b>${esc(e.slot)}</b></td><td>${esc(e.desc)}</td></tr>`).join("")}</tbody></table></div>
+  <p>Raridades: ${R.raridades.map(esc).join(", ")}.</p>
+  <h2>Materiais</h2><div class="tabela"><table><tbody>${R.materiais.map(m => `<tr><td><b>${esc(m.nome)}</b></td><td>${esc(m.origem)}</td></tr>`).join("")}</tbody></table></div>
+  <h2>Melhorias</h2><p>${esc(R.melhoria)}</p><h2>Sandbox</h2><p>${esc(R.sandbox)}</p>
+  <h2>Dificuldades</h2><ul class="lista">${R.dificuldades.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+
+// Roteiro
+const TIPO_NOME = {sistema: "Sistema", personagem: "Personagem", local: "Local", chefe: "Chefe", pacote: "Pacote"};
+document.getElementById("roteiro").innerHTML = `<h2>Roteiro de versões</h2><p class="meta">${D.versoes.length} versões e ${etapas} etapas. Cada etapa termina numa build de teste, jogada e aprovada antes de seguir, e testada em servidor com 2 jogadores.</p>` +
+  D.fases.map(f => `<div class="fase"><h3>${esc(f.nome)}</h3><p class="meta">${esc(f.desc)}</p>${D.versoes.filter(v => v.fase === f.id).map(v => `
+  <div class="versao ${v.tipo}"><div class="num">v${esc(v.v)}</div><div class="${v.demo ? "demo" : ""}">
+  <div class="tags"><span class="pill">${TIPO_NOME[v.tipo]}</span>${v.demo ? '<span class="tag">Demo jogável</span>' : ""}</div>
+  <h4>${esc(v.nome)}</h4>${v.nota ? `<p class="nota">${esc(v.nota)}</p>` : ""}<ol>${v.etapas.map(e => `<li>${esc(e)}</li>`).join("")}</ol></div></div>`).join("")}</div>`).join("");
+
+// Abas pelo endereço (#elenco, #roteiro...)
+const nav = document.getElementById("abas");
+nav.innerHTML = ABAS.map(([id, nome]) => `<a href="#${id}">${nome}</a>`).join("");
+function mostrar() {
+  const atual = ABAS.some(([id]) => "#" + id === location.hash) ? location.hash.slice(1) : "visao";
+  for (const [id] of ABAS) document.getElementById(id).hidden = id !== atual;
+  nav.querySelectorAll("a").forEach(a => { if (a.getAttribute("href") === "#" + atual) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+}
+window.addEventListener("hashchange", mostrar);
+mostrar();
+</script>
+</body>
+</html>

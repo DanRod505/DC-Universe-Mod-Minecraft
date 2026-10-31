@@ -1,5 +1,7 @@
 # DC Universe Mod: Planejamento
 
+> **Substituído pelo Plano 2 (31/10/2026):** o mod virou um jogo de ação, aventura e RPG em NeoForge. Veja [plano/VISAO.md](plano/VISAO.md) e [plano/ROTEIRO.md](plano/ROTEIRO.md). Este documento e o ROTEIRO.md antigo ficam como registro do que foi feito até a 0.4.1.
+
 > Documento vivo. Etapa atual: **planejamento concluído** (sem código). Próxima etapa: v0.1 do [ROTEIRO.md](ROTEIRO.md). As decisões que estavam em aberto estão na seção 8.
 
 ## 1. Visão geral
