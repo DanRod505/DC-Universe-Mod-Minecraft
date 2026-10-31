@@ -20,4 +20,7 @@ public interface TipoHabilidade {
 
     /** Modo HOLD: chamado a cada tick enquanto a tecla está segurada e há energia. */
     default void canalizar(ServerPlayer player, Personagem p, Personagem.Habilidade h, int tick) {}
+
+    /** Modo HOLD: a tecla foi solta (ou a energia acabou). Ex.: o golpe de braceletes carregado explode aqui. */
+    default void soltar(ServerPlayer player, Personagem p, Personagem.Habilidade h) {}
 }

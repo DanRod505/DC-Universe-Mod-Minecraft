@@ -32,7 +32,9 @@
     "osso_cristal": "Kryptonian Crystal Bone",
     "cristal_supergirl": "Crystal of the House of Zor-El",
     "jaqueta_conner": "Conner's Leather Jacket",
-    "tiara_mulher_maravilha": "Tiara of Themyscira"
+    "tiara_mulher_maravilha": "Tiara of Themyscira",
+    "espada_themyscira": "Sword of Themyscira",
+    "escudo_themyscira": "Shield of Themyscira"
   },
   "personagens": {
     "1": {
@@ -163,6 +165,14 @@
     "tiara_mulher_maravilha": {
       "desc": "Right-click to put on the tiara and the armor of Wonder Woman, with her bracelets and the Lasso of Truth. Press H to turn back to normal.",
       "obter": "Crafted with Orichalcum and Mystic Essence. It can also be your starting item."
+    },
+    "espada_themyscira": {
+      "desc": "The sword forged for Wonder Woman. It adds 2 hearts to her hits, swings every 0.6 s, reaches half a block farther and ignores 30% of the target's armor. It cuts wood and leaves like an axe. Every third hit in a row, Diana spins and strikes everyone around. It never leaves her hand and vanishes when she turns back to normal.",
+      "obter": "No recipe: as Wonder Woman, use the Sword of Themyscira ability on the radial menu."
+    },
+    "escudo_themyscira": {
+      "desc": "Wonder Woman's round shield, silver with the golden eagle. She throws it like a disc that bounces off up to 4 enemies and returns, and raises it in front of her during the shield charge.",
+      "obter": "No recipe: it appears when Wonder Woman uses the Shield of Themyscira or the Shield Charge."
     }
   }
 }

@@ -86,6 +86,21 @@ Mulher-Maravilha (v0.5):
 - arma_giro.ogg         zunido metálico da arma girando (toca a cada 1/4 s enquanto voa)
 - arma_acerta.ogg       a arma batendo: estalo de metal grosso
 - arma_pega.ogg         a arma volta e é pega: metal batendo na palma e o aperto
+- aliado.ogg            mob vira aliado pelo Laço: sino dourado subindo e um sopro calmo
+- braceletes_carga.ogg  braceletes carregando: zumbido de metal subindo e estalos de energia
+- braceletes_choque.ogg braceletes batendo: clangor brilhante, estrondo grave da onda e o ar varrendo para fora
+- grito.ogg             grito de guerra: trompa amazona em quinta subindo, tambores fundos e o vento
+- escudo_investida.ogg  investida com escudo: tinido do escudo erguendo, a rajada passando e o passo forte
+- espada_saca.ogg       espada saindo: lâmina deslizando (shiiing) e o brilho dourado
+- espada_guarda.ogg     espada guardada: deslize curto e o clique da bainha
+- espada_golpe.ogg      golpe de espada: corte rápido no ar e um tinido curto
+- espada_giro.ogg       giro da espada: chiado que dá a volta e o tinido no fim
+- jato_chega.ogg        Jato Invisível chegando: sopro liso, vidro cantando baixo e um acorde dourado
+- jato_motor.ogg        motor furtivo do jato: sopro largo e zumbido de vidro (laço sem emenda)
+- jato_rampa.ogg        rampa abrindo: clique, pistão e a lufada do salto
+- jato_embarque.ogg     feixe de embarque: arpejo dourado subindo sobre um zumbido de luz
+- jato_mostra.ogg       o contorno do jato reaparecendo: cintilação de vidro
+- mergulho_pouso.ogg    a Diana caindo do jato: pancada funda, terra rachando e o eco metálico
 
 Uso: python3 tools/arte/sons.py --raiz .  (precisa de numpy, scipy e ffmpeg)
 """
@@ -1400,6 +1415,176 @@ def arma_pega():
     return finalizar(normalizar(x, 0.8), 0.1)
 
 
+# ---------------------------------------------------------------- Mulher-Maravilha, etapa 3
+
+def aliado():
+    seg = 1.3
+    # O laço convence: acorde dourado subindo (quinta e oitava) com brilho mágico.
+    acorde = sum(sino(f, 1.2, 0.8, 0.5) * g for f, g in ((659.3, 0.5), (987.8, 0.4), (1318.5, 0.35)))
+    x = misturar((0, sino(523.3, 1.2, 0.9, 0.4) * 0.5), (0.08, acorde), (0.12, brilho_magico(0.8, 1568, 1.6) * 0.45))
+    return finalizar(normalizar(eco(x, 1.0, 0.25)[: n_(seg)], 0.8), 0.25)
+
+
+def braceletes_carga():
+    seg = 1.6
+    t = t_(seg)
+    # Zumbido metálico subindo de tom e de força, com estalinhos elétricos cada vez mais frequentes.
+    f = 180 * (2.6 ** (t / seg))
+    zumbido = np.sin(2 * np.pi * np.cumsum(f) / SR) * 0.5 + np.sin(2 * np.pi * np.cumsum(f * 2.01) / SR) * 0.25
+    zumbido *= (t / seg) ** 0.8
+    ar = filtro(ruido(seg), "bandpass", [1500, 6000]) * (t / seg) ** 1.5 * 0.35
+    estalos = np.zeros(len(t))
+    for k in range(26):
+        i = int((k / 26) ** 0.6 * seg * 0.95 * SR)
+        e_ = filtro(ruido(0.012), "highpass", 2500) * env(n_(0.012), 0.0002, 0.003) * (0.3 + 0.7 * k / 26)
+        estalos[i:i + len(e_)] += e_[: len(estalos) - i]
+    x = zumbido + ar + estalos * 0.8 + metal(1320, seg, 0.9, 0.5)[: len(t)] * 0.1 * (t / seg)
+    return finalizar(normalizar(x, 0.75), 0.06)
+
+
+def braceletes_choque():
+    seg = 2.4
+    t = t_(seg)
+    # Os braceletes batendo (clangor brilhante), o estrondo da onda e o ar varrendo para fora.
+    clang = misturar((0, metal(980, 1.8, 1.0, 1.0)), (0, metal(1470, 1.6, 0.8, 0.8) * 0.7), (0, metal(2205, 1.2, 0.5, 0.6) * 0.4))
+    golpe = filtro(ruido(0.04), "bandpass", [800, 8000]) * env(n_(0.04), 0.0003, 0.01) * 2.0
+    grave = varredura(110, 34, 1.0, 0.5) * env(n_(1.0), 0.002, 0.3) * 1.4
+    centro = 3000 * (400 / 3000) ** np.clip(t / 1.2, 0, 1)
+    varre = faixa_movel(ruido(seg), centro, 1.4) * env(len(t), 0.02, 0.5) * 0.9
+    acorde = sum(sino(f, 1.8, 1.0, 0.4) for f in (523.3, 784, 1046.5)) * 0.18
+    x = misturar((0, golpe), (0, clang * 0.8), (0, grave), (0.01, varre), (0.05, acorde))
+    return finalizar(normalizar(eco(x, 1.6, 0.3, 4000)[: n_(seg)], 0.95), 0.4)
+
+
+def grito():
+    seg = 3.0
+    t = t_(seg)
+    # O chamado das Amazonas: trompa de guerra (duas notas, quinta subindo), tambores fundos e o coro do vento.
+    def trompa(f, dur, ataque=0.08):
+        tt = t_(dur)
+        vib = 1 + 0.006 * np.sin(2 * np.pi * 5.2 * tt)
+        x_ = sum(g * np.sin(2 * np.pi * np.cumsum(f * m * vib) / SR) for m, g in ((1, 1), (2, 0.55), (3, 0.35), (4, 0.22), (5, 0.12)))
+        x_ = filtro(x_, "lowpass", 2600)
+        return x_ * env(len(tt), ataque, dur * 0.6) * np.clip((dur - tt) / 0.25, 0, 1)
+    tambor = lambda: misturar((0, varredura(95, 45, 0.6, 0.4) * env(n_(0.6), 0.002, 0.16)), (0, filtro(ruido(0.15), "lowpass", 600) * env(n_(0.15), 0.001, 0.03)))
+    x = misturar((0, trompa(196, 0.7)), (0.6, trompa(293.7, 1.9, 0.05) * 1.2), (0.6, trompa(146.8, 1.9, 0.05) * 0.5),
+                 (0.0, tambor() * 1.2), (0.3, tambor()), (0.6, tambor() * 1.4), (0.62, tambor() * 0.8),
+                 (0.55, filtro(ruido(1.6), "bandpass", [300, 1800]) * env(n_(1.6), 0.2, 0.5) * 0.25))
+    return finalizar(normalizar(eco(x, 2.0, 0.32, 3500)[: n_(seg)], 0.92), 0.5)
+
+
+def escudo_investida():
+    seg = 1.1
+    # Escudo raspando o ar: rajada grave que passa, o tinido do metal ao erguer e o passo forte.
+    x = misturar((0, metal(620, 0.6, 0.3, 0.6) * 0.4), (0.03, chicotada(0.55, 300, 1400) * 1.2),
+                 (0.0, varredura(120, 50, 0.4, 0.5) * env(n_(0.4), 0.003, 0.12) * 0.9),
+                 (0.05, filtro(ruido(0.7), "bandpass", [200, 1600]) * env(n_(0.7), 0.05, 0.25) * 0.6))
+    return finalizar(normalizar(eco(x, 0.7, 0.15)[: n_(seg)], 0.9), 0.2)
+
+
+def espada_saca():
+    seg = 1.2
+    # A lâmina deslizando para fora (shiiing) e o brilho dourado.
+    t = t_(0.5)
+    deslize = filtro(ruido(0.5), "bandpass", [3000, 9000]) * np.sin(np.pi * t / 0.5) ** 2 * 0.5
+    tom = varredura(1800, 2600, 0.5, 1.2) * np.sin(np.pi * t / 0.5) * 0.15
+    x = misturar((0, deslize + tom), (0.45, metal(2400, 0.7, 0.5, 0.8) * 0.5), (0.4, brilho_magico(0.6, 2093, 1.3) * 0.35))
+    return finalizar(normalizar(eco(x, 0.8, 0.2)[: n_(seg)], 0.8), 0.25)
+
+
+def espada_guarda():
+    seg = 0.7
+    t = t_(0.35)
+    deslize = filtro(ruido(0.35), "bandpass", [2500, 7000]) * np.sin(np.pi * t / 0.35) ** 2 * 0.5
+    x = misturar((0, deslize), (0.3, metal(900, 0.3, 0.08, 0.6) * 0.5), (0.32, filtro(ruido(0.05), "lowpass", 1200) * env(n_(0.05), 0.001, 0.01)))
+    return finalizar(normalizar(x[: n_(seg)], 0.75), 0.15)
+
+
+def espada_golpe():
+    seg = 0.6
+    # Corte rápido no ar e o impacto com um tinido curto.
+    x = misturar((0, chicotada(0.18, 1500, 5200) * 0.9), (0.12, filtro(ruido(0.05), "bandpass", [500, 4000]) * env(n_(0.05), 0.0005, 0.012) * 1.4),
+                 (0.12, metal(1850, 0.35, 0.12, 0.7) * 0.35))
+    return finalizar(normalizar(x[: n_(seg)], 0.85), 0.12)
+
+
+def espada_giro():
+    seg = 1.1
+    t = t_(0.6)
+    # A lâmina dá a volta inteira: chiado que gira (sobe e desce duas vezes), e o tinido no fim.
+    centro = 1800 + 2400 * np.sin(np.pi * t / 0.6 * 2) ** 2
+    giro = faixa_movel(ruido(0.6), centro, 1.2) * np.sin(np.pi * t / 0.6) * 1.1
+    x = misturar((0, giro), (0.5, metal(1500, 0.5, 0.25, 0.8) * 0.5), (0.48, filtro(ruido(0.06), "bandpass", [400, 3000]) * env(n_(0.06), 0.001, 0.015) * 1.2))
+    return finalizar(normalizar(eco(x, 0.6, 0.15)[: n_(seg)], 0.9), 0.15)
+
+
+def jato_chega():
+    seg = 3.0
+    t = t_(seg)
+    # Quase silencioso: um sopro liso que passa, o vidro cantando baixo e um acorde dourado ao pairar.
+    perto = suave(t, 0, 1.2) * (1 - 0.6 * suave(t, 1.4, 2.2))
+    centro = 700 + 3000 * (1 - suave(t, 0.3, 1.6))
+    sopro = faixa_movel(ruido(seg), centro, 1.3) * perto * 0.5
+    canto = (vidro(t, 880, 0.3, 0.5) + vidro(t, 1320, 0.2, 0.7)) * perto * 0.1
+    acorde = sum(sino(f, 1.4, 0.9, 0.4) * g for f, g in ((587.3, 0.4), (880, 0.35), (1174.7, 0.3)))
+    x = misturar((0, sopro + canto), (1.5, acorde * 0.4), (1.6, brilho_magico(0.8, 1760, 1.2) * 0.25))
+    return finalizar(normalizar(eco(x, 1.2, 0.2)[: n_(seg)], 0.8), 0.4)
+
+
+def jato_motor():
+    seg = 4.25
+    t = t_(seg)
+    # Laço de 4 s: motor discreto, sopro largo e um zumbido de vidro bem baixo (o jato é furtivo).
+    fluxo = filtro(ruido(seg), "bandpass", [400, 3200]) * (0.75 + 0.25 * np.sin(2 * np.pi * 0.5 * t)) * 0.4
+    grave = filtro(ruido(seg), "lowpass", 140) * 0.8
+    canto = vidro(t, 220, 0.3, 0.5) * 0.12 + vidro(t, 330, 0.2, 0.75) * 0.06 * (0.6 + 0.4 * np.sin(2 * np.pi * 0.75 * t))
+    x = fluxo + grave + canto
+    return normalizar(laco(x, 0.25), 0.55)
+
+
+def jato_rampa():
+    seg = 1.6
+    # A rampa abrindo (pistão e o ar entrando de uma vez) e a lufada do salto.
+    pistao = filtro(ruido(0.25), "bandpass", [300, 1500]) * env(n_(0.25), 0.02, 0.08) * 0.6
+    clique = metal(700, 0.3, 0.06, 0.5) * 0.5
+    ar = filtro(ruido(1.2), "bandpass", [500, 4000]) * env(n_(1.2), 0.05, 0.4) * 1.0
+    x = misturar((0, clique), (0.02, pistao), (0.18, ar), (0.25, chicotada(0.5, 400, 1600) * 0.8))
+    return finalizar(normalizar(eco(x, 0.8, 0.15)[: n_(seg)], 0.85), 0.3)
+
+
+def jato_embarque():
+    seg = 1.8
+    t = t_(seg)
+    # Feixe dourado: acorde que sobe em arpejo com um zumbido de luz por baixo.
+    luz = (np.sin(2 * np.pi * 220 * t) * 0.3 + np.sin(2 * np.pi * 330 * t) * 0.2) * env(len(t), 0.15, 0.7)
+    arpejo = np.zeros(len(t))
+    for k, f in enumerate((440, 554.4, 659.3, 880, 1108.7)):
+        s_ = sino(f, 1.0, 0.6, 0.5) * 0.4
+        i = int(k * 0.09 * SR)
+        arpejo[i:i + len(s_)] += s_[: len(arpejo) - i]
+    x = luz + arpejo + brilho_magico(seg, 1760, 1.5)[: len(t)] * 0.25
+    return finalizar(normalizar(eco(x, 1.0, 0.2)[: n_(seg)], 0.8), 0.4)
+
+
+def jato_mostra():
+    seg = 0.9
+    t = t_(0.8)
+    # O contorno voltando a aparecer: cintilação de vidro subindo.
+    x = misturar((0, vidro(t, 660, 0.4, 0.5) * env(len(t), 0.05, 0.3) * 0.4), (0, brilho_magico(0.7, 1318.5, 1.5) * 0.5))
+    return finalizar(normalizar(x[: n_(seg)], 0.7), 0.2)
+
+
+def mergulho_pouso():
+    seg = 2.8
+    # A Diana cai como um meteoro: pancada funda, a terra rachando, o eco metálico dos braceletes.
+    pancada = varredura(70, 26, 1.0, 0.6) * env(n_(1.0), 0.002, 0.25) * 1.5
+    corpo = filtro(ruido(0.4), "lowpass", 500) * env(n_(0.4), 0.001, 0.07)
+    racha_ = filtro(ruido(0.6), "bandpass", [600, 3500]) * env(n_(0.6), 0.001, 0.1) * 0.6
+    ronco = filtro(ruido(2.4), "lowpass", 130) * env(n_(2.4), 0.12, 0.7) * 1.4
+    x = misturar((0, pancada), (0, corpo), (0.005, racha_), (0.02, ronco), (0.01, metal(740, 1.4, 0.7, 0.7) * 0.35))
+    return finalizar(normalizar(eco(x, 1.2, 0.2, 2500)[: n_(seg)], 0.95), 0.4)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -1427,6 +1612,10 @@ SONS = {
     "bloqueio_quebra": bloqueio_quebra, "laco_arremesso": laco_arremesso, "laco_giro": laco_giro,
     "laco_prende": laco_prende, "laco_puxa": laco_puxa, "laco_solta": laco_solta, "arma_arremesso": arma_arremesso,
     "arma_giro": arma_giro, "arma_acerta": arma_acerta, "arma_pega": arma_pega,
+    "aliado": aliado, "braceletes_carga": braceletes_carga, "braceletes_choque": braceletes_choque, "grito": grito,
+    "escudo_investida": escudo_investida, "espada_saca": espada_saca, "espada_guarda": espada_guarda,
+    "espada_golpe": espada_golpe, "espada_giro": espada_giro, "jato_chega": jato_chega, "jato_motor": jato_motor,
+    "jato_rampa": jato_rampa, "jato_embarque": jato_embarque, "jato_mostra": jato_mostra, "mergulho_pouso": mergulho_pouso,
 }
 
 

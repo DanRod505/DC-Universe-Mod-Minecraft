@@ -14,7 +14,8 @@ import net.minecraft.world.InteractionHand;
  * lasso: o laço (content/LacoEntidade). Aperta: lança a laçada; com o laço preso, aperta de novo (sem custo): puxa;
  * agachado: solta. Parâmetros: range (blocos), speed (blocos/tick do arremesso), damage_mult (só em inimigos),
  * pull_speed (blocos/s da puxada), heavy_size (volume acima do qual o alvo é pesado e puxa você), leash (corda
- * curta depois do puxão, para levar o alvo), max_time (s preso) e color (brilho da corda).
+ * curta depois do puxão, para levar o alvo), max_time (s preso), color (brilho da corda), ally_after (s preso até o
+ * mob virar aliado; 0 = nunca) e ally_time (s que ele fica do seu lado, ability/Aliados).
  */
 public final class Laco implements TipoHabilidade {
     @Override
@@ -31,7 +32,8 @@ public final class Laco implements TipoHabilidade {
         }
         Params prm = h.params();
         LacoEntidade l = new LacoEntidade(player, prm.f("range", 24), prm.f("speed", 2.2f), Alvos.dano(p, prm.d("damage_mult", 0.2)),
-            prm.f("pull_speed", 26), prm.f("heavy_size", 2.6f), prm.f("leash", 3), prm.f("max_time", 90), prm.color("color", 0xFFC93C));
+            prm.f("pull_speed", 26), prm.f("heavy_size", 2.6f), prm.f("leash", 3), prm.f("max_time", 90), prm.color("color", 0xFFC93C))
+            .aliados(prm.f("ally_after", 0), prm.f("ally_time", 60));
         player.level().addFreshEntity(l);
         player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), Sons.LACO_ARREMESSO.get(), SoundSource.PLAYERS,
             1f, 0.95f + player.getRandom().nextFloat() * 0.1f);

@@ -86,6 +86,16 @@
    "obter": false
   },
   {
+   "id": "espada_themyscira",
+   "cat": "ferramenta",
+   "obter": true
+  },
+  {
+   "id": "escudo_themyscira",
+   "cat": "ferramenta",
+   "obter": true
+  },
+  {
    "id": "capa_planador",
    "cat": "equipamento",
    "obter": false

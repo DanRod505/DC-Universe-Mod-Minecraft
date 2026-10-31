@@ -101,6 +101,11 @@ public final class Entidades {
             .noLootTable().sized(4.0f, 2.2f).clientTrackingRange(12).updateInterval(1)
             .build(TIPOS.key("nave_kryptoniana")));
 
+    public static final RegistryObject<EntityType<JatoInvisivel>> JATO_INVISIVEL = TIPOS.register("jato_invisivel",
+        () -> EntityType.Builder.<JatoInvisivel>of(JatoInvisivel::new, MobCategory.MISC)
+            .noLootTable().sized(4.4f, 1.8f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("jato_invisivel")));
+
     public static final RegistryObject<EntityType<OrbeSolar>> ORBE_SOLAR = TIPOS.register("orbe_solar",
         () -> EntityType.Builder.<OrbeSolar>of(OrbeSolar::new, MobCategory.MISC)
             .noLootTable().sized(0.6f, 0.6f).clientTrackingRange(8).updateInterval(1)

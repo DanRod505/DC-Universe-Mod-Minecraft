@@ -44,9 +44,11 @@ public final class Bloqueador {
         });
         RenderHandEvent.BUS.addListener((Predicate<RenderHandEvent>) e -> {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null || e.getHand() != InteractionHand.MAIN_HAND || !e.getItemStack().isEmpty()) return false;
+            if (mc.player == null) return false;
             float g = erguido(mc.player.getId(), e.getPartialTick());
             if (g <= 0.01f) return false;
+            // Braços cruzados no lugar do que estiver nas mãos (a carga dos braceletes vale até com a espada).
+            if (e.getHand() != InteractionHand.MAIN_HAND) return true;
             bracosPrimeiraPessoa(mc, e.getPoseStack(), e.getNodeCollector(), e.getPackedLight(), g);
             return true;
         });
@@ -75,8 +77,9 @@ public final class Bloqueador {
         if (mc.level == null) return;
         ERGUIDO.keySet().removeIf(id -> mc.level.getEntity(id) == null);
         for (var ent : mc.level.players()) {
+            var ap = EstadoCliente.APARENCIAS.get(ent.getId());
             boolean alto = EstadoCliente.BLOQUEIOS.getOrDefault(ent.getId(), 0) == Bloqueio.ERGUIDO
-                || ent == p && enviado;
+                || ent == p && enviado || ap != null && ap.efeito().equals("bracelet_blast");
             float[] v = ERGUIDO.computeIfAbsent(ent.getId(), k -> new float[2]);
             v[1] = v[0];
             v[0] = Mth.clamp(v[0] + (alto ? 0.5f : -0.25f), 0, 1);

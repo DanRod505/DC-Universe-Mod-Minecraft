@@ -28,7 +28,8 @@ import java.util.Set;
  * air_dash: investida aérea. O jogador dispara para onde olha (dá para virar no caminho) e atropela quem estiver
  * na frente. O movimento é do cliente (client/Voador, como o voo); o servidor manda o pedido, confere quem foi
  * atingido no caminho de cada tick e quebra o que é frágil (vidro, folhas, plantas, neve). Parâmetros: range
- * (blocos percorridos), speed (blocos por tick), damage_mult, knockback, hit_radius e breaks_soft.
+ * (blocos percorridos), speed (blocos por tick), damage_mult, knockback, hit_radius, breaks_soft e visual ("shield": a
+ * investida com escudo da Mulher-Maravilha, com o escudo erguido na frente e, a pé, correndo rente ao chão).
  * Bater numa parede encerra a investida com um baque.
  */
 public final class Investida implements TipoHabilidade {
@@ -64,10 +65,12 @@ public final class Investida implements TipoHabilidade {
         ATIVAS.add(new Ativa(player, duracao, Alvos.dano(p, prm.d("damage_mult", 1.6)), prm.d("knockback", 2.0),
             prm.d("hit_radius", 1.6), prm.b("breaks_soft", true)));
         // Todos veem o rastro; o cliente do próprio jogador faz o movimento (cor = quem investe).
-        Rede.efeito(level, player.getX(), player.getY(), player.getZ(), "investida", duracao, (float) vel, player.getId());
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), Sons.INVESTIDA.get(), SoundSource.PLAYERS, 1.6f, 1f);
+        boolean escudo = prm.s("visual", "").equals("shield");
+        Rede.efeito(level, player.getX(), player.getY(), player.getZ(), escudo ? "investida_escudo" : "investida", duracao, (float) vel, player.getId());
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), escudo ? Sons.ESCUDO_INVESTIDA.get() : Sons.INVESTIDA.get(),
+            SoundSource.PLAYERS, 1.6f, 1f);
         player.resetFallDistance();
-        com.danrod.dcuniverse.guia.Guia.concluir(player, "investida");
+        com.danrod.dcuniverse.guia.Guia.concluir(player, escudo ? "investida_escudo" : "investida");
         return true;
     }
 

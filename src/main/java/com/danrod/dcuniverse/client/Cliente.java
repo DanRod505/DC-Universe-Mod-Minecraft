@@ -83,6 +83,7 @@ public final class Cliente {
             e.registerEntityRenderer(Entidades.BLOCO_TK.get(), com.danrod.dcuniverse.client.render.BlocoTkRenderer::new);
             e.registerEntityRenderer(Entidades.ILHA.get(), com.danrod.dcuniverse.client.render.IlhaRenderer::new);
             e.registerEntityRenderer(Entidades.NAVE_KRYPTONIANA.get(), com.danrod.dcuniverse.client.render.NaveKryptonianaRenderer::new);
+            e.registerEntityRenderer(Entidades.JATO_INVISIVEL.get(), com.danrod.dcuniverse.client.render.JatoRenderer::new);
             e.registerEntityRenderer(Entidades.ORBE_SOLAR.get(), com.danrod.dcuniverse.client.render.OrbeRenderer::new);
         });
         TickEvent.ClientTickEvent.Post.BUS.addListener(e -> tick());
@@ -99,6 +100,7 @@ public final class Cliente {
             Gancheador.limpar();
             Laceador.limpar();
             Bloqueador.limpar();
+            Escudeiro.limpar();
             Piloto.limpar();
             Motorista.limpar();
             Ilhas.limpar();
@@ -120,6 +122,7 @@ public final class Cliente {
         Visor.registrar();
         Saltador.registrar();
         Bloqueador.registrar();
+        Escudeiro.registrar();
         Piloto.registrar();
         Motorista.registrar();
         Ilhas.registrar();
@@ -173,6 +176,7 @@ public final class Cliente {
         Gancheador.tick(mc);
         Laceador.tick(mc);
         Bloqueador.tick(mc, livre);
+        Escudeiro.tick(mc);
         Piloto.tick(mc);
         Motorista.tick(mc);
         if (mc.level != null) SomCanal.tick(mc, mc.level);

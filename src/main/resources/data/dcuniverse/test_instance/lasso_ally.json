@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "dcuniverse:lasso_ally",
+  "environment": "minecraft:default",
+  "structure": "dcuniverse:arena_vazia",
+  "max_ticks": 260
+}

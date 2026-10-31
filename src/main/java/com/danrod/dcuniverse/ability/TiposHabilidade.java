@@ -31,7 +31,10 @@ public final class TiposHabilidade {
         Map.entry("tk_shield", new com.danrod.dcuniverse.ability.active.EscudoTk()),
         Map.entry("floating_island", new com.danrod.dcuniverse.ability.active.Ilha()),
         Map.entry("lasso", new com.danrod.dcuniverse.ability.active.Laco()),
-        Map.entry("thrown_weapon", new com.danrod.dcuniverse.ability.active.ArmaArremessada())
+        Map.entry("thrown_weapon", new com.danrod.dcuniverse.ability.active.ArmaArremessada()),
+        Map.entry("bracelet_blast", new com.danrod.dcuniverse.ability.active.Choque()),
+        Map.entry("war_cry", new com.danrod.dcuniverse.ability.active.Grito()),
+        Map.entry("summon_weapon", new com.danrod.dcuniverse.ability.active.Empunhar())
     ));
 
     private TiposHabilidade() {}

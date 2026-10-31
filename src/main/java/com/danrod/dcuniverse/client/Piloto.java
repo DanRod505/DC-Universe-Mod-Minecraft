@@ -74,6 +74,10 @@ public final class Piloto {
             if (e.isUseItem() && e.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) {
                 enviar(BatwingEntidade.MISSIL);
             }
+            // A rampa do Jato Invisível é um toque só: o clique rápido conta mesmo entre dois ticks.
+            if (e.isAttack() && BatwingEntidade.pilotando(mc.player) instanceof com.danrod.dcuniverse.content.JatoInvisivel) {
+                enviar(BatwingEntidade.TIRO_LIGA);
+            }
             return true;
         });
         ComputeFovModifierEvent.BUS.addListener(e -> {
@@ -113,7 +117,8 @@ public final class Piloto {
         SoundInstance s = e.getSound();
         if (s == null || s.isRelative() || s instanceof Motor) return;
         Identifier id = s.getIdentifier();
-        if (!DCUniverse.MODID.equals(id.getNamespace()) || !(id.getPath().startsWith("habilidade.batwing_") || id.getPath().startsWith("habilidade.nave_"))) return;
+        if (!DCUniverse.MODID.equals(id.getNamespace()) || !(id.getPath().startsWith("habilidade.batwing_") || id.getPath().startsWith("habilidade.nave_")
+            || id.getPath().startsWith("habilidade.jato_"))) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !(mc.player.getVehicle() instanceof BatwingEntidade b)) return;
         if (b.distanceToSqr(s.getX(), s.getY(), s.getZ()) > 20 * 20) return;
@@ -295,6 +300,10 @@ public final class Piloto {
             desenharNave(g, mc, n);
             return;
         }
+        if (b instanceof com.danrod.dcuniverse.content.JatoInvisivel j) {
+            desenharJato(g, mc, j);
+            return;
+        }
         Font f = mc.font;
         Params prm = params();
         int w = 150, h = 97, x = g.guiWidth() - w - 6, y = g.guiHeight() - h - 30;
@@ -395,6 +404,43 @@ public final class Piloto {
         }
         g.text(f, Component.translatable("dcuniverse.nave.dica1"), x + 5, y + 83, 0xFF7F8898, false);
         g.text(f, Component.translatable("dcuniverse.nave.dica2", Teclas.USAR.getTranslatedKeyMessage()), x + 5, y + 93, 0xFF7F8898, false);
+    }
+
+    private static final int VIDRO = 0xFFCFEFFF;
+
+    /** Painel do Jato Invisível: tempo, velocidade, altitude, assentos, camuflagem e os comandos. */
+    private static void desenharJato(GuiGraphicsExtractor g, Minecraft mc, com.danrod.dcuniverse.content.JatoInvisivel j) {
+        Font f = mc.font;
+        Params prm = params();
+        int w = 140, h = 102, x = g.guiWidth() - w - 6, y = g.guiHeight() - h - 30;
+        g.fill(x, y, x + w, y + h, 0xA0081018);
+        g.fill(x, y, x + w, y + 1, DOURADO);
+        g.fill(x, y + h - 1, x + w, y + h, 0x80CFEFFF);
+        g.text(f, Component.translatable("dcuniverse.jato.titulo").withStyle(ChatFormatting.BOLD), x + 5, y + 4, DOURADO, true);
+        int total = Math.round(prm.f("duration", 90) * 20);
+        float frac = Mth.clamp(j.restante() / (float) Math.max(1, total), 0, 1);
+        String seg = (j.restante() + 19) / 20 + " s";
+        g.text(f, seg, x + w - 5 - f.width(seg), y + 4, frac < 0.2f ? VERMELHO : 0xFFE8ECF4, true);
+        g.fill(x + 5, y + 14, x + w - 5, y + 16, 0xFF20242E);
+        g.fill(x + 5, y + 14, x + 5 + Math.round((w - 10) * frac), y + 16, frac < 0.2f ? VERMELHO : DOURADO);
+        g.text(f, Component.translatable("dcuniverse.batwing.velocidade", Math.round(j.velocidade * 20)), x + 5, y + 21, 0xFFE8ECF4, true);
+        g.text(f, Component.translatable("dcuniverse.batwing.altitude", (int) Math.floor(j.getY())), x + 78, y + 21, 0xFFE8ECF4, true);
+        // Assentos: piloto e os três de trás (cheio = alguém sentado).
+        g.text(f, Component.translatable("dcuniverse.jato.assentos"), x + 5, y + 34, CINZA, true);
+        int ocupados = j.getPassengers().size();
+        for (int i = 0; i < com.danrod.dcuniverse.content.JatoInvisivel.ASSENTOS.length; i++) {
+            int sx = x + 64 + i * 13, sy = y + 34;
+            boolean tem = i < ocupados;
+            g.fill(sx, sy + 1, sx + 9, sy + 8, tem ? DOURADO : 0xFF2A2F3A);
+            g.fill(sx + 2, sy - 2, sx + 7, sy + 1, tem ? DOURADO : 0xFF2A2F3A);
+        }
+        boolean camuflado = j.camuflado();
+        Component c = Component.translatable(camuflado ? "dcuniverse.jato.camuflado" : "dcuniverse.jato.invisivel");
+        g.text(f, c, x + 5, y + 47, camuflado ? VERDE : VIDRO, true);
+        g.text(f, Component.translatable("dcuniverse.jato.dica1"), x + 5, y + 61, 0xFF7F8898, false);
+        g.text(f, Component.translatable("dcuniverse.jato.dica2"), x + 5, y + 71, 0xFF7F8898, false);
+        g.text(f, Component.translatable("dcuniverse.jato.dica3", Teclas.USAR.getTranslatedKeyMessage()), x + 5, y + 81, 0xFF7F8898, false);
+        g.text(f, Component.translatable("dcuniverse.jato.dica4"), x + 5, y + 91, 0xFF7F8898, false);
     }
 
     /** Zumbido do canhão solar enquanto o raio está aceso. */

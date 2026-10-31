@@ -18,8 +18,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.InterpolationHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -67,6 +65,10 @@ public class LacoEntidade extends Projectile {
     private final InterpolationHandler interpolacao = new InterpolationHandler(this, 1);
     private float alcance = 24, vel = 2.2f, dano = 4, pesadoVolume = 2.6f, guia = 3;
     private int maxTicks = 90 * 20;
+    /** Ticks preso até o mob virar aliado (0 = nunca) e por quantos segundos ele fica do lado do dono. */
+    private int aliadoApos;
+    private float aliadoSeg = 60;
+    private boolean virouAliado;
     private double viajado;
     private long presoEm, puxandoDesde;
     private Entity alvo;
@@ -92,6 +94,13 @@ public class LacoEntidade extends Projectile {
         Vec3 olhar = dono.getLookAngle();
         setPos(dono.getEyePosition().add(olhar.scale(0.7)).add(0, -0.2, 0));
         setDeltaMovement(olhar.scale(vel).add(0, 0.05, 0));
+    }
+
+    /** O mob segurado por "apos" segundos vira aliado do dono por "dura" segundos (ability/Aliados). */
+    public LacoEntidade aliados(float apos, float dura) {
+        this.aliadoApos = Math.round(apos * 20);
+        this.aliadoSeg = dura;
+        return this;
     }
 
     @Override
@@ -260,7 +269,7 @@ public class LacoEntidade extends Projectile {
 
     /** Chefes e mobs maiores que o limite não saem do lugar: o laço puxa o dono até eles. */
     private boolean ehPesado(Entity e) {
-        if (e instanceof EnderDragon || e instanceof WitherBoss || e.getType().builtInRegistryHolder().is(net.minecraftforge.common.Tags.EntityTypes.BOSSES)) return true;
+        if (com.danrod.dcuniverse.ability.Alvos.chefe(e)) return true;
         return e.getBbWidth() * e.getBbWidth() * e.getBbHeight() > pesadoVolume;
     }
 
@@ -343,6 +352,14 @@ public class LacoEntidade extends Projectile {
                 e.setDeltaMovement(vel);
                 e.hurtMarked = true;
                 e.resetFallDistance();
+            }
+            if (e instanceof Mob mob && aliadoApos > 0 && !virouAliado && t - presoEm >= aliadoApos) {
+                virouAliado = true;
+                // Convencido pela verdade, o mob passa a lutar do lado dela: o laço se solta e volta para a mão.
+                if (com.danrod.dcuniverse.ability.Aliados.tornar(mob, dono, aliadoSeg)) {
+                    soltar();
+                    return;
+                }
             }
             if (e instanceof Mob mob) {
                 boolean esticado = d >= comp - 0.4;

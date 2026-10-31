@@ -122,6 +122,7 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.active.Telecinese.tick(e.server());
             com.danrod.dcuniverse.ability.active.EscudoTk.tick();
             com.danrod.dcuniverse.ability.active.Ilha.tick();
+            com.danrod.dcuniverse.ability.Aliados.tick();
             for (var level : e.server().getAllLevels()) com.danrod.dcuniverse.content.Teias.tick(level);
         });
         net.minecraftforge.event.server.ServerStartedEvent.BUS.addListener(e -> com.danrod.dcuniverse.inicio.Inicio.ajustarNascimento(e.getServer()));
@@ -140,6 +141,9 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.active.Telecinese.limpar();
             com.danrod.dcuniverse.ability.active.EscudoTk.limpar();
             com.danrod.dcuniverse.ability.active.Ilha.limpar();
+            com.danrod.dcuniverse.ability.Aliados.limpar();
+            com.danrod.dcuniverse.ability.active.Choque.limpar();
+            com.danrod.dcuniverse.content.EspadaThemyscira.limpar();
             com.danrod.dcuniverse.content.Teias.limpar();
         });
         Naturais.registrar();
@@ -154,6 +158,8 @@ public final class Eventos {
         com.danrod.dcuniverse.ability.passive.ContraAtaque.registrar();
         com.danrod.dcuniverse.ability.passive.Bloqueio.registrar();
         com.danrod.dcuniverse.ability.active.EscudoTk.registrar();
+        com.danrod.dcuniverse.ability.Aliados.registrar();
+        com.danrod.dcuniverse.content.JatoInvisivel.registrar();
     }
 
     static void tick(ServerPlayer player) {

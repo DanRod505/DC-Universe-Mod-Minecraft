@@ -83,6 +83,8 @@ public final class Voador {
     /** Investida aérea do jogador local (ability/active/Investida): ticks que faltam e velocidade (blocos/tick). */
     private static int investida;
     private static double investidaVel;
+    /** Investida com escudo: a pé, corre na horizontal (não afunda no chão olhando para baixo). */
+    private static boolean investidaPlana;
     /** Quem está numa investida agora (id da entidade → ticks que faltam), para a cauda luminosa. */
     private static final Map<Integer, Integer> INVESTINDO = new HashMap<>();
     /** Pose de voo de cada jogador visível que está voando (id da entidade). */
@@ -234,13 +236,16 @@ public final class Voador {
         if (mc.player == null || mc.player.getId() != e.cor()) return;
         investida = Math.round(e.a());
         investidaVel = e.b();
+        investidaPlana = e.tipo().equals("investida_escudo");
         soco = 0.35f;
         tremor = Math.max(tremor, 9);
     }
 
     /** Um tick da investida do jogador local: segue o olhar (dá para virar de leve) na velocidade da investida. */
     private static void investir(LocalPlayer p) {
-        Vec3 alvo = p.getLookAngle().scale(investidaVel);
+        Vec3 olhar = p.getLookAngle();
+        if (investidaPlana && !voando(p) && olhar.horizontalDistanceSqr() > 1e-4) olhar = new Vec3(olhar.x, Math.max(0, olhar.y) * 0.5, olhar.z).normalize();
+        Vec3 alvo = olhar.scale(investidaVel);
         Vec3 atual = p.getDeltaMovement();
         Vec3 nova = atual.lengthSqr() < investidaVel * investidaVel * 0.25 ? alvo : atual.lerp(alvo, 0.45).normalize().scale(investidaVel);
         investida--;

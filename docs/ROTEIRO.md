@@ -13,7 +13,7 @@
 | v0.2 | Batman (Bruce Wayne) | Personagem | 4 | 0 | 0 | 11 |
 | v0.3 | Smallville | Local | 5 | 2 | 3 | 4 |
 | v0.4 | Mundo organizado em volta da DC | Sistema | 3 | 0 | 0 | 0 |
-| v0.5 | Mulher-Maravilha (Diana) | Personagem | 4 | 0 | 0 | 4 |
+| v0.5 | Mulher-Maravilha (Diana) | Personagem | 4 | 0 | 0 | 6 |
 | v0.6 | Flash (Barry Allen) | Personagem | 5 | 0 | 0 | 2 |
 | v0.7 | Lanterna Verde (Hal Jordan) | Personagem | 5 | 0 | 0 | 3 |
 | v0.8 | Torre de Vigilância | Local | 4 | 0 | 2 | 5 |
@@ -206,7 +206,7 @@ Diana completa: Laço da Verdade, braceletes que refletem projéteis, escudo, es
 1. Sistemas: Laço (puxar e prender); Bloqueio e reflexo de projéteis; Arma arremessável que volta
 2. Skin e modelo final de Mulher-Maravilha (Diana)
 3. Habilidades do menu radial e suprema, com efeitos e sons
-4. Lote de itens (4)
+4. Lote de itens (6)
 
 **Cria (fica para as próximas):**
 
@@ -218,7 +218,7 @@ Diana completa: Laço da Verdade, braceletes que refletem projéteis, escudo, es
 
 - Voo e núcleo (v0.1)
 
-**Itens novos (lote) (4):** Escudo Amazônico, Essência Mística, Lingote de Oricalco, Minério de Oricalco
+**Itens novos (lote) (6):** Escudo Amazônico, Escudo de Themyscira, Espada de Themyscira, Essência Mística, Lingote de Oricalco, Minério de Oricalco
 
 ## v0.6: Flash
 

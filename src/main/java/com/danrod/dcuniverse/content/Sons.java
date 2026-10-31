@@ -100,6 +100,22 @@ public final class Sons {
     public static final RegistryObject<SoundEvent> ARMA_GIRO = som("habilidade.arma_giro");
     public static final RegistryObject<SoundEvent> ARMA_ACERTA = som("habilidade.arma_acerta");
     public static final RegistryObject<SoundEvent> ARMA_PEGA = som("habilidade.arma_pega");
+    // Mulher-Maravilha, etapa 3: aliado do laço, braceletes, grito, escudo, espada e Jato Invisível
+    public static final RegistryObject<SoundEvent> ALIADO = som("habilidade.aliado");
+    public static final RegistryObject<SoundEvent> BRACELETES_CARGA = som("habilidade.braceletes_carga");
+    public static final RegistryObject<SoundEvent> BRACELETES_CHOQUE = som("habilidade.braceletes_choque");
+    public static final RegistryObject<SoundEvent> GRITO = som("habilidade.grito");
+    public static final RegistryObject<SoundEvent> ESCUDO_INVESTIDA = som("habilidade.escudo_investida");
+    public static final RegistryObject<SoundEvent> ESPADA_SACA = som("habilidade.espada_saca");
+    public static final RegistryObject<SoundEvent> ESPADA_GUARDA = som("habilidade.espada_guarda");
+    public static final RegistryObject<SoundEvent> ESPADA_GOLPE = som("habilidade.espada_golpe");
+    public static final RegistryObject<SoundEvent> ESPADA_GIRO = som("habilidade.espada_giro");
+    public static final RegistryObject<SoundEvent> JATO_CHEGA = som("habilidade.jato_chega");
+    public static final RegistryObject<SoundEvent> JATO_MOTOR = som("habilidade.jato_motor");
+    public static final RegistryObject<SoundEvent> JATO_RAMPA = som("habilidade.jato_rampa");
+    public static final RegistryObject<SoundEvent> JATO_EMBARQUE = som("habilidade.jato_embarque");
+    public static final RegistryObject<SoundEvent> JATO_MOSTRA = som("habilidade.jato_mostra");
+    public static final RegistryObject<SoundEvent> MERGULHO_POUSO = som("habilidade.mergulho_pouso");
 
     private static RegistryObject<SoundEvent> som(String nome) {
         return SONS.register(nome, () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(DCUniverse.MODID, nome)));

@@ -96,6 +96,10 @@ public final class Mundo {
                 adicionar(e, agora);
             }
             case "investida" -> Voador.investida(mc, e);
+            case "investida_escudo" -> {
+                Voador.investida(mc, e);
+                Escudeiro.investida(e);
+            }
             case "escudo_tk", "escudo_tk_golpe", "escudo_tk_fim" -> Bolha.efeito(mc, e);
             case "tiro" -> {
                 tiroInicio(level, e);
@@ -106,6 +110,10 @@ public final class Mundo {
                 adicionar(e, agora);
             }
             case "deflect", "faisca", "laco" -> adicionar(e, agora);
+            case "braceletes", "grito", "grito_aliado", "giro_espada" -> {
+                Amazonas.inicio(mc, level, e);
+                adicionar(e, agora);
+            }
             default -> {}
         }
     }
@@ -128,6 +136,7 @@ public final class Mundo {
             case "deflect" -> t > (a.e.a() > 0 ? 14 : 7);
             case "faisca" -> t > 4;
             case "laco" -> t > 14;
+            case "braceletes", "grito", "grito_aliado", "giro_espada" -> Amazonas.tick(a.e, t);
             default -> true;
         };
     }
@@ -188,7 +197,7 @@ public final class Mundo {
     }
 
     /** A onda sai rápida e vai freando até a borda. */
-    private static double frente(double t) {
+    static double frente(double t) {
         t = Mth.clamp(t, 0, 1);
         return 1 - (1 - t) * (1 - t);
     }
@@ -269,6 +278,7 @@ public final class Mundo {
                 case "smoke" -> Fumaca.desenhar(ps, col, cam, a.e, t);
                 case "deflect", "faisca" -> estrela(ps, col, cam, a.e, t);
                 case "laco" -> lacada(ps, col, cam, a.e, t);
+                case "braceletes", "grito", "grito_aliado", "giro_espada" -> Amazonas.desenhar(ps, col, cam, a.e, t);
                 default -> {}
             }
         }
@@ -363,7 +373,7 @@ public final class Mundo {
     }
 
     /** Coroa entre os raios r0 e r1 no plano do chão, com alfa indo de a0 (dentro) a a1 (fora). */
-    private static void faixa(Matrix4f m, VertexConsumer buf, Vec3 c, double r0, double r1, int cor, float a0, float a1) {
+    static void faixa(Matrix4f m, VertexConsumer buf, Vec3 c, double r0, double r1, int cor, float a0, float a1) {
         if (r1 <= 0) return;
         r0 = Math.max(0, r0);
         float rr = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f;
@@ -400,7 +410,7 @@ public final class Mundo {
     }
 
     /** Coluna vertical de 4 planos em cruz, mais fraca no topo. */
-    private static void coluna(Matrix4f m, VertexConsumer buf, Vec3 de, Vec3 ate, float largura, int cor, float alfa) {
+    static void coluna(Matrix4f m, VertexConsumer buf, Vec3 de, Vec3 ate, float largura, int cor, float alfa) {
         float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f;
         float w = largura / 2;
         for (int k = 0; k < 4; k++) {
@@ -521,7 +531,7 @@ public final class Mundo {
     }
 
     /** Anel de raio r em volta de c: plano 0 deitado, 1 e 2 em pé e cruzados. */
-    private static void anelSonico(Matrix4f m, VertexConsumer buf, Vec3 c, double r, int plano, float largura, int cor, float alfa) {
+    static void anelSonico(Matrix4f m, VertexConsumer buf, Vec3 c, double r, int plano, float largura, int cor, float alfa) {
         int n = 40;
         Vec3 ant = null;
         for (int i = 0; i <= n; i++) {

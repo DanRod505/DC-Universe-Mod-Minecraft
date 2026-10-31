@@ -31,7 +31,9 @@ public final class Guia {
         "smallville", "nave_kalel",
         "conversar_npc", "missao_aceitar", "missao_concluir", "trocar_npc", "presente_npc", "domar_krypto", "domar_streaky", "liga_vincular", "liga_ponto",
         "investida", "nave", "telecinese", "ilha",
-        "laco", "laco_puxar", "bloqueio", "bloqueio_perfeito", "arma_arremessada");
+        "laco", "laco_puxar", "bloqueio", "bloqueio_perfeito", "arma_arremessada",
+        "aliado", "empunhar", "espada", "espada_giro", "investida_escudo", "braceletes", "grito", "grito_aliados",
+        "jato", "jato_aliados", "jato_rampa", "jato_mergulho");
     /** Segundos recarregando ao sol para ganhar o visto de "sol". */
     public static final int SEGUNDOS_SOL = 5;
 

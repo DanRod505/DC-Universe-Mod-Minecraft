@@ -630,6 +630,18 @@ C · ·
 
 A = Gancho de Armadilha; B = Linha; C = Lingote de Ferro
 
+### Espada de Themyscira
+
+Espada da Diana: +2 ♥ por golpe, ignora 30% da armadura, corta madeira como machado e gira no 3º golpe.
+
+**Obtenção:** Só a Mulher-Maravilha: aparece na mão dela pela habilidade.
+
+### Escudo de Themyscira
+
+Escudo da Diana: arremessável (até 4 ricochetes, volta) e erguido na investida com escudo.
+
+**Obtenção:** Só a Mulher-Maravilha: o escudo que ela arremessa e ergue na investida.
+
 ### Baralho do Coringa
 
 Arremessa 3 cartas afiadas (2 ♥ cada) e efeito aleatório do gás do riso. 52 usos.
