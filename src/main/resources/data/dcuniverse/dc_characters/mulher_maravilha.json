@@ -1,0 +1,45 @@
+{
+  "n": 3,
+  "category": "heroi",
+  "level": 4,
+  "color": "#D4202F",
+  "scale": 0.99,
+  "stats": { "vida": 36, "armadura": 22, "dano": 10, "terra": 6.2 },
+  "energy": {
+    "max": 250,
+    "regen": 1.5,
+    "recharge": []
+  },
+  "suit": [ "chest", "legs", "feet" ],
+  "passives": [
+    { "type": "flight", "speed": 44, "drain": 0.5, "boost_drain": 2.6, "dash_cost": 12,
+      "trail_color": "#E0263A", "trail_color2": "#F5C542", "trail_color3": "#3D63D8" },
+    { "type": "fall_immunity" },
+    { "type": "super_strength", "speed": 7, "max_hardness": 30 },
+    { "type": "deflect", "angle": 140, "perfect_window": 0.3, "reflect_mult": 2.0, "explosion_reduction": 0.8,
+      "energy_per_heart": 1.5, "slow": 0.5, "stagger": 1.5 },
+    { "type": "super_jump", "power": 1.8, "charge": 0.9 }
+  ],
+  "abilities": [
+    { "id": "laco_da_verdade", "type": "lasso", "cost": 12, "cooldown": 4,
+      "range": 24, "speed": 2.2, "damage_mult": 0.2, "pull_speed": 26, "heavy_size": 2.6, "leash": 3, "max_time": 90,
+      "ally_after": 5, "ally_time": 60, "color": "#FFC93C" },
+    { "id": "espada_de_themyscira", "type": "summon_weapon", "cost": 5, "cooldown": 1,
+      "item": "dcuniverse:espada_themyscira", "color": "#FFE7A0" },
+    { "id": "escudo_de_themyscira", "type": "thrown_weapon", "cost": 10, "cooldown": 3,
+      "range": 16, "speed": 1.7, "damage_mult": 0.6, "ricochet": 4, "item": "dcuniverse:escudo_themyscira",
+      "spin": "disc", "color": "#E6EEFA" },
+    { "id": "investida_com_escudo", "type": "air_dash", "visual": "shield", "cost": 18, "cooldown": 5,
+      "range": 12, "speed": 1.6, "damage_mult": 0.8, "knockback": 2.6, "hit_radius": 1.6, "breaks_soft": true },
+    { "id": "golpe_de_braceletes", "type": "bracelet_blast", "mode": "hold", "cost": 20, "cooldown": 6,
+      "charge": 1.5, "min_radius": 3, "radius": 8, "damage_mult": 1.2, "knockback": 2.0, "stun": 2, "color": "#FFD86A" },
+    { "id": "grito_de_guerra", "type": "war_cry", "cost": 30, "cooldown": 25,
+      "radius": 12, "duration": 20, "strength": 1, "resistance": 1, "fear": 4, "color": "#FFC93C" },
+    { "id": "tiara", "type": "thrown_weapon", "cost": 8, "cooldown": 2,
+      "range": 20, "speed": 1.9, "damage_mult": 0.4, "ricochet": 2, "item": "dcuniverse:tiara_mulher_maravilha",
+      "spin": "disc", "color": "#FFD86A" },
+    { "id": "jato_invisivel", "type": "vehicle", "model": "jato_invisivel", "supreme": true, "cost_pct": 70, "cooldown": 140,
+      "duration": 120, "speed": 32, "boost_speed": 64, "dive_speed": 1.8, "dive_radius": 6, "dive_damage_mult": 1.0,
+      "board_range": 14 }
+  ]
+}

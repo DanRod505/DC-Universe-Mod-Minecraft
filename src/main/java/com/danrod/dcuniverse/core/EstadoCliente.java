@@ -36,6 +36,9 @@ public final class EstadoCliente {
     /** Cabos de gancho que mudaram e o cliente ainda vai aplicar (client/Gancheador). */
     public static final java.util.Queue<Rede.GanchoVisto> GANCHOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
 
+    /** Braceletes erguidos (1) ou guarda quebrada (2) por id da entidade do jogador (ability/passive/Bloqueio). */
+    public static final Map<Integer, Integer> BLOQUEIOS = new ConcurrentHashMap<>();
+
     /** Abre ou atualiza a tela do Batcomputador (o cliente troca por client/BatcomputadorScreen::receber). */
     public static volatile java.util.function.Consumer<Rede.BatAbrir> batcomputador = m -> {};
 
@@ -149,5 +152,6 @@ public final class EstadoCliente {
         MANOBRAS.clear();
         GANCHOS.clear();
         EFEITOS.clear();
+        BLOQUEIOS.clear();
     }
 }

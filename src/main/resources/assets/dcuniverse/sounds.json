@@ -603,5 +603,229 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.nave_escudo_desliga"
+  },
+  "habilidade.braceletes_ergue": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/braceletes_ergue"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.braceletes_ergue"
+  },
+  "habilidade.bloqueio": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/bloqueio"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.bloqueio"
+  },
+  "habilidade.bloqueio_perfeito": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/bloqueio_perfeito"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.bloqueio_perfeito"
+  },
+  "habilidade.bloqueio_quebra": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/bloqueio_quebra"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.bloqueio_quebra"
+  },
+  "habilidade.laco_arremesso": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_arremesso"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_arremesso"
+  },
+  "habilidade.laco_giro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_giro"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_giro"
+  },
+  "habilidade.laco_prende": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_prende"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_prende"
+  },
+  "habilidade.laco_puxa": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_puxa"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_puxa"
+  },
+  "habilidade.laco_solta": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/laco_solta"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.laco_solta"
+  },
+  "habilidade.arma_arremesso": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/arma_arremesso"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.arma_arremesso"
+  },
+  "habilidade.arma_giro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/arma_giro"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.arma_giro"
+  },
+  "habilidade.arma_acerta": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/arma_acerta"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.arma_acerta"
+  },
+  "habilidade.arma_pega": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/arma_pega"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.arma_pega"
+  },
+  "habilidade.aliado": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/aliado"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.aliado"
+  },
+  "habilidade.braceletes_carga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/braceletes_carga"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.braceletes_carga"
+  },
+  "habilidade.braceletes_choque": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/braceletes_choque"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.braceletes_choque"
+  },
+  "habilidade.grito": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/grito"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.grito"
+  },
+  "habilidade.escudo_investida": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/escudo_investida"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.escudo_investida"
+  },
+  "habilidade.espada_saca": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/espada_saca"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.espada_saca"
+  },
+  "habilidade.espada_guarda": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/espada_guarda"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.espada_guarda"
+  },
+  "habilidade.espada_golpe": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/espada_golpe"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.espada_golpe"
+  },
+  "habilidade.espada_giro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/espada_giro"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.espada_giro"
+  },
+  "habilidade.jato_chega": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/jato_chega"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.jato_chega"
+  },
+  "habilidade.jato_motor": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/jato_motor"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.jato_motor"
+  },
+  "habilidade.jato_rampa": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/jato_rampa"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.jato_rampa"
+  },
+  "habilidade.jato_embarque": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/jato_embarque"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.jato_embarque"
+  },
+  "habilidade.jato_mostra": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/jato_mostra"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.jato_mostra"
+  },
+  "habilidade.mergulho_pouso": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/mergulho_pouso"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.mergulho_pouso"
   }
 }

@@ -28,7 +28,9 @@ public final class TiposPassiva {
         Map.entry("super_jump", new Passiva() {}),
         // Batman: stealth age pelo evento de visibilidade; counter abre a janela no tick e defende no ataque.
         Map.entry("stealth", new com.danrod.dcuniverse.ability.passive.Furtividade()),
-        Map.entry("counter", new com.danrod.dcuniverse.ability.passive.ContraAtaque())
+        Map.entry("counter", new com.danrod.dcuniverse.ability.passive.ContraAtaque()),
+        // Mulher-Maravilha: braceletes erguidos pelo clique direito com a mão vazia (client/Bloqueador).
+        Map.entry("deflect", new com.danrod.dcuniverse.ability.passive.Bloqueio())
     );
 
     private TiposPassiva() {}

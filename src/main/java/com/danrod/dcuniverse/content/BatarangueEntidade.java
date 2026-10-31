@@ -436,25 +436,32 @@ public class BatarangueEntidade extends Projectile {
 
     /** Teias, folhas, trepadeiras e cordas de armadilha no caminho: corta (e deixa cair o que der). */
     private void cortarNoCaminho(Vec3 de, Vec3 ate) {
-        ServerLevel level = (ServerLevel) level();
-        if (getOwner() instanceof ServerPlayer sp && !level.mayInteract(sp, BlockPos.containing(ate))) return;
+        cortar((ServerLevel) level(), this, getOwner(), de, ate);
+    }
+
+    /**
+     * Corta o que for cortável no segmento de-ate (teias, folhas, cipós, linhas) e as cordas (guias) que ele cruza.
+     * Também usado pela arma arremessada (content/ArmaArremessadaEntidade).
+     */
+    public static void cortar(ServerLevel level, Entity fonte, Entity dono, Vec3 de, Vec3 ate) {
+        if (dono instanceof ServerPlayer sp && !level.mayInteract(sp, BlockPos.containing(ate))) return;
         int passos = (int) Math.ceil(de.distanceTo(ate) / 0.4);
         for (int i = 0; i <= passos; i++) {
             BlockPos pos = BlockPos.containing(de.lerp(ate, i / (double) Math.max(1, passos)));
             BlockState st = level.getBlockState(pos);
             // As teias da rede do próprio Batman ficam: elas seguram quem ele prendeu.
             if (cortavel(st) && !Teias.temporaria(level, pos)) {
-                level.destroyBlock(pos, true, getOwner());
+                level.destroyBlock(pos, true, dono);
                 level.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.6f, 1.4f);
             }
         }
-        cortarCordas(level, de, ate);
+        cortarCordas(level, fonte, de, ate);
     }
 
     /** Cordas (laços) que cruzam o caminho: o mob preso fica solto e a corda cai como item. */
-    private void cortarCordas(ServerLevel level, Vec3 de, Vec3 ate) {
+    private static void cortarCordas(ServerLevel level, Entity fonte, Vec3 de, Vec3 ate) {
         AABB area = new AABB(de, ate).inflate(12);
-        for (Entity e : level.getEntities(this, area, x -> x instanceof net.minecraft.world.entity.Leashable l && l.isLeashed())) {
+        for (Entity e : level.getEntities(fonte, area, x -> x instanceof net.minecraft.world.entity.Leashable l && l.isLeashed())) {
             var preso = (net.minecraft.world.entity.Leashable) e;
             Entity dono = preso.getLeashHolder();
             if (dono == null) continue;

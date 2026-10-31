@@ -962,7 +962,7 @@ public final class GuiaScreen extends Screen {
             out.add(topico(topicos, nome(nomeSup), nomeSup, true));
             texto(out, Component.translatable("habilidade.dcuniverse." + sup.id() + ".desc"), TINTA, 1);
             out.add(item(Component.translatable("dcuniverse.guia.suprema.custo", pct, fmt(sup.recargaSeg()))));
-            detalhes(out, sup.params());
+            detalhes(out, sup.params(), p);
         }
         out.add(espaco(4));
         out.add(secao(topicos, "dcuniverse.guia.secao.historia"));
@@ -997,12 +997,12 @@ public final class GuiaScreen extends Screen {
         if (ammo != null) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.cargas", ammo.i("max", 1), fmt(ammo.d("reload", 5)), fmt(ammo.d("reload_cost", 0)))));
         }
-        detalhes(out, prm);
+        detalhes(out, prm, p);
         out.add(espaco(3));
     }
 
     /** Raio, duração e efeitos de controle, quando a habilidade tem. */
-    private void detalhes(List<Bloco> out, Params prm) {
+    private void detalhes(List<Bloco> out, Params prm, Personagem p0) {
         if (prm.json().has("radius")) out.add(item(Component.translatable("dcuniverse.guia.hab.raio", fmt(prm.d("radius", 0)))));
         if (prm.json().has("duration")) out.add(item(Component.translatable("dcuniverse.guia.hab.duracao", fmt(prm.d("duration", 0)))));
         if (prm.json().has("missiles")) {
@@ -1016,6 +1016,12 @@ public final class GuiaScreen extends Screen {
             out.add(item(Component.translatable("dcuniverse.guia.hab.nave.orbes", prm.i("orbs", 3), fmt(prm.d("orb_damage", 8)),
                 fmt(prm.d("orb_radius", 3.5)), fmt(prm.d("orb_reload", 6)))));
             out.add(item(Component.translatable("dcuniverse.guia.hab.nave.escudo", fmt(prm.d("shield_time", 12)), fmt(prm.d("shield_recharge", 18)))));
+        } else if (prm.s("model", "").equals("jato_invisivel")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.batwing.voo", fmt(prm.d("speed", 32)), fmt(prm.d("boost_speed", 64)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.jato.assentos", com.danrod.dcuniverse.content.JatoInvisivel.ASSENTOS.length - 1,
+                fmt(prm.d("board_range", 14)))));
+            out.add(item(Component.translatable("dcuniverse.guia.hab.jato.mergulho", fmt(prm.d("dive_radius", 6)),
+                fmt(Alvos.dano(p0, prm.d("dive_damage_mult", 1.0)) / 2.0))));
         } else if (prm.json().has("model") && !prm.s("model", "").equals("batwing")) {
             String m = prm.s("model", "");
             out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.velocidade", fmt(prm.d("speed", 26)), fmt(prm.d("boost_speed", 42)))));
@@ -1025,6 +1031,21 @@ public final class GuiaScreen extends Screen {
             out.add(item(Component.translatable("dcuniverse.guia.hab.veiculo.especial." + m, fmt(prm.d("special_radius", 5)),
                 fmt(prm.d("special_damage", 4)), fmt(prm.d("stun", 3)), fmt(prm.d("special_cooldown", 12)), fmt(prm.d("special_duration", 6)),
                 fmt(prm.d("dive_speed", 14)))));
+        }
+        if (prm.json().has("charge")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.braceletes", fmt(prm.d("charge", 1.5)), fmt(prm.d("min_radius", 3)),
+                fmt(prm.d("radius", 8)))));
+        }
+        if (prm.json().has("strength")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.grito", prm.i("strength", 1), prm.i("resistance", 1), fmt(prm.d("fear", 4)))));
+        }
+        if (prm.d("ally_after", 0) > 0) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.aliado", fmt(prm.d("ally_after", 5)), fmt(prm.d("ally_time", 60)))));
+        }
+        if (prm.s("item", "").equals("dcuniverse:espada_themyscira") && !prm.json().has("range")) {
+            out.add(item(Component.translatable("dcuniverse.guia.hab.espada", fmt(com.danrod.dcuniverse.content.EspadaThemyscira.DANO / 2.0),
+                fmt(3 + com.danrod.dcuniverse.content.EspadaThemyscira.ALCANCE_EXTRA), Math.round(com.danrod.dcuniverse.content.EspadaThemyscira.IGNORA_ARMADURA * 100),
+                fmt(com.danrod.dcuniverse.content.EspadaThemyscira.GIRO_RAIO))));
         }
         if (prm.json().has("reduction")) {
             out.add(item(Component.translatable("dcuniverse.guia.hab.escudo_tk", Math.round(prm.d("reduction", 0.75) * 100), fmt(prm.d("shield_radius", 2.6)))));

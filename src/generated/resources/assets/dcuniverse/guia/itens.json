@@ -86,6 +86,16 @@
    "obter": false
   },
   {
+   "id": "espada_themyscira",
+   "cat": "ferramenta",
+   "obter": true
+  },
+  {
+   "id": "escudo_themyscira",
+   "cat": "ferramenta",
+   "obter": true
+  },
+  {
    "id": "capa_planador",
    "cat": "equipamento",
    "obter": false
@@ -142,6 +152,11 @@
   },
   {
    "id": "cinto_batman",
+   "cat": "transformacao",
+   "obter": true
+  },
+  {
+   "id": "tiara_mulher_maravilha",
    "cat": "transformacao",
    "obter": true
   },

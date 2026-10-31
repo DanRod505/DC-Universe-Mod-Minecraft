@@ -40,6 +40,7 @@ public final class Efeitos {
             switch (a.efeito()) {
                 case "projectile_beam" -> raio(level, pl, a, primeiraPessoa);
                 case "area_cone" -> sopro(level, pl, a, primeiraPessoa);
+                case "bracelet_blast" -> carga(level, pl, a, primeiraPessoa);
                 default -> {}
             }
         }
@@ -48,6 +49,24 @@ public final class Efeitos {
         });
         EstadoCliente.TRANSFORMOU.clear();
         if (mc.player != null && Planador.amortecendo(mc.player)) rastro(level, mc.player);
+    }
+
+    /**
+     * Carga do golpe de braceletes: faíscas douradas e pequenos raios saltando entre os braceletes cruzados na
+     * frente do peito, cada vez mais (o servidor não diz a carga; o cliente conta desde que a pose subiu).
+     */
+    private static void carga(ClientLevel level, Player pl, Rede.Aparencia a, boolean primeiraPessoa) {
+        RandomSource rnd = level.getRandom();
+        float g = Bloqueador.erguido(pl.getId(), 1);
+        Vec3 olhar = Vec3.directionFromRotation(0, pl.getYRot());
+        Vec3 c = pl.position().add(0, pl.getBbHeight() * (primeiraPessoa ? 0.78 : 0.72), 0).add(olhar.scale(primeiraPessoa ? 0.75 : 0.45));
+        int n = 1 + Math.round(3 * g);
+        for (int i = 0; i < n; i++) {
+            level.addParticle(new DustParticleOptions(rnd.nextInt(3) == 0 ? 0xFFFFFF : a.efeitoCor(), 0.55f),
+                c.x + (rnd.nextDouble() - 0.5) * 0.35, c.y + (rnd.nextDouble() - 0.5) * 0.3, c.z + (rnd.nextDouble() - 0.5) * 0.35,
+                (rnd.nextDouble() - 0.5) * 0.04, 0.02, (rnd.nextDouble() - 0.5) * 0.04);
+        }
+        if (rnd.nextInt(3) == 0) level.addParticle(ParticleTypes.ELECTRIC_SPARK, c.x, c.y, c.z, rnd.nextGaussian() * 0.12, rnd.nextGaussian() * 0.12, rnd.nextGaussian() * 0.12);
     }
 
     /** Dois feixes saindo dos olhos que se encontram no alvo, com núcleo claro, olhos acesos e faíscas no impacto. */

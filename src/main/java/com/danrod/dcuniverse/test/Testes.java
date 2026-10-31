@@ -3,6 +3,7 @@ package com.danrod.dcuniverse.test;
 import com.danrod.dcuniverse.DCUniverse;
 import com.danrod.dcuniverse.ability.DemoHud;
 import com.danrod.dcuniverse.ability.Habilidades;
+import com.danrod.dcuniverse.ability.passive.Bloqueio;
 import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.ability.QuedaAmortecida;
 import com.danrod.dcuniverse.ability.TipoHabilidade;
@@ -47,6 +48,7 @@ public final class Testes {
     private static final Identifier BATMAN = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "batman");
     private static final Identifier SUPERGIRL = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "supergirl");
     private static final Identifier SUPERBOY = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "superboy");
+    private static final Identifier MULHER_MARAVILHA = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "mulher_maravilha");
 
     static {
         FUNCOES.register("transform", () -> Testes::transforma);
@@ -89,6 +91,14 @@ public final class Testes {
         FUNCOES.register("floating_island", () -> Testes::ilha);
         FUNCOES.register("batch_v03", () -> Testes::loteV03);
         FUNCOES.register("guided_start", () -> Testes::inicioGuiado);
+        FUNCOES.register("deflect", () -> Testes::bloqueio);
+        FUNCOES.register("lasso", () -> Testes::laco);
+        FUNCOES.register("thrown_weapon", () -> Testes::armaArremessada);
+        FUNCOES.register("lasso_ally", () -> Testes::lacoAliado);
+        FUNCOES.register("bracelet_blast", () -> Testes::braceletes);
+        FUNCOES.register("war_cry", () -> Testes::grito);
+        FUNCOES.register("summon_weapon", () -> Testes::empunhar);
+        FUNCOES.register("invisible_jet", () -> Testes::jato);
     }
 
     private Testes() {}
@@ -1588,6 +1598,255 @@ public final class Testes {
         h.assertValueEqual(mapa.paleta().length, 2, "duas cores na paleta");
         h.assertValueEqual(mapa.paleta()[mapa.pixels()[0]], 0x2E7D32, "oeste verde");
         h.assertValueEqual(mapa.paleta()[mapa.pixels()[mapa.w() - 1]], 0x0B1B4A, "leste azul");
+        h.succeed();
+    }
+
+    // ------------------------------------------------------------------ v0.5: Mulher-Maravilha
+
+    /**
+     * Braceletes: erguer deixa lenta; a flecha de frente no tempo perfeito volta para o esqueleto (dono novo, crítica,
+     * mais forte); golpe de frente é anulado e empurra; de costas entra; sem energia a guarda quebra.
+     */
+    static void bloqueio(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, MULHER_MARAVILHA, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        e.setEnergia(e.personagem().energia().max());
+        var esq = h.spawn(net.minecraft.world.entity.EntityTypes.SKELETON, new net.minecraft.core.BlockPos(1, 1, 8));
+        esq.setNoAi(true);
+        mirar(p, esq.getEyePosition());
+        double antes = p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+        Bloqueio.definir(p, true);
+        h.assertTrue(Bloqueio.erguido(p), "braços erguidos");
+        h.assertTrue(p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED) < antes, "anda devagar bloqueando");
+        // Flecha vindo do esqueleto, de frente, logo depois de erguer: bloqueio perfeito.
+        var flecha = new net.minecraft.world.entity.projectile.arrow.Arrow(h.getLevel(), esq, new ItemStack(Items.ARROW), null);
+        flecha.setPos(p.getEyePosition().add(p.getLookAngle().scale(1.5)));
+        flecha.setDeltaMovement(p.getLookAngle().scale(-2));
+        double danoAntes = ((com.danrod.dcuniverse.mixin.AbstractArrowAccessor) flecha).dcuniverse$dano();
+        var desvio = Bloqueio.desvio(p, flecha);
+        h.assertTrue(desvio != null, "a flecha de frente é desviada");
+        flecha.deflect(desvio, p, null, false);
+        h.assertTrue(flecha.getOwner() == p, "a flecha refletida passa a ser da Diana");
+        h.assertTrue(flecha.getDeltaMovement().dot(esq.position().subtract(flecha.position())) > 0, "volta na direção do esqueleto");
+        h.assertTrue(flecha.isCritArrow() && ((com.danrod.dcuniverse.mixin.AbstractArrowAccessor) flecha).dcuniverse$dano() > danoAntes, "volta crítica e mais forte");
+        h.assertTrue(Guia.concluida(p, "bloqueio_perfeito"), "tarefa do bloqueio perfeito");
+        flecha.discard();
+        // Golpe de frente (fora da janela perfeita): anulado; o zumbi é empurrado.
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 1, 3));
+        zumbi.setNoAi(true);
+        mirar(p, zumbi.getEyePosition());
+        var golpe = p.damageSources().mobAttack(zumbi);
+        h.assertTrue(Bloqueio.corpoACorpo(p, golpe, 4), "golpe de frente bloqueado");
+        h.assertTrue(Guia.concluida(p, "bloqueio"), "tarefa do bloqueio");
+        // De costas não bloqueia.
+        mirar(p, aqui.add(0, 1.6, -5));
+        h.assertFalse(Bloqueio.corpoACorpo(p, golpe, 4), "golpe pelas costas entra");
+        mirar(p, zumbi.getEyePosition());
+        // Sem energia a guarda quebra: os braços caem e o golpe passa.
+        e.setEnergia(0);
+        h.assertFalse(Bloqueio.corpoACorpo(p, golpe, 4), "sem energia o golpe passa");
+        h.assertFalse(Bloqueio.erguido(p), "guarda quebrada");
+        Bloqueio.definir(p, true);
+        h.assertFalse(Bloqueio.erguido(p), "não ergue de novo logo depois de quebrar");
+        Bloqueio.definir(p, false);
+        h.assertTrue(p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED) == antes, "volta à velocidade normal");
+        zumbi.discard();
+        esq.discard();
+        Transformacao.destransformar(p);
+        h.succeed();
+    }
+
+    /** Laço (numa vaca: no mundo de teste pacífico os monstros somem): prende, usar de novo puxa até perto, agachado solta. */
+    static void laco(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, MULHER_MARAVILHA, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem mm = e.personagem();
+        e.setEnergia(mm.energia().max());
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.COW, new net.minecraft.core.BlockPos(1, 1, 7));
+        mirar(p, zumbi.getBoundingBox().getCenter());
+        h.assertTrue(Habilidades.executar(p, mm, mm.habilidade("laco_da_verdade")), "lança o laço");
+        var laco = com.danrod.dcuniverse.content.LacoEntidade.ativo(p);
+        h.assertTrue(laco != null, "laço no ar");
+        int[] fase = {0};
+        h.succeedWhen(() -> {
+            if (fase[0] == 0) {
+                h.assertTrue(laco.estado() == com.danrod.dcuniverse.content.LacoEntidade.PRESO && laco.alvoId() == zumbi.getId(), "zumbi preso");
+                h.assertTrue(Guia.concluida(p, "laco"), "tarefa do laço");
+                fase[0] = 1;
+                // Usar de novo não gasta energia e puxa.
+                float energia = e.energia();
+                h.assertTrue(Habilidades.executar(p, mm, mm.habilidade("laco_da_verdade")), "puxa");
+                h.assertTrue(e.energia() == energia, "puxar é de graça");
+                h.assertTrue(Guia.concluida(p, "laco_puxar"), "tarefa de puxar");
+            }
+            h.assertTrue(zumbi.distanceTo(p) < 4.5, "zumbi puxado até perto");
+            if (fase[0] == 1) {
+                fase[0] = 2;
+                p.setShiftKeyDown(true);
+                h.assertTrue(Habilidades.executar(p, mm, mm.habilidade("laco_da_verdade")), "agachado solta");
+                p.setShiftKeyDown(false);
+                h.assertTrue(laco.estado() == com.danrod.dcuniverse.content.LacoEntidade.RECOLHE, "laço recolhendo");
+            }
+            zumbi.discard();
+        });
+    }
+
+    /** Tiara: voa, acerta a vaca (no mundo de teste pacífico os monstros somem) e volta sozinha (a entidade some ao ser pega). */
+    static void armaArremessada(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, MULHER_MARAVILHA, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem mm = e.personagem();
+        e.setEnergia(mm.energia().max());
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.COW, new net.minecraft.core.BlockPos(1, 1, 7));
+        zumbi.setNoAi(true);
+        float vida = zumbi.getHealth();
+        mirar(p, zumbi.getBoundingBox().getCenter());
+        h.assertTrue(Habilidades.executar(p, mm, mm.habilidade("tiara")), "arremessa a tiara");
+        h.assertTrue(Guia.concluida(p, "arma_arremessada"), "tarefa da tiara");
+        var caixa = new net.minecraft.world.phys.AABB(aqui, aqui).inflate(32);
+        h.assertTrue(!h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.ArmaArremessadaEntidade.class, caixa).isEmpty(), "tiara no ar");
+        boolean[] acertou = {false};
+        h.succeedWhen(() -> {
+            if (zumbi.getHealth() < vida) acertou[0] = true;
+            h.assertTrue(acertou[0], "acertou o zumbi");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.ArmaArremessadaEntidade.class, caixa).isEmpty(), "voltou para a mão");
+            zumbi.discard();
+        });
+    }
+
+    private static ServerPlayer diana(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, MULHER_MARAVILHA, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        e.setEnergia(e.personagem().energia().max());
+        return p;
+    }
+
+    /** Laço: segurado 5 s, o mob vira aliado da Diana (e deixa de poder ser atingido por ela). */
+    static void lacoAliado(GameTestHelper h) {
+        ServerPlayer p = diana(h);
+        Personagem mm = EstadoJogador.de(p).personagem();
+        var vaca = h.spawn(net.minecraft.world.entity.EntityTypes.COW, new net.minecraft.core.BlockPos(1, 1, 5));
+        mirar(p, vaca.getBoundingBox().getCenter());
+        h.assertTrue(Habilidades.executar(p, mm, mm.habilidade("laco_da_verdade")), "lança o laço");
+        long inicio = h.getLevel().getGameTime();
+        h.succeedWhen(() -> {
+            h.assertTrue(com.danrod.dcuniverse.ability.Aliados.aliado(vaca), "vaca virou aliada");
+            h.assertTrue(h.getLevel().getGameTime() - inicio >= 95, "só depois de 5 s preso");
+            h.assertTrue(p.getUUID().equals(com.danrod.dcuniverse.ability.Aliados.donoDe(vaca)), "aliada da Diana");
+            h.assertTrue(!com.danrod.dcuniverse.ability.Alvos.podeAtingir(p, vaca), "a Diana não fere a aliada");
+            h.assertTrue(Guia.concluida(p, "aliado"), "tarefa do aliado");
+            com.danrod.dcuniverse.ability.Aliados.limpar();
+            var laco = com.danrod.dcuniverse.content.LacoEntidade.ativo(p);
+            if (laco != null) laco.discard();
+            vaca.discard();
+        });
+    }
+
+    /** Golpe de braceletes: carregado ao máximo, fere e empurra para longe; com carga mínima o raio é menor. */
+    static void braceletes(GameTestHelper h) {
+        ServerPlayer p = diana(h);
+        Personagem mm = EstadoJogador.de(p).personagem();
+        var h0 = mm.habilidade("golpe_de_braceletes");
+        var perto = h.spawn(net.minecraft.world.entity.EntityTypes.COW, new net.minecraft.core.BlockPos(1, 1, 3));
+        var longe = h.spawn(net.minecraft.world.entity.EntityTypes.COW, new net.minecraft.core.BlockPos(6, 1, 6));
+        perto.setNoAi(true);
+        longe.setNoAi(true);
+        float vida = perto.getHealth();
+        com.danrod.dcuniverse.ability.active.Choque.explodir(h.getLevel(), p, mm, h0.params(), 0);
+        h.assertTrue(perto.getHealth() < vida, "carga mínima fere quem está perto");
+        h.assertTrue(longe.getHealth() == longe.getMaxHealth(), "carga mínima não chega longe");
+        com.danrod.dcuniverse.ability.active.Choque.explodir(h.getLevel(), p, mm, h0.params(), 1);
+        h.assertTrue(longe.getHealth() < longe.getMaxHealth(), "carga cheia chega a 8 blocos");
+        h.assertTrue(perto.getDeltaMovement().horizontalDistance() > 0.5, "empurra para fora");
+        h.assertTrue(perto.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "carga cheia atordoa");
+        h.assertTrue(Guia.concluida(p, "braceletes"), "tarefa dos braceletes");
+        perto.discard();
+        longe.discard();
+        h.succeed();
+    }
+
+    /** Grito de guerra: Força e Resistência para os aliados por perto (o jogador de teste não está na lista do mundo). */
+    static void grito(GameTestHelper h) {
+        ServerPlayer p = diana(h);
+        Personagem mm = EstadoJogador.de(p).personagem();
+        var lobo = h.spawn(net.minecraft.world.entity.EntityTypes.WOLF, new net.minecraft.core.BlockPos(3, 1, 3));
+        lobo.tame(p);
+        h.assertTrue(Habilidades.executar(p, mm, mm.habilidade("grito_de_guerra")), "grita");
+        h.assertTrue(lobo.hasEffect(net.minecraft.world.effect.MobEffects.STRENGTH), "Força no lobo dela");
+        h.assertTrue(lobo.hasEffect(net.minecraft.world.effect.MobEffects.RESISTANCE), "Resistência no lobo dela");
+        h.assertTrue(Guia.concluida(p, "grito") && Guia.concluida(p, "grito_aliados"), "tarefas do grito");
+        lobo.discard();
+        h.succeed();
+    }
+
+    /** Espada de Themyscira: aparece na mão, só ela pode ter, e some ao guardar ou ao destransformar. */
+    static void empunhar(GameTestHelper h) {
+        ServerPlayer p = diana(h);
+        Personagem mm = EstadoJogador.de(p).personagem();
+        var espada = com.danrod.dcuniverse.content.Itens.ESPADA_THEMYSCIRA.get();
+        p.getInventory().setItem(p.getInventory().getSelectedSlot(), new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BREAD));
+        h.assertTrue(Habilidades.executar(p, mm, mm.habilidade("espada_de_themyscira")), "saca a espada");
+        h.assertTrue(p.getMainHandItem().is(espada), "espada na mão");
+        h.assertTrue(p.getInventory().contains(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BREAD)), "o pão foi para outro espaço");
+        h.assertTrue(Guia.concluida(p, "empunhar"), "tarefa de empunhar");
+        h.assertTrue(Habilidades.executar(p, mm, mm.habilidade("espada_de_themyscira")), "guarda a espada");
+        h.assertTrue(!p.getInventory().contains(new net.minecraft.world.item.ItemStack(espada)), "espada guardada");
+        p.getInventory().setItem(p.getInventory().getSelectedSlot(), new net.minecraft.world.item.ItemStack(espada));
+        Transformacao.destransformar(p);
+        var pilha = p.getMainHandItem();
+        pilha.inventoryTick(h.getLevel(), p, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
+        h.assertTrue(!p.getInventory().contains(new net.minecraft.world.item.ItemStack(espada)), "some fora da Diana");
+        h.succeed();
+    }
+
+    /** Jato Invisível: custa 70%, tem quatro lugares e esconde dos mobs quem está dentro. */
+    static void jato(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 40, 1.5));
+        p.setPos(aqui.x, aqui.y, aqui.z);
+        Transformacao.transformar(p, MULHER_MARAVILHA, true);
+        try {
+            EstadoJogador e = EstadoJogador.de(p);
+            Personagem mm = e.personagem();
+            e.setEnergia(mm.energia().max());
+            Personagem.Habilidade sup = mm.suprema();
+            h.assertValueEqual(sup.id(), "jato_invisivel", "a suprema é o jato");
+            h.assertTrue(Habilidades.executar(p, mm, sup), "chama o jato");
+            h.assertValueEqual(e.energia(), mm.energia().max() * 0.3f, "custa 70% da energia");
+            var jato = (com.danrod.dcuniverse.content.JatoInvisivel) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
+            h.assertTrue(jato != null && jato.isAlive(), "jato no mundo");
+            h.assertValueEqual(jato.lugaresLivres(), 4, "quatro lugares");
+            var vaca = h.spawn(net.minecraft.world.entity.EntityTypes.COW, new net.minecraft.core.BlockPos(1, 1, 1));
+            vaca.teleportTo(jato.getX(), jato.getY(), jato.getZ());
+            h.assertTrue(vaca.startRiding(jato, true, true), "passageiro embarca");
+            h.assertValueEqual(jato.lugaresLivres(), 3, "um lugar ocupado");
+            var lobo = h.spawn(net.minecraft.world.entity.EntityTypes.WOLF, new net.minecraft.core.BlockPos(1, 1, 1));
+            lobo.setTarget(vaca);
+            h.assertTrue(lobo.getTarget() == null, "mobs não miram quem está no jato");
+            vaca.stopRiding();
+            vaca.discard();
+            lobo.discard();
+        } finally {
+            for (var n : h.getLevel().getEntities(com.danrod.dcuniverse.content.Entidades.JATO_INVISIVEL.get(), x -> true)) {
+                if (n.distanceToSqr(p) < 64 * 64) {
+                    n.ejectPassengers();
+                    n.discard();
+                }
+            }
+            com.danrod.dcuniverse.ability.active.Veiculo.limpar();
+        }
         h.succeed();
     }
 }

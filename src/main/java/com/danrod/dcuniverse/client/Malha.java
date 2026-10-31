@@ -72,6 +72,26 @@ public final class Malha {
         }
     }
 
+    /**
+     * Envia só posição e cor (para o tipo de luz aditiva, client/Luz), com a cor ARGB de cada vértice calculada na
+     * hora (ex.: o brilho que corre pelo vidro do Jato Invisível). Cada triângulo vai nas duas voltas.
+     */
+    public void enviarLuz(PoseStack.Pose pose, VertexConsumer buf, java.util.function.ToIntFunction<V> cor) {
+        for (int i = 0; i + 2 < tris.size(); i += 3) {
+            V a = tris.get(i), b = tris.get(i + 1), c = tris.get(i + 2);
+            int ca = cor.applyAsInt(a), cb = cor.applyAsInt(b), cc = cor.applyAsInt(c);
+            if ((ca >>> 24) < 2 && (cb >>> 24) < 2 && (cc >>> 24) < 2) continue;
+            buf.addVertex(pose, a.x, a.y, a.z).setColor(ca);
+            buf.addVertex(pose, b.x, b.y, b.z).setColor(cb);
+            buf.addVertex(pose, c.x, c.y, c.z).setColor(cc);
+            buf.addVertex(pose, c.x, c.y, c.z).setColor(cc);
+            buf.addVertex(pose, c.x, c.y, c.z).setColor(cc);
+            buf.addVertex(pose, b.x, b.y, b.z).setColor(cb);
+            buf.addVertex(pose, a.x, a.y, a.z).setColor(ca);
+            buf.addVertex(pose, a.x, a.y, a.z).setColor(ca);
+        }
+    }
+
     private static void vert(PoseStack.Pose pose, VertexConsumer buf, V v, int cor, int luz) {
         buf.addVertex(pose, v.x, v.y, v.z).setColor(cor).setUv(v.u, v.v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(luz)
             .setNormal(pose, v.nx, v.ny, v.nz);

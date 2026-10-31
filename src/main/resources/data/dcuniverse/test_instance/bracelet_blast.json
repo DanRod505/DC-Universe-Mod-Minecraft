@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "dcuniverse:bracelet_blast",
+  "environment": "minecraft:default",
+  "structure": "dcuniverse:arena_vazia",
+  "max_ticks": 60
+}

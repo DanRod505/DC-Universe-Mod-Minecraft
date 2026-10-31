@@ -23,6 +23,9 @@
     "TreeFeatureMixin",
     "MultifaceGrowthFeatureMixin",
     "ServerGamePacketListenerImplAccessor",
-    "ServerGamePacketListenerImplMixin"
+    "ServerGamePacketListenerImplMixin",
+    "AbstractArrowAccessor",
+    "EntityDeflectionMixin",
+    "ProjectileDeflectMixin"
   ]
 }

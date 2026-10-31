@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * vehicle: veículo da suprema (seção 2.11). O parâmetro "model" diz qual: batwing (padrão, content/BatwingEntidade),
- * batmovel, batmoto ou batbarco (content/VeiculoBat). Um por dono: usar de novo com ele no mundo chama o veículo
+ * batmovel, batmoto ou batbarco (content/VeiculoBat), nave_kryptoniana ou jato_invisivel (variações do Batwing). Um por dono: usar de novo com ele no mundo chama o veículo
  * (perto, embarca; o Batmóvel e a Batmoto vêm buscar quem está longe) e não gasta a suprema. Com o cinto, o
  * jogador escolhe no Batcomputador qual veículo a suprema chama (character/Cinto).
  */
@@ -54,6 +54,7 @@ public final class Veiculo implements TipoHabilidade {
         String modelo = h.params().s("model", "batwing");
         if (modelo.equals("batwing")) return BatwingEntidade.invocar(player, h.params());
         if (modelo.equals("nave_kryptoniana")) return com.danrod.dcuniverse.content.NaveKryptoniana.invocar(player, h.params());
+        if (modelo.equals("jato_invisivel")) return com.danrod.dcuniverse.content.JatoInvisivel.invocar(player, h.params());
         VeiculoBat v = VeiculoBat.invocar(player, modelo, h.params());
         if (v == null && modelo.equals("batbarco")) {
             com.danrod.dcuniverse.character.Transformacao.avisar(player, Component.translatable("dcuniverse.msg.batbarco_sem_agua"));
@@ -63,6 +64,7 @@ public final class Veiculo implements TipoHabilidade {
 
     private static String modelo(Entity e) {
         if (e instanceof com.danrod.dcuniverse.content.NaveKryptoniana) return "nave_kryptoniana";
+        if (e instanceof com.danrod.dcuniverse.content.JatoInvisivel) return "jato_invisivel";
         return e instanceof VeiculoBat v ? v.modelo() : "batwing";
     }
 

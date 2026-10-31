@@ -186,6 +186,10 @@ public final class Pecas {
             if (d.pecas().contains("brilho") && s.id != Integer.MIN_VALUE) {
                 var a = EstadoCliente.APARENCIAS.get(s.id);
                 Identifier t = a == null ? null : d.brilho().get(a.efeito());
+                // Braceletes erguidos (bloqueio): acendem enquanto os braços estão cruzados.
+                if (t == null && Bloqueador.erguido(s.id, Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)) > 0.3f) {
+                    t = d.brilho().get("deflect");
+                }
                 if (t != null) {
                     col.submitModel(m, s, ps, RenderTypes.eyes(t), luz, OverlayTexture.NO_OVERLAY, s.outlineColor, null);
                 }

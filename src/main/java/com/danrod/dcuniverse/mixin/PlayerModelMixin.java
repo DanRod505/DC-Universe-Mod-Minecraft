@@ -8,12 +8,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Depois da animação normal, abre os braços de quem plana com a capa-asa (client/Pecas) e põe quem pilota a Batmoto na pose dela. */
+/**
+ * Depois da animação normal, abre os braços de quem plana com a capa-asa (client/Pecas), põe quem pilota a Batmoto na
+ * pose dela, estica o braço de quem segura o laço, cruza os braceletes de quem bloqueia (ou carrega o golpe de
+ * braceletes) e ergue o escudo de quem investe com ele.
+ */
 @Mixin(PlayerModel.class)
 public abstract class PlayerModelMixin {
     @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)V", at = @At("TAIL"))
     private void dcuniverse$planar(AvatarRenderState state, CallbackInfo ci) {
         Pecas.posePlanar((PlayerModel) (Object) this, state);
         com.danrod.dcuniverse.client.Motorista.poseMoto((PlayerModel) (Object) this, state);
+        com.danrod.dcuniverse.client.Laceador.pose((PlayerModel) (Object) this, state);
+        com.danrod.dcuniverse.client.Bloqueador.pose((PlayerModel) (Object) this, state);
+        com.danrod.dcuniverse.client.Escudeiro.pose((PlayerModel) (Object) this, state);
     }
 }

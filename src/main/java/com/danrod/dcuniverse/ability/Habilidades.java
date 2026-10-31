@@ -98,13 +98,21 @@ public final class Habilidades {
         TiposHabilidade.TIPOS.get(h.tipo()).canalizar(player, p, h, player.tickCount);
     }
 
+    /** Para a habilidade canalizada agora (a própria habilidade pode pedir, como a carga dos braceletes no máximo). */
+    public static void parar(ServerPlayer player) {
+        parar(player, EstadoJogador.de(player));
+    }
+
     private static void parar(ServerPlayer player, EstadoJogador e) {
         String id = e.canalizando();
         if (id.isEmpty()) return;
         e.setCanalizando("");
         Personagem p = e.personagem();
         Personagem.Habilidade h = p == null ? null : p.habilidade(id);
-        if (h != null) e.setProntaEm(id, player.level().getGameTime() + Math.round(h.recargaSeg() * 20));
+        if (h != null) {
+            TiposHabilidade.TIPOS.get(h.tipo()).soltar(player, p, h);
+            e.setProntaEm(id, player.level().getGameTime() + Math.round(h.recargaSeg() * 20));
+        }
         Rede.sincronizar(player);
         Rede.aparencia(player);
     }

@@ -37,7 +37,15 @@ public final class Alvos {
         if (alvo instanceof EnderDragonPart parte) alvo = parte.parentMob;
         if (alvo == atacante || !(alvo instanceof LivingEntity vivo) || !vivo.isAlive()) return false;
         if (alvo instanceof Player outro) return atacante.canHarmPlayer(outro);
+        // Os aliados do laço não levam os golpes do próprio dono.
+        if (alvo instanceof net.minecraft.world.entity.Mob m && atacante.getUUID().equals(Aliados.donoDe(m))) return false;
         return !alvo.isAlliedTo(atacante);
+    }
+
+    /** Chefes (dragão, Wither e a tag de chefes): não viram aliados nem saem do lugar com o laço. */
+    public static boolean chefe(Entity e) {
+        return e instanceof EnderDragon || e instanceof net.minecraft.world.entity.boss.wither.WitherBoss
+            || e.getType().builtInRegistryHolder().is(net.minecraftforge.common.Tags.EntityTypes.BOSSES);
     }
 
     /** Pode levar golpe de poder: criaturas vivas, os cristais do End e as partes do Ender Dragon. */

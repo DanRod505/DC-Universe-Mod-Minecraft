@@ -39,6 +39,12 @@ public final class Itens {
         p -> new TransformacaoItem("supergirl", p.rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> JAQUETA_CONNER = item("jaqueta_conner",
         p -> new TransformacaoItem("superboy", p.rarity(Rarity.EPIC)));
+    public static final RegistryObject<Item> TIARA_MULHER_MARAVILHA = item("tiara_mulher_maravilha",
+        p -> new TransformacaoItem("mulher_maravilha", p.rarity(Rarity.EPIC)));
+    // Armas da Mulher-Maravilha (só existem na mão dela: ability/active/Empunhar e thrown_weapon)
+    public static final RegistryObject<Item> ESPADA_THEMYSCIRA = item("espada_themyscira", EspadaThemyscira::new);
+    public static final RegistryObject<Item> ESCUDO_THEMYSCIRA = item("escudo_themyscira",
+        p -> new ArmaVinculada(p.stacksTo(1).rarity(Rarity.EPIC).fireResistant()));
 
     // Lote da v0.1: kryptonita e Krypton
     public static final RegistryObject<Item> FRAGMENTO_KRYPTONITA = item("fragmento_kryptonita", p -> new Item(p.rarity(Rarity.UNCOMMON)));

@@ -20,6 +20,16 @@ public final class Entidades {
             .noLootTable().sized(0.5f, 0.25f).clientTrackingRange(6).updateInterval(1)
             .build(TIPOS.key("batarangue")));
 
+    public static final RegistryObject<EntityType<LacoEntidade>> LACO = TIPOS.register("laco",
+        () -> EntityType.Builder.<LacoEntidade>of(LacoEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.4f, 0.4f).clientTrackingRange(8).updateInterval(1)
+            .build(TIPOS.key("laco")));
+
+    public static final RegistryObject<EntityType<ArmaArremessadaEntidade>> ARMA_ARREMESSADA = TIPOS.register("arma_arremessada",
+        () -> EntityType.Builder.<ArmaArremessadaEntidade>of(ArmaArremessadaEntidade::new, MobCategory.MISC)
+            .noLootTable().sized(0.5f, 0.25f).clientTrackingRange(6).updateInterval(1)
+            .build(TIPOS.key("arma_arremessada")));
+
     public static final RegistryObject<EntityType<BatwingEntidade>> BATWING = TIPOS.register("batwing",
         () -> EntityType.Builder.<BatwingEntidade>of(BatwingEntidade::new, MobCategory.MISC)
             .noLootTable().sized(5.6f, 1.6f).clientTrackingRange(12).updateInterval(1)
@@ -90,6 +100,11 @@ public final class Entidades {
         () -> EntityType.Builder.<NaveKryptoniana>of(NaveKryptoniana::new, MobCategory.MISC)
             .noLootTable().sized(4.0f, 2.2f).clientTrackingRange(12).updateInterval(1)
             .build(TIPOS.key("nave_kryptoniana")));
+
+    public static final RegistryObject<EntityType<JatoInvisivel>> JATO_INVISIVEL = TIPOS.register("jato_invisivel",
+        () -> EntityType.Builder.<JatoInvisivel>of(JatoInvisivel::new, MobCategory.MISC)
+            .noLootTable().sized(4.4f, 1.8f).clientTrackingRange(12).updateInterval(1)
+            .build(TIPOS.key("jato_invisivel")));
 
     public static final RegistryObject<EntityType<OrbeSolar>> ORBE_SOLAR = TIPOS.register("orbe_solar",
         () -> EntityType.Builder.<OrbeSolar>of(OrbeSolar::new, MobCategory.MISC)
