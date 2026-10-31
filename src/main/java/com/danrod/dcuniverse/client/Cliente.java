@@ -123,6 +123,10 @@ public final class Cliente {
         Motorista.registrar();
         Diretor.registrar();
         FlashbackInstalador.registrar();
+        // O trajeto da câmera do Flashback usa o pipeline debug_quads, que o Iris não conhece ("Missing program"):
+        // desenha como o raio do trovão (mesmo formato de vértice, posição e cor).
+        Iris.comoVanilla(net.minecraft.client.renderer.RenderPipelines.DEBUG_QUADS, net.minecraft.client.renderer.RenderPipelines.LIGHTNING);
+        com.danrod.dcuniverse.core.EstadoCliente.emReplay = Flashback::emReplay;
         Ilhas.registrar();
         LigaHud.registrar();
         com.danrod.dcuniverse.client.npc.NpcRenderer.registrar();
@@ -153,6 +157,8 @@ public final class Cliente {
         while (Teclas.DIRETOR_RAPIDO.consumeClick()) Diretor.tempo(mc, -1);
         Diretor.tick(mc);
         Flashback.tick();
+        if (Flashback.emReplay() && com.danrod.dcuniverse.core.EstadoCliente.transformado())
+            com.danrod.dcuniverse.core.EstadoCliente.atual = Rede.Sync.VAZIO;
         while (Teclas.MAPA.consumeClick()) {
             if (livre) Rede.CANAL.send(new Rede.MapaPedir(), com.danrod.dcuniverse.core.Canal.SERVIDOR);
         }
