@@ -23,6 +23,19 @@
     { "type": "projectile_resistance", "max_damage": 10 },
     { "type": "super_jump", "power": 2.0, "charge": 1.0 }
   ],
+  "combo": {
+    "lunge": 6,
+    "hits": [
+      { "anim": "superman.direto", "impact": 0.1, "recover": 0.2, "window": 0.65, "damage_mult": 0.25,
+        "reach": 3.4, "arc": 80, "knockback": 0.35, "fx": "light" },
+      { "anim": "superman.cruzado", "impact": 0.11, "recover": 0.22, "window": 0.65, "damage_mult": 0.3,
+        "reach": 3.4, "arc": 80, "knockback": 0.4, "fx": "light" },
+      { "anim": "superman.gancho", "impact": 0.13, "recover": 0.3, "window": 0.75, "damage_mult": 0.4,
+        "reach": 3.4, "arc": 80, "knockback": 0.3, "launch": 0.6, "fx": "medium" },
+      { "anim": "superman.soco_de_aco", "impact": 0.22, "recover": 0.6, "window": 0.6, "damage_mult": 0.9,
+        "reach": 3.8, "arc": 100, "knockback": 2.4, "launch": 0.35, "radius": 2.2, "stun": 1.0, "fx": "heavy" }
+    ]
+  },
   "abilities": [
     { "id": "visao_de_calor", "type": "projectile_beam", "mode": "hold", "cost": 12, "cooldown": 2,
       "range": 24, "damage_mult": 0.4, "color": "#FF2A1A", "sets_fire": true, "melts": true },

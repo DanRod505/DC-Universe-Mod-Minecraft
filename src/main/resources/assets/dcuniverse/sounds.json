@@ -80,6 +80,42 @@
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.raio_x"
   },
+  "habilidade.golpe_ar": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/golpe_ar",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.golpe_ar"
+  },
+  "habilidade.golpe_leve": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/golpe_leve",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.golpe_leve"
+  },
+  "habilidade.golpe_medio": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/golpe_medio",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.golpe_medio"
+  },
+  "habilidade.golpe_pesado": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/golpe_pesado",
+        "attenuation_distance": 40
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.golpe_pesado"
+  },
   "habilidade.fortaleza_cresce": {
     "sounds": [
       {

@@ -127,6 +127,7 @@ public final class Eventos {
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerChangedDimensionEvent.class, e -> sync(e.getEntity()));
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, e -> {
             Onda.tick();
+            com.danrod.dcuniverse.combate.Combo.tick(e.getServer());
             com.danrod.dcuniverse.ability.Congelamento.tick();
             Fortaleza.tick();
             com.danrod.dcuniverse.missao.Cenas.tick();

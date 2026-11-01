@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Menu radial: abre enquanto R está segurada, com as habilidades em volta do centro. A habilidade fica em
- * foco pela direção do mouse; soltar R (ou clicar) escolhe. O centro mostra nome, custo, recarga e se dá
+ * Menu radial: abre enquanto a tecla dele (Y) está segurada, com as habilidades em volta do centro. A habilidade fica em
+ * foco pela direção do mouse; soltar a tecla (ou clicar) usa a habilidade na hora. O centro mostra nome, custo, recarga e se dá
  * para usar agora. A arte vem de textures/gui/radial.png (tools/arte/hud.py).
  */
 public final class RadialScreen extends Screen {
@@ -72,8 +72,13 @@ public final class RadialScreen extends Screen {
 
     private void escolherEFechar() {
         int i = hover();
-        if (i >= 0 && i != EstadoCliente.atual.selecionada()) {
+        if (i >= 0) {
+            // Soltar sobre uma habilidade usa ela na hora (as canalizadas ficam nos atalhos, que dá para segurar).
             Rede.CANAL.send(new Rede.Selecionar(i), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+            if (!EstadoCliente.habilidades().get(i).hold()) {
+                Rede.CANAL.send(new Rede.Usar(i, true), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+                Rede.CANAL.send(new Rede.Usar(i, false), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+            }
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.4f, 0.5f));
         }
         onClose();

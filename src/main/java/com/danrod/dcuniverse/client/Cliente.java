@@ -10,6 +10,7 @@ import com.danrod.dcuniverse.content.Entidades;
 import com.danrod.dcuniverse.content.GuiaItem;
 import com.danrod.dcuniverse.core.EstadoCliente;
 import com.danrod.dcuniverse.core.Rede;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.resources.Identifier;
@@ -25,15 +26,16 @@ import net.neoforged.neoforge.common.NeoForge;
 
 /** Tudo que só existe no cliente: teclas, HUD, menu radial, Guia do Herói, física do voo e do planar, skins e efeitos. */
 public final class Cliente {
-    /** Se a tecla de uso está apertada (o servidor só fica sabendo quando muda). */
-    private static boolean usando;
+    /** Índice (na lista do Sync) que cada tecla de habilidade está segurando, -1 = solta. O servidor só fica sabendo quando muda. */
+    private static final int[] SEGURANDO = {-1, -1, -1, -1, -1, -1};
 
     private Cliente() {}
 
     public static void registrar() {
         DCUniverse.modBus().addListener(RegisterKeyMappingsEvent.class, e -> {
+            for (var k : Teclas.HABILIDADES) e.register(k);
+            e.register(Teclas.SUPREMA);
             e.register(Teclas.RADIAL);
-            e.register(Teclas.USAR);
             e.register(Teclas.DESTRANSFORMAR);
             e.register(Teclas.GUIA);
             e.register(Teclas.DIARIO);
@@ -102,7 +104,9 @@ public final class Cliente {
             Piloto.limpar();
             Motorista.limpar();
             Ilhas.limpar();
-            usando = false;
+            java.util.Arrays.fill(SEGURANDO, -1);
+            com.danrod.dcuniverse.client.anim.Animador.limpar();
+            Combate.limpar();
         });
         GuiaItem.abrir = GuiaScreen::abrir;
         com.danrod.dcuniverse.core.EstadoCliente.batcomputador = BatcomputadorScreen::receber;
@@ -111,6 +115,8 @@ public final class Cliente {
         EstadoCliente.npcFala = com.danrod.dcuniverse.client.npc.DialogoScreen::falar;
         Skins.registrar();
         Pecas.registrar();
+        Combate.registrar();
+        com.danrod.dcuniverse.client.anim.Animador.registrar();
         com.danrod.dcuniverse.client.npc.ColeiraCamada.registrar();
         Voador.registrar();
         Planador.registrar();
@@ -176,12 +182,16 @@ public final class Cliente {
                 livre = false;
             }
         }
-        // Uso: apertar dispara (instantânea) ou começa a canalizar; soltar para de canalizar.
-        boolean usar = livre && transformado && Teclas.USAR.isDown();
-        if (usar != usando) {
-            usando = usar;
-            Rede.CANAL.send(new Rede.Usar(usar), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+        // Atalhos: apertar dispara (instantânea) ou começa a canalizar; soltar para de canalizar.
+        for (int i = 0; i < SEGURANDO.length; i++) {
+            KeyMapping k = i < Teclas.HABILIDADES.size() ? Teclas.HABILIDADES.get(i) : Teclas.SUPREMA;
+            int alvo = livre && transformado && k.isDown() ? (SEGURANDO[i] >= 0 ? SEGURANDO[i] : Atalhos.indice(i)) : -1;
+            if (alvo == SEGURANDO[i]) continue;
+            if (SEGURANDO[i] >= 0) Rede.CANAL.send(new Rede.Usar(SEGURANDO[i], false), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+            if (alvo >= 0) Rede.CANAL.send(new Rede.Usar(alvo, true), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+            SEGURANDO[i] = alvo;
         }
+        Combate.tick(mc);
         String tarefa = EstadoCliente.tarefaNova;
         if (!tarefa.isEmpty()) {
             EstadoCliente.tarefaNova = "";

@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 13;
+    private static final int VERSAO = 14;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -160,7 +160,17 @@ public final class Rede {
     public record Selecionar(int indice) {}
 
     /** Tecla de uso apertada (true) ou solta (false). */
-    public record Usar(boolean pressionado) {}
+    /** Tecla de habilidade apertada ou solta: indice na lista de habilidades do Sync (-1 = a escolhida no radial). */
+    public record Usar(int indice, boolean pressionado) {}
+
+    /** Golpe do combo corpo a corpo (combate/Combo): passo 0 começa o combo. */
+    public record Golpe(int passo) {}
+
+    /** Alguém começou um golpe: a animação para quem vê. */
+    public record GolpeVisto(int entidade, String anim) {}
+
+    /** Um golpe acertou: hit-stop, tremor, partículas e som no ponto (x, y, z), com a direção do golpe (dx, dy, dz). */
+    public record Impacto(int atacante, int alvo, int fx, double x, double y, double z, float dx, float dy, float dz) {}
 
     /** O cliente passou da barreira do som voando (o servidor confere e solta o estrondo). */
     public record Estrondo() {}
@@ -550,8 +560,30 @@ public final class Rede {
             .add();
         CANAL.messageBuilder(Usar.class)
             .direction(PacketFlow.SERVERBOUND)
-            .encoder((m, b) -> b.writeBoolean(m.pressionado())).decoder(b -> new Usar(b.readBoolean()))
-            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Habilidades.usar(p, m.pressionado())))
+            .encoder((m, b) -> b.writeVarInt(m.indice() + 1).writeBoolean(m.pressionado())).decoder(b -> new Usar(b.readVarInt() - 1, b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Habilidades.usar(p, m.indice(), m.pressionado())))
+            .add();
+        CANAL.messageBuilder(Golpe.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.passo())).decoder(b -> new Golpe(b.readVarInt()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.combate.Combo.golpe(p, m.passo())))
+            .add();
+        CANAL.messageBuilder(GolpeVisto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeUtf(m.anim()))
+            .decoder(b -> new GolpeVisto(b.readVarInt(), b.readUtf()))
+            .consumerMainThread((m, ctx) -> EstadoCliente.GOLPES.add(m))
+            .add();
+        CANAL.messageBuilder(Impacto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> {
+                b.writeVarInt(m.atacante()).writeVarInt(m.alvo()).writeVarInt(m.fx());
+                b.writeDouble(m.x()).writeDouble(m.y()).writeDouble(m.z());
+                b.writeFloat(m.dx()).writeFloat(m.dy()).writeFloat(m.dz());
+            })
+            .decoder(b -> new Impacto(b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readDouble(), b.readDouble(), b.readDouble(),
+                b.readFloat(), b.readFloat(), b.readFloat()))
+            .consumerMainThread((m, ctx) -> EstadoCliente.IMPACTOS.add(m))
             .add();
         CANAL.messageBuilder(Estrondo.class)
             .direction(PacketFlow.SERVERBOUND)

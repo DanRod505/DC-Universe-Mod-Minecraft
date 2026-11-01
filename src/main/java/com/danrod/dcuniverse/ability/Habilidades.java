@@ -25,30 +25,43 @@ public final class Habilidades {
         if (canalizava) Rede.aparencia(player);
     }
 
-    /** Tecla de uso apertada (true) ou solta (false). */
+    /** Tecla de uso da habilidade escolhida no radial apertada (true) ou solta (false). */
     public static void usar(ServerPlayer player, boolean pressionado) {
+        usar(player, -1, pressionado);
+    }
+
+    /**
+     * Tecla de habilidade apertada (true) ou solta (false). indice é a posição na lista de habilidades do jogador
+     * (a mesma do Sync e do radial); -1 usa a escolhida no radial. Soltar só para a canalização daquela habilidade,
+     * então dá para segurar uma tecla e apertar outra.
+     */
+    public static void usar(ServerPlayer player, int indice, boolean pressionado) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
         if (p == null || player.isSpectator()) return;
-        // Pilotando o veículo da suprema, a tecla de uso é dele (modo furtivo do Batwing, casco elétrico do Batmóvel...).
+        // Pilotando o veículo da suprema, as teclas de habilidade são dele (modo furtivo do Batwing, casco elétrico do Batmóvel...).
         var veiculo = com.danrod.dcuniverse.content.VeiculoDono.pilotando(player);
         if (veiculo != null) {
             if (pressionado) veiculo.comando(player, com.danrod.dcuniverse.content.VeiculoDono.ESPECIAL);
             return;
         }
+        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(player, p);
+        if (habs.isEmpty() || indice >= habs.size()) return;
+        Personagem.Habilidade h = habs.get(indice < 0 ? Math.min(e.selecionada(), habs.size() - 1) : indice);
         if (!pressionado) {
-            parar(player, e);
+            if (h.id().equals(e.canalizando())) parar(player, e);
             return;
         }
-        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(player, p);
-        if (e.destransformarEm() != 0L || habs.isEmpty()) return;
-        Personagem.Habilidade h = habs.get(Math.min(e.selecionada(), habs.size() - 1));
+        if (e.destransformarEm() != 0L) return;
+        if (indice >= 0 && indice != e.selecionada()) e.setSelecionada(indice);
         if (h.modo() == Personagem.Modo.HOLD) {
             if (e.prontaEm(h.id()) > player.level().getGameTime()) return;
             if (e.esgotado() && !player.isCreative()) {
                 Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
                 return;
             }
+            boolean trocou = !e.canalizando().isEmpty() && !e.canalizando().equals(h.id());
+            if (trocou) parar(player, e);
             e.setCanalizando(h.id());
             Guia.concluir(player, "habilidade");
             Rede.aparencia(player);
