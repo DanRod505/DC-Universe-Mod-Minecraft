@@ -93,6 +93,31 @@ public final class EstadoCliente {
         if (!a.personagem().isEmpty() && (antes == null || !antes.personagem().equals(a.personagem()))) TRANSFORMOU.put(a.entidade(), a);
     }
 
+    /** Foto das aparências gravada pelo Flashback: troca tudo, sem tocar o efeito de transformação de novo. */
+    public static void aparencias(Rede.Aparencias m) {
+        java.util.Map<Integer, Rede.Aparencia> novas = new java.util.HashMap<>();
+        java.util.Map<Integer, Integer> planar = new java.util.HashMap<>();
+        for (Rede.Aparencia a : m.todas()) {
+            if (!a.personagem().isEmpty()) novas.put(a.entidade(), a);
+            else if (a.planar() != 0) planar.put(a.entidade(), a.planar());
+        }
+        APARENCIAS.keySet().retainAll(novas.keySet());
+        APARENCIAS.putAll(novas);
+        PLANAR_SEM_HEROI.keySet().retainAll(planar.keySet());
+        PLANAR_SEM_HEROI.putAll(planar);
+        COLEIRAS.retainAll(m.coleiras());
+        COLEIRAS.addAll(m.coleiras());
+    }
+
+    /** O contrário de {@link #aparencias}: o que o cliente sabe agora, para a foto da gravação. */
+    public static Rede.Aparencias fotoAparencias() {
+        List<Rede.Aparencia> todas = new java.util.ArrayList<>(APARENCIAS.values());
+        PLANAR_SEM_HEROI.forEach((id, estado) -> {
+            if (!APARENCIAS.containsKey(id)) todas.add(new Rede.Aparencia(id, "", 0, "", 0, 0, 0, false, 0, 0, 0, estado));
+        });
+        return new Rede.Aparencias(todas, List.copyOf(COLEIRAS));
+    }
+
     public static void catalogo(Rede.Catalogo c) {
         catalogo = c.personagens();
         passivasDe = "";

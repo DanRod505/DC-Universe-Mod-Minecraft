@@ -322,6 +322,8 @@ public final class Voador {
         soco *= 0.85f;
         clarao *= 0.8f;
         for (Rede.ManobraVista m; (m = EstadoCliente.MANOBRAS.poll()) != null; ) {
+            // O aviso da própria manobra só serve para a gravação do Flashback: ao vivo ela já foi animada.
+            if (mc.player != null && m.entidade() == mc.player.getId() && !Flashback.emReplay()) continue;
             if (m.tipo() >= Planar.GIRO_ESQUERDA) {
                 Planador.manobraVista(level, m);
                 continue;

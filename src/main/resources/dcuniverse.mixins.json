@@ -9,6 +9,7 @@
     "CameraMixin",
     "MouseHandlerMixin",
     "FlashbackEditorStateMixin",
+    "FlashbackRecorderMixin",
     "MusicManagerMixin",
     "EntityRendererMixin",
     "EntityRenderStateMixin",

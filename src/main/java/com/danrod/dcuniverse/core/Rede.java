@@ -489,6 +489,30 @@ public final class Rede {
     /** O cliente começou a gravar um replay (Flashback): pede de novo a aparência de quem está por perto. */
     public record AparenciasPedir() {}
 
+    /**
+     * Tudo o que o cliente sabe das aparências e coleiras de uma vez, no lugar do que ele tinha. Só existe dentro das
+     * gravações do Flashback: vai em cada "foto" do replay (início, a cada 5 minutos e depois de pausar), para o
+     * traje aparecer mesmo quando o replay começa ou pula para o meio da gravação.
+     */
+    public record Aparencias(List<Aparencia> todas, List<Integer> coleiras) {
+        public static void encode(Aparencias m, FriendlyByteBuf b) {
+            b.writeVarInt(m.todas.size());
+            for (Aparencia a : m.todas) Aparencia.encode(a, b);
+            b.writeVarInt(m.coleiras.size());
+            for (int c : m.coleiras) b.writeVarInt(c);
+        }
+
+        public static Aparencias decode(FriendlyByteBuf b) {
+            int n = b.readVarInt();
+            List<Aparencia> todas = new java.util.ArrayList<>(n);
+            for (int i = 0; i < n; i++) todas.add(Aparencia.decode(b));
+            int c = b.readVarInt();
+            List<Integer> coleiras = new java.util.ArrayList<>(c);
+            for (int i = 0; i < c; i++) coleiras.add(b.readVarInt());
+            return new Aparencias(todas, coleiras);
+        }
+    }
+
     private Rede() {}
 
     public static void registrar() {
@@ -532,6 +556,11 @@ public final class Rede {
             .direction(PacketFlow.CLIENTBOUND)
             .encoder(Aparencia::encode).decoder(Aparencia::decode)
             .consumerMainThread((m, ctx) -> EstadoCliente.aparencia(m))
+            .add();
+        CANAL.messageBuilder(Aparencias.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(Aparencias::encode).decoder(Aparencias::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.aparencias(m))
             .add();
         CANAL.messageBuilder(Catalogo.class)
             .direction(PacketFlow.CLIENTBOUND)
@@ -749,10 +778,13 @@ public final class Rede {
         CANAL.send(montarAparencia(player), Canal.rastreandoEProprio(player));
     }
 
-    /** Avisa só quem está vendo o jogador (ele mesmo já animou a manobra). */
+    /**
+     * Avisa quem está vendo o jogador e ele mesmo. Ele já animou a manobra na hora e ignora o próprio aviso, mas o
+     * pacote precisa chegar até ele para entrar na gravação do Flashback (que só guarda o que o cliente recebe).
+     */
     public static void manobraVista(ServerPlayer player, int tipo) {
         if (player.connection == null) return;
-        CANAL.send(new ManobraVista(player.getId(), tipo), Canal.rastreando(player));
+        CANAL.send(new ManobraVista(player.getId(), tipo), Canal.rastreandoEProprio(player));
     }
 
     /** Avisa quem está vendo o animal que ele pôs ou tirou a Coleira do S. */

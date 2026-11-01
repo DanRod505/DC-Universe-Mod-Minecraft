@@ -77,6 +77,13 @@ public final class Canal {
         alvo.accept(new Envelope(tipo, msg));
     }
 
+    /** O pacote de jogo que leva a mensagem ao cliente (para quem grava pacotes por conta própria, como o Flashback). */
+    public net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket pacoteCliente(Object msg) {
+        CustomPacketPayload.Type<Envelope> tipo = tipos.get(msg.getClass());
+        if (tipo == null) throw new IllegalArgumentException("Pacote não registrado: " + msg.getClass());
+        return new net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket(new Envelope(tipo, msg));
+    }
+
     /** Entrega os pacotes ao NeoForge (barramento do mod). */
     public void registrar(RegisterPayloadHandlersEvent e) {
         PayloadRegistrar r = e.registrar(versao);
