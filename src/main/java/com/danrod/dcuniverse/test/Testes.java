@@ -162,6 +162,20 @@ public final class Testes {
         var hab = new Rede.Sync("x", 1, 2, true, 0, "", List.of(new Rede.HabInfo("a", false, true, 210, 5, 1800)), 0, true, 4.5f, true, false, 32f, 15f, true, false);
         Rede.Sync.encode(hab, buf);
         h.assertValueEqual(Rede.Sync.decode(buf), hab, "sync com suprema e queda amortecida");
+        // Foto das aparências do Flashback: ida e volta, e no cliente troca tudo sem repetir a transformação.
+        var sup = new Rede.Aparencia(7, SUPERMAN.toString(), 1, "", 0, 0, 0, true, 2, 3, 4, 0);
+        var capa = new Rede.Aparencia(8, "", 0, "", 0, 0, 0, false, 0, 0, 0, 2);
+        var foto = new Rede.Aparencias(List.of(sup, capa), List.of(9));
+        Rede.Aparencias.encode(foto, buf);
+        h.assertValueEqual(Rede.Aparencias.decode(buf), foto, "foto das aparências");
+        com.danrod.dcuniverse.core.EstadoCliente.APARENCIAS.put(99, sup);
+        com.danrod.dcuniverse.core.EstadoCliente.aparencias(foto);
+        h.assertTrue(com.danrod.dcuniverse.core.EstadoCliente.APARENCIAS.keySet().equals(java.util.Set.of(7)), "foto troca as aparências");
+        h.assertValueEqual(com.danrod.dcuniverse.core.EstadoCliente.PLANAR_SEM_HEROI.get(8), 2, "foto guarda a capa planadora");
+        h.assertTrue(com.danrod.dcuniverse.core.EstadoCliente.COLEIRAS.contains(9), "foto guarda as coleiras");
+        h.assertTrue(com.danrod.dcuniverse.core.EstadoCliente.TRANSFORMOU.isEmpty(), "foto não repete a transformação");
+        h.assertValueEqual(com.danrod.dcuniverse.core.EstadoCliente.fotoAparencias().todas().size(), 2, "foto montada do estado");
+        com.danrod.dcuniverse.core.EstadoCliente.limpar();
         var guia = new Rede.GuiaSync(List.of("transformar"), List.of(SUPERMAN.toString()), "sol");
         Rede.GuiaSync.encode(guia, buf);
         h.assertValueEqual(Rede.GuiaSync.decode(buf), guia, "progresso do guia");
