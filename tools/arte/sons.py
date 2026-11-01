@@ -1273,6 +1273,58 @@ def nave_escudo_desliga():
     return finalizar(normalizar(x[: int(seg * SR)], 0.78), 0.2)
 
 
+def modo_combate_liga():
+    # Punhos fechando: couro estalando, um "fwump" grave subindo e um brilho metálico curto.
+    seg = 0.9
+    t = t_(seg)
+    couro = filtro(ruido(0.08), "bandpass", [900, 4200]) * env(int(round(0.08 * SR)), 0.001, 0.012)
+    sobe = varredura(55, 110, 0.5, 0.6) * env(int(round(0.5 * SR)), 0.04, 0.14) * 0.9
+    ar = filtro(ruido(0.4), "bandpass", [300, 1600]) * env(int(round(0.4 * SR)), 0.08, 0.08) * 0.5
+    brilho = (np.sin(2 * np.pi * 1320 * t) + 0.5 * np.sin(2 * np.pi * 1980 * t)) * np.exp(-t / 0.18) * 0.12
+    x = misturar((0, couro * 1.2), (0.03, couro * 0.8), (0, sobe), (0, ar), (0.12, brilho[: int(0.7 * SR)]))
+    return finalizar(normalizar(eco(x, 0.8, 0.15), 0.8), 0.1)
+
+
+def modo_combate_desliga():
+    seg = 0.6
+    t = t_(seg)
+    desce = varredura(110, 50, 0.45, 0.8) * env(int(round(0.45 * SR)), 0.01, 0.12) * 0.8
+    ar = filtro(ruido(0.3), "bandpass", [250, 1200]) * env(int(round(0.3 * SR)), 0.02, 0.07) * 0.4
+    x = misturar((0, desce), (0, ar))
+    return finalizar(normalizar(x[: int(seg * SR)], 0.6), 0.1)
+
+
+def carga():
+    # Energia juntando no punho: zumbido que sobe por 1,2 s e fica tremendo no máximo.
+    seg = 2.0
+    t = t_(seg)
+    f = 70 + 190 * np.clip(t / 1.2, 0, 1) ** 1.4
+    fase = 2 * np.pi * np.cumsum(f) / SR
+    serra = sum(np.sin(k * fase) / k for k in range(1, 12))
+    zumbido = filtro(serra, "lowpass", 1800) * (0.7 + 0.3 * np.sin(2 * np.pi * (6 + 10 * np.clip(t / 1.2, 0, 1)) * t))
+    vento = filtro(ruido(seg), "bandpass", [600, 3500]) * (0.15 + 0.35 * np.clip(t / 1.2, 0, 1))
+    estalos = np.zeros_like(t)
+    for _ in range(18):
+        i = RNG.integers(int(0.5 * SR), len(t) - 400)
+        estalos[i:i + 400] += filtro(ruido(400 / SR), "highpass", 2500) * np.exp(-np.arange(400) / 70) * RNG.uniform(0.2, 0.7)
+    cheio = np.sin(2 * np.pi * 880 * t) * 0.06 * (t > 1.2)
+    x = (0.6 * zumbido + vento + 0.4 * estalos + cheio) * np.clip(t / 0.06, 0, 1)
+    return finalizar(normalizar(x, 0.75), 0.15)
+
+
+def golpe_onda():
+    # O chão rachando com a onda de choque: estouro, grave longo, cascalho e rocha se partindo.
+    seg = 2.2
+    estalo = filtro(ruido(0.04), "highpass", 1500) * env(int(round(0.04 * SR)), 0.0004, 0.006)
+    boom = varredura(90, 24, 1.8, 0.45) * env(int(round(1.8 * SR)), 0.003, 0.45)
+    soco = filtro(ruido(0.4), "lowpass", 600) * env(int(round(0.4 * SR)), 0.001, 0.09)
+    pedras = cascalho(1.6, 90, 1.0, banda=(400, 5000), dur=(0.004, 0.04), ganho=(0.05, 0.35))
+    rasga = racha(0.5, 80, 1.2)
+    x = misturar((0, estalo * 1.4), (0, boom * 1.3), (0, soco), (0.04, rasga * 0.8), (0.08, pedras * 0.7))
+    x = eco(x, 1.6, 0.25, 3000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.97), 0.3)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -1297,6 +1349,8 @@ SONS = {
     "ilha_pousa": ilha_pousa, "nave_chega": nave_chega, "nave_motor": nave_motor, "nave_canhao": nave_canhao,
     "nave_orbe": nave_orbe, "nave_escudo_liga": nave_escudo_liga, "nave_escudo_desliga": nave_escudo_desliga,
     "golpe_ar": golpe_ar, "golpe_leve": golpe_leve, "golpe_medio": golpe_medio, "golpe_pesado": golpe_pesado,
+    "modo_combate_liga": modo_combate_liga, "modo_combate_desliga": modo_combate_desliga, "carga": carga,
+    "golpe_onda": golpe_onda,
 }
 
 

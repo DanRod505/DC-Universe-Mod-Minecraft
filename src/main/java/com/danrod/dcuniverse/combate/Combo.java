@@ -42,39 +42,123 @@ import java.util.concurrent.ConcurrentHashMap;
  * até o alvo no começo de cada golpe.
  */
 public final class Combo {
-    public static final int LEVE = 0, MEDIO = 1, PESADO = 2;
+    /** Força do golpe (hit-stop, tremor, partículas, som); ONDA é o pesado que racha o chão em volta. */
+    public static final int LEVE = 0, MEDIO = 1, PESADO = 2, ONDA = 3;
+    /** Passo do golpe carregado (botão direito no modo combate) nos pacotes e nas contas do combo. */
+    public static final int PASSO_PESADO = 99;
 
     public record Golpe(String anim, float impacto, float livre, float janela, float dano, float alcance, float arco,
-                        float empurrao, float lancar, float raio, float atordoar, int fx) {}
-
-    public record Config(List<Golpe> golpes, float investida) {
-        public static Config parse(JsonObject j) {
-            List<Golpe> gs = new ArrayList<>();
-            for (JsonElement el : j.getAsJsonArray("hits")) {
-                JsonObject g = el.getAsJsonObject();
-                float impacto = f(g, "impact", 0.12f);
-                gs.add(new Golpe(g.get("anim").getAsString(), impacto, Math.max(impacto, f(g, "recover", impacto + 0.08f)),
-                    f(g, "window", 0.6f), f(g, "damage_mult", 0.4f), f(g, "reach", 3.4f), f(g, "arc", 80f),
-                    f(g, "knockback", 0.4f), f(g, "launch", 0f), f(g, "radius", 0f), f(g, "stun", 0f),
-                    switch (g.has("fx") ? g.get("fx").getAsString() : "light") {
-                        case "heavy" -> PESADO;
-                        case "medium" -> MEDIO;
-                        default -> LEVE;
-                    }));
-            }
-            if (gs.isEmpty()) throw new IllegalArgumentException("combo sem golpes");
-            return new Config(List.copyOf(gs), f(j, "lunge", 5f));
+                        float empurrao, float lancar, float raio, float atordoar, int fx) {
+        public boolean pesado() {
+            return fx >= PESADO;
         }
 
-        private static float f(JsonObject j, String k, float def) {
-            return j.has(k) ? j.get(k).getAsFloat() : def;
+        static Golpe parse(JsonObject g) {
+            float impacto = f(g, "impact", 0.12f);
+            return new Golpe(g.get("anim").getAsString(), impacto, Math.max(impacto, f(g, "recover", impacto + 0.08f)),
+                f(g, "window", 0.6f), f(g, "damage_mult", 0.4f), f(g, "reach", 3.4f), f(g, "arc", 80f),
+                f(g, "knockback", 0.4f), f(g, "launch", 0f), f(g, "radius", 0f), f(g, "stun", 0f),
+                switch (g.has("fx") ? g.get("fx").getAsString() : "light") {
+                    case "shockwave" -> ONDA;
+                    case "heavy" -> PESADO;
+                    case "medium" -> MEDIO;
+                    default -> LEVE;
+                });
         }
     }
 
-    /** O combo usa a mão: com arma ou ferramenta na mão principal, o clique é o ataque normal do Minecraft. */
+    /**
+     * Golpe carregado: segurar o botão direito no modo combate toca charge_anim (em laço) por até charge segundos; ao
+     * soltar sai o golpe (os campos de um golpe comum), com dano e empurrão de min_power (soltou na hora) a 1 (carga
+     * cheia).
+     */
+    public record Carregado(String animCarga, float carga, float minimo, Golpe golpe) {}
+
+    /** stance: a guarda (animação em laço) do modo combate. heavy: o golpe carregado (pode faltar). */
+    public record Config(List<Golpe> golpes, float investida, String postura, Carregado pesado) {
+        public static Config parse(JsonObject j) {
+            List<Golpe> gs = new ArrayList<>();
+            for (JsonElement el : j.getAsJsonArray("hits")) gs.add(Golpe.parse(el.getAsJsonObject()));
+            if (gs.isEmpty()) throw new IllegalArgumentException("combo sem golpes");
+            Carregado pesado = null;
+            if (j.has("heavy")) {
+                JsonObject h = j.getAsJsonObject("heavy");
+                pesado = new Carregado(h.get("charge_anim").getAsString(), f(h, "charge", 1f), f(h, "min_power", 0.4f), Golpe.parse(h));
+            }
+            return new Config(List.copyOf(gs), f(j, "lunge", 5f), j.has("stance") ? j.get("stance").getAsString() : "", pesado);
+        }
+
+        /** O golpe do passo (PASSO_PESADO = o carregado). */
+        public Golpe golpe(int passo) {
+            if (passo == PASSO_PESADO) return pesado == null ? null : pesado.golpe();
+            return passo >= 0 && passo < golpes.size() ? golpes.get(passo) : null;
+        }
+
+    }
+
+    private static float f(JsonObject j, String k, float def) {
+        return j.has(k) ? j.get(k).getAsFloat() : def;
+    }
+
+    /**
+     * O combo usa a mão: com arma ou ferramenta na mão principal, o clique é o ataque normal do Minecraft. No modo
+     * combate a mão é sempre do combo.
+     */
     public static boolean maoLivre(Player p) {
         ItemStack s = p.getMainHandItem();
-        return s.isEmpty() || !s.has(DataComponents.WEAPON) && !s.has(DataComponents.TOOL);
+        return s.isEmpty() || !s.has(DataComponents.WEAPON) && !s.has(DataComponents.TOOL) || emModo(p);
+    }
+
+    // ------------------------------------------------------------------ modo combate
+
+    /** Quem está no modo combate (servidor). No cliente vale EstadoCliente.MODO_COMBATE (ids das entidades). */
+    private static final Map<UUID, ServerPlayer> MODO = new ConcurrentHashMap<>();
+
+    /**
+     * Modo combate: os botões do mouse são só do combate (esquerdo combo, direito golpe carregado); nada de quebrar,
+     * construir ou usar itens. A tecla liga e desliga; destransformar desliga.
+     */
+    public static boolean emModo(Player p) {
+        if (p.level().isClientSide()) return com.danrod.dcuniverse.core.EstadoCliente.MODO_COMBATE.contains(p.getId());
+        return MODO.containsKey(p.getUUID());
+    }
+
+    public static void modo(ServerPlayer p, boolean ligar) {
+        Config c = config(EstadoJogador.de(p).personagem());
+        if (c == null || p.isSpectator() || EstadoJogador.de(p).destransformarEm() != 0L) ligar = false;
+        boolean estava = MODO.containsKey(p.getUUID());
+        if (ligar) MODO.put(p.getUUID(), p);
+        else MODO.remove(p.getUUID());
+        if (!ligar) CARREGANDO.remove(p.getUUID());
+        // Sempre responde (mesmo sem mudar): o cliente que previu errado volta ao estado certo.
+        Rede.CANAL.send(new Rede.ModoVisto(p.getId(), ligar ? c.postura() : ""), Canal.rastreandoEProprio(p));
+        if (ligar && !estava) Guia.concluir(p, "modo_combate");
+    }
+
+    /** Modo combate: o mouse não quebra, não constrói e não usa nada (nos dois lados, para a previsão do cliente bater). */
+    public static void registrar() {
+        var bus = net.neoforged.neoforge.common.NeoForge.EVENT_BUS;
+        bus.addListener(net.neoforged.neoforge.event.level.block.BreakBlockEvent.class,
+            com.danrod.dcuniverse.core.Eventos.cancela(e -> {
+                if (!emModo(e.getPlayer())) return false;
+                if (e.getPlayer() instanceof ServerPlayer sp && sp.connection != null) e.setNotifyClient(true);
+                return true;
+            }));
+        bus.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.class,
+            com.danrod.dcuniverse.core.Eventos.cancela(e -> emModo(e.getEntity())));
+        bus.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock.class,
+            com.danrod.dcuniverse.core.Eventos.cancela(e -> emModo(e.getEntity())));
+        bus.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickItem.class,
+            com.danrod.dcuniverse.core.Eventos.cancela(e -> emModo(e.getEntity())));
+        bus.addListener(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.EntityInteract.class,
+            com.danrod.dcuniverse.core.Eventos.cancela(e -> emModo(e.getEntity())));
+    }
+
+    /** Quem começa a ver o jogador fica sabendo da guarda dele. */
+    public static void modoPara(ServerPlayer quem, ServerPlayer alvo) {
+        if (!MODO.containsKey(alvo.getUUID())) return;
+        Config c = config(EstadoJogador.de(alvo).personagem());
+        if (c != null) Rede.CANAL.send(new Rede.ModoVisto(alvo.getId(), c.postura()), Canal.jogador(quem));
     }
 
     /**
@@ -138,12 +222,15 @@ public final class Combo {
 
     // ------------------------------------------------------------------ servidor
 
-    /** Último golpe de cada jogador: passo e tick do jogo em que começou. */
-    private record Ultimo(int passo, long tick) {}
+    /** Último golpe de cada jogador: passo, o golpe e o tick do jogo em que começou. */
+    private record Ultimo(int passo, Golpe golpe, long tick) {}
 
-    private record Pendente(ServerPlayer jogador, int passo, long tick) {}
+    /** Impacto agendado: força 0 a 1 multiplica dano e empurrão (golpe carregado). */
+    private record Pendente(ServerPlayer jogador, Golpe golpe, float forca, long tick) {}
 
     private static final Map<UUID, Ultimo> ULTIMOS = new ConcurrentHashMap<>();
+    /** Tick em que cada jogador começou a carregar o golpe pesado. */
+    private static final Map<UUID, Long> CARREGANDO = new ConcurrentHashMap<>();
     private static final List<Pendente> PENDENTES = new ArrayList<>();
 
     private Combo() {}
@@ -162,21 +249,56 @@ public final class Combo {
         long agora = player.level().getGameTime();
         Ultimo u = ULTIMOS.get(player.getUUID());
         if (u != null) {
-            Golpe ant = c.golpes().get(Math.min(u.passo, c.golpes().size() - 1));
+            Golpe ant = u.golpe;
             long desde = agora - u.tick;
-            // Folga de 3 ticks para o atraso da rede; mais rápido que isso é clique automático.
-            if (desde < Math.round(ant.livre() * 20) - 3) return;
+            // Folga de 3 ticks para o atraso da rede (mas nunca dois golpes a menos de 2 ticks): mais rápido que isso é
+            // clique automático.
+            if (desde < Math.max(2, Math.round(ant.livre() * 20) - 3)) return;
             if (passo > 0 && (passo != u.passo + 1 || desde > Math.round(ant.janela() * 20) + 6)) return;
         } else if (passo > 0) {
             return;
         }
-        ULTIMOS.put(player.getUUID(), new Ultimo(passo, agora));
         Golpe g = c.golpes().get(passo);
+        CARREGANDO.remove(player.getUUID());
+        agendar(player, passo, g, 1, agora);
+        if (passo == c.golpes().size() - 1) Guia.concluir(player, "combo");
+    }
+
+    private static void agendar(ServerPlayer player, int passo, Golpe g, float forca, long agora) {
+        ULTIMOS.put(player.getUUID(), new Ultimo(passo, g, agora));
         Rede.CANAL.send(new Rede.GolpeVisto(player.getId(), g.anim()), Canal.rastreandoEProprio(player));
         synchronized (PENDENTES) {
-            PENDENTES.add(new Pendente(player, passo, agora + Math.max(0, Math.round(g.impacto() * 20))));
+            PENDENTES.add(new Pendente(player, g, forca, agora + Math.max(0, Math.round(g.impacto() * 20))));
         }
-        if (passo == c.golpes().size() - 1) Guia.concluir(player, "combo");
+    }
+
+    /** Golpe carregado (só no modo combate): começar toca a carga para quem vê; soltar agenda o golpe. */
+    public static void carregar(ServerPlayer player, boolean comecar) {
+        EstadoJogador e = EstadoJogador.de(player);
+        Config c = config(e.personagem());
+        if (c == null || c.pesado() == null || !emModo(player) || player.isSpectator() || player.isPassenger() || e.destransformarEm() != 0L) {
+            CARREGANDO.remove(player.getUUID());
+            return;
+        }
+        long agora = player.level().getGameTime();
+        if (comecar) {
+            Ultimo u = ULTIMOS.get(player.getUUID());
+            if (u != null && agora - u.tick < Math.round(u.golpe.livre() * 20) - 3) return;
+            CARREGANDO.put(player.getUUID(), agora);
+            Rede.CANAL.send(new Rede.GolpeVisto(player.getId(), c.pesado().animCarga()), Canal.rastreandoEProprio(player));
+            return;
+        }
+        Long desde = CARREGANDO.remove(player.getUUID());
+        if (desde == null) return;
+        Carregado k = c.pesado();
+        float forca = forca(k, (agora - desde) / 20f);
+        agendar(player, PASSO_PESADO, k.golpe(), forca, agora);
+        if (forca >= 0.99f) Guia.concluir(player, "golpe_carregado");
+    }
+
+    /** Força do golpe carregado depois de segundos carregando (a mesma conta no cliente). */
+    public static float forca(Carregado k, float segundos) {
+        return Mth.clamp(k.minimo() + (1 - k.minimo()) * segundos / Math.max(0.05f, k.carga()), k.minimo(), 1);
     }
 
     /** Tick do servidor: resolve os impactos que chegaram na hora. */
@@ -195,21 +317,32 @@ public final class Combo {
             }
         }
         for (Pendente p : agora) {
-            Config c = config(EstadoJogador.de(p.jogador).personagem());
-            if (c == null || p.passo >= c.golpes().size() || !p.jogador.isAlive()) continue;
-            acertar(p.jogador, c.golpes().get(p.passo));
+            if (config(EstadoJogador.de(p.jogador).personagem()) == null || !p.jogador.isAlive()) continue;
+            acertar(p.jogador, p.golpe, p.forca);
+        }
+        // Modo combate: sai quem destransformou, morreu ou saiu.
+        for (var it = MODO.values().iterator(); it.hasNext(); ) {
+            ServerPlayer p = it.next();
+            boolean fora = p.isRemoved() || p.hasDisconnected();
+            if (fora || config(EstadoJogador.de(p).personagem()) == null || EstadoJogador.de(p).destransformarEm() != 0L || p.isSpectator()) {
+                it.remove();
+                CARREGANDO.remove(p.getUUID());
+                if (!fora) Rede.CANAL.send(new Rede.ModoVisto(p.getId(), ""), Canal.rastreandoEProprio(p));
+            }
         }
     }
 
     public static void esquecer(ServerPlayer player) {
         ULTIMOS.remove(player.getUUID());
+        CARREGANDO.remove(player.getUUID());
+        MODO.remove(player.getUUID());
     }
 
-    private static void acertar(ServerPlayer player, Golpe g) {
+    private static void acertar(ServerPlayer player, Golpe g, float forca) {
         if (!(player.level() instanceof ServerLevel level)) return;
         List<LivingEntity> alvos = alvos(player, g);
         if (alvos.isEmpty()) return;
-        float dano = (float) (player.getAttributeValue(Attributes.ATTACK_DAMAGE) * g.dano());
+        float dano = (float) (player.getAttributeValue(Attributes.ATTACK_DAMAGE) * g.dano() * forca);
         Vec3 olhar = player.getLookAngle();
         boolean noAr = !player.onGround();
         for (LivingEntity alvo : alvos) {
@@ -219,7 +352,7 @@ public final class Combo {
             alvo.invulnerableTime = 0;
             boolean feriu = alvo.hurtServer(level, player.damageSources().playerAttack(player), dano);
             if (!feriu) continue;
-            empurrar(player, alvo, g, olhar, noAr);
+            empurrar(player, alvo, g, olhar, noAr, forca);
             if (g.atordoar() > 0) {
                 int t = Math.round(g.atordoar() * 20);
                 alvo.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, t, 3, false, false), player);
@@ -242,18 +375,18 @@ public final class Combo {
             Mth.clamp(naLinha.z, bb.minZ, bb.maxZ));
     }
 
-    private static void empurrar(ServerPlayer player, LivingEntity alvo, Golpe g, Vec3 olhar, boolean noAr) {
+    private static void empurrar(ServerPlayer player, LivingEntity alvo, Golpe g, Vec3 olhar, boolean noAr, float forca) {
         double resiste = 1 - Mth.clamp(alvo.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), 0, 1) * 0.7;
         if (resiste <= 0) return;
         Vec3 dir = alvo.position().subtract(player.position());
         Vec3 plano = new Vec3(dir.x, 0, dir.z);
         plano = plano.lengthSqr() < 1e-4 ? new Vec3(olhar.x, 0, olhar.z).normalize() : plano.normalize();
         Vec3 v;
-        if (noAr && g.fx() == PESADO) {
+        if (noAr && g.pesado()) {
             // No ar o golpe final manda o alvo para onde o herói olha (até para baixo, contra o chão).
-            v = olhar.scale(g.empurrao() * 1.2);
+            v = olhar.scale(g.empurrao() * 1.2 * forca);
         } else {
-            v = plano.scale(g.empurrao()).add(0, g.lancar() + (alvo.onGround() ? 0.12 : 0.04), 0);
+            v = plano.scale(g.empurrao() * forca).add(0, g.lancar() * forca + (alvo.onGround() ? 0.12 : 0.04), 0);
         }
         Vec3 atual = alvo.getDeltaMovement();
         alvo.setDeltaMovement(atual.scale(0.3).add(v.scale(resiste)));

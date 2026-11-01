@@ -56,6 +56,7 @@ public final class Eventos {
     }
 
     public static void registrar() {
+        com.danrod.dcuniverse.combate.Combo.registrar();
         NeoForge.EVENT_BUS.addListener(AddServerReloadListenersEvent.class, e -> {
             e.addListener(id("personagens"), new Personagens());
             e.addListener(id("npcs"), new com.danrod.dcuniverse.npc.Npcs.CarregarNpcs());
@@ -111,6 +112,7 @@ public final class Eventos {
                 DemoHud.parar(sp);
                 com.danrod.dcuniverse.world.estrutura.Chegada.sair(sp);
                 com.danrod.dcuniverse.npc.Dialogo.fechar(sp);
+                com.danrod.dcuniverse.combate.Combo.esquecer(sp);
             }
         });
         NeoForge.EVENT_BUS.addListener(PlayerEvent.StartTracking.class, e -> {
@@ -119,6 +121,7 @@ public final class Eventos {
             }
             if (e.getEntity() instanceof ServerPlayer quem && e.getTarget() instanceof ServerPlayer alvo) {
                 Rede.aparenciaPara(quem, alvo);
+                com.danrod.dcuniverse.combate.Combo.modoPara(quem, alvo);
                 // Ver outro jogador transformado também libera a página do personagem no Guia.
                 var id = EstadoJogador.de(alvo).personagemId();
                 if (id != null) Guia.descobrir(quem, id);

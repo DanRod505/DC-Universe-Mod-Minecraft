@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 14;
+    private static final int VERSAO = 15;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -165,6 +165,15 @@ public final class Rede {
 
     /** Golpe do combo corpo a corpo (combate/Combo): passo 0 começa o combo. */
     public record Golpe(int passo) {}
+
+    /** Liga ou desliga o modo combate (combate/Combo.modo). */
+    public record ModoCombate(boolean ligar) {}
+
+    /** Alguém entrou (postura = animação da guarda) ou saiu ("") do modo combate. */
+    public record ModoVisto(int entidade, String postura) {}
+
+    /** Golpe carregado do modo combate: começou a carregar (true) ou soltou (false). */
+    public record Carregar(boolean comecar) {}
 
     /** Alguém começou um golpe: a animação para quem vê. */
     public record GolpeVisto(int entidade, String anim) {}
@@ -567,6 +576,25 @@ public final class Rede {
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> b.writeVarInt(m.passo())).decoder(b -> new Golpe(b.readVarInt()))
             .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.combate.Combo.golpe(p, m.passo())))
+            .add();
+        CANAL.messageBuilder(ModoCombate.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeBoolean(m.ligar())).decoder(b -> new ModoCombate(b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.combate.Combo.modo(p, m.ligar())))
+            .add();
+        CANAL.messageBuilder(ModoVisto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeUtf(m.postura()))
+            .decoder(b -> new ModoVisto(b.readVarInt(), b.readUtf()))
+            .consumerMainThread((m, ctx) -> {
+                if (m.postura().isEmpty()) EstadoCliente.POSTURAS.remove(m.entidade());
+                else EstadoCliente.POSTURAS.put(m.entidade(), m.postura());
+            })
+            .add();
+        CANAL.messageBuilder(Carregar.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeBoolean(m.comecar())).decoder(b -> new Carregar(b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.combate.Combo.carregar(p, m.comecar())))
             .add();
         CANAL.messageBuilder(GolpeVisto.class)
             .direction(PacketFlow.CLIENTBOUND)

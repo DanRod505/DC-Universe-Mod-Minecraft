@@ -639,5 +639,41 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.nave_escudo_desliga"
+  },
+  "habilidade.golpe_onda": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/golpe_onda",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.golpe_onda"
+  },
+  "habilidade.carga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/carga",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.carga"
+  },
+  "habilidade.modo_combate_liga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/modo_combate_liga",
+        "attenuation_distance": 16
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.modo_combate_liga"
+  },
+  "habilidade.modo_combate_desliga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/modo_combate_desliga",
+        "attenuation_distance": 16
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.modo_combate_desliga"
   }
 }

@@ -20,6 +20,10 @@ public final class Sons {
     public static final DeferredHolder<SoundEvent, SoundEvent> GOLPE_LEVE = som("habilidade.golpe_leve");
     public static final DeferredHolder<SoundEvent, SoundEvent> GOLPE_MEDIO = som("habilidade.golpe_medio");
     public static final DeferredHolder<SoundEvent, SoundEvent> GOLPE_PESADO = som("habilidade.golpe_pesado");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GOLPE_ONDA = som("habilidade.golpe_onda");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CARGA = som("habilidade.carga");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MODO_COMBATE_LIGA = som("habilidade.modo_combate_liga");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MODO_COMBATE_DESLIGA = som("habilidade.modo_combate_desliga");
     public static final DeferredHolder<SoundEvent, SoundEvent> FORTALEZA_CRESCE = som("habilidade.fortaleza_cresce");
     public static final DeferredHolder<SoundEvent, SoundEvent> FORTALEZA_QUEBRA = som("habilidade.fortaleza_quebra");
     public static final DeferredHolder<SoundEvent, SoundEvent> SALTO_CARGA = som("habilidade.salto_carga");

@@ -16,12 +16,15 @@ import java.util.Set;
  * imposta à do osso (x negativo levanta o braço para a frente) e posição em pixels (y para baixo).
  * <p>
  * Ossos do corpo: root (tudo, gira em volta dos pés), body (o tronco, gira na cintura levando cabeça e braços), head,
- * right_arm, left_arm, right_leg, left_leg. Ossos da primeira pessoa: fp_right_arm e fp_left_arm (pixels e graus em
- * volta da posição de descanso do braço na tela).
+ * right_arm, left_arm, right_leg, left_leg; e as dobras right_forearm, left_forearm, right_shin, left_shin (rotação da
+ * metade de baixo do braço ou da perna em volta do cotovelo ou do joelho, ver Dobra). Ossos da primeira pessoa:
+ * fp_right_arm e fp_left_arm (pixels e graus em volta da posição de descanso do braço na tela) e fp_right_forearm e
+ * fp_left_forearm (cotovelo).
  * <p>
  * Campos nossos (opcionais): "dcuniverse:entrada" e "dcuniverse:saida" (segundos para entrar e sair da animação,
  * misturando com a pose normal) e "dcuniverse:aditivos" (ossos cuja rotação soma à pose normal em vez de substituir;
- * padrão: root, body e head, para a cabeça continuar olhando para onde o jogador olha).
+ * padrão: root, body e head, para a cabeça continuar olhando para onde o jogador olha) e "dcuniverse:rastros" (por
+ * ponta, right_arm, left_arm, right_leg ou left_leg: lista de [de, até] em segundos com rastro de luz).
  */
 public final class Animacao {
     public static final Set<String> ADITIVOS_PADRAO = Set.of("root", "body", "head");
@@ -75,9 +78,13 @@ public final class Animacao {
     public final float duracao;
     public final boolean repete;
     public final float entrada, saida;
+    /** Altura (pixels do modelo, 0 = cabeça, 24 = pés) em volta da qual o osso root gira: "dcuniverse:pivo_raiz". */
+    float pivoRaiz = 24;
     final Map<String, Curva> rotacao = new HashMap<>();
     final Map<String, Curva> posicao = new HashMap<>();
     final Set<String> aditivos;
+    /** Trechos (segundos de/até) em que cada ponta (Rastros.PONTAS) deixa rastro: os golpes de verdade. */
+    final Map<String, float[][]> rastros = new HashMap<>();
 
     private Animacao(String nome, float duracao, boolean repete, float entrada, float saida, Set<String> aditivos) {
         this.nome = nome;
@@ -86,6 +93,14 @@ public final class Animacao {
         this.entrada = entrada;
         this.saida = saida;
         this.aditivos = aditivos;
+    }
+
+    /** A ponta deixa rastro no tempo t. */
+    boolean rastro(String ponta, float t) {
+        float[][] r = rastros.get(ponta);
+        if (r == null) return false;
+        for (float[] tr : r) if (t >= tr[0] && t <= tr[1]) return true;
+        return false;
     }
 
     public boolean tem(String osso) {
@@ -124,6 +139,15 @@ public final class Animacao {
                 aditivos = Set.copyOf(l);
             }
             Animacao a = new Animacao(en.getKey(), dur, repete, entrada, saida, aditivos);
+            if (j.has("dcuniverse:pivo_raiz")) a.pivoRaiz = j.get("dcuniverse:pivo_raiz").getAsFloat();
+            if (j.has("dcuniverse:rastros")) {
+                for (var r : j.getAsJsonObject("dcuniverse:rastros").entrySet()) {
+                    JsonArray l = r.getValue().getAsJsonArray();
+                    float[][] trechos = new float[l.size()][];
+                    for (int i = 0; i < l.size(); i++) trechos[i] = new float[] {l.get(i).getAsJsonArray().get(0).getAsFloat(), l.get(i).getAsJsonArray().get(1).getAsFloat()};
+                    a.rastros.put(r.getKey(), trechos);
+                }
+            }
             JsonObject ossos = j.has("bones") ? j.getAsJsonObject("bones") : new JsonObject();
             for (var o : ossos.entrySet()) {
                 JsonObject osso = o.getValue().getAsJsonObject();

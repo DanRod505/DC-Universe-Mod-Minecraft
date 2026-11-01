@@ -18,6 +18,6 @@ public abstract class PlayerModelMixin {
     private void dcuniverse$planar(AvatarRenderState state, CallbackInfo ci) {
         Pecas.posePlanar((PlayerModel) (Object) this, state);
         com.danrod.dcuniverse.client.Motorista.poseMoto((PlayerModel) (Object) this, state);
-        com.danrod.dcuniverse.client.anim.Animador.aplicar((PlayerModel) (Object) this, state);
+        com.danrod.dcuniverse.client.anim.Animador.aplicar((PlayerModel) (Object) this, state, true);
     }
 }

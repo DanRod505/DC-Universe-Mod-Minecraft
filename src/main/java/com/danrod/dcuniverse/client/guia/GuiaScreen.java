@@ -978,16 +978,28 @@ public final class GuiaScreen extends Screen {
         out.add(espaco(4));
         out.add(secao(topicos, "dcuniverse.guia.secao.combo"));
         texto(out, Component.translatable("dcuniverse.guia.combo.como", fmt(c.investida())), TINTA, 2);
+        texto(out, Component.translatable("dcuniverse.guia.combo.modo", com.danrod.dcuniverse.client.Teclas.COMBATE.getTranslatedKeyMessage()), TINTA, 2);
         for (var g : c.golpes()) {
             Component nomeGolpe = Component.translatable("dcuniverse.guia.combo.golpe." + g.anim());
             out.add(topico(topicos, nome(nomeGolpe), nomeGolpe, true));
             texto(out, Component.translatable("dcuniverse.guia.combo.golpe." + g.anim() + ".desc"), TINTA, 1);
             // Dano de ataque do personagem = dano da ficha x 2 pontos de vida: em corações, ficha x multiplicador.
             out.add(item(Component.translatable("dcuniverse.guia.combo.dano", fmt(p.ficha().dano() * g.dano()), fmt(g.alcance()))));
-            if (g.raio() > 0) out.add(item(Component.translatable("dcuniverse.guia.combo.area", fmt(g.raio()), fmt(g.atordoar()))));
+            if (g.fx() == com.danrod.dcuniverse.combate.Combo.ONDA) out.add(item(Component.translatable("dcuniverse.guia.combo.onda", fmt(g.raio()), fmt(g.atordoar()))));
+            else if (g.raio() > 0) out.add(item(Component.translatable("dcuniverse.guia.combo.area", fmt(g.raio()), fmt(g.atordoar()))));
             else if (g.lancar() > 0) out.add(item(Component.translatable("dcuniverse.guia.combo.lanca")));
             out.add(espaco(2));
         }
+        var k = c.pesado();
+        if (k == null) return;
+        var g = k.golpe();
+        Component nomeGolpe = Component.translatable("dcuniverse.guia.combo.golpe." + g.anim());
+        out.add(topico(topicos, nome(nomeGolpe), nomeGolpe, true));
+        out.add(item(Component.translatable("dcuniverse.guia.combo.carregado")));
+        texto(out, Component.translatable("dcuniverse.guia.combo.golpe." + g.anim() + ".desc"), TINTA, 1);
+        out.add(item(Component.translatable("dcuniverse.guia.combo.carregado.dano", fmt(p.ficha().dano() * g.dano() * k.minimo()),
+            fmt(p.ficha().dano() * g.dano()), fmt(k.carga()), fmt(g.alcance()))));
+        out.add(espaco(2));
     }
 
     /** Tecla de atalho da habilidade para o personagem: a do HUD quando é ele que está transformado, senão pela ordem. */
