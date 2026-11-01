@@ -459,6 +459,36 @@ def verificar_blocos(raiz, recursos, erros):
                     erros.append(f"blocos: {bloco} usa a textura {caminho}, que não existe")
 
 
+def verificar_combos(recursos, erros):
+    """Combo de cada personagem: as animações existem (assets/dcuniverse/animacoes) e cada golpe tem nome e descrição no Guia."""
+    anims = set()
+    for arq in recursos.glob("assets/dcuniverse/animacoes/*.json"):
+        a = ler_json(arq, erros)
+        if a:
+            anims.update(a.get("animations", {}))
+    lang = {i: ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {} for i in IDIOMAS}
+    for arq in sorted(recursos.glob("data/*/dc_characters/*.json")):
+        c = ler_json(arq, erros)
+        combo = (c or {}).get("combo")
+        if not combo:
+            continue
+        golpes = list(combo.get("hits", []))
+        pesado = combo.get("heavy")
+        if pesado:
+            golpes.append(pesado)
+            if pesado.get("charge_anim") not in anims:
+                erros.append(f"{arq.name}: animação de carga '{pesado.get('charge_anim')}' não existe")
+        if combo.get("stance") and combo["stance"] not in anims:
+            erros.append(f"{arq.name}: animação da guarda '{combo['stance']}' não existe")
+        for g in golpes:
+            if g.get("anim") not in anims:
+                erros.append(f"{arq.name}: animação do golpe '{g.get('anim')}' não existe")
+            for i in IDIOMAS:
+                for k in (f"dcuniverse.guia.combo.golpe.{g.get('anim')}", f"dcuniverse.guia.combo.golpe.{g.get('anim')}.desc"):
+                    if k not in lang[i]:
+                        erros.append(f"{i}: falta {k} (Guia do combo de {arq.stem})")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--raiz", default=".")
@@ -470,6 +500,7 @@ def main():
     verificar_receitas(pastas, erros)
     verificar_mod_id(raiz, erros)
     verificar_personagens(raiz, recursos, erros)
+    verificar_combos(recursos, erros)
     verificar_guia(raiz, recursos, erros)
     verificar_demo_hud(raiz, recursos, erros)
     verificar_teclas(raiz, erros)

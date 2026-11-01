@@ -58,6 +58,8 @@ public final class Testes {
         FUNCOES.register("guide", () -> Testes::guia);
         FUNCOES.register("hud", () -> Testes::hud);
         FUNCOES.register("abilities", () -> Testes::habilidades);
+        FUNCOES.register("combo", () -> Testes::combo);
+        FUNCOES.register("modo_combate", () -> Testes::modoCombate);
         FUNCOES.register("flight", () -> Testes::voo);
         FUNCOES.register("powers", () -> Testes::poderes);
         FUNCOES.register("fortress", () -> Testes::fortaleza);
@@ -314,6 +316,109 @@ public final class Testes {
             Habilidades.usar(p, true);
             h.assertValueEqual(e.energia(), energia - 40f, "em recarga não dispara de novo");
             h.succeed();
+        });
+    }
+
+    /**
+     * Combo corpo a corpo (v0.7): o combo do Superman vem do JSON, começar no meio ou rápido demais é recusado, o golpe
+     * acerta o zumbi à frente só no quadro do impacto e o próximo passo emenda; os atalhos usam a habilidade pela
+     * posição, e soltar outra tecla não para a canalização da primeira.
+     */
+    static void combo(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem sup = e.personagem();
+        e.setEnergia(sup.energia().max());
+        var cfg = sup.combo();
+        h.assertTrue(cfg != null && cfg.golpes().size() == 5, "o Superman tem um combo de 5 golpes");
+        h.assertValueEqual(cfg.golpes().get(4).fx(), com.danrod.dcuniverse.combate.Combo.ONDA, "o último golpe racha o chão");
+        h.assertTrue(cfg.pesado() != null && !cfg.postura().isEmpty(), "tem golpe carregado e guarda do modo combate");
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 2, 3));
+        zumbi.setNoAi(true);
+        h.assertFalse(com.danrod.dcuniverse.combate.Combo.alvos(p, cfg.golpes().get(0)).isEmpty(), "o zumbi à frente está no arco do golpe");
+        float vida = zumbi.getHealth();
+        com.danrod.dcuniverse.combate.Combo.golpe(p, 1);
+        com.danrod.dcuniverse.combate.Combo.golpe(p, 0);
+        // Mesmo tick: emendar já é rápido demais (clique automático).
+        com.danrod.dcuniverse.combate.Combo.golpe(p, 1);
+        h.assertValueEqual(zumbi.getHealth(), vida, "antes do quadro do impacto ninguém se fere");
+        h.runAfterDelay(4, () -> {
+            float depois = zumbi.getHealth();
+            h.assertTrue(depois < vida, "o jab acerta o zumbi no impacto");
+            com.danrod.dcuniverse.combate.Combo.golpe(p, 1);
+            h.runAfterDelay(4, () -> {
+                h.assertTrue(zumbi.getHealth() < depois || !zumbi.isAlive(), "o direto emenda e acerta de novo, sem a invencibilidade");
+
+                // Atalhos: Z (índice 0) segura a visão de calor; soltar outra tecla não a para.
+                Habilidades.usar(p, 0, true);
+                h.assertValueEqual(e.canalizando(), "visao_de_calor", "o atalho 1 canaliza a visão de calor");
+                Habilidades.usar(p, 1, false);
+                h.assertValueEqual(e.canalizando(), "visao_de_calor", "soltar outro atalho não para o raio");
+                Habilidades.usar(p, 0, false);
+                h.assertValueEqual(e.canalizando(), "", "soltar o atalho 1 para o raio");
+                int soco = sup.habilidades().indexOf(sup.habilidade("soco_sonico"));
+                float energia = e.energia();
+                Habilidades.usar(p, soco, true);
+                h.assertValueEqual(e.energia(), energia - 40f, "o atalho do soco sônico dispara direto, sem escolher no radial");
+                Habilidades.usar(p, soco, false);
+                h.succeed();
+            });
+        });
+    }
+
+    /**
+     * Modo combate (v0.7): só transformado; com ele o mouse não quebra bloco, a espada na mão não impede o combo, o golpe
+     * carregado sai mais forte quanto mais carregado e destransformar tira do modo.
+     */
+    static void modoCombate(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        com.danrod.dcuniverse.combate.Combo.modo(p, true);
+        h.assertFalse(com.danrod.dcuniverse.combate.Combo.emModo(p), "sem estar transformado não entra no modo combate");
+        Transformacao.transformar(p, SUPERMAN, true);
+        com.danrod.dcuniverse.combate.Combo.modo(p, true);
+        h.assertTrue(com.danrod.dcuniverse.combate.Combo.emModo(p), "transformado entra no modo combate");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD));
+        h.assertTrue(com.danrod.dcuniverse.combate.Combo.maoLivre(p), "no modo combate a espada na mão não impede o combo");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+        var bloco = new net.minecraft.core.BlockPos(3, 1, 1);
+        h.setBlock(bloco, net.minecraft.world.level.block.Blocks.STONE);
+        h.assertFalse(p.gameMode.destroyBlock(h.absolutePos(bloco)), "no modo combate o jogador não quebra blocos");
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.STONE, bloco);
+        var cfg = EstadoJogador.de(p).personagem().combo();
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 2, 3));
+        zumbi.setNoAi(true);
+        zumbi.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(1000);
+        zumbi.setHealth(1000);
+        // Carga rápida: força mínima; carga cheia (1 s): força 1.
+        h.assertValueEqual(com.danrod.dcuniverse.combate.Combo.forca(cfg.pesado(), 0), cfg.pesado().minimo(), "soltar na hora dá a força mínima");
+        h.assertValueEqual(com.danrod.dcuniverse.combate.Combo.forca(cfg.pesado(), 5), 1f, "a força para na carga cheia");
+        com.danrod.dcuniverse.combate.Combo.carregar(p, true);
+        h.runAfterDelay(1, () -> {
+            com.danrod.dcuniverse.combate.Combo.carregar(p, false);
+            // Espera o golpe terminar (recover) antes de carregar de novo.
+            h.runAfterDelay(10, () -> {
+                float fraco = 1000 - zumbi.getHealth();
+                h.assertTrue(fraco > 0, "o golpe carregado na hora acerta");
+                com.danrod.dcuniverse.combate.Combo.carregar(p, true);
+                h.runAfterDelay(22, () -> {
+                    float antes = zumbi.getHealth();
+                    com.danrod.dcuniverse.combate.Combo.carregar(p, false);
+                    h.runAfterDelay(4, () -> {
+                        float forte = antes - zumbi.getHealth();
+                        h.assertTrue(forte > fraco * 2, "carregado cheio bate bem mais forte (" + fraco + " -> " + forte + ")");
+                        Transformacao.destransformar(p);
+                        h.runAfterDelay(2, () -> {
+                            h.assertFalse(com.danrod.dcuniverse.combate.Combo.emModo(p), "destransformar tira do modo combate");
+                            h.succeed();
+                        });
+                    });
+                });
+            });
         });
     }
 

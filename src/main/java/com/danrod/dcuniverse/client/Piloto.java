@@ -395,7 +395,7 @@ public final class Piloto {
             g.text(f, c, x + w - 5 - f.width(c), y + 52, pisca ? VERMELHO : 0xFFFFB0A0, true);
         }
         g.text(f, Component.translatable("dcuniverse.nave.dica1"), x + 5, y + 83, 0xFF7F8898, false);
-        g.text(f, Component.translatable("dcuniverse.nave.dica2", Teclas.USAR.getTranslatedKeyMessage()), x + 5, y + 93, 0xFF7F8898, false);
+        g.text(f, Component.translatable("dcuniverse.nave.dica2", Teclas.HAB4.getTranslatedKeyMessage()), x + 5, y + 93, 0xFF7F8898, false);
     }
 
     /** Zumbido do canhão solar enquanto o raio está aceso. */

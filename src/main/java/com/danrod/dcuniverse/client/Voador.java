@@ -137,6 +137,12 @@ public final class Voador {
         Cauda.registrar();
     }
 
+    /** Investida do combo (client/Combate): troca a velocidade do jogador, voando ou não. */
+    public static void impulso(LocalPlayer p, Vec3 v) {
+        p.setDeltaMovement(v);
+        if (vel != null) vel = v;
+    }
+
     /** Faz a câmera tremer por alguns ticks (até 14 = o tremor mais forte). */
     public static void tremer(int ticks) {
         tremor = Math.max(tremor, Math.min(14, ticks));

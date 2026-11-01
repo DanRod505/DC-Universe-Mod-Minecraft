@@ -35,6 +35,12 @@ public final class EstadoCliente {
     public static final Map<Integer, Rede.Aparencia> TRANSFORMOU = new ConcurrentHashMap<>();
 
     /** Manobras de voo de outros jogadores que o cliente ainda vai animar. */
+    /** Golpes e impactos do combo corpo a corpo, para o client/Combate desenhar no tick. */
+    /** Quem está no modo combate (id da entidade) e a animação da guarda dele (combate/Combo.emModo no cliente). */
+    public static final Map<Integer, String> POSTURAS = new ConcurrentHashMap<>();
+    public static final java.util.Set<Integer> MODO_COMBATE = POSTURAS.keySet();
+    public static final java.util.Queue<Rede.GolpeVisto> GOLPES = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    public static final java.util.Queue<Rede.Impacto> IMPACTOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
     public static final java.util.Queue<Rede.ManobraVista> MANOBRAS = new java.util.concurrent.ConcurrentLinkedQueue<>();
 
     /** Efeitos pontuais no mundo que o cliente ainda vai começar a desenhar. */
@@ -154,6 +160,9 @@ public final class EstadoCliente {
         COLEIRAS.clear();
         TRANSFORMOU.clear();
         MANOBRAS.clear();
+        GOLPES.clear();
+        POSTURAS.clear();
+        IMPACTOS.clear();
         GANCHOS.clear();
         EFEITOS.clear();
     }

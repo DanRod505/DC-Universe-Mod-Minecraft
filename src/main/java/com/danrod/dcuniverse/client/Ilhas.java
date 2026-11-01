@@ -160,7 +160,7 @@ public final class Ilhas {
         g.fill(x + 5, y + 14, x + 5 + Math.round((w - 10) * frac), y + 16, frac < 0.1f ? 0xFFFF5A4A : AZUL);
         g.text(f, Component.translatable("dcuniverse.ilha.altitude", (int) Math.floor(i.getY())), x + 5, y + 21, 0xFFE8ECF4, true);
         g.text(f, Component.translatable("dcuniverse.ilha.dica1"), x + 5, y + 34, 0xFF7F8898, false);
-        g.text(f, Component.translatable("dcuniverse.ilha.dica2", Teclas.USAR.getTranslatedKeyMessage()), x + 5, y + 45, 0xFF7F8898, false);
+        g.text(f, Component.translatable("dcuniverse.ilha.dica2", Teclas.SUPREMA.getTranslatedKeyMessage()), x + 5, y + 45, 0xFF7F8898, false);
     }
 
     /** Zumbido grave da ilha flutuando: sobe de tom e de volume quando ela anda. */
