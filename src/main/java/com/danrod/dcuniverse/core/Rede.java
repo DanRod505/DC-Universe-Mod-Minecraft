@@ -749,10 +749,13 @@ public final class Rede {
         CANAL.send(montarAparencia(player), Canal.rastreandoEProprio(player));
     }
 
-    /** Avisa só quem está vendo o jogador (ele mesmo já animou a manobra). */
+    /**
+     * Avisa quem está vendo o jogador e ele mesmo. Ele já animou a manobra na hora e ignora o próprio aviso, mas o
+     * pacote precisa chegar até ele para entrar na gravação do Flashback (que só guarda o que o cliente recebe).
+     */
     public static void manobraVista(ServerPlayer player, int tipo) {
         if (player.connection == null) return;
-        CANAL.send(new ManobraVista(player.getId(), tipo), Canal.rastreando(player));
+        CANAL.send(new ManobraVista(player.getId(), tipo), Canal.rastreandoEProprio(player));
     }
 
     /** Avisa quem está vendo o animal que ele pôs ou tirou a Coleira do S. */
