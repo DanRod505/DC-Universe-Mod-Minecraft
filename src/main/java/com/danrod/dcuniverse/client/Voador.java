@@ -438,7 +438,8 @@ public final class Voador {
         }
     }
 
-    private static boolean voandoVisto(Minecraft mc, Player pl) {
+    /** O jogador (local ou outro) está voando, pelo que este cliente sabe. */
+    public static boolean voandoVisto(Minecraft mc, Player pl) {
         if (pl == mc.player) return voando(mc.player);
         Rede.Aparencia a = EstadoCliente.APARENCIAS.get(pl.getId());
         return a != null && a.voando();

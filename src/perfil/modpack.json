@@ -9,6 +9,7 @@
     {"nome": "ImmediatelyFast", "papel": "desempenho (HUD e textos)", "tipo": "mod", "lado": "cliente", "projectID": 686911, "fileID": 8898471, "arquivo": "ImmediatelyFast-NeoForge-1.16.5+26.2.jar"},
     {"nome": "Entity Culling", "papel": "não desenha entidades escondidas", "tipo": "mod", "lado": "cliente", "projectID": 448233, "fileID": 9100314, "arquivo": "entityculling-neoforge-1.11.3-mc26.2.jar"},
     {"nome": "Dynamic FPS", "papel": "menos FPS com o jogo em segundo plano", "tipo": "mod", "lado": "cliente", "projectID": 335493, "fileID": 8260229, "arquivo": "dynamic-fps-3.11.9+minecraft-26.2.0-neoforge.jar"},
+    {"nome": "Not Enough Animations", "papel": "animações em terceira pessoa para ações do Minecraft (comer, beber, escada, mapa, barco, montaria)", "tipo": "mod", "lado": "cliente", "projectID": 433760, "fileID": 9396215, "arquivo": "notenoughanimations-neoforge-1.12.7-mc26.2.jar"},
     {"nome": "Iris Shaders", "papel": "shaders", "tipo": "mod", "lado": "cliente", "projectID": 455508, "fileID": 8868972, "arquivo": "iris-neoforge-1.11.4+mc26.2.jar"},
     {"nome": "Distant Horizons", "papel": "paisagem distante", "tipo": "mod", "lado": "ambos", "projectID": 508933, "fileID": 9004780, "arquivo": "DistantHorizons-3.3.3-26.2-fabric-neoforge.jar"},
     {"nome": "Complementary Shaders - Reimagined", "papel": "shader Leve", "tipo": "shader", "lado": "cliente", "projectID": 627557, "fileID": 8884654, "arquivo": "ComplementaryReimagined_r5.9.3.zip"},
