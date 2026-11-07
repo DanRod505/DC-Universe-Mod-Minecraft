@@ -628,6 +628,67 @@ def icone_visao_raio_x():
     return t
 
 
+def icone_investida_de_aco():
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # Rastro de cometa vermelho e azul, afinando para trás (embaixo à esquerda).
+    for i, (cor, w) in enumerate((("#1F48A8", 7), ("#3A7BFF", 5), ("#C81E26", 3), ("#FFD0D0", 1))):
+        d.line([(1, 30), (17, 14)], fill=hexa(cor), width=w)
+    for x0, y0, x1, y1 in ((0, 22, 8, 14), (8, 31, 16, 23)):
+        d.line([(x0, y0), (x1, y1)], fill=hexa("#BFD6FF"), width=1)
+    # Estrondo à frente do punho: cone de anéis brancos.
+    for r, cor, w in ((6, "#FFFFFF", 2), (9, "#DDEBFF", 1), (12, "#9FC4FF", 1)):
+        d.arc([22 - r, 10 - r, 22 + r, 10 + r], start=-110, end=20, fill=hexa(cor), width=w)
+    # Punho (luva azul) virado para cima e para a direita.
+    pal = {"o": CONTORNO, "+": hexa("#3A7BFF"), "#": hexa("#1F48A8")}
+    tela = Tela(32, 32)
+    tela.bitmap(10, 6, PUNHO, pal)
+    for x, y in ((12, 8), (14, 8), (16, 8)):
+        tela.p(x, y, hexa("#8FB8FF"))
+    punho = tela.img.rotate(38, resample=0, center=(18, 12))
+    img.alpha_composite(punho)
+    brilho(t, 26, 6, 4, hexa("#FFFFFF"), 0.8)
+    contornar(t)
+    return t
+
+
+def icone_palmas_sonicas():
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # A onda de ar: anéis em volta do ponto onde as mãos batem.
+    for r, cor, w in ((15, "#6FA8FF", 1), (12, "#A8CCFF", 1), (9, "#DDEBFF", 2)):
+        d.ellipse([16 - r, 14 - r, 16 + r, 14 + r], outline=hexa(cor), width=w)
+    # Duas mãos de lado, espalmadas e com os dedos para cima, batendo no meio.
+    pele, sombra, luz = hexa("#F2C6A0"), hexa("#C98E66"), hexa("#FFE4CC")
+    maos = Tela(32, 32)
+    dm = ImageDraw.Draw(maos.img)
+    for lado in (-1, 1):
+        def x(v):
+            return 16 + lado * v
+        # Palma e dedos (de 1 a 7 px do meio), polegar saindo para fora embaixo.
+        dm.polygon([(x(0), 4), (x(3), 3), (x(6), 6), (x(7), 14), (x(9), 15), (x(9), 18), (x(7), 20), (x(6), 24), (x(0), 24)], fill=pele)
+        dm.polygon([(x(4), 7), (x(6), 6), (x(7), 14), (x(6), 24), (x(4), 24)], fill=sombra)
+        dm.line([(x(1), 5), (x(1), 22)], fill=luz, width=1)
+        # Separação dos dedos.
+        dm.line([(x(2), 5), (x(5), 12)], fill=sombra, width=1)
+        # Punho azul da roupa.
+        dm.rectangle(sorted([x(0), x(7)]) and [min(x(0), x(7)), 24, max(x(0), x(7)), 28], fill=hexa("#2C55C8"))
+        dm.line([(min(x(0), x(7)), 24), (max(x(0), x(7)), 24)], fill=hexa("#C81E26"), width=1)
+    img.alpha_composite(maos.img)
+    contornar(t)
+    # Estalo branco no meio, por cima do contorno.
+    brilho(t, 16, 12, 5, hexa("#FFFFFF"), 1.0)
+    d.line([(16, 3), (16, 22)], fill=hexa("#FFFFFF"), width=1)
+    for x0, y0, x1, y1 in ((16, 12, 10, 1), (16, 12, 22, 1), (16, 12, 3, 9), (16, 12, 29, 9)):
+        d.line([(x0 + (x1 - x0) * 0.6, y0 + (y1 - y0) * 0.6), (x1, y1)], fill=hexa("#EAF4FF"), width=1)
+    # Cacos de vidro voando.
+    for x0, y0 in ((2, 22), (27, 22), (4, 28), (25, 28)):
+        d.polygon([(x0, y0), (x0 + 2, y0 + 1), (x0 + 1, y0 + 2)], fill=hexa("#CFF2FF"))
+    return t
+
+
 ICONES = {
     "visao_de_calor": icone_visao_de_calor,
     "sopro_congelante": icone_sopro_congelante,
@@ -635,6 +696,8 @@ ICONES = {
     "pisao_sismico": icone_pisao_sismico,
     "visao_raio_x": icone_visao_raio_x,
     "fortaleza_da_solidao": icone_fortaleza_da_solidao,
+    "investida_de_aco": icone_investida_de_aco,
+    "palmas_sonicas": icone_palmas_sonicas,
 }
 
 

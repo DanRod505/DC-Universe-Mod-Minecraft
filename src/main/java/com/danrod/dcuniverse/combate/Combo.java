@@ -350,7 +350,10 @@ public final class Combo {
             Vec3 ponto = pontoDoImpacto(player, alvo);
             // Cada golpe do combo conta: sem a invencibilidade de meio segundo depois de levar dano.
             alvo.invulnerableTime = 0;
-            boolean feriu = alvo.hurtServer(level, player.damageSources().playerAttack(player), dano);
+            // Estátua de gelo (sopro congelante): o soco a estilhaça, com dano extra.
+            boolean estilhaca = com.danrod.dcuniverse.ability.Congelamento.congelado(alvo);
+            if (estilhaca) estilhacar(level, alvo);
+            boolean feriu = alvo.hurtServer(level, player.damageSources().playerAttack(player), estilhaca ? dano * ESTILHACA : dano);
             if (!feriu) continue;
             empurrar(player, alvo, g, olhar, noAr, forca);
             if (g.atordoar() > 0) {
@@ -362,6 +365,21 @@ public final class Combo {
                 (float) olhar.x, (float) olhar.y, (float) olhar.z), Canal.perto(level, ponto.x, ponto.y, ponto.z, 64));
         }
         player.causeFoodExhaustion(0.1f);
+    }
+
+    /** Dano a mais do soco que estilhaça uma estátua de gelo. */
+    public static final float ESTILHACA = 1.75f;
+
+    private static void estilhacar(ServerLevel level, LivingEntity alvo) {
+        com.danrod.dcuniverse.ability.Congelamento.estilhacar(alvo);
+        var gelo = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+            net.minecraft.world.level.block.Blocks.PACKED_ICE.defaultBlockState());
+        level.sendParticles(gelo, alvo.getX(), alvo.getY() + alvo.getBbHeight() / 2, alvo.getZ(), 60, alvo.getBbWidth() / 2, alvo.getBbHeight() / 2,
+            alvo.getBbWidth() / 2, 0.25);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE, alvo.getX(), alvo.getY() + alvo.getBbHeight() / 2, alvo.getZ(), 30,
+            0.4, 0.5, 0.4, 0.2);
+        level.playSound(null, alvo.getX(), alvo.getY(), alvo.getZ(), net.minecraft.sounds.SoundEvents.GLASS_BREAK,
+            net.minecraft.sounds.SoundSource.PLAYERS, 1.6f, 0.7f);
     }
 
     /** Onde o punho encontra o alvo: o ponto da caixa dele mais perto da linha do olhar, na altura do peito. */

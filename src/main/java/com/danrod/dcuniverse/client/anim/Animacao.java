@@ -24,7 +24,9 @@ import java.util.Set;
  * Campos nossos (opcionais): "dcuniverse:entrada" e "dcuniverse:saida" (segundos para entrar e sair da animação,
  * misturando com a pose normal) e "dcuniverse:aditivos" (ossos cuja rotação soma à pose normal em vez de substituir;
  * padrão: root, body e head, para a cabeça continuar olhando para onde o jogador olha) e "dcuniverse:rastros" (por
- * ponta, right_arm, left_arm, right_leg ou left_leg: lista de [de, até] em segundos com rastro de luz).
+ * ponta, right_arm, left_arm, right_leg ou left_leg: lista de [de, até] em segundos com rastro de luz) e
+ * "dcuniverse:eventos" (a coreografia: lista de {"t": segundos, ...} com tremor, fov, flash, som e fx, disparados uma
+ * vez quando a animação passa por t; ver client/Cena).
  */
 public final class Animacao {
     public static final Set<String> ADITIVOS_PADRAO = Set.of("root", "body", "head");
@@ -85,6 +87,10 @@ public final class Animacao {
     final Set<String> aditivos;
     /** Trechos (segundos de/até) em que cada ponta (Rastros.PONTAS) deixa rastro: os golpes de verdade. */
     final Map<String, float[][]> rastros = new HashMap<>();
+    /** Momentos da coreografia, em ordem de tempo. */
+    public record Evento(float t, JsonObject dados) {}
+
+    final List<Evento> eventos = new ArrayList<>();
 
     private Animacao(String nome, float duracao, boolean repete, float entrada, float saida, Set<String> aditivos) {
         this.nome = nome;
@@ -147,6 +153,13 @@ public final class Animacao {
                     for (int i = 0; i < l.size(); i++) trechos[i] = new float[] {l.get(i).getAsJsonArray().get(0).getAsFloat(), l.get(i).getAsJsonArray().get(1).getAsFloat()};
                     a.rastros.put(r.getKey(), trechos);
                 }
+            }
+            if (j.has("dcuniverse:eventos")) {
+                for (JsonElement ev : j.getAsJsonArray("dcuniverse:eventos")) {
+                    JsonObject o = ev.getAsJsonObject();
+                    a.eventos.add(new Evento(o.get("t").getAsFloat(), o));
+                }
+                a.eventos.sort((x, y) -> Float.compare(x.t(), y.t()));
             }
             JsonObject ossos = j.has("bones") ? j.getAsJsonObject("bones") : new JsonObject();
             for (var o : ossos.entrySet()) {

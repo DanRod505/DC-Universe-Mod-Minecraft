@@ -60,6 +60,7 @@ public final class Testes {
         FUNCOES.register("abilities", () -> Testes::habilidades);
         FUNCOES.register("combo", () -> Testes::combo);
         FUNCOES.register("modo_combate", () -> Testes::modoCombate);
+        FUNCOES.register("coreografia", () -> Testes::coreografia);
         FUNCOES.register("flight", () -> Testes::voo);
         FUNCOES.register("powers", () -> Testes::poderes);
         FUNCOES.register("fortress", () -> Testes::fortaleza);
@@ -293,6 +294,8 @@ public final class Testes {
         Habilidades.selecionar(p, 0);
         h.assertTrue(Guia.concluida(p, "radial"), "escolher no menu conclui a tarefa");
         Habilidades.usar(p, true);
+        h.assertValueEqual(e.canalizando(), "", "primeiro a cena: os olhos acendem antes do raio");
+        com.danrod.dcuniverse.ability.Coreografia.adiantar(p);
         h.assertValueEqual(e.canalizando(), "visao_de_calor", "segurar V canaliza o raio");
         h.assertValueEqual(Rede.montarAparencia(p).efeito(), "projectile_beam", "quem vê recebe o efeito do raio");
         float antes = e.energia();
@@ -354,6 +357,7 @@ public final class Testes {
 
                 // Atalhos: Z (índice 0) segura a visão de calor; soltar outra tecla não a para.
                 Habilidades.usar(p, 0, true);
+                com.danrod.dcuniverse.ability.Coreografia.adiantar(p);
                 h.assertValueEqual(e.canalizando(), "visao_de_calor", "o atalho 1 canaliza a visão de calor");
                 Habilidades.usar(p, 1, false);
                 h.assertValueEqual(e.canalizando(), "visao_de_calor", "soltar outro atalho não para o raio");
@@ -366,6 +370,66 @@ public final class Testes {
                 Habilidades.usar(p, soco, false);
                 h.succeed();
             });
+        });
+    }
+
+    /**
+     * Habilidades coreografadas (v0.7): as palmas cobram no aperto, seguram o efeito até o estalo (nada mais sai no
+     * preparo) e então a onda estoura o vidro, apaga a tocha e a fogueira e atordoa o porco; soltar o sopro antes de
+     * encher o peito cancela; o soco numa estátua de gelo a estilhaça.
+     */
+    static void coreografia(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        piso(h, 1, 1, 1, 6);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem sup = e.personagem();
+        e.setEnergia(sup.energia().max());
+        var vidro = new net.minecraft.core.BlockPos(4, 2, 1);
+        var tocha = new net.minecraft.core.BlockPos(1, 2, 4);
+        var fogueira = new net.minecraft.core.BlockPos(-2, 2, 1);
+        h.setBlock(vidro, net.minecraft.world.level.block.Blocks.GLASS);
+        h.setBlock(tocha, net.minecraft.world.level.block.Blocks.TORCH);
+        h.setBlock(fogueira, net.minecraft.world.level.block.Blocks.CAMPFIRE);
+        var porco = h.spawn(net.minecraft.world.entity.EntityTypes.PIG, new net.minecraft.core.BlockPos(1, 2, -2));
+        Personagem.Habilidade palmas = sup.habilidade("palmas_sonicas");
+        h.assertValueEqual(palmas.tipo(), "sonic_clap", "palmas sônicas");
+        float antes = e.energia();
+        h.assertTrue(Habilidades.executar(p, sup, palmas), "as palmas começam");
+        h.assertValueEqual(e.energia(), antes - 35f, "cobra no aperto");
+        h.assertTrue(com.danrod.dcuniverse.ability.Coreografia.emCena(p), "a cena está tocando");
+        Habilidades.usar(p, sup.habilidades().indexOf(palmas), false);
+        h.assertTrue(com.danrod.dcuniverse.ability.Coreografia.emCena(p), "soltar a tecla não cancela uma habilidade instantânea");
+        h.assertFalse(Habilidades.executar(p, sup, sup.habilidade("investida_de_aco")), "no preparo nenhuma outra habilidade sai");
+        h.assertTrue(h.getBlockState(vidro).is(net.minecraft.world.level.block.Blocks.GLASS), "antes do estalo o vidro está inteiro");
+        // O estalo sai sozinho no tempo do windup (0,62 s = 13 ticks), e a onda leva 6 ticks.
+        h.runAfterDelay(24, () -> {
+            h.assertFalse(com.danrod.dcuniverse.ability.Coreografia.emCena(p), "a cena acabou");
+            h.assertTrue(h.getBlockState(vidro).isAir(), "o vidro estourou");
+            h.assertTrue(h.getBlockState(tocha).isAir(), "a tocha apagou");
+            h.assertFalse(h.getBlockState(fogueira).getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT), "a fogueira apagou");
+            h.assertTrue(porco.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "o porco ficou atordoado");
+            h.assertTrue(porco.getHealth() < porco.getMaxHealth(), "a onda fere");
+
+            // Sopro: soltar antes de o peito encher cancela, sem canalizar.
+            int sopro = sup.habilidades().indexOf(sup.habilidade("sopro_congelante"));
+            Habilidades.usar(p, sopro, true);
+            h.assertTrue(com.danrod.dcuniverse.ability.Coreografia.preparando(p, "sopro_congelante"), "o sopro começa enchendo o peito");
+            Habilidades.usar(p, sopro, false);
+            h.assertFalse(com.danrod.dcuniverse.ability.Coreografia.emCena(p), "soltar antes cancela");
+            h.assertValueEqual(e.canalizando(), "", "e não sopra");
+
+            // Estátua de gelo: o soco a estilhaça e solta o mob.
+            var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 2, 3));
+            com.danrod.dcuniverse.ability.Congelamento.congelarJa(zumbi, 60);
+            h.assertTrue(com.danrod.dcuniverse.ability.Congelamento.congelado(zumbi), "zumbi congelado");
+            com.danrod.dcuniverse.ability.Congelamento.estilhacar(zumbi);
+            h.assertFalse(com.danrod.dcuniverse.ability.Congelamento.congelado(zumbi), "o soco estilhaça o gelo");
+            h.assertTrue(com.danrod.dcuniverse.combate.Combo.ESTILHACA > 1, "e dá dano extra");
+            zumbi.discard();
+            h.succeed();
         });
     }
 
@@ -630,6 +694,7 @@ public final class Testes {
         Personagem.Habilidade h2 = sup.suprema();
         h.assertValueEqual(h2.id(), "fortaleza_da_solidao", "a suprema é a Fortaleza da Solidão");
         h.assertTrue(Habilidades.executar(p, sup, h2), "a fortaleza nasce onde ele olha (o chão)");
+        com.danrod.dcuniverse.ability.Coreografia.adiantar(p);
         h.assertValueEqual(e.energia(), sup.energia().max() * 0.3f, "custa 70% da energia");
         // Um porco em cima de onde seria a parede de trás: o cristal não nasce em cima dele.
         h.spawn(net.minecraft.world.entity.EntityTypes.PIG, new net.minecraft.core.BlockPos(1, 2, 7));

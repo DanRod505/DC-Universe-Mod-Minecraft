@@ -113,6 +113,7 @@ public final class Eventos {
                 com.danrod.dcuniverse.world.estrutura.Chegada.sair(sp);
                 com.danrod.dcuniverse.npc.Dialogo.fechar(sp);
                 com.danrod.dcuniverse.combate.Combo.esquecer(sp);
+                com.danrod.dcuniverse.ability.Coreografia.esquecer(sp);
             }
         });
         NeoForge.EVENT_BUS.addListener(PlayerEvent.StartTracking.class, e -> {
@@ -129,7 +130,9 @@ public final class Eventos {
         });
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerChangedDimensionEvent.class, e -> sync(e.getEntity()));
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, e -> {
+            com.danrod.dcuniverse.ability.Coreografia.tick();
             Onda.tick();
+            com.danrod.dcuniverse.ability.active.Palmas.tick();
             com.danrod.dcuniverse.combate.Combo.tick(e.getServer());
             com.danrod.dcuniverse.ability.Congelamento.tick();
             Fortaleza.tick();
@@ -149,6 +152,8 @@ public final class Eventos {
         NeoForge.EVENT_BUS.addListener(ServerStoppingEvent.class, e -> {
             com.danrod.dcuniverse.inicio.Inicio.limpar();
             Onda.limpar();
+            com.danrod.dcuniverse.ability.Coreografia.limpar();
+            com.danrod.dcuniverse.ability.active.Palmas.limpar();
             com.danrod.dcuniverse.ability.Congelamento.limpar();
             Fortaleza.limpar();
             com.danrod.dcuniverse.missao.Cenas.limpar();

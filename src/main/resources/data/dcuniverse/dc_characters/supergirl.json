@@ -25,9 +25,11 @@
   ],
   "abilities": [
     { "id": "visao_de_calor", "type": "projectile_beam", "mode": "hold", "cost": 12, "cooldown": 2,
-      "range": 24, "damage_mult": 0.4, "color": "#FF3A2A", "sets_fire": true, "melts": true },
+      "range": 24, "damage_mult": 0.4, "color": "#FF3A2A", "sets_fire": true, "melts": true,
+      "anim": "superman.visao.inicio", "windup": 0.35, "loop_anim": "superman.visao" },
     { "id": "sopro_congelante", "type": "area_cone", "mode": "hold", "cost": 10, "cooldown": 3,
-      "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze" },
+      "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze",
+      "anim": "superman.sopro.inicio", "windup": 0.6, "loop_anim": "superman.sopro" },
     { "id": "investida_aerea", "type": "air_dash", "cost": 25, "cooldown": 5,
       "range": 24, "speed": 3.2, "damage_mult": 1.6, "knockback": 2.0, "hit_radius": 1.6, "breaks_soft": true },
     { "id": "visao_raio_x", "type": "vision", "mode": "xray", "cost": 20, "cooldown": 12,

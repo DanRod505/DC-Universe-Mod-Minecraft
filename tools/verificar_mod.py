@@ -467,8 +467,25 @@ def verificar_combos(recursos, erros):
         if a:
             anims.update(a.get("animations", {}))
     lang = {i: ler_json(recursos / f"assets/dcuniverse/lang/{i}.json", erros) or {} for i in IDIOMAS}
+    sons = set((ler_json(recursos / "assets/dcuniverse/sounds.json", erros) or {}).keys())
+    # Coreografia: os sons dos eventos existem (nossos no sounds.json; os do Minecraft não dá para conferir aqui).
+    for arq in recursos.glob("assets/dcuniverse/animacoes/*.json"):
+        for nome, a in ((ler_json(arq, erros) or {}).get("animations", {})).items():
+            for ev in a.get("dcuniverse:eventos", []):
+                if "t" not in ev:
+                    erros.append(f"{arq.name}: evento sem tempo em {nome}")
+                som = ev.get("som", "")
+                if som.startswith("dcuniverse:") and som.split(":", 1)[1] not in sons:
+                    erros.append(f"{arq.name}: som '{som}' do evento de {nome} não está no sounds.json")
     for arq in sorted(recursos.glob("data/*/dc_characters/*.json")):
         c = ler_json(arq, erros)
+        # Habilidades coreografadas: as animações pedidas existem e o preparo tem animação.
+        for h in (c or {}).get("abilities", []):
+            for campo in ("anim", "loop_anim", "end_anim"):
+                if h.get(campo) and h[campo] not in anims:
+                    erros.append(f"{arq.name}: animação '{h[campo]}' ({campo}) da habilidade {h.get('id')} não existe")
+            if h.get("windup") and not h.get("anim"):
+                erros.append(f"{arq.name}: habilidade {h.get('id')} com windup sem anim")
         combo = (c or {}).get("combo")
         if not combo:
             continue

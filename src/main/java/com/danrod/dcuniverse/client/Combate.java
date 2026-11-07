@@ -121,7 +121,7 @@ public final class Combate {
             }
         });
         NeoForge.EVENT_BUS.addListener(ComputeFovModifierEvent.class, e -> {
-            if (e.getPlayer() == Minecraft.getInstance().player && socoFov > 0.001f) e.setNewFovModifier(e.getNewFovModifier() * (1 - socoFov));
+            if (e.getPlayer() == Minecraft.getInstance().player && Math.abs(socoFov) > 0.001f) e.setNewFovModifier(e.getNewFovModifier() * (1 - socoFov));
         });
     }
 
@@ -328,10 +328,13 @@ public final class Combate {
                 if (outro != p && outro.distanceToSqr(p) < 48 * 48 && Animador.tocando(outro).endsWith(".carga")) auraCarga(outro, 0.8f);
             }
         }
+        if (!mc.isPaused()) Animador.eventos(level, Cena::evento);
         for (Rede.GolpeVisto g; (g = EstadoCliente.GOLPES.poll()) != null; ) {
-            if (g.entidade() == p.getId() && !Flashback.emReplay()) continue;
+            if (g.entidade() == p.getId() && !g.proprio() && !Flashback.emReplay()) continue;
             Entity e = level.getEntity(g.entidade());
-            if (e != null) Animador.tocar(e, g.anim());
+            if (e == null) continue;
+            if (g.anim().isEmpty()) Animador.soltar(e);
+            else Animador.tocar(e, g.anim());
         }
         for (Rede.Impacto i; (i = EstadoCliente.IMPACTOS.poll()) != null; ) {
             if (i.atacante() == p.getId() && !Flashback.emReplay()) continue;
@@ -377,6 +380,16 @@ public final class Combate {
             passo = -1;
             atual = null;
         }
+    }
+
+    /**
+     * Câmera da coreografia (client/Cena): tremor (graus por ticks), zoom (positivo fecha o campo de visão, negativo
+     * abre, como num arranque) e clarão da cor dada.
+     */
+    static void cena(float graus, int ticks, float zoom, int cor, float clarao) {
+        if (graus > 0) tremer(graus, ticks);
+        if (Math.abs(zoom) > Math.abs(socoFov)) socoFov = zoom;
+        if (clarao > 0) piscar(cor, clarao);
     }
 
     private static void piscar(int cor, float forca) {

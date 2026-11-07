@@ -50,9 +50,10 @@ public final class Habilidades {
         Personagem.Habilidade h = habs.get(indice < 0 ? Math.min(e.selecionada(), habs.size() - 1) : indice);
         if (!pressionado) {
             if (h.id().equals(e.canalizando())) parar(player, e);
+            else if (h.modo() == Personagem.Modo.HOLD && Coreografia.preparando(player, h.id())) Coreografia.cancelar(player);
             return;
         }
-        if (e.destransformarEm() != 0L) return;
+        if (e.destransformarEm() != 0L || Coreografia.emCena(player)) return;
         if (indice >= 0 && indice != e.selecionada()) e.setSelecionada(indice);
         if (h.modo() == Personagem.Modo.HOLD) {
             if (e.prontaEm(h.id()) > player.level().getGameTime()) return;
@@ -60,14 +61,24 @@ public final class Habilidades {
                 Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
                 return;
             }
-            boolean trocou = !e.canalizando().isEmpty() && !e.canalizando().equals(h.id());
+            if (h.id().equals(e.canalizando())) return;
+            boolean trocou = !e.canalizando().isEmpty();
             if (trocou) parar(player, e);
-            e.setCanalizando(h.id());
             Guia.concluir(player, "habilidade");
-            Rede.aparencia(player);
+            // Coreografada: primeiro a cena (os olhos acendem, o peito enche), depois o raio.
+            if (Coreografia.preparo(h) > 0) Coreografia.comecar(player, p, h, true, 0);
+            else canalizarJa(player, h);
         } else if (executar(player, p, h)) {
             Guia.concluir(player, "habilidade");
         }
+        Rede.sincronizar(player);
+    }
+
+    /** Liga a canalização da habilidade segurada (direto, ou no fim do preparo coreografado). */
+    static void canalizarJa(ServerPlayer player, Personagem.Habilidade h) {
+        EstadoJogador e = EstadoJogador.de(player);
+        e.setCanalizando(h.id());
+        Rede.aparencia(player);
         Rede.sincronizar(player);
     }
 
@@ -81,7 +92,7 @@ public final class Habilidades {
         long agora = player.level().getGameTime();
         TipoHabilidade tipo = TiposHabilidade.TIPOS.get(h.tipo());
         if (tipo.gratis(player, h)) return tipo.usar(player, p, h);
-        if (e.prontaEm(h.id()) > agora) return false;
+        if (e.prontaEm(h.id()) > agora || Coreografia.emCena(player)) return false;
         boolean criativo = player.isCreative();
         if (!criativo && (e.esgotado() || e.energia() < h.custo())) {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
@@ -90,6 +101,15 @@ public final class Habilidades {
         if (!Cargas.tem(player, h)) {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_cargas", Component.translatable("habilidade.dcuniverse." + h.id())));
             return false;
+        }
+        if (Coreografia.preparo(h) > 0) {
+            // Cena primeiro: cobra agora (devolve se no fim o efeito não puder sair) e o efeito sai no tempo certo.
+            float pago = criativo ? 0 : h.custo();
+            if (!criativo) Energia.gastar(player, p, h.custo());
+            Cargas.gastar(player, h);
+            e.setProntaEm(h.id(), agora + Math.round(h.recargaSeg() * 20));
+            Coreografia.comecar(player, p, h, false, pago);
+            return true;
         }
         if (!tipo.usar(player, p, h)) return false;
         if (!criativo) Energia.gastar(player, p, h.custo());
@@ -118,6 +138,7 @@ public final class Habilidades {
         Personagem p = e.personagem();
         Personagem.Habilidade h = p == null ? null : p.habilidade(id);
         if (h != null) e.setProntaEm(id, player.level().getGameTime() + Math.round(h.recargaSeg() * 20));
+        if (h != null && Coreografia.preparo(h) > 0) Coreografia.animar(player, h.params().s("end_anim", ""));
         Rede.sincronizar(player);
         Rede.aparencia(player);
     }

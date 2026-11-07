@@ -44,16 +44,25 @@
   },
   "abilities": [
     { "id": "visao_de_calor", "type": "projectile_beam", "mode": "hold", "cost": 12, "cooldown": 2,
-      "range": 24, "damage_mult": 0.4, "color": "#FF2A1A", "sets_fire": true, "melts": true },
+      "range": 24, "damage_mult": 0.4, "color": "#FF2A1A", "sets_fire": true, "melts": true,
+      "anim": "superman.visao.inicio", "windup": 0.35, "loop_anim": "superman.visao" },
     { "id": "sopro_congelante", "type": "area_cone", "mode": "hold", "cost": 10, "cooldown": 3,
-      "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze" },
+      "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze",
+      "anim": "superman.sopro.inicio", "windup": 0.6, "loop_anim": "superman.sopro" },
+    { "id": "investida_de_aco", "type": "air_dash", "cost": 30, "cooldown": 6,
+      "range": 22, "speed": 3.4, "damage_mult": 1.8, "knockback": 2.6, "hit_radius": 1.7, "breaks_soft": true,
+      "anim": "superman.investida", "windup": 0.3 },
+    { "id": "palmas_sonicas", "type": "sonic_clap", "cost": 35, "cooldown": 9,
+      "radius": 9, "spread_ticks": 6, "damage_mult": 0.5, "knockback": 1.8, "launch": 0.45, "stun": 2.0, "breaks_glass": true,
+      "anim": "superman.palmas", "windup": 0.62 },
+    { "id": "visao_raio_x", "type": "vision", "mode": "xray", "cost": 20, "cooldown": 12,
+      "duration": 12, "range": 28, "color": "#8FD8FF" },
     { "id": "soco_sonico", "type": "projectile", "cost": 40, "cooldown": 8, "visual": "sonic",
       "speed": 1.6, "range": 28, "damage_mult": 2.0, "knockback": 1.6, "impact_radius": 4 },
     { "id": "pisao_sismico", "type": "area_blast", "cost": 30, "cooldown": 6,
       "radius": 7, "damage_mult": 0.75, "knockback": 1.2, "launch": 0.7, "stun": 1.5, "spread_ticks": 10 },
-    { "id": "visao_raio_x", "type": "vision", "mode": "xray", "cost": 20, "cooldown": 12,
-      "duration": 12, "range": 28, "color": "#8FD8FF" },
     { "id": "fortaleza_da_solidao", "type": "structure", "supreme": true, "cost_pct": 70, "cooldown": 150,
-      "range": 24, "radius": 6, "duration": 120, "regen_level": 2, "energy_per_second": 8 }
+      "range": 24, "radius": 6, "duration": 120, "regen_level": 2, "energy_per_second": 8,
+      "meteor": true, "impact_damage_mult": 1.5, "anim": "superman.suprema", "windup": 2.4 }
   ]
 }

@@ -1325,6 +1325,59 @@ def golpe_onda():
     return finalizar(normalizar(x[: int(seg * SR)], 0.97), 0.3)
 
 
+def palmas():
+    # Duas mãos de aço se batendo: estalo seco altíssimo, o ar rasgando em volta e um trovão que rola longe.
+    seg = 2.6
+    estalo = filtro(ruido(0.03), "highpass", 2200) * env(int(round(0.03 * SR)), 0.0002, 0.004)
+    corpo = filtro(ruido(0.12), "bandpass", (500, 3000)) * env(int(round(0.12 * SR)), 0.0005, 0.025)
+    boom = varredura(120, 30, 1.6, 0.4) * env(int(round(1.6 * SR)), 0.002, 0.4)
+    ar = filtro(ruido(0.9), "bandpass", (300, 2400)) * env(int(round(0.9 * SR)), 0.02, 0.3)
+    trovao = filtro(ruido(2.2), "lowpass", 260) * env(int(round(2.2 * SR)), 0.05, 0.8)
+    x = misturar((0, estalo * 1.6), (0, corpo * 1.1), (0.005, boom * 1.2), (0.02, ar * 0.5), (0.06, trovao * 0.7))
+    x = eco(x, 2.0, 0.3, 2600)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.98), 0.4)
+
+
+def olhos_acendem():
+    # Os olhos acendem: um chiado de calor que sobe e um zumbido grave de energia.
+    seg = 0.7
+    chiado = filtro(ruido(0.7), "highpass", 3000) * env(int(round(0.7 * SR)), 0.15, 0.25)
+    zumbido = varredura(70, 160, 0.7, 0.3) * env(int(round(0.7 * SR)), 0.2, 0.2)
+    x = misturar((0, chiado * 0.5), (0, zumbido * 0.8))
+    return finalizar(normalizar(x[: int(seg * SR)], 0.8), 0.15)
+
+
+def inspira():
+    # O peito enchendo: ar entrando com força, de longe para perto, subindo de tom.
+    seg = 0.8
+    n = int(round(seg * SR))
+    ar = filtro(ruido(seg), "bandpass", (600, 4500)) * env(n, 0.6, 0.12)
+    grave = filtro(ruido(seg), "lowpass", 400) * env(n, 0.5, 0.2)
+    x = misturar((0, ar * 0.9), (0, grave * 0.5))
+    return finalizar(normalizar(x[:n], 0.75), 0.1)
+
+
+def decola():
+    # O salto da suprema: o chão estoura e um rugido sobe para o céu.
+    seg = 2.2
+    estalo = filtro(ruido(0.05), "highpass", 1200) * env(int(round(0.05 * SR)), 0.0005, 0.01)
+    boom = varredura(80, 30, 1.2, 0.4) * env(int(round(1.2 * SR)), 0.002, 0.35)
+    rugido = filtro(ruido(2.0), "bandpass", (200, 1800)) * env(int(round(2.0 * SR)), 0.1, 0.9)
+    pedras = cascalho(1.0, 60, 0.8, banda=(400, 5000), dur=(0.004, 0.04), ganho=(0.05, 0.3))
+    x = misturar((0, estalo * 1.4), (0, boom * 1.3), (0.02, rugido * 0.8), (0.05, pedras * 0.6))
+    return finalizar(normalizar(x[: int(seg * SR)], 0.95), 0.4)
+
+
+def meteoro():
+    # A descida como meteoro: assobio que desce de tom e um rugido de fogo crescendo até o impacto.
+    seg = 1.6
+    n = int(round(seg * SR))
+    assobio = varredura(1400, 300, seg, 0.25) * env(n, 0.3, 0.05)
+    fogo = filtro(ruido(seg), "bandpass", (150, 2500)) * env(n, 1.2, 0.08)
+    x = misturar((0, assobio * 0.5), (0, fogo * 1.0))
+    return finalizar(normalizar(x[:n], 0.9), 0.05)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -1350,7 +1403,8 @@ SONS = {
     "nave_orbe": nave_orbe, "nave_escudo_liga": nave_escudo_liga, "nave_escudo_desliga": nave_escudo_desliga,
     "golpe_ar": golpe_ar, "golpe_leve": golpe_leve, "golpe_medio": golpe_medio, "golpe_pesado": golpe_pesado,
     "modo_combate_liga": modo_combate_liga, "modo_combate_desliga": modo_combate_desliga, "carga": carga,
-    "golpe_onda": golpe_onda,
+    "golpe_onda": golpe_onda, "palmas": palmas, "olhos_acendem": olhos_acendem, "inspira": inspira,
+    "decola": decola, "meteoro": meteoro,
 }
 
 

@@ -21,6 +21,11 @@ public final class Sons {
     public static final DeferredHolder<SoundEvent, SoundEvent> GOLPE_MEDIO = som("habilidade.golpe_medio");
     public static final DeferredHolder<SoundEvent, SoundEvent> GOLPE_PESADO = som("habilidade.golpe_pesado");
     public static final DeferredHolder<SoundEvent, SoundEvent> GOLPE_ONDA = som("habilidade.golpe_onda");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PALMAS = som("habilidade.palmas");
+    public static final DeferredHolder<SoundEvent, SoundEvent> OLHOS_ACENDEM = som("habilidade.olhos_acendem");
+    public static final DeferredHolder<SoundEvent, SoundEvent> INSPIRA = som("habilidade.inspira");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DECOLA = som("habilidade.decola");
+    public static final DeferredHolder<SoundEvent, SoundEvent> METEORO = som("habilidade.meteoro");
     public static final DeferredHolder<SoundEvent, SoundEvent> CARGA = som("habilidade.carga");
     public static final DeferredHolder<SoundEvent, SoundEvent> MODO_COMBATE_LIGA = som("habilidade.modo_combate_liga");
     public static final DeferredHolder<SoundEvent, SoundEvent> MODO_COMBATE_DESLIGA = som("habilidade.modo_combate_desliga");

@@ -675,5 +675,50 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.modo_combate_desliga"
+  },
+  "habilidade.palmas": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/palmas",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.palmas"
+  },
+  "habilidade.olhos_acendem": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/olhos_acendem",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.olhos_acendem"
+  },
+  "habilidade.inspira": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/inspira",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.inspira"
+  },
+  "habilidade.decola": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/decola",
+        "attenuation_distance": 96
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.decola"
+  },
+  "habilidade.meteoro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/meteoro",
+        "attenuation_distance": 96
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.meteoro"
   }
 }

@@ -37,6 +37,10 @@ public final class Animador {
         final float inicio;
         Tocando anterior;
         float congeladoDe = -1, congeladoAte = -1, congeladoAntes;
+        /** Próximo evento da coreografia a disparar. */
+        int evento;
+        /** Tempo da animação em que ela foi solta (laço que sai misturando); -1 = tocando. */
+        float soltoEm = -1;
 
         Tocando(Animacao a, float inicio) {
             this.a = a;
@@ -53,11 +57,12 @@ public final class Animador {
         float peso(float t) {
             float w = a.entrada <= 0 ? 1 : Math.min(1, t / a.entrada);
             if (!a.repete && a.saida > 0) w = Math.min(w, (a.duracao - t) / a.saida);
+            if (soltoEm >= 0) w = Math.min(w, 1 - (t - soltoEm) / Math.max(0.05f, a.saida));
             return Mth.clamp(w, 0, 1);
         }
 
         boolean acabou(float t) {
-            return !a.repete && t >= a.duracao;
+            return !a.repete && t >= a.duracao || soltoEm >= 0 && t >= soltoEm + Math.max(0.05f, a.saida);
         }
     }
 
@@ -123,6 +128,31 @@ public final class Animador {
 
     public static void parar(Entity e) {
         TOCANDO.remove(e.getId());
+    }
+
+    /** Solta a animação da entidade misturando de volta para a pose normal (fim de um laço de canalização). */
+    public static void soltar(Entity e) {
+        Tocando t = TOCANDO.get(e.getId());
+        if (t != null && t.soltoEm < 0) t.soltoEm = t.tempo(idade(e));
+    }
+
+    /**
+     * Dispara os eventos da coreografia ("dcuniverse:eventos") que as animações tocando já alcançaram, uma vez cada,
+     * na ordem. Chamado a cada tick do cliente.
+     */
+    public static void eventos(net.minecraft.client.multiplayer.ClientLevel level, java.util.function.BiConsumer<Entity, com.google.gson.JsonObject> f) {
+        for (var en : TOCANDO.entrySet()) {
+            Tocando tc = en.getValue();
+            if (tc.evento >= tc.a.eventos.size()) continue;
+            Entity e = level.getEntity(en.getKey());
+            if (e == null) continue;
+            float t = tc.tempo(idade(e));
+            while (tc.evento < tc.a.eventos.size() && tc.a.eventos.get(tc.evento).t() <= t) {
+                Animacao.Evento ev = tc.a.eventos.get(tc.evento++);
+                // Eventos muito para trás (entrou no alcance no meio da animação) não disparam.
+                if (t - ev.t() < 0.5f) f.accept(e, ev.dados());
+            }
+        }
     }
 
     /** Nome da animação tocando na entidade agora ("" = nenhuma). */

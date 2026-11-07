@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 15;
+    private static final int VERSAO = 16;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -176,7 +176,12 @@ public final class Rede {
     public record Carregar(boolean comecar) {}
 
     /** Alguém começou um golpe: a animação para quem vê. */
-    public record GolpeVisto(int entidade, String anim) {}
+    /** Animação que a entidade começou. proprio: o próprio jogador também toca (habilidades; o combo ele já previu). */
+    public record GolpeVisto(int entidade, String anim, boolean proprio) {
+        public GolpeVisto(int entidade, String anim) {
+            this(entidade, anim, false);
+        }
+    }
 
     /** Um golpe acertou: hit-stop, tremor, partículas e som no ponto (x, y, z), com a direção do golpe (dx, dy, dz). */
     public record Impacto(int atacante, int alvo, int fx, double x, double y, double z, float dx, float dy, float dz) {}
@@ -598,8 +603,8 @@ public final class Rede {
             .add();
         CANAL.messageBuilder(GolpeVisto.class)
             .direction(PacketFlow.CLIENTBOUND)
-            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeUtf(m.anim()))
-            .decoder(b -> new GolpeVisto(b.readVarInt(), b.readUtf()))
+            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeUtf(m.anim()).writeBoolean(m.proprio()))
+            .decoder(b -> new GolpeVisto(b.readVarInt(), b.readUtf(), b.readBoolean()))
             .consumerMainThread((m, ctx) -> EstadoCliente.GOLPES.add(m))
             .add();
         CANAL.messageBuilder(Impacto.class)
