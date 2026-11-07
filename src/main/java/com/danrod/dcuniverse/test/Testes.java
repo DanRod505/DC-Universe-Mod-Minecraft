@@ -61,6 +61,7 @@ public final class Testes {
         FUNCOES.register("combo", () -> Testes::combo);
         FUNCOES.register("modo_combate", () -> Testes::modoCombate);
         FUNCOES.register("coreografia", () -> Testes::coreografia);
+        FUNCOES.register("defesa", () -> Testes::defesa);
         FUNCOES.register("flight", () -> Testes::voo);
         FUNCOES.register("powers", () -> Testes::poderes);
         FUNCOES.register("fortress", () -> Testes::fortaleza);
@@ -290,6 +291,8 @@ public final class Testes {
         h.assertValueEqual(sup.habilidade("visao_de_calor").tipo(), "projectile_beam", "visão de calor é um raio");
         h.assertValueEqual(sup.habilidade("sopro_congelante").tipo(), "area_cone", "sopro congelante é um cone");
         h.assertValueEqual(sup.habilidade("soco_sonico").tipo(), "projectile", "soco sônico é um projétil");
+        // Visão, sopro e soco sônico são do conjunto de combate.
+        com.danrod.dcuniverse.combate.Combo.modo(p, true);
 
         Habilidades.selecionar(p, 0);
         h.assertTrue(Guia.concluida(p, "radial"), "escolher no menu conclui a tarefa");
@@ -337,6 +340,8 @@ public final class Testes {
         e.setEnergia(sup.energia().max());
         var cfg = sup.combo();
         h.assertTrue(cfg != null && cfg.golpes().size() == 5, "o Superman tem um combo de 5 golpes");
+        com.danrod.dcuniverse.combate.Combo.modo(p, true);
+
         h.assertValueEqual(cfg.golpes().get(4).fx(), com.danrod.dcuniverse.combate.Combo.ONDA, "o último golpe racha o chão");
         h.assertTrue(cfg.pesado() != null && !cfg.postura().isEmpty(), "tem golpe carregado e guarda do modo combate");
         var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 2, 3));
@@ -394,6 +399,7 @@ public final class Testes {
         h.setBlock(tocha, net.minecraft.world.level.block.Blocks.TORCH);
         h.setBlock(fogueira, net.minecraft.world.level.block.Blocks.CAMPFIRE);
         var porco = h.spawn(net.minecraft.world.entity.EntityTypes.PIG, new net.minecraft.core.BlockPos(1, 2, -2));
+        com.danrod.dcuniverse.combate.Combo.modo(p, true);
         Personagem.Habilidade palmas = sup.habilidade("palmas_sonicas");
         h.assertValueEqual(palmas.tipo(), "sonic_clap", "palmas sônicas");
         float antes = e.energia();
@@ -430,6 +436,73 @@ public final class Testes {
             h.assertTrue(com.danrod.dcuniverse.combate.Combo.ESTILHACA > 1, "e dá dano extra");
             zumbi.discard();
             h.succeed();
+        });
+    }
+
+    /**
+     * Modo combate 2.0 (v0.7): fora do modo o clique não golpeia; cada modo usa o seu conjunto de poderes nas mesmas
+     * teclas (trocar de modo para o poder do outro conjunto); a defesa apara o golpe que chega no começo da guarda
+     * (sem dano, atacante tonto), depois só corta parte do dano pela frente, e não segura o que vem pelas costas.
+     */
+    static void defesa(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        piso(h, 1, 1, 1, 6);
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 1.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        Transformacao.transformar(p, SUPERMAN, true);
+        EstadoJogador e = EstadoJogador.de(p);
+        Personagem sup = e.personagem();
+        e.setEnergia(sup.energia().max());
+        var zumbi = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(1, 2, 3));
+        zumbi.setNoAi(true);
+        zumbi.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(1000);
+        zumbi.setHealth(1000);
+        // Modo mundo: o clique é o do Minecraft, o combo não sai.
+        com.danrod.dcuniverse.combate.Combo.golpe(p, 0);
+        int calor = sup.habilidades().indexOf(sup.habilidade("calor_focado"));
+        int visao = sup.habilidades().indexOf(sup.habilidade("visao_de_calor"));
+        h.assertValueEqual(com.danrod.dcuniverse.combate.Combo.conjunto(sup.habilidade("calor_focado")), com.danrod.dcuniverse.combate.Combo.MUNDO, "a visão focada é do mundo");
+        h.runAfterDelay(3, () -> {
+            h.assertValueEqual(zumbi.getHealth(), 1000f, "o clique fora do modo combate não golpeou");
+            // Os poderes de olhos para o lado (longe do zumbi).
+            p.snapTo(aqui.x, aqui.y, aqui.z, 90, 0);
+            Habilidades.usar(p, visao, true);
+            h.assertFalse(com.danrod.dcuniverse.ability.Coreografia.emCena(p) || !e.canalizando().isEmpty(), "fora do combate a visão de combate não sai");
+            Habilidades.usar(p, visao, false);
+            Habilidades.usar(p, calor, true);
+            h.assertValueEqual(e.canalizando(), "calor_focado", "a visão focada sai na hora no modo mundo");
+            // Entrar no combate para o poder do mundo.
+            com.danrod.dcuniverse.combate.Combo.modo(p, true);
+            h.assertValueEqual(e.canalizando(), "", "trocar de modo para o poder do outro conjunto");
+            Habilidades.usar(p, calor, false);
+            Habilidades.usar(p, calor, true);
+            h.assertValueEqual(e.canalizando(), "", "no combate a visão focada não sai");
+            Habilidades.usar(p, calor, false);
+            p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+            // Defesa: no começo da guarda, aparo.
+            var fonte = p.level().damageSources().mobAttack(zumbi);
+            com.danrod.dcuniverse.combate.Defesa.defender(p, true);
+            h.assertTrue(com.danrod.dcuniverse.combate.Defesa.defendendo(p), "a guarda levanta");
+            h.assertValueEqual(com.danrod.dcuniverse.combate.Defesa.receber(p, fonte, 10f), 0f, "o golpe no começo da guarda é aparado");
+            h.assertTrue(zumbi.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "quem foi aparado fica tonto");
+            h.assertTrue(Guia.concluida(p, "aparo") && Guia.concluida(p, "defesa"), "defender e aparar concluem as tarefas");
+            com.danrod.dcuniverse.combate.Combo.golpe(p, 0);
+            h.runAfterDelay(10, () -> {
+                h.assertValueEqual(zumbi.getHealth(), 1000f, "defendendo não golpeia");
+                float passa = com.danrod.dcuniverse.combate.Defesa.receber(p, fonte, 10f);
+                h.assertTrue(passa > 0 && passa < 5, "depois do aparo a guarda só corta parte do dano (" + passa + ")");
+                // Pelas costas a guarda não vale.
+                p.snapTo(aqui.x, aqui.y, aqui.z, 180, 0);
+                h.assertValueEqual(com.danrod.dcuniverse.combate.Defesa.receber(p, fonte, 10f), 10f, "pelas costas a guarda não segura");
+                com.danrod.dcuniverse.combate.Defesa.defender(p, false);
+                h.assertFalse(com.danrod.dcuniverse.combate.Defesa.defendendo(p), "soltar o botão baixa a guarda");
+                com.danrod.dcuniverse.combate.Defesa.defender(p, true);
+                com.danrod.dcuniverse.combate.Combo.modo(p, false);
+                h.runAfterDelay(1, () -> {
+                    h.assertFalse(com.danrod.dcuniverse.combate.Defesa.defendendo(p), "sair do modo combate baixa a guarda");
+                    h.succeed();
+                });
+            });
         });
     }
 

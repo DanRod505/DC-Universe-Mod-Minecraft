@@ -54,6 +54,8 @@ public final class Habilidades {
             return;
         }
         if (e.destransformarEm() != 0L || Coreografia.emCena(player)) return;
+        // Cada modo tem o seu conjunto de habilidades nas mesmas teclas (combate/Combo.conjunto).
+        if (!com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) return;
         if (indice >= 0 && indice != e.selecionada()) e.setSelecionada(indice);
         if (h.modo() == Personagem.Modo.HOLD) {
             if (e.prontaEm(h.id()) > player.level().getGameTime()) return;
@@ -71,6 +73,16 @@ public final class Habilidades {
         } else if (executar(player, p, h)) {
             Guia.concluir(player, "habilidade");
         }
+        Rede.sincronizar(player);
+    }
+
+    /** Trocou de modo: a habilidade canalizada (ou em preparo) que não é do conjunto novo para. */
+    public static void trocouModo(ServerPlayer player) {
+        EstadoJogador e = EstadoJogador.de(player);
+        Personagem p = e.personagem();
+        if (p == null) return;
+        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
+        if (h != null && !com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) parar(player, e);
         Rede.sincronizar(player);
     }
 

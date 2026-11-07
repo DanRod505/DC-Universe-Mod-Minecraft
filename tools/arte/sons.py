@@ -1378,6 +1378,48 @@ def meteoro():
     return finalizar(normalizar(x[:n], 0.9), 0.05)
 
 
+def defesa():
+    # Golpe batendo nos antebraços de aço cruzados: baque surdo, estalo metálico curto e o corpo segurando.
+    seg = 0.7
+    baque = filtro(ruido(0.12), "lowpass", 500) * env(int(0.12 * SR), 0.001, 0.03) * 1.8
+    estalo = filtro(ruido(0.03), "bandpass", (1500, 6000)) * env(int(0.03 * SR), 0.0003, 0.006) * 1.2
+    metal = sino(620, 0.5, 0.12, 0.6) * 0.35
+    grave = varredura(90, 50, 0.25, 0.5) * env(int(0.25 * SR), 0.001, 0.07)
+    x = misturar((0, baque), (0, estalo), (0.002, metal), (0, grave))
+    return finalizar(normalizar(eco(x, 0.6, 0.15, 3000)[: int(seg * SR)], 0.85), 0.15)
+
+
+def aparo():
+    # Aparo perfeito: estalo seco, um sino brilhante que corta o ar e o golpe sendo jogado de volta.
+    seg = 1.6
+    estalo = filtro(ruido(0.025), "highpass", 2500) * env(int(0.025 * SR), 0.0002, 0.004) * 1.6
+    sinoA = sino(1320, 1.3, 0.55, 1.2) * 0.55
+    sinoB = sino(1980, 1.0, 0.35, 1.0) * 0.3
+    ar = filtro(ruido(0.4), "bandpass", (800, 5000)) * env(int(0.4 * SR), 0.01, 0.1) * 0.5
+    boom = varredura(140, 45, 0.5, 0.5) * env(int(0.5 * SR), 0.001, 0.12) * 0.9
+    x = misturar((0, estalo), (0, sinoA), (0.01, sinoB), (0.02, ar), (0, boom))
+    return finalizar(normalizar(eco(x, 1.4, 0.3, 7000)[: int(seg * SR)], 0.92), 0.3)
+
+
+def trava():
+    # Trava de mira: dois toques de cristal subindo, curtos e limpos.
+    seg = 0.7
+    a = sino(1046, 0.45, 0.18, 1.0)
+    b = sino(1568, 0.5, 0.22, 1.0)
+    sopro = filtro(ruido(0.15), "bandpass", (2000, 8000)) * env(int(0.15 * SR), 0.02, 0.04) * 0.15
+    x = misturar((0, a * 0.6), (0.07, b * 0.7), (0, sopro))
+    return finalizar(normalizar(eco(x, 0.6, 0.25, 8000)[: int(seg * SR)], 0.6), 0.2)
+
+
+def trava_solta():
+    # Solta a trava: um toque descendo, mais baixo.
+    seg = 0.5
+    a = sino(1318, 0.35, 0.12, 0.8)
+    b = sino(880, 0.4, 0.16, 0.8)
+    x = misturar((0, a * 0.5), (0.06, b * 0.55))
+    return finalizar(normalizar(eco(x, 0.4, 0.2, 6000)[: int(seg * SR)], 0.45), 0.15)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -1403,7 +1445,7 @@ SONS = {
     "nave_orbe": nave_orbe, "nave_escudo_liga": nave_escudo_liga, "nave_escudo_desliga": nave_escudo_desliga,
     "golpe_ar": golpe_ar, "golpe_leve": golpe_leve, "golpe_medio": golpe_medio, "golpe_pesado": golpe_pesado,
     "modo_combate_liga": modo_combate_liga, "modo_combate_desliga": modo_combate_desliga, "carga": carga,
-    "golpe_onda": golpe_onda, "palmas": palmas, "olhos_acendem": olhos_acendem, "inspira": inspira,
+    "golpe_onda": golpe_onda, "palmas": palmas, "defesa": defesa, "aparo": aparo, "trava": trava, "trava_solta": trava_solta, "olhos_acendem": olhos_acendem, "inspira": inspira,
     "decola": decola, "meteoro": meteoro,
 }
 

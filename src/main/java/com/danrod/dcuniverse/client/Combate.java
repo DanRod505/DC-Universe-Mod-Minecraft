@@ -46,8 +46,8 @@ import java.util.function.Predicate;
  */
 public final class Combate {
     /** Hit-stop (ticks) e tremor da câmera (graus) de cada força de golpe: leve, médio, pesado, onda de choque. */
-    private static final float[] HIT_STOP = {1.6f, 2.6f, 5.5f, 7f};
-    private static final float[] TREMOR = {0.9f, 1.6f, 3.8f, 5.5f};
+    private static final float[] HIT_STOP = {1.6f, 2.6f, 5.5f, 7f, 1.5f, 6f};
+    private static final float[] TREMOR = {0.9f, 1.6f, 3.8f, 5.5f, 1.1f, 3.2f};
     /** Braço que normalmente não aparece (mão secundária vazia) fica aqui embaixo quando a animação não o usa. */
     private static final float OCULTO_Y = -16;
 
@@ -63,8 +63,15 @@ public final class Combate {
     private static Combo.Golpe atual;
     private static float inicio, forca = 1;
     private static boolean fila, impactou;
-    /** Carregando o golpe pesado (botão direito segurado no modo combate) desde a idade cargaDe. */
+    /** Carregando o golpe pesado (botão esquerdo segurado no modo combate) desde a idade cargaDe. */
     private static boolean carregando;
+    /** Botão esquerdo segurado desde o tick esquerdoDe (segurar vira carga; um toque é golpe do combo). */
+    private static boolean esquerdo;
+    private static int esquerdoDe;
+    /** Segurando o botão direito no modo combate: defesa (combate/Defesa). */
+    private static boolean defendendo;
+    /** Ticks segurando o esquerdo para a carga começar no lugar do combo. */
+    private static final int SEGURAR_CARGA = 6;
     private static float cargaDe;
     private static net.minecraft.client.resources.sounds.SimpleSoundInstance somCarga;
     /** Último tick em que um clique virou golpe (o Minecraft repete o clique segurando o botão num bloco). */
@@ -82,6 +89,8 @@ public final class Combate {
         atual = null;
         fila = false;
         carregando = false;
+        esquerdo = false;
+        defendendo = false;
         tremor = 0;
         socoFov = 0;
         flash = 0;
@@ -91,19 +100,11 @@ public final class Combate {
     public static void registrar() {
         NeoForge.EVENT_BUS.addListener(InputEvent.InteractionKeyMappingTriggered.class, Eventos.cancela((Predicate<InputEvent.InteractionKeyMappingTriggered>) e -> {
             Minecraft mc = Minecraft.getInstance();
-            boolean modo = mc.player != null && Combo.emModo(mc.player);
-            // Modo combate: o mouse é só do combate (o botão direito é lido no tick, para segurar e soltar).
-            if (modo && !e.isAttack()) {
-                e.setSwingHand(false);
-                return true;
-            }
-            if (!e.isAttack()) return false;
-            if (!pode(mc)) {
-                if (!modo) return false;
-                e.setSwingHand(false);
-                return true;
-            }
+            // Modo normal: o mouse é o do Minecraft. Modo combate: o mouse é só do combate (o direito e o segurar do
+            // esquerdo são lidos no tick; o botão do meio é a trava de mira).
+            if (mc.player == null || !Combo.emModo(mc.player)) return false;
             e.setSwingHand(false);
+            if (!e.isAttack() || !pode(mc)) return true;
             if (mc.player.tickCount != ultimoClique) {
                 ultimoClique = mc.player.tickCount;
                 clicar(mc);
@@ -152,11 +153,7 @@ public final class Combate {
         if (p == null || mc.gui.screen() != null || !EstadoCliente.transformado() || Flashback.emReplay() || Diretor.ativo()) return false;
         if (p.isSpectator() || p.isPassenger() || !Combo.maoLivre(p)) return false;
         Combo.Config c = config();
-        if (c == null || carregando) return false;
-        if (Combo.emModo(p)) return true;
-        // Mirando um bloco sem ninguém na frente, o clique quebra o bloco como sempre.
-        if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.BLOCK) return !Combo.alvos(p, c.golpes().get(0)).isEmpty();
-        return true;
+        return c != null && !carregando && !defendendo && Combo.emModo(p);
     }
 
     private static float idade(Entity e) {
@@ -213,7 +210,12 @@ public final class Combate {
             SoundSource.PLAYERS, 0.7f, 1f, false);
         p.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(ligar ? "dcuniverse.combate.ligado" : "dcuniverse.combate.desligado",
             Teclas.COMBATE.getTranslatedKeyMessage()));
-        if (!ligar) soltarCarga(p, false);
+        if (!ligar) {
+            soltarCarga(p, false);
+            defender(p, false);
+            Trava.soltar(false);
+        }
+        Hud.trocouModo();
     }
 
     /** Animação da guarda já aplicada em cada entidade (para desligar quando ela sair do modo). */
@@ -234,11 +236,98 @@ public final class Combate {
         });
     }
 
-    /** Botão direito no modo combate: segurar carrega, soltar golpeia. */
+    /** Botão direito segurado no modo combate: levanta a guarda (o servidor corta o dano e faz o aparo). */
+    private static void guarda(Minecraft mc, LocalPlayer p, Combo.Config c) {
+        boolean quer = Combo.emModo(p) && c != null && c.defesa() != null && mc.options.keyUse.isDown() && mc.gui.screen() == null
+            && EstadoCliente.transformado() && !carregando && !p.isPassenger();
+        if (quer != defendendo) {
+            // Levantar a guarda corta o golpe do combo que estava saindo (o servidor já tinha agendado o impacto).
+            if (quer) {
+                passo = -1;
+                atual = null;
+                fila = false;
+            }
+            defender(p, quer);
+            return;
+        }
+        // Depois do aparo a animação volta sozinha para a guarda.
+        if (defendendo && c != null && c.defesa() != null && Animador.tocando(p).isEmpty()) Animador.tocar(p, c.defesa().anim());
+    }
+
+    static boolean defendendo() {
+        return defendendo;
+    }
+
+    private static void defender(LocalPlayer p, boolean ligar) {
+        if (defendendo == ligar) return;
+        defendendo = ligar;
+        Rede.CANAL.send(new Rede.Defender(ligar), Canal.SERVIDOR);
+        Combo.Config c = config();
+        if (ligar && c != null && c.defesa() != null) {
+            Animador.tocar(p, c.defesa().anim());
+            p.level().playLocalSound(p.getX(), p.getEyeY(), p.getZ(), Sons.GOLPE_AR.get(), SoundSource.PLAYERS, 0.35f, 1.3f, false);
+        } else {
+            Animador.soltar(p);
+        }
+    }
+
+    /** Golpe segurado na guarda (faíscas e um tranco) ou aparado (clarão, anel de luz, hit-stop nos dois). */
+    private static void defesaVista(ClientLevel level, LocalPlayer p, Rede.Impacto i) {
+        Entity quem = level.getEntity(i.atacante());
+        Entity bateu = i.alvo() >= 0 ? level.getEntity(i.alvo()) : null;
+        Vec3 ponto = new Vec3(i.x(), i.y(), i.z());
+        Vec3 d = new Vec3(i.dx(), i.dy(), i.dz());
+        d = d.lengthSqr() < 1e-6 ? new Vec3(0, 0, 1) : d.normalize();
+        Vec3 u = Math.abs(d.y) > 0.9 ? new Vec3(1, 0, 0) : d.cross(new Vec3(0, 1, 0)).normalize();
+        Vec3 w = d.cross(u).normalize();
+        RandomSource r = level.getRandom();
+        int cor = cor(i.atacante());
+        boolean meu = i.atacante() == p.getId();
+        if (i.fx() == Combo.APARO) {
+            if (quem != null) Animador.congelar(quem, HIT_STOP[Combo.APARO]);
+            if (bateu != null) Animador.congelar(bateu, HIT_STOP[Combo.APARO] * 1.5f);
+            level.addParticle(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), ponto.x, ponto.y, ponto.z, 0, 0, 0);
+            for (int k = 0; k < 36; k++) {
+                double a = Math.PI * 2 * k / 36;
+                Vec3 radial = u.scale(Math.cos(a)).add(w.scale(Math.sin(a)));
+                Vec3 v = radial.scale(0.45).add(d.scale(0.08));
+                level.addParticle(ParticleTypes.END_ROD, ponto.x, ponto.y, ponto.z, v.x, v.y, v.z);
+                if (k % 2 == 0) level.addParticle(new DustParticleOptions(Efeitos.misturar(cor, 0xFFFFFF, 0.5f), 1.3f), ponto.x + radial.x * 0.3,
+                    ponto.y + radial.y * 0.3, ponto.z + radial.z * 0.3, v.x * 0.6, v.y * 0.6, v.z * 0.6);
+            }
+            for (int k = 0; k < 14; k++) level.addParticle(ParticleTypes.ELECTRIC_SPARK, ponto.x, ponto.y, ponto.z,
+                d.x * 0.3 + r.nextGaussian() * 0.25, d.y * 0.3 + r.nextGaussian() * 0.25, d.z * 0.3 + r.nextGaussian() * 0.25);
+            if (meu) {
+                tremer(TREMOR[Combo.APARO], 6);
+                piscar(0xFFFFFF, 0.4f);
+                socoFov = -0.07f;
+                aparoEm = p.tickCount;
+            } else if (bateu == p) {
+                tremer(TREMOR[Combo.APARO] * 1.2f, 8);
+                piscar(Efeitos.misturar(cor, 0xFFFFFF, 0.6f), 0.3f);
+            }
+            return;
+        }
+        if (quem != null) Animador.congelar(quem, HIT_STOP[Combo.BLOQUEIO]);
+        for (int k = 0; k < 12; k++) {
+            Vec3 v = d.scale(-0.2).add(u.scale(r.nextGaussian() * 0.3)).add(w.scale(r.nextGaussian() * 0.3));
+            level.addParticle(ParticleTypes.CRIT, ponto.x, ponto.y, ponto.z, v.x, v.y, v.z);
+        }
+        level.addParticle(ParticleTypes.POOF, ponto.x, ponto.y, ponto.z, 0, 0.02, 0);
+        if (meu) tremer(TREMOR[Combo.BLOQUEIO], 3);
+    }
+
+    /** Tick do último aparo do próprio jogador (o HUD mostra "APARO!"). */
+    static int aparoEm = -100;
+
+    /** Botão esquerdo segurado no modo combate: depois de um instante vira carga; soltar golpeia. */
     private static void carga(Minecraft mc, LocalPlayer p, Combo.Config c) {
         Combo.Carregado k = c == null ? null : c.pesado();
         boolean modo = Combo.emModo(p);
-        boolean segura = modo && k != null && mc.options.keyUse.isDown() && mc.gui.screen() == null && EstadoCliente.transformado();
+        boolean baixo = modo && mc.options.keyAttack.isDown() && mc.gui.screen() == null;
+        if (baixo && !esquerdo) esquerdoDe = p.tickCount;
+        esquerdo = baixo;
+        boolean segura = baixo && k != null && !defendendo && EstadoCliente.transformado() && (carregando || p.tickCount - esquerdoDe >= SEGURAR_CARGA);
         if (carregando) {
             if (!segura) {
                 soltarCarga(p, modo && k != null);
@@ -264,7 +353,7 @@ public final class Combate {
         mc.getSoundManager().play(somCarga);
     }
 
-    /** Soltou o botão direito: o golpe carregado sai (golpear) ou a carga só some (saiu do modo). */
+    /** Soltou o botão esquerdo: o golpe carregado sai (golpear) ou a carga só some (saiu do modo). */
     private static void soltarCarga(LocalPlayer p, boolean golpear) {
         if (!carregando) return;
         carregando = false;
@@ -298,7 +387,9 @@ public final class Combate {
 
     /** Avança até o alvo à frente (para o golpe chegar nele), ou dá um passo curto se não houver ninguém. */
     private static void investir(LocalPlayer p, Combo.Config c, Combo.Golpe g, float f) {
-        LivingEntity alvo = Combo.alvoInvestida(p, c);
+        // Travado num inimigo ao alcance do avanço, o golpe vai nele.
+        LivingEntity travado = Trava.alvo();
+        LivingEntity alvo = travado != null && travado.distanceTo(p) <= c.investida() + travado.getBbWidth() ? travado : Combo.alvoInvestida(p, c);
         boolean voando = Voador.voando(p);
         Vec3 v;
         if (alvo != null) {
@@ -337,6 +428,10 @@ public final class Combate {
             else Animador.tocar(e, g.anim());
         }
         for (Rede.Impacto i; (i = EstadoCliente.IMPACTOS.poll()) != null; ) {
+            if (i.fx() >= Combo.BLOQUEIO) {
+                defesaVista(level, p, i);
+                continue;
+            }
             if (i.atacante() == p.getId() && !Flashback.emReplay()) continue;
             Entity atacante = level.getEntity(i.atacante());
             if (atacante != null) Animador.congelar(atacante, HIT_STOP[i.fx()]);
@@ -359,10 +454,9 @@ public final class Combate {
             Rede.CANAL.send(new Rede.ModoCombate(false), Canal.SERVIDOR);
         }
         carga(mc, p, c);
+        guarda(mc, p, c);
         if (passo < 0 || c == null || atual == null) {
             passo = -1;
-            // Segurando o botão esquerdo no modo combate, o combo continua sozinho.
-            if (Combo.emModo(p) && mc.options.keyAttack.isDown() && mc.gui.screen() == null && pode(mc)) clicar(mc);
             return;
         }
         Combo.Golpe g = atual;
@@ -371,7 +465,6 @@ public final class Combate {
             impactou = true;
             prever(level, p, g);
         }
-        if (Combo.emModo(p) && mc.options.keyAttack.isDown() && mc.gui.screen() == null && t >= g.livre() - 0.1f) fila = true;
         if (fila && t >= g.livre()) {
             if (pode(mc)) clicar(mc);
             else fila = false;
@@ -519,15 +612,9 @@ public final class Combate {
         if (flash > 0.01f) g.fill(0, 0, w, h, (Math.round(Math.min(1, flash) * 160) << 24) | (flashCor & 0xFFFFFF));
         if (!Combo.emModo(p)) return;
         int cor = 0xFF000000 | cor(p.getId());
-        // Cantoneiras em volta da mira: o mouse agora é só para lutar.
-        int cx = w / 2, cy = h / 2, r = 9, l = 4;
-        for (int sx = -1; sx <= 1; sx += 2) {
-            for (int sy = -1; sy <= 1; sy += 2) {
-                int x = cx + sx * r, y = cy + sy * r;
-                g.fill(Math.min(x, x - sx * l), y, Math.max(x, x - sx * l) + 1, y + 1, cor);
-                g.fill(x, Math.min(y, y - sy * l), x + 1, Math.max(y, y - sy * l) + 1, cor);
-            }
-        }
+        // A mira é a do jogo (ou a da câmera de aventura, onde o olhar do herói bate): a barra e os avisos ficam embaixo dela.
+        int[] mira = CameraAventura.miraNaTela(g);
+        int cx = mira == null ? w / 2 : mira[0], cy = mira == null ? h / 2 : mira[1];
         Combo.Config c = config();
         if (carregando && c != null && c.pesado() != null) {
             float pt = dt.getGameTimeDeltaPartialTick(false);
@@ -541,10 +628,18 @@ public final class Combate {
             g.fill(bx, by, bx + Math.round(bw * u), by + 2, cb);
         }
         var font = mc.font;
-        var txt = net.minecraft.network.chat.Component.translatable("dcuniverse.combate.hud", Teclas.COMBATE.getTranslatedKeyMessage());
-        int tw = font.width(txt);
-        int ty = h - 62;
-        g.text(font, txt, cx - tw / 2, ty, 0xD0FFFFFF & (0xFF000000 | 0xFFFFFF), true);
+        float desde = p.tickCount + dt.getGameTimeDeltaPartialTick(false) - aparoEm;
+        if (desde < 24) {
+            // "APARO!" sobe da mira e some.
+            float a = Math.min(1, (24 - desde) / 8f);
+            var txt = net.minecraft.network.chat.Component.translatable("dcuniverse.combate.aparo").withStyle(net.minecraft.ChatFormatting.BOLD);
+            g.pose().pushMatrix();
+            g.pose().translate(cx, cy - 18 - desde * 0.6f);
+            float esc = 1.4f + Math.max(0, (4 - desde) / 4f) * 0.8f;
+            g.pose().scale(esc, esc);
+            g.text(font, txt, -font.width(txt) / 2, -4, (Math.max(8, Math.round(a * 255)) << 24) | 0xFFF6C8, true);
+            g.pose().popMatrix();
+        }
     }
 
     // ------------------------------------------------------------------ câmera

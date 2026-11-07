@@ -274,17 +274,28 @@ public final class CameraAventura {
     private static final Matrix4f MATRIZ = new Matrix4f();
     private static final Vector4f V = new Vector4f();
 
+    /** Ponto do mundo na tela (coordenadas da GUI), null se está atrás da câmera. */
+    public static int[] naTela(GuiGraphicsExtractor g, Vec3 ponto) {
+        Camera cam = Minecraft.getInstance().gameRenderer.mainCamera();
+        Vec3 rel = ponto.subtract(cam.position());
+        cam.getViewRotationProjectionMatrix(MATRIZ).transform(V.set((float) rel.x, (float) rel.y, (float) rel.z, 1f));
+        if (V.w <= 0.01f) return null;
+        return new int[] {Math.round((V.x / V.w + 1) * 0.5f * g.guiWidth()), Math.round((1 - V.y / V.w) * 0.5f * g.guiHeight())};
+    }
+
+    /** Onde a mira da câmera de aventura está na tela agora (null: câmera desligada, a mira é a do centro). */
+    public static int[] miraNaTela(GuiGraphicsExtractor g) {
+        Minecraft mc = Minecraft.getInstance();
+        return alvo == null || !ativa(mc) ? null : naTela(g, alvo);
+    }
+
     /** A mira: no ponto da tela onde o olhar do herói bate (quase sempre o centro), com cantos quando é uma criatura. */
     public static void desenhar(GuiGraphicsExtractor g, DeltaTracker dt) {
         Minecraft mc = Minecraft.getInstance();
         if (alvo == null || !ativa(mc) || mc.gui.hud.isHidden() || mc.player.isSpectator()) return;
-        Camera cam = mc.gameRenderer.mainCamera();
-        Vec3 rel = alvo.subtract(cam.position());
-        cam.getViewRotationProjectionMatrix(MATRIZ).transform(V.set((float) rel.x, (float) rel.y, (float) rel.z, 1f));
-        if (V.w <= 0.01f) return;
-        float x = (V.x / V.w + 1) * 0.5f * g.guiWidth();
-        float y = (1 - V.y / V.w) * 0.5f * g.guiHeight();
-        int cx = Math.round(x), cy = Math.round(y);
+        int[] m = naTela(g, alvo);
+        if (m == null) return;
+        int cx = m[0], cy = m[1];
         g.nextStratum();
         g.blitSprite(RenderPipelines.CROSSHAIR, MIRA, cx - 7, cy - 7, 15, 15);
         if (alvoCriatura) {

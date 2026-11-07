@@ -38,6 +38,7 @@ public final class Cliente {
             e.register(Teclas.RADIAL);
             e.register(Teclas.COMBATE);
             e.register(Teclas.OMBRO);
+            e.register(Teclas.TRAVA);
             e.register(Teclas.DESTRANSFORMAR);
             e.register(Teclas.GUIA);
             e.register(Teclas.DIARIO);
@@ -47,6 +48,9 @@ public final class Cliente {
             e.register(Teclas.DIRETOR_RAPIDO);
         });
         DCUniverse.modBus().addListener(RegisterGuiLayersEvent.class, e -> {
+            // Primeiro (embaixo de tudo): as faixas de cinema da trava de mira ficam atrás do HUD.
+            e.registerBelow(VanillaGuiLayers.SLEEP_OVERLAY,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "trava"), foraDoReplay(Trava::desenhar));
             e.registerBelow(VanillaGuiLayers.SLEEP_OVERLAY,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "velocidade"), foraDoReplay(Voador::desenharLinhas));
             e.registerBelow(VanillaGuiLayers.SLEEP_OVERLAY,
@@ -114,6 +118,7 @@ public final class Cliente {
             com.danrod.dcuniverse.client.anim.Animador.limpar();
             Combate.limpar();
             CameraAventura.limpar();
+            Trava.limpar();
         });
         GuiaItem.abrir = GuiaScreen::abrir;
         com.danrod.dcuniverse.core.EstadoCliente.batcomputador = BatcomputadorScreen::receber;
@@ -124,6 +129,7 @@ public final class Cliente {
         Pecas.registrar();
         Combate.registrar();
         CameraAventura.registrar();
+        Trava.registrar();
         com.danrod.dcuniverse.client.anim.Animador.registrar();
         com.danrod.dcuniverse.client.anim.Rastros.registrar();
         com.danrod.dcuniverse.client.npc.ColeiraCamada.registrar();
@@ -191,6 +197,10 @@ public final class Cliente {
         while (Teclas.COMBATE.consumeClick()) {
             if (livre) Combate.alternar(mc);
         }
+        while (Teclas.TRAVA.consumeClick()) {
+            if (livre && transformado) Trava.apertar(mc);
+        }
+        Trava.tick(mc);
         while (Teclas.RADIAL.consumeClick()) {
             if (livre && transformado) {
                 mc.gui.setScreen(new RadialScreen());

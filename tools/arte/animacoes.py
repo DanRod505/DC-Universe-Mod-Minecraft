@@ -203,6 +203,60 @@ anims["superman.martelo"] = {
     },
 }
 
+# ---------------------------------------------------------------- defesa (botão direito no modo combate)
+# Antebraços de aço cruzados na frente do rosto, queixo baixo, joelhos dobrados e o peso para a frente; respira.
+D_D, D_D_COT = [-104, -12, -34], [-72, 0, 0]
+D_E, D_E_COT = [-98, 12, 30], [-80, 0, 0]
+anims["superman.defesa"] = {
+    "loop": True, "animation_length": 1.6, "dcuniverse:entrada": 0.07, "dcuniverse:saida": 0.16,
+    "bones": {
+        "root": {"position": kf([(0, [0, 2.0, 0.4]), (0.8, [0, 2.3, 0.4]), (1.6, [0, 2.0, 0.4])], "tudo"),
+                 "rotation": [3, 0, 0]},
+        "body": {"rotation": kf([(0, [12, 4, 0]), (0.8, [14, 5, 0]), (1.6, [12, 4, 0])], "tudo")},
+        "head": {"rotation": [16, 0, 0]},
+        "right_arm": {"rotation": kf([(0, D_D), (0.8, [-102, -12, -33]), (1.6, D_D)], "tudo")},
+        "right_forearm": {"rotation": D_D_COT},
+        "left_arm": {"rotation": kf([(0, D_E), (0.8, [-96, 12, 29]), (1.6, D_E)], "tudo")},
+        "left_forearm": {"rotation": D_E_COT},
+        "right_leg": {"rotation": [20, 0, 9]},
+        "left_leg": {"rotation": [-20, 0, -7]},
+        "right_shin": {"rotation": [26, 0, 0]},
+        "left_shin": {"rotation": [22, 0, 0]},
+        "fp_right_arm": {"position": kf([(0, [-3.2, 7.5, -1.5]), (0.8, [-3.2, 7.2, -1.5]), (1.6, [-3.2, 7.5, -1.5])], "tudo"),
+                         "rotation": [0, 30, -38]},
+        "fp_right_forearm": {"rotation": [-62, 0, 0]},
+        "fp_left_arm": {"position": kf([(0, [3.4, 7.0, -1.0]), (0.8, [3.4, 6.7, -1.0]), (1.6, [3.4, 7.0, -1.0])], "tudo"),
+                        "rotation": [0, -30, 38]},
+        "fp_left_forearm": {"rotation": [-62, 0, 0]},
+    },
+}
+
+# Aparo: no instante do golpe os braços abrem com força e jogam o ataque de volta; depois voltam à defesa.
+anims["superman.aparo"] = {
+    "animation_length": 0.45, "dcuniverse:entrada": 0.0, "dcuniverse:saida": 0.12,
+    "dcuniverse:rastros": {"right_arm": [[0.0, 0.1]], "left_arm": [[0.0, 0.1]]},
+    "bones": {
+        "root": {"position": kf([(0, [0, 2.0, 0.4]), (0.06, [0, 1.2, -2.6]), (0.2, [0, 1.3, -2.2]), (0.45, [0, 2.0, 0.4])], suave=(0.45,)),
+                 "rotation": kf([(0, [3, 0, 0]), (0.06, [-6, 0, 0]), (0.45, [3, 0, 0])])},
+        "body": {"rotation": kf([(0, [12, 4, 0]), (0.06, [-8, 0, 0]), (0.2, [-6, 0, 0]), (0.45, [12, 4, 0])], suave=(0.45,))},
+        "head": {"rotation": kf([(0, [16, 0, 0]), (0.06, [-4, 0, 0]), (0.45, [16, 0, 0])])},
+        "right_arm": {"rotation": kf([(0, D_D), (0.06, [-82, 20, 62]), (0.2, [-78, 18, 58]), (0.45, D_D)], suave=(0.45,))},
+        "right_forearm": {"rotation": kf([(0, D_D_COT), (0.06, [-14, 0, 0]), (0.2, [-18, 0, 0]), (0.45, D_D_COT)], suave=(0.45,))},
+        "left_arm": {"rotation": kf([(0, D_E), (0.06, [-82, -20, -62]), (0.2, [-78, -18, -58]), (0.45, D_E)], suave=(0.45,))},
+        "left_forearm": {"rotation": kf([(0, D_E_COT), (0.06, [-14, 0, 0]), (0.2, [-18, 0, 0]), (0.45, D_E_COT)], suave=(0.45,))},
+        "right_leg": {"rotation": kf([(0, [20, 0, 9]), (0.06, [28, 0, 9]), (0.45, [20, 0, 9])])},
+        "left_leg": {"rotation": kf([(0, [-20, 0, -7]), (0.06, [-30, 0, -7]), (0.45, [-20, 0, -7])])},
+        "right_shin": {"rotation": [26, 0, 0]},
+        "left_shin": {"rotation": kf([(0, [22, 0, 0]), (0.06, [36, 0, 0]), (0.45, [22, 0, 0])])},
+        "fp_right_arm": {"position": kf([(0, [-3.2, 7.5, -1.5]), (0.06, [5, 6, -4]), (0.2, [4.6, 5.6, -3.6]), (0.45, [-3.2, 7.5, -1.5])], suave=(0.45,)),
+                         "rotation": kf([(0, [0, 30, -38]), (0.06, [0, -20, 10]), (0.45, [0, 30, -38])])},
+        "fp_right_forearm": {"rotation": kf([(0, [-62, 0, 0]), (0.06, [-10, 0, 0]), (0.45, [-62, 0, 0])])},
+        "fp_left_arm": {"position": kf([(0, [3.4, 7.0, -1.0]), (0.06, [-5, 5.6, -4]), (0.2, [-4.6, 5.2, -3.6]), (0.45, [3.4, 7.0, -1.0])], suave=(0.45,)),
+                        "rotation": kf([(0, [0, -30, 38]), (0.06, [0, 20, -10]), (0.45, [0, -30, 38])])},
+        "fp_left_forearm": {"rotation": kf([(0, [-62, 0, 0]), (0.06, [-10, 0, 0]), (0.45, [-62, 0, 0])])},
+    },
+}
+
 # ---------------------------------------------------------------- golpe carregado
 # Carga (laço curto, tremendo): o punho direito vai lá atrás, o esquerdo mira, as pernas abrem e o corpo abaixa.
 anims["superman.carga"] = {
@@ -492,5 +546,5 @@ def gravar(nome, sobre, conteudo):
     open(f"src/main/resources/assets/dcuniverse/animacoes/{nome}.json", "w", encoding="utf-8").write(texto + "\n")
 
 
-gravar("superman_combo", "Guarda, combo e golpe carregado do Superman (v0.7). Eixos do modelo Java: graus somados/impostos ao osso, posição em pixels. Ver client/anim/Animacao.java e tools/arte/animacoes.py.", anims)
+gravar("superman_combo", "Guarda, combo, golpe carregado, defesa e aparo do Superman (v0.7). Eixos do modelo Java: graus somados/impostos ao osso, posição em pixels. Ver client/anim/Animacao.java e tools/arte/animacoes.py.", anims)
 gravar("superman_habilidades", "Habilidades coreografadas do Superman (v0.7): visão de calor, sopro congelante, investida de aço, palmas sônicas e a suprema. Os eventos são a coreografia (client/Cena). Ver tools/arte/animacoes.py.", habs)

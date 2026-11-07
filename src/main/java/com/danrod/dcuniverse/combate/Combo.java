@@ -44,6 +44,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class Combo {
     /** Força do golpe (hit-stop, tremor, partículas, som); ONDA é o pesado que racha o chão em volta. */
     public static final int LEVE = 0, MEDIO = 1, PESADO = 2, ONDA = 3;
+    /** Efeitos da defesa (combate/Defesa) no mesmo pacote de impacto: golpe segurado na guarda e aparo perfeito. */
+    public static final int BLOQUEIO = 4, APARO = 5;
     /** Passo do golpe carregado (botão direito no modo combate) nos pacotes e nas contas do combo. */
     public static final int PASSO_PESADO = 99;
 
@@ -74,8 +76,8 @@ public final class Combo {
      */
     public record Carregado(String animCarga, float carga, float minimo, Golpe golpe) {}
 
-    /** stance: a guarda (animação em laço) do modo combate. heavy: o golpe carregado (pode faltar). */
-    public record Config(List<Golpe> golpes, float investida, String postura, Carregado pesado) {
+    /** stance: a guarda (animação em laço) do modo combate. heavy: o golpe carregado e guard: a defesa (podem faltar). */
+    public record Config(List<Golpe> golpes, float investida, String postura, Carregado pesado, Defesa.Config defesa) {
         public static Config parse(JsonObject j) {
             List<Golpe> gs = new ArrayList<>();
             for (JsonElement el : j.getAsJsonArray("hits")) gs.add(Golpe.parse(el.getAsJsonObject()));
@@ -85,7 +87,8 @@ public final class Combo {
                 JsonObject h = j.getAsJsonObject("heavy");
                 pesado = new Carregado(h.get("charge_anim").getAsString(), f(h, "charge", 1f), f(h, "min_power", 0.4f), Golpe.parse(h));
             }
-            return new Config(List.copyOf(gs), f(j, "lunge", 5f), j.has("stance") ? j.get("stance").getAsString() : "", pesado);
+            return new Config(List.copyOf(gs), f(j, "lunge", 5f), j.has("stance") ? j.get("stance").getAsString() : "", pesado,
+                j.has("guard") ? Defesa.Config.parse(j.getAsJsonObject("guard")) : null);
         }
 
         /** O golpe do passo (PASSO_PESADO = o carregado). */
@@ -115,12 +118,32 @@ public final class Combo {
     private static final Map<UUID, ServerPlayer> MODO = new ConcurrentHashMap<>();
 
     /**
-     * Modo combate: os botões do mouse são só do combate (esquerdo combo, direito golpe carregado); nada de quebrar,
+     * Modo combate: os botões do mouse são só do combate (esquerdo combo e, segurado, golpe carregado; direito defesa); nada de quebrar,
      * construir ou usar itens. A tecla liga e desliga; destransformar desliga.
      */
     public static boolean emModo(Player p) {
         if (p.level().isClientSide()) return com.danrod.dcuniverse.core.EstadoCliente.MODO_COMBATE.contains(p.getId());
         return MODO.containsKey(p.getUUID());
+    }
+
+    /** Conjunto da habilidade (campo "set"): AMBOS, COMBATE (só no modo combate) ou MUNDO (só fora dele). */
+    public static final int AMBOS = 0, COMBATE = 1, MUNDO = 2;
+
+    public static int conjunto(Personagem.Habilidade h) {
+        return switch (h.params().s("set", "")) {
+            case "combat" -> COMBATE;
+            case "world" -> MUNDO;
+            default -> AMBOS;
+        };
+    }
+
+    /** A habilidade está nas teclas agora: as de combate só no modo combate, as de mundo só fora dele. */
+    public static boolean disponivel(Player p, Personagem.Habilidade h) {
+        return disponivel(conjunto(h), emModo(p));
+    }
+
+    public static boolean disponivel(int conjunto, boolean emModo) {
+        return conjunto == AMBOS || (conjunto == COMBATE) == emModo;
     }
 
     public static void modo(ServerPlayer p, boolean ligar) {
@@ -130,6 +153,7 @@ public final class Combo {
         if (ligar) MODO.put(p.getUUID(), p);
         else MODO.remove(p.getUUID());
         if (!ligar) CARREGANDO.remove(p.getUUID());
+        if (ligar != estava) com.danrod.dcuniverse.ability.Habilidades.trocouModo(p);
         // Sempre responde (mesmo sem mudar): o cliente que previu errado volta ao estado certo.
         Rede.CANAL.send(new Rede.ModoVisto(p.getId(), ligar ? c.postura() : ""), Canal.rastreandoEProprio(p));
         if (ligar && !estava) Guia.concluir(p, "modo_combate");
@@ -245,7 +269,8 @@ public final class Combo {
         EstadoJogador e = EstadoJogador.de(player);
         Config c = config(e.personagem());
         if (c == null || player.isSpectator() || player.isPassenger() || passo < 0 || passo >= c.golpes().size()) return;
-        if (e.destransformarEm() != 0L || !maoLivre(player)) return;
+        // Fora do modo combate o mouse é o do Minecraft: nada de combo.
+        if (e.destransformarEm() != 0L || !emModo(player) || Defesa.defendendo(player)) return;
         long agora = player.level().getGameTime();
         Ultimo u = ULTIMOS.get(player.getUUID());
         if (u != null) {
@@ -282,6 +307,7 @@ public final class Combo {
         }
         long agora = player.level().getGameTime();
         if (comecar) {
+            if (Defesa.defendendo(player)) return;
             Ultimo u = ULTIMOS.get(player.getUUID());
             if (u != null && agora - u.tick < Math.round(u.golpe.livre() * 20) - 3) return;
             CARREGANDO.put(player.getUUID(), agora);
@@ -294,6 +320,11 @@ public final class Combo {
         float forca = forca(k, (agora - desde) / 20f);
         agendar(player, PASSO_PESADO, k.golpe(), forca, agora);
         if (forca >= 0.99f) Guia.concluir(player, "golpe_carregado");
+    }
+
+    /** A carga some sem golpear (levantou a guarda). */
+    static void cancelarCarga(ServerPlayer player) {
+        CARREGANDO.remove(player.getUUID());
     }
 
     /** Força do golpe carregado depois de segundos carregando (a mesma conta no cliente). */

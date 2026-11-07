@@ -720,5 +720,37 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.meteoro"
+  },
+  "habilidade.defesa": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/defesa"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.defesa"
+  },
+  "habilidade.aparo": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/aparo"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.aparo"
+  },
+  "habilidade.trava": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/trava"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.trava"
+  },
+  "habilidade.trava_solta": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/trava_solta"
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.trava_solta"
   }
 }

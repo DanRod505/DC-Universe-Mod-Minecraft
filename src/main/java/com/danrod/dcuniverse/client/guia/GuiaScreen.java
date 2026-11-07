@@ -981,6 +981,11 @@ public final class GuiaScreen extends Screen {
         texto(out, Component.translatable("dcuniverse.guia.combo.modo", com.danrod.dcuniverse.client.Teclas.COMBATE.getTranslatedKeyMessage()), TINTA, 2);
         texto(out, Component.translatable("dcuniverse.guia.combo.camera", net.minecraft.client.Minecraft.getInstance().options.keyTogglePerspective.getTranslatedKeyMessage(),
             com.danrod.dcuniverse.client.Teclas.OMBRO.getTranslatedKeyMessage()), TINTA, 2);
+        if (c.defesa() != null) {
+            var d = c.defesa();
+            texto(out, Component.translatable("dcuniverse.guia.combo.defesa", fmt(d.reducao() * 100), fmt(d.aparo()), fmt(d.atordoar())), TINTA, 2);
+        }
+        texto(out, Component.translatable("dcuniverse.guia.combo.trava", com.danrod.dcuniverse.client.Teclas.TRAVA.getTranslatedKeyMessage()), TINTA, 2);
         for (var g : c.golpes()) {
             Component nomeGolpe = Component.translatable("dcuniverse.guia.combo.golpe." + g.anim());
             out.add(topico(topicos, nome(nomeGolpe), nomeGolpe, true));
@@ -1007,15 +1012,18 @@ public final class GuiaScreen extends Screen {
     /** Tecla de atalho da habilidade para o personagem: a do HUD quando é ele que está transformado, senão pela ordem. */
     private static Component atalho(Personagem p, Personagem.Habilidade h) {
         int a = -1;
+        int conj = com.danrod.dcuniverse.combate.Combo.conjunto(h);
         if (p.id().toString().equals(EstadoCliente.atual.personagem())) {
             var habs = EstadoCliente.habilidades();
             for (int i = 0; i < habs.size(); i++) {
-                if (habs.get(i).id().equals(h.id())) a = com.danrod.dcuniverse.client.Atalhos.atalhoDe(i);
+                if (habs.get(i).id().equals(h.id())) a = com.danrod.dcuniverse.client.Atalhos.atalhoDe(i, conj == com.danrod.dcuniverse.combate.Combo.COMBATE
+                    || conj == com.danrod.dcuniverse.combate.Combo.AMBOS && com.danrod.dcuniverse.client.Atalhos.combate());
             }
         } else if (h.suprema()) {
             a = com.danrod.dcuniverse.client.Atalhos.SUPREMA;
         } else if (p.cinto() == null) {
-            int n = p.habilidades().stream().filter(x -> !x.suprema()).toList().indexOf(h);
+            int n = p.habilidades().stream().filter(x -> !x.suprema() && (com.danrod.dcuniverse.combate.Combo.conjunto(x) == conj
+                || conj == com.danrod.dcuniverse.combate.Combo.AMBOS || com.danrod.dcuniverse.combate.Combo.conjunto(x) == com.danrod.dcuniverse.combate.Combo.AMBOS)).toList().indexOf(h);
             a = n < com.danrod.dcuniverse.client.Teclas.HABILIDADES.size() ? n : -1;
         }
         return a < 0 ? Component.translatable("dcuniverse.guia.hab.so_radial")
@@ -1029,6 +1037,10 @@ public final class GuiaScreen extends Screen {
         out.add(topico(topicos, nome(nomeHab), nomeHab, true));
         texto(out, Component.translatable("habilidade.dcuniverse." + h.id() + ".desc"), TINTA, 1);
         out.add(item(atalho(p, h)));
+        int conj = com.danrod.dcuniverse.combate.Combo.conjunto(h);
+        if (conj != com.danrod.dcuniverse.combate.Combo.AMBOS) {
+            out.add(item(Component.translatable(conj == com.danrod.dcuniverse.combate.Combo.COMBATE ? "dcuniverse.guia.hab.conjunto.combate" : "dcuniverse.guia.hab.conjunto.mundo")));
+        }
         boolean segura = h.modo() == Personagem.Modo.HOLD;
         out.add(item(Component.translatable(segura ? "dcuniverse.guia.hab.segurar" : "dcuniverse.guia.hab.apertar", fmt(h.custo()))));
         Component recarga = Component.translatable("dcuniverse.guia.hab.recarga", fmt(h.recargaSeg()));

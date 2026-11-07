@@ -23,8 +23,10 @@ public final class Teclas {
     public static final List<KeyMapping> HABILIDADES = List.of(HAB1, HAB2, HAB3, HAB4, HAB5);
     /** Menu radial com todas as habilidades (as que não cabem nos atalhos): clicar numa usa ela. */
     public static final KeyMapping RADIAL = new KeyMapping("key.dcuniverse.radial", InputConstants.KEY_Y, CATEGORIA);
-    /** Modo combate: os botões do mouse viram só combo (esquerdo) e golpe carregado (direito). */
+    /** Modo combate: o esquerdo vira combo (segurado, golpe carregado) e o direito defesa; troca o conjunto de habilidades. */
     public static final KeyMapping COMBATE = new KeyMapping("key.dcuniverse.combate", InputConstants.KEY_LALT, CATEGORIA);
+    /** Trava de mira do modo combate (botão do meio do mouse, que no modo combate não pega bloco). */
+    public static final KeyMapping TRAVA = new KeyMapping("key.dcuniverse.trava", InputConstants.Type.MOUSE, org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE, CATEGORIA);
     /** Câmera de aventura: troca o ombro (direito, esquerdo, centro). */
     public static final KeyMapping OMBRO = new KeyMapping("key.dcuniverse.ombro", InputConstants.KEY_N, CATEGORIA);
     public static final KeyMapping DESTRANSFORMAR = new KeyMapping("key.dcuniverse.destransformar", InputConstants.KEY_H, CATEGORIA);
@@ -37,7 +39,7 @@ public final class Teclas {
 
     /** Teclas de outros mods do modpack que caem nas nossas por padrão (o recarregar shaders do Iris é R, o do radial). */
     private static final Set<String> CEDEM = Set.of("iris.keybind.reload");
-    private static final List<KeyMapping> NOSSAS = List.of(HAB1, HAB2, HAB3, HAB4, HAB5, SUPREMA, RADIAL, COMBATE, OMBRO, DESTRANSFORMAR, GUIA, DIARIO, MAPA, DIRETOR, DIRETOR_LENTO, DIRETOR_RAPIDO);
+    private static final List<KeyMapping> NOSSAS = List.of(HAB1, HAB2, HAB3, HAB4, HAB5, SUPREMA, RADIAL, COMBATE, TRAVA, OMBRO, DESTRANSFORMAR, GUIA, DIARIO, MAPA, DIRETOR, DIRETOR_LENTO, DIRETOR_RAPIDO);
     private static boolean conferido;
 
     private Teclas() {}

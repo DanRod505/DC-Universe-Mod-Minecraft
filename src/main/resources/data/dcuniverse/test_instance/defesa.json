@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "dcuniverse:defesa",
+  "environment": "dcuniverse:duelo",
+  "structure": "minecraft:empty",
+  "max_ticks": 60
+}

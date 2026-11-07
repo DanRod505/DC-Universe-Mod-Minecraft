@@ -57,6 +57,7 @@ public final class Eventos {
 
     public static void registrar() {
         com.danrod.dcuniverse.combate.Combo.registrar();
+        com.danrod.dcuniverse.combate.Defesa.registrar();
         NeoForge.EVENT_BUS.addListener(AddServerReloadListenersEvent.class, e -> {
             e.addListener(id("personagens"), new Personagens());
             e.addListener(id("npcs"), new com.danrod.dcuniverse.npc.Npcs.CarregarNpcs());
@@ -113,6 +114,7 @@ public final class Eventos {
                 com.danrod.dcuniverse.world.estrutura.Chegada.sair(sp);
                 com.danrod.dcuniverse.npc.Dialogo.fechar(sp);
                 com.danrod.dcuniverse.combate.Combo.esquecer(sp);
+                com.danrod.dcuniverse.combate.Defesa.esquecer(sp);
                 com.danrod.dcuniverse.ability.Coreografia.esquecer(sp);
             }
         });
@@ -134,6 +136,7 @@ public final class Eventos {
             Onda.tick();
             com.danrod.dcuniverse.ability.active.Palmas.tick();
             com.danrod.dcuniverse.combate.Combo.tick(e.getServer());
+            com.danrod.dcuniverse.combate.Defesa.tick();
             com.danrod.dcuniverse.ability.Congelamento.tick();
             Fortaleza.tick();
             com.danrod.dcuniverse.missao.Cenas.tick();
@@ -154,6 +157,7 @@ public final class Eventos {
             Onda.limpar();
             com.danrod.dcuniverse.ability.Coreografia.limpar();
             com.danrod.dcuniverse.ability.active.Palmas.limpar();
+            com.danrod.dcuniverse.combate.Defesa.limpar();
             com.danrod.dcuniverse.ability.Congelamento.limpar();
             Fortaleza.limpar();
             com.danrod.dcuniverse.missao.Cenas.limpar();
