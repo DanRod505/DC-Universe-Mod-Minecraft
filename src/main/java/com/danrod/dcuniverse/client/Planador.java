@@ -135,6 +135,11 @@ public final class Planador {
         return a.planar();
     }
 
+    /** O jogador local está planando (capa aberta), para a câmera de aventura (client/CameraAventura). */
+    public static boolean planando() {
+        return estado != Planar.FECHADA;
+    }
+
     /** O jogador local desce em queda amortecida (para a fumacinha nos pés em client/Efeitos). */
     public static boolean amortecendo(LocalPlayer p) {
         return EstadoCliente.atual.amortecendo() && noAr(p) && p.getDeltaMovement().y < 0;

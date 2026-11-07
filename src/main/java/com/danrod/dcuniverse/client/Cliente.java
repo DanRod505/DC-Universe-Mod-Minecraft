@@ -37,6 +37,7 @@ public final class Cliente {
             e.register(Teclas.SUPREMA);
             e.register(Teclas.RADIAL);
             e.register(Teclas.COMBATE);
+            e.register(Teclas.OMBRO);
             e.register(Teclas.DESTRANSFORMAR);
             e.register(Teclas.GUIA);
             e.register(Teclas.DIARIO);
@@ -72,6 +73,8 @@ public final class Cliente {
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "ilha"), foraDoReplay(Ilhas::desenhar));
             e.registerBelow(VanillaGuiLayers.SLEEP_OVERLAY,
                 Identifier.fromNamespaceAndPath(DCUniverse.MODID, "combate"), foraDoReplay(Combate::desenhar));
+            e.registerAbove(VanillaGuiLayers.CROSSHAIR,
+                Identifier.fromNamespaceAndPath(DCUniverse.MODID, "mira_aventura"), foraDoReplay(CameraAventura::desenhar));
         });
         DCUniverse.modBus().addListener(EntityRenderersEvent.RegisterRenderers.class, e -> {
             e.registerEntityRenderer(Entidades.PROJETIL.get(), ThrownItemRenderer::new);
@@ -110,6 +113,7 @@ public final class Cliente {
             java.util.Arrays.fill(SEGURANDO, -1);
             com.danrod.dcuniverse.client.anim.Animador.limpar();
             Combate.limpar();
+            CameraAventura.limpar();
         });
         GuiaItem.abrir = GuiaScreen::abrir;
         com.danrod.dcuniverse.core.EstadoCliente.batcomputador = BatcomputadorScreen::receber;
@@ -119,6 +123,7 @@ public final class Cliente {
         Skins.registrar();
         Pecas.registrar();
         Combate.registrar();
+        CameraAventura.registrar();
         com.danrod.dcuniverse.client.anim.Animador.registrar();
         com.danrod.dcuniverse.client.anim.Rastros.registrar();
         com.danrod.dcuniverse.client.npc.ColeiraCamada.registrar();
@@ -180,6 +185,9 @@ public final class Cliente {
             if (EstadoCliente.transformado() && !Flashback.emReplay()) Rede.CANAL.send(new Rede.Destransformar(), com.danrod.dcuniverse.core.Canal.SERVIDOR);
         }
         boolean transformado = EstadoCliente.transformado();
+        while (Teclas.OMBRO.consumeClick()) {
+            if (livre) CameraAventura.trocarOmbro(mc);
+        }
         while (Teclas.COMBATE.consumeClick()) {
             if (livre) Combate.alternar(mc);
         }

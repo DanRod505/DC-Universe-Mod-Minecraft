@@ -996,5 +996,11 @@
   "habilidade.dcuniverse.investida_de_aco": "Steel Charge",
   "habilidade.dcuniverse.investida_de_aco.desc": "Superman draws back his fist, vanishes in a boom that tears the air and crosses up to 22 blocks in an instant, fist first, toward where you aim. Anyone in the way takes a very strong hit and is thrown far; glass, leaves, snow and cobwebs shatter as he passes. Works on the ground and in flight, and stops when hitting a wall.",
   "habilidade.dcuniverse.palmas_sonicas": "Sonic Clap",
-  "habilidade.dcuniverse.palmas_sonicas.desc": "The arms spread wide and the hands meet in slow motion. The clap releases a visible bubble of air that grows up to 9 blocks: it stuns and pushes everyone around, breaks shield guards, shatters glass and leaves, puts out torches, candles and campfires and scatters loose items on the ground."
+  "habilidade.dcuniverse.palmas_sonicas.desc": "The arms spread wide and the hands meet in slow motion. The clap releases a visible bubble of air that grows up to 9 blocks: it stuns and pushes everyone around, breaks shield guards, shatters glass and leaves, puts out torches, candles and campfires and scatters loose items on the ground.",
+  "key.dcuniverse.ombro": "Adventure camera: swap shoulder",
+  "dcuniverse.camera.ombro": "Camera: %s",
+  "dcuniverse.camera.ombro.direito": "right shoulder",
+  "dcuniverse.camera.ombro.esquerdo": "left shoulder",
+  "dcuniverse.camera.ombro.centro": "center",
+  "dcuniverse.guia.combo.camera": "Adventure camera (%s until the camera is behind the hero): it sits over the shoulder, so the hero leaves the middle of the screen and you see the way ahead. It pulls back by itself when sprinting, flying and gliding (farther the faster you go) and widens a little in combat mode to show who is around. The crosshair shows where the hero's gaze lands, with corners when it is a creature. %s swaps the shoulder: right, left or center."
 }

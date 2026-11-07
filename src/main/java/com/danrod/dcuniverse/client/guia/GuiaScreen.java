@@ -979,6 +979,8 @@ public final class GuiaScreen extends Screen {
         out.add(secao(topicos, "dcuniverse.guia.secao.combo"));
         texto(out, Component.translatable("dcuniverse.guia.combo.como", fmt(c.investida())), TINTA, 2);
         texto(out, Component.translatable("dcuniverse.guia.combo.modo", com.danrod.dcuniverse.client.Teclas.COMBATE.getTranslatedKeyMessage()), TINTA, 2);
+        texto(out, Component.translatable("dcuniverse.guia.combo.camera", net.minecraft.client.Minecraft.getInstance().options.keyTogglePerspective.getTranslatedKeyMessage(),
+            com.danrod.dcuniverse.client.Teclas.OMBRO.getTranslatedKeyMessage()), TINTA, 2);
         for (var g : c.golpes()) {
             Component nomeGolpe = Component.translatable("dcuniverse.guia.combo.golpe." + g.anim());
             out.add(topico(topicos, nome(nomeGolpe), nomeGolpe, true));

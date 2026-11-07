@@ -996,5 +996,11 @@
   "habilidade.dcuniverse.investida_de_aco": "Investida de Aço",
   "habilidade.dcuniverse.investida_de_aco.desc": "O Superman recolhe o punho, some num estrondo que rompe o ar e cruza até 22 blocos em um instante com o punho na frente, na direção em que você mira. Quem estiver no caminho leva um golpe muito forte e é arremessado longe; vidro, folhas, neve e teias se despedaçam na passagem. Funciona no chão e no voo, e para ao bater numa parede.",
   "habilidade.dcuniverse.palmas_sonicas": "Palmas Sônicas",
-  "habilidade.dcuniverse.palmas_sonicas.desc": "Os braços abrem bem e as mãos se juntam em câmera lenta. O estalo solta uma bolha de ar visível que cresce até 9 blocos: atordoa e empurra todos em volta, derruba a defesa dos escudos, estoura vidros e folhas, apaga tochas, velas e fogueiras e espalha os itens soltos no chão."
+  "habilidade.dcuniverse.palmas_sonicas.desc": "Os braços abrem bem e as mãos se juntam em câmera lenta. O estalo solta uma bolha de ar visível que cresce até 9 blocos: atordoa e empurra todos em volta, derruba a defesa dos escudos, estoura vidros e folhas, apaga tochas, velas e fogueiras e espalha os itens soltos no chão.",
+  "key.dcuniverse.ombro": "Câmera de aventura: trocar ombro",
+  "dcuniverse.camera.ombro": "Câmera: %s",
+  "dcuniverse.camera.ombro.direito": "ombro direito",
+  "dcuniverse.camera.ombro.esquerdo": "ombro esquerdo",
+  "dcuniverse.camera.ombro.centro": "centro",
+  "dcuniverse.guia.combo.camera": "Câmera de aventura (%s até a câmera atrás do herói): ela fica sobre o ombro, então o herói sai do meio da tela e você vê o caminho. Recua sozinha correndo, voando e planando (mais longe quanto mais rápido) e abre um pouco no modo combate para mostrar quem está em volta. A mira aparece onde o olhar do herói acerta, com cantos quando é uma criatura. %s troca o ombro: direito, esquerdo ou centro."
 }
