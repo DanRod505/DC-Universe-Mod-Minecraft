@@ -131,6 +131,7 @@ public final class Cliente {
         CameraAventura.registrar();
         Trava.registrar();
         com.danrod.dcuniverse.client.anim.Animador.registrar();
+        com.danrod.dcuniverse.client.anim.Locomocao.registrar();
         com.danrod.dcuniverse.client.anim.Rastros.registrar();
         com.danrod.dcuniverse.client.npc.ColeiraCamada.registrar();
         Voador.registrar();

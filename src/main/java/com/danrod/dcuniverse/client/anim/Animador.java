@@ -82,6 +82,7 @@ public final class Animador {
         TOCANDO.clear();
         BASES.clear();
         Rastros.limpar();
+        Locomocao.limpar();
         ANIMACOES.clear();
         carregado = false;
     }
@@ -254,6 +255,8 @@ public final class Animador {
                 wAcao = tc.peso(t);
             }
         }
+        // Movimento procedural (corrida, curvas, pulo, pouso) por baixo de tudo: os golpes cobrem por cima.
+        Locomocao.aplicar(m, s, wAcao, pontas);
         if (b != null) {
             float wb = b.peso(s.ageInTicks);
             if (!b.ligada && wb <= 0 || s.ageInTicks + 1 < b.mudou) {
@@ -341,7 +344,7 @@ public final class Animador {
     }
 
     /** Gira as peças juntas em volta do pivô (graus x, y, z vezes o peso), como filhas de um mesmo osso. */
-    private static void girar(ModelPart[] ps, float[] graus, float w, Vector3f pivo) {
+    static void girar(ModelPart[] ps, float[] graus, float w, Vector3f pivo) {
         Quaternionf d = new Quaternionf().rotationZYX(graus[2] * w * Mth.DEG_TO_RAD, graus[1] * w * Mth.DEG_TO_RAD, graus[0] * w * Mth.DEG_TO_RAD);
         Vector3f off = new Vector3f(), e = new Vector3f();
         Quaternionf q = new Quaternionf();
