@@ -457,6 +457,8 @@ public final class Testes {
         zumbi.setNoAi(true);
         zumbi.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(1000);
         zumbi.setHealth(1000);
+        // Sem isto o zumbi às vezes pega fogo no sol e perde 1 de vida, derrubando as contas abaixo.
+        zumbi.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE, 2000, 0, false, false));
         // Modo mundo: o clique é o do Minecraft, o combo não sai.
         com.danrod.dcuniverse.combate.Combo.golpe(p, 0);
         int calor = sup.habilidades().indexOf(sup.habilidade("calor_focado"));
