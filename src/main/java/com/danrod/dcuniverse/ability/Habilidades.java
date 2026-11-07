@@ -25,36 +25,72 @@ public final class Habilidades {
         if (canalizava) Rede.aparencia(player);
     }
 
-    /** Tecla de uso apertada (true) ou solta (false). */
+    /** Tecla de uso da habilidade escolhida no radial apertada (true) ou solta (false). */
     public static void usar(ServerPlayer player, boolean pressionado) {
+        usar(player, -1, pressionado);
+    }
+
+    /**
+     * Tecla de habilidade apertada (true) ou solta (false). indice é a posição na lista de habilidades do jogador
+     * (a mesma do Sync e do radial); -1 usa a escolhida no radial. Soltar só para a canalização daquela habilidade,
+     * então dá para segurar uma tecla e apertar outra.
+     */
+    public static void usar(ServerPlayer player, int indice, boolean pressionado) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
         if (p == null || player.isSpectator()) return;
-        // Pilotando o veículo da suprema, a tecla de uso é dele (modo furtivo do Batwing, casco elétrico do Batmóvel...).
+        // Pilotando o veículo da suprema, as teclas de habilidade são dele (modo furtivo do Batwing, casco elétrico do Batmóvel...).
         var veiculo = com.danrod.dcuniverse.content.VeiculoDono.pilotando(player);
         if (veiculo != null) {
             if (pressionado) veiculo.comando(player, com.danrod.dcuniverse.content.VeiculoDono.ESPECIAL);
             return;
         }
+        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(player, p);
+        if (habs.isEmpty() || indice >= habs.size()) return;
+        Personagem.Habilidade h = habs.get(indice < 0 ? Math.min(e.selecionada(), habs.size() - 1) : indice);
         if (!pressionado) {
-            parar(player, e);
+            if (h.id().equals(e.canalizando())) parar(player, e);
+            else if (h.modo() == Personagem.Modo.HOLD && Coreografia.preparando(player, h.id())) Coreografia.cancelar(player);
             return;
         }
-        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(player, p);
-        if (e.destransformarEm() != 0L || habs.isEmpty()) return;
-        Personagem.Habilidade h = habs.get(Math.min(e.selecionada(), habs.size() - 1));
+        if (e.destransformarEm() != 0L || Coreografia.emCena(player)) return;
+        // Cada modo tem o seu conjunto de habilidades nas mesmas teclas (combate/Combo.conjunto).
+        if (!com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) return;
+        if (indice >= 0 && indice != e.selecionada()) e.setSelecionada(indice);
         if (h.modo() == Personagem.Modo.HOLD) {
             if (e.prontaEm(h.id()) > player.level().getGameTime()) return;
             if (e.esgotado() && !player.isCreative()) {
                 Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
                 return;
             }
-            e.setCanalizando(h.id());
+            if (h.id().equals(e.canalizando())) return;
+            boolean trocou = !e.canalizando().isEmpty();
+            if (trocou) parar(player, e);
             Guia.concluir(player, "habilidade");
-            Rede.aparencia(player);
+            // Coreografada: primeiro a cena (os olhos acendem, o peito enche), depois o raio.
+            if (Coreografia.preparo(h) > 0) Coreografia.comecar(player, p, h, true, 0);
+            else canalizarJa(player, h);
         } else if (executar(player, p, h)) {
             Guia.concluir(player, "habilidade");
         }
+        Rede.sincronizar(player);
+    }
+
+    /** Trocou de modo: a habilidade canalizada (ou em preparo) que não é do conjunto novo para. */
+    public static void trocouModo(ServerPlayer player) {
+        EstadoJogador e = EstadoJogador.de(player);
+        Personagem p = e.personagem();
+        if (p == null) return;
+        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
+        if (h != null && !com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) parar(player, e);
+        Rede.sincronizar(player);
+    }
+
+    /** Liga a canalização da habilidade segurada (direto, ou no fim do preparo coreografado). */
+    static void canalizarJa(ServerPlayer player, Personagem.Habilidade h) {
+        EstadoJogador e = EstadoJogador.de(player);
+        e.setCanalizando(h.id());
+        Rede.aparencia(player);
         Rede.sincronizar(player);
     }
 
@@ -68,7 +104,7 @@ public final class Habilidades {
         long agora = player.level().getGameTime();
         TipoHabilidade tipo = TiposHabilidade.TIPOS.get(h.tipo());
         if (tipo.gratis(player, h)) return tipo.usar(player, p, h);
-        if (e.prontaEm(h.id()) > agora) return false;
+        if (e.prontaEm(h.id()) > agora || Coreografia.emCena(player)) return false;
         boolean criativo = player.isCreative();
         if (!criativo && (e.esgotado() || e.energia() < h.custo())) {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
@@ -77,6 +113,15 @@ public final class Habilidades {
         if (!Cargas.tem(player, h)) {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_cargas", Component.translatable("habilidade.dcuniverse." + h.id())));
             return false;
+        }
+        if (Coreografia.preparo(h) > 0) {
+            // Cena primeiro: cobra agora (devolve se no fim o efeito não puder sair) e o efeito sai no tempo certo.
+            float pago = criativo ? 0 : h.custo();
+            if (!criativo) Energia.gastar(player, p, h.custo());
+            Cargas.gastar(player, h);
+            e.setProntaEm(h.id(), agora + Math.round(h.recargaSeg() * 20));
+            Coreografia.comecar(player, p, h, false, pago);
+            return true;
         }
         if (!tipo.usar(player, p, h)) return false;
         if (!criativo) Energia.gastar(player, p, h.custo());
@@ -105,6 +150,7 @@ public final class Habilidades {
         Personagem p = e.personagem();
         Personagem.Habilidade h = p == null ? null : p.habilidade(id);
         if (h != null) e.setProntaEm(id, player.level().getGameTime() + Math.round(h.recargaSeg() * 20));
+        if (h != null && Coreografia.preparo(h) > 0) Coreografia.animar(player, h.params().s("end_anim", ""));
         Rede.sincronizar(player);
         Rede.aparencia(player);
     }

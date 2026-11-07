@@ -96,6 +96,7 @@ public final class Mundo {
                 adicionar(e, agora);
             }
             case "investida" -> Voador.investida(mc, e);
+            case "meteoro" -> Voador.meteoro(mc, e);
             case "escudo_tk", "escudo_tk_golpe", "escudo_tk_fim" -> Bolha.efeito(mc, e);
             case "tiro" -> {
                 tiroInicio(level, e);
@@ -103,6 +104,10 @@ public final class Mundo {
             }
             case "sonico" -> {
                 sonicoInicio(mc, level, e);
+                adicionar(e, agora);
+            }
+            case "palmas" -> {
+                palmasInicio(mc, level, e);
                 adicionar(e, agora);
             }
             default -> {}
@@ -123,6 +128,7 @@ public final class Mundo {
             case "arco" -> t > 6;
             case "tiro" -> t > 2;
             case "sonico" -> t > SONICO_TICKS + 8;
+            case "palmas" -> t > PALMAS_TICKS + 10;
             case "smoke" -> Fumaca.tick(level, a.e, t);
             default -> true;
         };
@@ -262,6 +268,7 @@ public final class Mundo {
                 case "arco" -> arco(ps, col, cam, a.e, t);
                 case "tiro" -> tiro(ps, col, cam, a.e, t);
                 case "sonico" -> sonico(ps, col, cam, a.e, t);
+                case "palmas" -> palmas(ps, col, cam, a.e, t);
                 case "smoke" -> Fumaca.desenhar(ps, col, cam, a.e, t);
                 default -> {}
             }
@@ -444,6 +451,59 @@ public final class Mundo {
                     anelSonico(m, buf, c, r, k, 0.5f, 0x8A6BFF, 0.35f * alfa);
                     anelSonico(m, buf, c, r, k, 0.14f, 0xF2EEFF, 0.9f * alfa);
                 }
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------ palmas sônicas
+
+    private static final int PALMAS_TICKS = 14;
+
+    /**
+     * Palmas sônicas (ability/active/Palmas): clarão nas mãos, poeira e folhas varridas pelo chão e o tremor de quem
+     * está perto. a = raio, b = altura do chão em relação ao centro, cor = cor do herói.
+     */
+    private static void palmasInicio(Minecraft mc, ClientLevel level, Rede.Efeito e) {
+        RandomSource rnd = level.getRandom();
+        level.addParticle(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), e.x(), e.y(), e.z(), 0, 0, 0);
+        // Ar empurrado: um anel de poeira que corre pelo chão e um sopro de nuvem em volta das mãos.
+        double chao = e.y() + e.b();
+        for (int i = 0; i < 64; i++) {
+            double ang = i * Math.PI * 2 / 64, v = 0.55 + rnd.nextDouble() * 0.25;
+            level.addParticle(ParticleTypes.POOF, e.x(), chao + 0.15, e.z(), Math.cos(ang) * v, 0.02, Math.sin(ang) * v);
+        }
+        for (int i = 0; i < 30; i++) {
+            Vec3 d = new Vec3(rnd.nextGaussian(), rnd.nextGaussian() * 0.6, rnd.nextGaussian()).normalize().scale(0.35 + rnd.nextDouble() * 0.3);
+            level.addParticle(new DustParticleOptions(i % 3 == 0 ? e.cor() : 0xEAF4FF, 1.4f), e.x(), e.y(), e.z(), d.x, d.y, d.z);
+        }
+        if (mc.player != null) {
+            double d = mc.player.position().distanceTo(new Vec3(e.x(), e.y(), e.z()));
+            if (d < e.a() * 1.6) Voador.tremer(Math.round(12 * (float) (1 - d / (e.a() * 1.6))) + 2);
+        }
+    }
+
+    /**
+     * A onda das palmas: uma bolha de ar que cresce até o raio, feita de anéis em várias alturas (a casca de uma
+     * esfera), branca com a borda na cor do herói, e uma segunda onda mais fraca logo atrás.
+     */
+    private static void palmas(PoseStack ps, SubmitNodeCollector col, Vec3 cam, Rede.Efeito e, float t) {
+        Vec3 c = new Vec3(e.x(), e.y(), e.z()).subtract(cam);
+        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Matrix4f m = pose.pose();
+            for (int onda = 0; onda < 2; onda++) {
+                float u = (t - onda * 3) / PALMAS_TICKS;
+                if (u <= 0 || u > 1) continue;
+                double r = e.a() * frente(u);
+                float alfa = (1 - u) * (1 - u) * (onda == 0 ? 1f : 0.45f);
+                for (int k = -2; k <= 2; k++) {
+                    double lat = k * Math.PI / 7;
+                    Vec3 cc = c.add(0, Math.sin(lat) * r, 0);
+                    double rr = Math.cos(lat) * r;
+                    anelSonico(m, buf, cc, rr, 0, 0.7f, e.cor(), 0.28f * alfa);
+                    anelSonico(m, buf, cc, rr, 0, 0.16f, 0xFFFFFF, 0.75f * alfa);
+                }
+                anelSonico(m, buf, c, r, 1, 0.4f, e.cor(), 0.22f * alfa);
+                anelSonico(m, buf, c, r, 2, 0.4f, e.cor(), 0.22f * alfa);
             }
         });
     }

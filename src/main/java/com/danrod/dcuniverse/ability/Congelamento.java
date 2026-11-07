@@ -124,6 +124,12 @@ public final class Congelamento {
         if (s != null && s.congelado && e.level() instanceof ServerLevel level) soltar(level, e, s, true);
     }
 
+    /** Um soco na estátua de gelo: ela se parte em cacos (ver Combo). */
+    public static void estilhacar(LivingEntity e) {
+        Estado s = ESTADOS.get(e);
+        if (s != null && s.congelado && e.level() instanceof ServerLevel level) soltar(level, e, s, false);
+    }
+
     private static void soltar(ServerLevel level, LivingEntity e, Estado s, boolean derreteu) {
         s.congelado = false;
         s.exposicao = 0;

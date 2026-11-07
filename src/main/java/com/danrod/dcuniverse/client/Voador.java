@@ -86,6 +86,9 @@ public final class Voador {
     /** Investida aérea do jogador local (ability/active/Investida): ticks que faltam e velocidade (blocos/tick). */
     private static int investida;
     private static double investidaVel;
+    /** Suprema coreografada (Fortaleza): ticks desde o começo, duração e o ponto de impacto. -1 = nenhuma. */
+    private static int meteoroT = -1, meteoroDur;
+    private static Vec3 meteoroAlvo;
     /** Quem está numa investida agora (id da entidade → ticks que faltam), para a cauda luminosa. */
     private static final Map<Integer, Integer> INVESTINDO = new HashMap<>();
     /** Pose de voo de cada jogador visível que está voando (id da entidade). */
@@ -137,6 +140,12 @@ public final class Voador {
         Cauda.registrar();
     }
 
+    /** Investida do combo (client/Combate): troca a velocidade do jogador, voando ou não. */
+    public static void impulso(LocalPlayer p, Vec3 v) {
+        p.setDeltaMovement(v);
+        if (vel != null) vel = v;
+    }
+
     /** Faz a câmera tremer por alguns ticks (até 14 = o tremor mais forte). */
     public static void tremer(int ticks) {
         tremor = Math.max(tremor, Math.min(14, ticks));
@@ -154,6 +163,10 @@ public final class Voador {
         boolean livre = mc.gui.screen() == null;
         if (investida > 0) {
             investir(p);
+            return;
+        }
+        if (meteoroT >= 0) {
+            meteoro(p);
             return;
         }
         if (!voando(p)) {
@@ -234,6 +247,50 @@ public final class Voador {
         investidaVel = e.b();
         soco = 0.35f;
         tremor = Math.max(tremor, 9);
+    }
+
+    /**
+     * Suprema do Superman (Rede.Efeito "meteoro"): agacha, sobe como um foguete, para no alto contra o céu e desce
+     * como um meteoro até o ponto do impacto, chegando junto com o efeito do servidor. a = duração (ticks), cor =
+     * entidade. Todos veem a cauda acesa na subida e na descida.
+     */
+    public static void meteoro(Minecraft mc, Rede.Efeito e) {
+        if (mc.level == null) return;
+        INVESTINDO.put(e.cor(), Math.round(e.a()) + 2);
+        if (mc.player == null || mc.player.getId() != e.cor()) return;
+        meteoroT = 0;
+        meteoroDur = Math.max(20, Math.round(e.a()));
+        meteoroAlvo = new Vec3(e.x(), e.y(), e.z());
+    }
+
+    /** Fases da suprema em fração da duração: agacha até 0.22, sobe até 0.55, paira até 0.66 e desce até 1. */
+    private static void meteoro(LocalPlayer p) {
+        int t = meteoroT++;
+        float u = t / (float) meteoroDur;
+        Vec3 v;
+        if (u < 0.22f) {
+            v = new Vec3(0, Math.min(0, p.getDeltaMovement().y), 0);
+        } else if (u < 0.55f) {
+            // Sobe rápido e vai perdendo força (uns 18 blocos).
+            float f = (u - 0.22f) / 0.33f;
+            v = new Vec3(0, 2.0 * (1 - f) + 0.15, 0);
+        } else if (u < 0.66f) {
+            v = new Vec3(0, 0.02, 0);
+        } else {
+            int falta = Math.max(1, meteoroDur - t);
+            Vec3 d = meteoroAlvo.subtract(p.position());
+            double rapidez = Math.max(1.4, d.length() / falta);
+            v = d.lengthSqr() < 0.25 ? Vec3.ZERO : d.normalize().scale(Math.min(rapidez, d.length()));
+            if (t == Math.round(meteoroDur * 0.66f)) tremor = Math.max(tremor, 8);
+        }
+        p.setDeltaMovement(v);
+        if (voando(p)) vel = v;
+        p.resetFallDistance();
+        if (t >= meteoroDur + 2 || p.isSpectator()) {
+            meteoroT = -1;
+            p.setDeltaMovement(Vec3.ZERO);
+            tremor = 14;
+        }
     }
 
     /** Um tick da investida do jogador local: segue o olhar (dá para virar de leve) na velocidade da investida. */
@@ -583,6 +640,7 @@ public final class Voador {
     public static void limpar() {
         investida = 0;
         INVESTINDO.clear();
+        meteoroT = -1;
         vel = null;
         armado = true;
         tremor = 0;

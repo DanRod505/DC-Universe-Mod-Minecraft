@@ -20,14 +20,14 @@ Os sistemas que todo personagem, local e chefe vão usar.
 
 ### v0.7: Animação (sistema)
 
-1. Animador do jogador com Blockbench e sincronização no multiplayer
+1. Protótipo jogável: animador do jogador (formato Blockbench, multiplayer) com o combo do Superman, habilidades em atalhos diretos e impacto nos golpes
 2. Rostos expressivos e interações animadas com o mundo
 3. Ferramenta de coreografias (habilidade como roteiro)
 
 ### v0.8: Combate (sistema)
 
-1. Combo, golpe pesado e sensação de impacto
-2. Atalhos, cancelamentos e novo HUD
+1. Combo para todos os arquétipos, golpe pesado e golpes no ar
+2. Cancelamentos, atalhos por personagem e novo HUD
 3. Esquiva, aparar e mira travada
 4. Inimigos com IA de combate (GeckoLib)
 

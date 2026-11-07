@@ -11,6 +11,11 @@ Gera em src/main/resources/assets/dcuniverse/sounds/habilidade/ (mono, para o so
 - salto_carga.ogg       carga do super-salto: vento subindo
 - salto.ogg             impulso do super-salto: pancada e o ar passando
 - ricochete.ogg         projétil batendo no aço e ricocheteando
+Combate (v0.7):
+- golpe_ar.ogg          o punho cortando o ar (toca em todo golpe, acertando ou não)
+- golpe_leve.ogg        soco direto acertando: estalo seco e a pancada curta no corpo
+- golpe_medio.ogg       gancho acertando: pancada mais funda, o tapa da pele e um sopro de ar
+- golpe_pesado.ogg      golpe final: estalo da onda de choque, estrondo grave e o ar rasgando para longe
 Batman (v0.2):
 - gancho_disparo.ogg    disparo pneumático do gancho e o cabo correndo
 - gancho_puxa.ogg       guincho do cabo puxando
@@ -166,6 +171,56 @@ def finalizar(x, fade=0.05):
 
 
 # ---------------------------------------------------------------- sons
+
+def golpe_ar():
+    seg = 0.32
+    n = int(round(seg * SR))
+    t = np.arange(n) / SR
+    # Ruído passando por uma faixa que sobe e desce: o "fwip" do braço passando rápido.
+    ar = ruido(seg)
+    centro = 700 + 2200 * np.sin(np.pi * np.clip(t / 0.2, 0, 1))
+    out = np.zeros(n)
+    bloco = 512
+    for i in range(0, n, bloco):
+        f = float(centro[min(i, n - 1)])
+        out[i:i + bloco] = filtro(ar[max(0, i - 2048):i + bloco], "bandpass", [f * 0.6, f * 1.6])[-len(out[i:i + bloco]):]
+    forma = np.sin(np.pi * np.clip(t / 0.22, 0, 1)) ** 1.5
+    return finalizar(normalizar(out * forma, 0.75), 0.04)
+
+
+def pancada(f0, f1, seg, corpo_corte, estalo_forca, queda):
+    n = int(round(seg * SR))
+    grave = varredura(f0, f1, seg, 0.4) * env(n, 0.001, queda)
+    corpo = filtro(ruido(seg), "lowpass", corpo_corte) * env(n, 0.0005, queda * 0.35)
+    estalo = filtro(ruido(0.02), "highpass", 2500) * env(int(round(0.02 * SR)), 0.0002, 0.003)
+    return misturar((0, grave * 1.2), (0, corpo * 0.9), (0, estalo * estalo_forca))
+
+
+def golpe_leve():
+    x = pancada(170, 70, 0.3, 1400, 1.0, 0.05)
+    x = eco(x, 0.4, 0.12, 3000)
+    return finalizar(normalizar(x[: int(0.32 * SR)], 0.9), 0.04)
+
+
+def golpe_medio():
+    base = pancada(130, 48, 0.45, 1000, 1.3, 0.08)
+    tapa = filtro(ruido(0.06), "bandpass", [900, 3800]) * env(int(round(0.06 * SR)), 0.0005, 0.012)
+    sopro = filtro(ruido(0.35), "bandpass", [300, 1400]) * env(int(round(0.35 * SR)), 0.02, 0.08) * 0.35
+    x = misturar((0, base), (0.002, tapa * 0.8), (0.01, sopro))
+    x = eco(x, 0.6, 0.15, 2800)
+    return finalizar(normalizar(x[: int(0.5 * SR)], 0.92), 0.05)
+
+
+def golpe_pesado():
+    seg = 1.3
+    estalo = filtro(ruido(0.03), "highpass", 1800) * env(int(round(0.03 * SR)), 0.0004, 0.005)
+    boom = varredura(110, 30, 1.1, 0.5) * env(int(round(1.1 * SR)), 0.002, 0.26)
+    soco = filtro(ruido(0.3), "lowpass", 800) * env(int(round(0.3 * SR)), 0.001, 0.06)
+    rasgo = filtro(ruido(0.9), "bandpass", [500, 3200]) * env(int(round(0.9 * SR)), 0.03, 0.18) * 0.45
+    x = misturar((0, estalo * 1.5), (0, boom * 1.2), (0, soco), (0.015, rasgo))
+    x = eco(x, 1.0, 0.2, 3500)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.95), 0.2)
+
 
 def visao_calor():
     seg = 2.25
@@ -1218,6 +1273,153 @@ def nave_escudo_desliga():
     return finalizar(normalizar(x[: int(seg * SR)], 0.78), 0.2)
 
 
+def modo_combate_liga():
+    # Punhos fechando: couro estalando, um "fwump" grave subindo e um brilho metálico curto.
+    seg = 0.9
+    t = t_(seg)
+    couro = filtro(ruido(0.08), "bandpass", [900, 4200]) * env(int(round(0.08 * SR)), 0.001, 0.012)
+    sobe = varredura(55, 110, 0.5, 0.6) * env(int(round(0.5 * SR)), 0.04, 0.14) * 0.9
+    ar = filtro(ruido(0.4), "bandpass", [300, 1600]) * env(int(round(0.4 * SR)), 0.08, 0.08) * 0.5
+    brilho = (np.sin(2 * np.pi * 1320 * t) + 0.5 * np.sin(2 * np.pi * 1980 * t)) * np.exp(-t / 0.18) * 0.12
+    x = misturar((0, couro * 1.2), (0.03, couro * 0.8), (0, sobe), (0, ar), (0.12, brilho[: int(0.7 * SR)]))
+    return finalizar(normalizar(eco(x, 0.8, 0.15), 0.8), 0.1)
+
+
+def modo_combate_desliga():
+    seg = 0.6
+    t = t_(seg)
+    desce = varredura(110, 50, 0.45, 0.8) * env(int(round(0.45 * SR)), 0.01, 0.12) * 0.8
+    ar = filtro(ruido(0.3), "bandpass", [250, 1200]) * env(int(round(0.3 * SR)), 0.02, 0.07) * 0.4
+    x = misturar((0, desce), (0, ar))
+    return finalizar(normalizar(x[: int(seg * SR)], 0.6), 0.1)
+
+
+def carga():
+    # Energia juntando no punho: zumbido que sobe por 1,2 s e fica tremendo no máximo.
+    seg = 2.0
+    t = t_(seg)
+    f = 70 + 190 * np.clip(t / 1.2, 0, 1) ** 1.4
+    fase = 2 * np.pi * np.cumsum(f) / SR
+    serra = sum(np.sin(k * fase) / k for k in range(1, 12))
+    zumbido = filtro(serra, "lowpass", 1800) * (0.7 + 0.3 * np.sin(2 * np.pi * (6 + 10 * np.clip(t / 1.2, 0, 1)) * t))
+    vento = filtro(ruido(seg), "bandpass", [600, 3500]) * (0.15 + 0.35 * np.clip(t / 1.2, 0, 1))
+    estalos = np.zeros_like(t)
+    for _ in range(18):
+        i = RNG.integers(int(0.5 * SR), len(t) - 400)
+        estalos[i:i + 400] += filtro(ruido(400 / SR), "highpass", 2500) * np.exp(-np.arange(400) / 70) * RNG.uniform(0.2, 0.7)
+    cheio = np.sin(2 * np.pi * 880 * t) * 0.06 * (t > 1.2)
+    x = (0.6 * zumbido + vento + 0.4 * estalos + cheio) * np.clip(t / 0.06, 0, 1)
+    return finalizar(normalizar(x, 0.75), 0.15)
+
+
+def golpe_onda():
+    # O chão rachando com a onda de choque: estouro, grave longo, cascalho e rocha se partindo.
+    seg = 2.2
+    estalo = filtro(ruido(0.04), "highpass", 1500) * env(int(round(0.04 * SR)), 0.0004, 0.006)
+    boom = varredura(90, 24, 1.8, 0.45) * env(int(round(1.8 * SR)), 0.003, 0.45)
+    soco = filtro(ruido(0.4), "lowpass", 600) * env(int(round(0.4 * SR)), 0.001, 0.09)
+    pedras = cascalho(1.6, 90, 1.0, banda=(400, 5000), dur=(0.004, 0.04), ganho=(0.05, 0.35))
+    rasga = racha(0.5, 80, 1.2)
+    x = misturar((0, estalo * 1.4), (0, boom * 1.3), (0, soco), (0.04, rasga * 0.8), (0.08, pedras * 0.7))
+    x = eco(x, 1.6, 0.25, 3000)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.97), 0.3)
+
+
+def palmas():
+    # Duas mãos de aço se batendo: estalo seco altíssimo, o ar rasgando em volta e um trovão que rola longe.
+    seg = 2.6
+    estalo = filtro(ruido(0.03), "highpass", 2200) * env(int(round(0.03 * SR)), 0.0002, 0.004)
+    corpo = filtro(ruido(0.12), "bandpass", (500, 3000)) * env(int(round(0.12 * SR)), 0.0005, 0.025)
+    boom = varredura(120, 30, 1.6, 0.4) * env(int(round(1.6 * SR)), 0.002, 0.4)
+    ar = filtro(ruido(0.9), "bandpass", (300, 2400)) * env(int(round(0.9 * SR)), 0.02, 0.3)
+    trovao = filtro(ruido(2.2), "lowpass", 260) * env(int(round(2.2 * SR)), 0.05, 0.8)
+    x = misturar((0, estalo * 1.6), (0, corpo * 1.1), (0.005, boom * 1.2), (0.02, ar * 0.5), (0.06, trovao * 0.7))
+    x = eco(x, 2.0, 0.3, 2600)
+    return finalizar(normalizar(x[: int(seg * SR)], 0.98), 0.4)
+
+
+def olhos_acendem():
+    # Os olhos acendem: um chiado de calor que sobe e um zumbido grave de energia.
+    seg = 0.7
+    chiado = filtro(ruido(0.7), "highpass", 3000) * env(int(round(0.7 * SR)), 0.15, 0.25)
+    zumbido = varredura(70, 160, 0.7, 0.3) * env(int(round(0.7 * SR)), 0.2, 0.2)
+    x = misturar((0, chiado * 0.5), (0, zumbido * 0.8))
+    return finalizar(normalizar(x[: int(seg * SR)], 0.8), 0.15)
+
+
+def inspira():
+    # O peito enchendo: ar entrando com força, de longe para perto, subindo de tom.
+    seg = 0.8
+    n = int(round(seg * SR))
+    ar = filtro(ruido(seg), "bandpass", (600, 4500)) * env(n, 0.6, 0.12)
+    grave = filtro(ruido(seg), "lowpass", 400) * env(n, 0.5, 0.2)
+    x = misturar((0, ar * 0.9), (0, grave * 0.5))
+    return finalizar(normalizar(x[:n], 0.75), 0.1)
+
+
+def decola():
+    # O salto da suprema: o chão estoura e um rugido sobe para o céu.
+    seg = 2.2
+    estalo = filtro(ruido(0.05), "highpass", 1200) * env(int(round(0.05 * SR)), 0.0005, 0.01)
+    boom = varredura(80, 30, 1.2, 0.4) * env(int(round(1.2 * SR)), 0.002, 0.35)
+    rugido = filtro(ruido(2.0), "bandpass", (200, 1800)) * env(int(round(2.0 * SR)), 0.1, 0.9)
+    pedras = cascalho(1.0, 60, 0.8, banda=(400, 5000), dur=(0.004, 0.04), ganho=(0.05, 0.3))
+    x = misturar((0, estalo * 1.4), (0, boom * 1.3), (0.02, rugido * 0.8), (0.05, pedras * 0.6))
+    return finalizar(normalizar(x[: int(seg * SR)], 0.95), 0.4)
+
+
+def meteoro():
+    # A descida como meteoro: assobio que desce de tom e um rugido de fogo crescendo até o impacto.
+    seg = 1.6
+    n = int(round(seg * SR))
+    assobio = varredura(1400, 300, seg, 0.25) * env(n, 0.3, 0.05)
+    fogo = filtro(ruido(seg), "bandpass", (150, 2500)) * env(n, 1.2, 0.08)
+    x = misturar((0, assobio * 0.5), (0, fogo * 1.0))
+    return finalizar(normalizar(x[:n], 0.9), 0.05)
+
+
+def defesa():
+    # Golpe batendo nos antebraços de aço cruzados: baque surdo, estalo metálico curto e o corpo segurando.
+    seg = 0.7
+    baque = filtro(ruido(0.12), "lowpass", 500) * env(int(0.12 * SR), 0.001, 0.03) * 1.8
+    estalo = filtro(ruido(0.03), "bandpass", (1500, 6000)) * env(int(0.03 * SR), 0.0003, 0.006) * 1.2
+    metal = sino(620, 0.5, 0.12, 0.6) * 0.35
+    grave = varredura(90, 50, 0.25, 0.5) * env(int(0.25 * SR), 0.001, 0.07)
+    x = misturar((0, baque), (0, estalo), (0.002, metal), (0, grave))
+    return finalizar(normalizar(eco(x, 0.6, 0.15, 3000)[: int(seg * SR)], 0.85), 0.15)
+
+
+def aparo():
+    # Aparo perfeito: estalo seco, um sino brilhante que corta o ar e o golpe sendo jogado de volta.
+    seg = 1.6
+    estalo = filtro(ruido(0.025), "highpass", 2500) * env(int(0.025 * SR), 0.0002, 0.004) * 1.6
+    sinoA = sino(1320, 1.3, 0.55, 1.2) * 0.55
+    sinoB = sino(1980, 1.0, 0.35, 1.0) * 0.3
+    ar = filtro(ruido(0.4), "bandpass", (800, 5000)) * env(int(0.4 * SR), 0.01, 0.1) * 0.5
+    boom = varredura(140, 45, 0.5, 0.5) * env(int(0.5 * SR), 0.001, 0.12) * 0.9
+    x = misturar((0, estalo), (0, sinoA), (0.01, sinoB), (0.02, ar), (0, boom))
+    return finalizar(normalizar(eco(x, 1.4, 0.3, 7000)[: int(seg * SR)], 0.92), 0.3)
+
+
+def trava():
+    # Trava de mira: dois toques de cristal subindo, curtos e limpos.
+    seg = 0.7
+    a = sino(1046, 0.45, 0.18, 1.0)
+    b = sino(1568, 0.5, 0.22, 1.0)
+    sopro = filtro(ruido(0.15), "bandpass", (2000, 8000)) * env(int(0.15 * SR), 0.02, 0.04) * 0.15
+    x = misturar((0, a * 0.6), (0.07, b * 0.7), (0, sopro))
+    return finalizar(normalizar(eco(x, 0.6, 0.25, 8000)[: int(seg * SR)], 0.6), 0.2)
+
+
+def trava_solta():
+    # Solta a trava: um toque descendo, mais baixo.
+    seg = 0.5
+    a = sino(1318, 0.35, 0.12, 0.8)
+    b = sino(880, 0.4, 0.16, 0.8)
+    x = misturar((0, a * 0.5), (0.06, b * 0.55))
+    return finalizar(normalizar(eco(x, 0.4, 0.2, 6000)[: int(seg * SR)], 0.45), 0.15)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -1241,6 +1443,10 @@ SONS = {
     "escudo_tk_impacto": escudo_tk_impacto, "ilha_arranca": ilha_arranca, "ilha_motor": ilha_motor,
     "ilha_pousa": ilha_pousa, "nave_chega": nave_chega, "nave_motor": nave_motor, "nave_canhao": nave_canhao,
     "nave_orbe": nave_orbe, "nave_escudo_liga": nave_escudo_liga, "nave_escudo_desliga": nave_escudo_desliga,
+    "golpe_ar": golpe_ar, "golpe_leve": golpe_leve, "golpe_medio": golpe_medio, "golpe_pesado": golpe_pesado,
+    "modo_combate_liga": modo_combate_liga, "modo_combate_desliga": modo_combate_desliga, "carga": carga,
+    "golpe_onda": golpe_onda, "palmas": palmas, "defesa": defesa, "aparo": aparo, "trava": trava, "trava_solta": trava_solta, "olhos_acendem": olhos_acendem, "inspira": inspira,
+    "decola": decola, "meteoro": meteoro,
 }
 
 

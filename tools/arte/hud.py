@@ -628,6 +628,172 @@ def icone_visao_raio_x():
     return t
 
 
+def icone_investida_de_aco():
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # Rastro de cometa vermelho e azul, afinando para trás (embaixo à esquerda).
+    for i, (cor, w) in enumerate((("#1F48A8", 7), ("#3A7BFF", 5), ("#C81E26", 3), ("#FFD0D0", 1))):
+        d.line([(1, 30), (17, 14)], fill=hexa(cor), width=w)
+    for x0, y0, x1, y1 in ((0, 22, 8, 14), (8, 31, 16, 23)):
+        d.line([(x0, y0), (x1, y1)], fill=hexa("#BFD6FF"), width=1)
+    # Estrondo à frente do punho: cone de anéis brancos.
+    for r, cor, w in ((6, "#FFFFFF", 2), (9, "#DDEBFF", 1), (12, "#9FC4FF", 1)):
+        d.arc([22 - r, 10 - r, 22 + r, 10 + r], start=-110, end=20, fill=hexa(cor), width=w)
+    # Punho (luva azul) virado para cima e para a direita.
+    pal = {"o": CONTORNO, "+": hexa("#3A7BFF"), "#": hexa("#1F48A8")}
+    tela = Tela(32, 32)
+    tela.bitmap(10, 6, PUNHO, pal)
+    for x, y in ((12, 8), (14, 8), (16, 8)):
+        tela.p(x, y, hexa("#8FB8FF"))
+    punho = tela.img.rotate(38, resample=0, center=(18, 12))
+    img.alpha_composite(punho)
+    brilho(t, 26, 6, 4, hexa("#FFFFFF"), 0.8)
+    contornar(t)
+    return t
+
+
+def icone_palmas_sonicas():
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # A onda de ar: anéis em volta do ponto onde as mãos batem.
+    for r, cor, w in ((15, "#6FA8FF", 1), (12, "#A8CCFF", 1), (9, "#DDEBFF", 2)):
+        d.ellipse([16 - r, 14 - r, 16 + r, 14 + r], outline=hexa(cor), width=w)
+    # Duas mãos de lado, espalmadas e com os dedos para cima, batendo no meio.
+    pele, sombra, luz = hexa("#F2C6A0"), hexa("#C98E66"), hexa("#FFE4CC")
+    maos = Tela(32, 32)
+    dm = ImageDraw.Draw(maos.img)
+    for lado in (-1, 1):
+        def x(v):
+            return 16 + lado * v
+        # Palma e dedos (de 1 a 7 px do meio), polegar saindo para fora embaixo.
+        dm.polygon([(x(0), 4), (x(3), 3), (x(6), 6), (x(7), 14), (x(9), 15), (x(9), 18), (x(7), 20), (x(6), 24), (x(0), 24)], fill=pele)
+        dm.polygon([(x(4), 7), (x(6), 6), (x(7), 14), (x(6), 24), (x(4), 24)], fill=sombra)
+        dm.line([(x(1), 5), (x(1), 22)], fill=luz, width=1)
+        # Separação dos dedos.
+        dm.line([(x(2), 5), (x(5), 12)], fill=sombra, width=1)
+        # Punho azul da roupa.
+        dm.rectangle(sorted([x(0), x(7)]) and [min(x(0), x(7)), 24, max(x(0), x(7)), 28], fill=hexa("#2C55C8"))
+        dm.line([(min(x(0), x(7)), 24), (max(x(0), x(7)), 24)], fill=hexa("#C81E26"), width=1)
+    img.alpha_composite(maos.img)
+    contornar(t)
+    # Estalo branco no meio, por cima do contorno.
+    brilho(t, 16, 12, 5, hexa("#FFFFFF"), 1.0)
+    d.line([(16, 3), (16, 22)], fill=hexa("#FFFFFF"), width=1)
+    for x0, y0, x1, y1 in ((16, 12, 10, 1), (16, 12, 22, 1), (16, 12, 3, 9), (16, 12, 29, 9)):
+        d.line([(x0 + (x1 - x0) * 0.6, y0 + (y1 - y0) * 0.6), (x1, y1)], fill=hexa("#EAF4FF"), width=1)
+    # Cacos de vidro voando.
+    for x0, y0 in ((2, 22), (27, 22), (4, 28), (25, 28)):
+        d.polygon([(x0, y0), (x0 + 2, y0 + 1), (x0 + 1, y0 + 2)], fill=hexa("#CFF2FF"))
+    return t
+
+
+def icone_calor_focado():
+    """Visão de calor de precisão (mundo): um feixe fino e firme acendendo a boca de uma fornalha."""
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # Fornalha embaixo à direita: pedra com a boca em brasa.
+    d.rectangle([15, 15, 30, 30], fill=hexa("#5E5E62"))
+    d.rectangle([15, 15, 30, 16], fill=hexa("#8A8A90"))
+    d.rectangle([15, 15, 16, 30], fill=hexa("#7A7A80"))
+    d.rectangle([29, 15, 30, 30], fill=hexa("#3E3E44"))
+    d.rectangle([15, 29, 30, 30], fill=hexa("#34343A"))
+    for x, y in ((19, 18), (25, 19), (22, 27), (27, 25)):
+        d.point((x, y), fill=hexa("#4A4A50"))
+    d.rectangle([18, 21, 27, 27], fill=hexa("#1A0E0A"))
+    d.rectangle([19, 24, 26, 27], fill=hexa("#E8501A"))
+    d.rectangle([20, 23, 25, 26], fill=hexa("#FFB040"))
+    d.line([(21, 22), (22, 24)], fill=hexa("#FFF0A0"))
+    d.line([(24, 22), (24, 24)], fill=hexa("#FFE07A"))
+    # Um olho no alto à esquerda e o feixe fino até a boca da fornalha.
+    d.polygon([(0, 3), (10, 3), (12, 6), (10, 9), (0, 9)], fill=hexa("#2A1418"))
+    ox, oy = 6, 6
+    d.line([(ox, oy), (22, 23)], fill=hexa("#8E1410"), width=3)
+    d.line([(ox, oy), (22, 23)], fill=hexa("#F0301E"), width=1)
+    d.ellipse([ox - 3, oy - 2, ox + 3, oy + 2], fill=hexa("#E8261E"))
+    d.ellipse([ox - 2, oy - 1, ox + 2, oy + 1], fill=hexa("#FF9A3A"))
+    d.point((ox, oy), fill=hexa("#FFF6C8"))
+    brilho(t, 22, 23, 4, hexa("#FFD27A"), 0.8)
+    contornar(t)
+    return t
+
+
+def icone_sopro_gelido():
+    """Sopro gélido (mundo): o ar gelado varre a água e deixa um caminho de gelo."""
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # Água embaixo (ondas) virando gelo da esquerda para a direita.
+    d.rectangle([0, 20, 31, 31], fill=hexa("#2456A8"))
+    for y in (23, 27):
+        for x in range(0, 32, 6):
+            d.line([(x, y), (x + 2, y - 1), (x + 4, y)], fill=hexa("#4A86D8"))
+    d.polygon([(6, 20), (31, 20), (31, 31), (12, 31)], fill=hexa("#A8D8F4"))
+    d.line([(6, 20), (31, 20)], fill=hexa("#E8F8FF"))
+    for a, b in (((15, 22), (19, 29)), ((22, 21), (20, 26)), ((26, 23), (30, 28))):
+        d.line([a, b], fill=hexa("#78B8E0"))
+    d.line([(9, 22), (12, 30)], fill=hexa("#E8F8FF"))
+    # O jato de ar descendo do alto à esquerda.
+    bolhas = [(4, 6, 2), (8, 8, 3), (13, 10, 3), (18, 13, 4), (23, 15, 4)]
+    for x, y, r in bolhas:
+        d.ellipse([x - r - 1, y - r - 1, x + r + 1, y + r + 1], fill=hexa("#2F6FB8"))
+    for x, y, r in bolhas:
+        d.ellipse([x - r, y - r, x + r, y + r], fill=hexa("#6CBDF4"))
+    for x, y, r in bolhas:
+        if r >= 3:
+            d.ellipse([x - r + 1, y - r + 1, x + r - 2, y + r - 2], fill=hexa("#B8E8FF"))
+    d.line([(3, 6), (20, 13)], fill=hexa("#FFFFFF"))
+    contornar(t)
+    floco(d, 26, 7, 3, hexa("#FFFFFF"))
+    return t
+
+
+def icone_modo_combate():
+    """Modo combate (HUD): punho fechado em guarda com as linhas do golpe."""
+    t = Tela(32, 32)
+    d = ImageDraw.Draw(t.img)
+    for i, (a, b) in enumerate((((2, 9), (9, 11)), ((1, 16), (8, 16)), ((2, 23), (9, 21)))):
+        d.line([a, b], fill=hexa("#FFD23A") if i == 1 else hexa("#FF8A3A"), width=2)
+    # Punho visto de frente: quatro dedos, o polegar cruzando e o pulso.
+    PELE, SOMBRA, LUZ = hexa("#3A6BD8"), hexa("#1E3C88"), hexa("#8AB4FF")
+    d.rounded_rectangle([11, 7, 28, 24], 4, fill=PELE)
+    for x in (15, 19, 23):
+        d.line([(x, 8), (x, 15)], fill=SOMBRA)
+    d.line([(12, 15), (27, 15)], fill=SOMBRA)
+    d.rounded_rectangle([12, 16, 23, 21], 2, fill=hexa("#2E58BE"))
+    d.line([(13, 17), (22, 17)], fill=LUZ)
+    for x in (12, 16, 20, 24):
+        d.line([(x + 1, 8), (x + 2, 8)], fill=LUZ)
+    d.rectangle([14, 24, 25, 29], fill=hexa("#C82028"))
+    d.line([(14, 26), (25, 26)], fill=hexa("#FFD23A"))
+    contornar(t)
+    return t
+
+
+def icone_modo_mundo():
+    """Modo mundo (HUD): o planeta, com os continentes e a luz do sol de um lado."""
+    t = Tela(32, 32)
+    d = ImageDraw.Draw(t.img)
+    d.ellipse([3, 3, 28, 28], fill=hexa("#2A6CC8"))
+    for poly in ([(8, 9), (14, 7), (16, 11), (13, 15), (9, 14)], [(17, 15), (23, 13), (25, 18), (21, 24), (18, 21)],
+                 [(7, 19), (11, 18), (12, 23), (9, 24)]):
+        d.polygon(poly, fill=hexa("#4CB050"))
+    d.line([(9, 10), (13, 9)], fill=hexa("#8AE07A"))
+    d.line([(18, 16), (22, 15)], fill=hexa("#8AE07A"))
+    # Sombra do lado de baixo à direita e o brilho do sol em cima à esquerda.
+    for y in range(32):
+        for x in range(32):
+            c = t.get(x, y)
+            if c[3] and (x - 10) ** 2 + (y - 10) ** 2 > 17 ** 2:
+                t.p(x, y, escurecer(c, 0.35))
+    d.arc([3, 3, 28, 28], 190, 260, fill=hexa("#CFE8FF"))
+    d.point((10, 7), fill=hexa("#FFFFFF"))
+    contornar(t)
+    return t
+
+
 ICONES = {
     "visao_de_calor": icone_visao_de_calor,
     "sopro_congelante": icone_sopro_congelante,
@@ -635,6 +801,10 @@ ICONES = {
     "pisao_sismico": icone_pisao_sismico,
     "visao_raio_x": icone_visao_raio_x,
     "fortaleza_da_solidao": icone_fortaleza_da_solidao,
+    "investida_de_aco": icone_investida_de_aco,
+    "palmas_sonicas": icone_palmas_sonicas,
+    "calor_focado": icone_calor_focado,
+    "sopro_gelido": icone_sopro_gelido,
 }
 
 
@@ -1204,6 +1374,8 @@ def main():
     icones = {k: f() for k, f in ICONES.items()}
     for k, t in icones.items():
         t.salvar(gui / "ability" / f"{k}.png")
+    for k in ("modo_combate", "modo_mundo"):
+        globals()["icone_" + k]().salvar(gui / f"{k}.png")
     if a.previa:
         previa(hud, emblemas, icones, a.previa)
 

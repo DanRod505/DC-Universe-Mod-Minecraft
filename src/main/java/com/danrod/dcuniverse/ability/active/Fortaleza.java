@@ -48,6 +48,8 @@ public final class Fortaleza implements TipoHabilidade {
     /** Ticks que a fortaleza leva para crescer do chão. */
     public static final int CRESCE = 40;
     private static final List<Ativa> ATIVAS = new ArrayList<>();
+    /** Onde a fortaleza vai nascer, escolhido no aperto da suprema coreografada (o meteoro desce até lá). */
+    private static final java.util.Map<java.util.UUID, BlockPos> MIRADAS = new java.util.concurrent.ConcurrentHashMap<>();
 
     private static final class Ativa {
         final ServerLevel level;
@@ -72,11 +74,27 @@ public final class Fortaleza implements TipoHabilidade {
         }
     }
 
+    /**
+     * Coreografia da suprema ("meteor": true): escolhe o ponto agora e manda o jogador agachar, subir ao céu e descer
+     * como um meteoro até lá; a fortaleza nasce no impacto (usar(), no fim do preparo).
+     */
+    @Override
+    public void preparar(ServerPlayer player, Personagem p, Personagem.Habilidade h, float segundos) {
+        if (!(player.level() instanceof ServerLevel level) || !h.params().b("meteor", false)) return;
+        BlockPos base = chao(level, player, h.params().d("range", 24));
+        if (base == null) return;
+        MIRADAS.put(player.getUUID(), base);
+        Rede.efeito(level, base.getX() + 0.5, base.getY(), base.getZ() + 0.5, "meteoro", segundos * 20, 0, player.getId());
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), Sons.DECOLA.get(), SoundSource.PLAYERS, 2.5f, 1f);
+    }
+
     @Override
     public boolean usar(ServerPlayer player, Personagem p, Personagem.Habilidade h) {
         if (!(player.level() instanceof ServerLevel level)) return false;
         Params prm = h.params();
-        BlockPos base = chao(level, player, prm.d("range", 24));
+        BlockPos mirada = MIRADAS.remove(player.getUUID());
+        BlockPos base = mirada != null ? mirada : chao(level, player, prm.d("range", 24));
+        if (mirada != null) impacto(level, player, p, base, prm);
         if (base == null) {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_chao"));
             return false;
@@ -95,6 +113,22 @@ public final class Fortaleza implements TipoHabilidade {
         level.playSound(null, base, Sons.FORTALEZA_CRESCE.get(), SoundSource.PLAYERS, 2.5f, 1f);
         Rede.efeito(level, base.getX() + 0.5, base.getY(), base.getZ() + 0.5, "fortress", raio, (float) (fim - level.getGameTime()), altura);
         return true;
+    }
+
+    /** O meteoro chega: estrondo, o chão racha em volta e quem está perto voa longe antes do cristal crescer. */
+    private static void impacto(ServerLevel level, ServerPlayer player, Personagem p, BlockPos base, Params prm) {
+        Vec3 c = Vec3.atBottomCenterOf(base);
+        player.resetFallDistance();
+        level.playSound(null, c.x, c.y, c.z, Sons.GOLPE_ONDA.get(), SoundSource.PLAYERS, 3f, 0.8f);
+        Rede.efeito(level, c.x, c.y, c.z, "slam", (float) prm.d("radius", 6) + 4, 10, Block.getId(level.getBlockState(base.below())));
+        float dano = Alvos.dano(p, prm.d("impact_damage_mult", 1.5));
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(base).inflate(prm.d("radius", 6) + 3), e -> Alvos.podeAtingir(player, e))) {
+            Vec3 d = e.position().subtract(c);
+            Vec3 dir = d.horizontalDistanceSqr() < 1e-4 ? new Vec3(1, 0, 0) : new Vec3(d.x, 0, d.z).normalize();
+            Alvos.ferir(player, e, level.damageSources().playerAttack(player), dano);
+            e.setDeltaMovement(dir.x * 2.2, 0.8, dir.z * 2.2);
+            e.hurtMarked = true;
+        }
     }
 
     /** Onde a fortaleza nasce: o chão no ponto mirado (ou sob o jogador), até 8 blocos abaixo. */
@@ -254,6 +288,7 @@ public final class Fortaleza implements TipoHabilidade {
     }
 
     public static void limpar() {
+        MIRADAS.clear();
         ATIVAS.clear();
     }
 }
