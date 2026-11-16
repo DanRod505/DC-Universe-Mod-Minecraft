@@ -45,7 +45,14 @@
       "parry_stun": 1.5, "parry_knockback": 1.4, "arc": 200 }
   },
   "skill_tree": {
-    "energy": { "max": 100, "regen": 20, "delay": 3, "boost_drain": 8 },
+    "stats": {
+      "energy": [ 100, 200, 300, 400 ],
+      "health": [ 10, 15, 20, 30 ],
+      "regen": [ 2, 3, 4, 5 ],
+      "armor": [ 10, 14, 18, 22 ],
+      "flight_speed": [ 56, 64, 72 ],
+      "boost_drain": [ 8, 6, 4 ]
+    },
     "starters": [ "visao_de_calor", "super_pulo", "sopro_congelante" ],
     "abilities": [
       { "id": "visao_de_calor", "cost": 1 },

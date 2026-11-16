@@ -143,14 +143,17 @@ public final class Testes {
         float max0 = Arvore.energiaMax(p, sup);
         h.assertValueEqual(max0, 100f, "Superman com 100 de energia na árvore");
         h.assertTrue(Arvore.comprar(p, "heroi.energia_1"), "compra energia I");
-        h.assertTrue(Math.abs(Arvore.energiaMax(p, sup) - 120f) < 0.01f, "energia I: +20%");
+        h.assertValueEqual(Arvore.energiaMax(p, sup), 200f, "energia I: 100 -> 200 (Dalton)");
         h.assertValueEqual(Arvore.pontos(p, sup), 0, "gastou os 2 pontos");
         // Visão de calor completa: segurar, com fogo, fornalha e comida assada desde o começo.
         Personagem.Habilidade vis = Arvore.habilidade(p, sup, "visao_de_calor");
         h.assertValueEqual(Arvore.rajada(vis), 0f, "segura para usar");
         h.assertTrue(vis.params().b("sets_fire", false) && vis.params().b("lights_furnace", false) && vis.params().b("cooks_drops", false),
             "já vem com fogo, fornalha e comida assada");
-        // Energia: gasta ao usar e só volta a encher depois do atraso.
+        // Vida em corações e armadura do Superman na árvore (Dalton: 10 corações).
+        h.assertValueEqual(p.getMaxHealth(), 20f, "Superman começa com 10 corações");
+        h.assertValueEqual(Arvore.armadura(p, sup), 10f, "armadura de base");
+        // Energia: gasta ao usar e recupera sempre, aos poucos.
         EstadoJogador e = EstadoJogador.de(p);
         e.setEnergia(100f);
         Habilidades.usar(p, 0, true);
@@ -158,7 +161,7 @@ public final class Testes {
         Habilidades.tick(p, sup);
         h.assertValueEqual(e.canalizando(), "visao_de_calor", "segurando, canaliza");
         h.assertTrue(e.energia() < 100f, "a visão de calor gasta energia");
-        h.assertValueEqual(com.danrod.dcuniverse.energy.Energia.recargaAgora(p, sup), 0f, "logo depois de gastar, não recupera");
+        h.assertTrue(Arvore.regen(p, sup) == 2f && com.danrod.dcuniverse.energy.Energia.recargaAgora(p, sup) >= 2f, "recupera 2 por segundo, sem esperar");
         Habilidades.usar(p, 0, false);
         h.assertValueEqual(e.canalizando(), "", "soltar a tecla para");
         // Build livre: o que não tem fica de fora, melhoria não vai para slot; qualquer um dos 6 slots vale.
@@ -170,23 +173,28 @@ public final class Testes {
         Transformacao.transformar(p, SUPERMAN, true);
         h.assertValueEqual(Arvore.compradas(p, sup), List.of("super_pulo.altura_20", "heroi.energia_1"), "compras guardadas");
         h.assertValueEqual(Arvore.nivel(p, sup), 3, "nível guardado");
-        h.assertTrue(Math.abs(e.energia() - 120f * com.danrod.dcuniverse.core.Config.ENERGIA_INICIAL.get()) < 0.01f, "começa com a energia da árvore (" + e.energia() + ")");
+        h.assertTrue(Math.abs(e.energia() - 200f * com.danrod.dcuniverse.core.Config.ENERGIA_INICIAL.get()) < 0.01f, "começa com a energia da árvore (" + e.energia() + ")");
         // Criativo: pontos infinitos, compra de verdade o que quiser (e desfaz para testar), sem gastar energia.
         ServerPlayer c = jogadorArvore(h, GameType.CREATIVE);
         Transformacao.transformar(c, SUPERMAN, true);
         h.assertFalse(Arvore.tem(c, sup, "pisao_sismico"), "criativo não vem com tudo comprado");
         float vida0 = c.getMaxHealth();
+        float dano0 = Arvore.danoCoracoes(sup, Arvore.habilidade(c, sup, "visao_de_calor"));
+        h.assertValueEqual(dano0, 5f, "visão de calor: 5 corações/s de base");
         for (String id : List.of("pisao_sismico", "visao_de_calor.dano_1", "visao_de_calor.dano_2", "visao_de_calor.custo_1",
-            "heroi.vida_1", "heroi.voo_velocidade_1", "heroi.impulso_1", "heroi.recuperacao_1")) h.assertTrue(Arvore.comprar(c, id), "criativo compra " + id);
+            "heroi.vida_1", "heroi.voo_velocidade_1", "heroi.impulso_1", "heroi.recuperacao_1", "heroi.armadura_1")) h.assertTrue(Arvore.comprar(c, id), "criativo compra " + id);
         h.assertValueEqual(Arvore.pontos(c, sup), Arvore.PONTOS_CRIATIVO, "pontos infinitos no criativo");
         Personagem.Habilidade visC = Arvore.habilidade(c, sup, "visao_de_calor");
-        h.assertTrue(Math.abs(visC.params().f("damage_mult", 0) - 0.4f * 1.4f) < 1e-4, "dano II: +40%");
-        h.assertTrue(Math.abs(visC.custo() - 12f * 0.8f) < 1e-4, "eficiência I: -20% de energia");
-        h.assertTrue(Math.abs(c.getMaxHealth() - vida0 * 1.15f) < 0.01f, "vida I: +15% (" + vida0 + " -> " + c.getMaxHealth() + ")");
-        h.assertTrue(Math.abs(Arvore.velocidadeVoo(c, sup) - 56f * 1.15f) < 1e-3, "velocidade de voo I: +15%");
-        h.assertTrue(Math.abs(Arvore.drenoVoo(c, sup, sup.passiva("flight").params(), true) - 8f * 0.75f) < 1e-4, "impulso I: -25% de gasto");
+        h.assertTrue(Math.abs(Arvore.danoCoracoes(sup, visC) - 10f) < 1e-3, "dano II: 5 -> 10 corações/s");
+        h.assertTrue(Math.abs(visC.custo() - 9.5f) < 1e-4, "eficiência I: 12 -> 9,5 de energia/s");
+        h.assertValueEqual(vida0, 20f, "10 corações");
+        h.assertValueEqual(c.getMaxHealth(), 30f, "vida I: 10 -> 15 corações");
+        h.assertValueEqual(Arvore.armadura(c, sup), 14f, "armadura I: 10 -> 14");
+        h.assertValueEqual(c.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR), 14.0, "armadura aplicada");
+        h.assertValueEqual(Arvore.velocidadeVoo(c, sup), 64f, "velocidade de voo I: 56 -> 64 blocos/s");
+        h.assertValueEqual(Arvore.drenoVoo(c, sup, sup.passiva("flight").params(), true), 6f, "impulso I: 8 -> 6 de energia/s");
         h.assertValueEqual(Arvore.drenoVoo(c, sup, sup.passiva("flight").params(), false), 0f, "o cruzeiro não gasta");
-        h.assertTrue(Math.abs(Arvore.regen(c, sup) - 20f * 1.25f) < 1e-4, "recuperação I: +25%");
+        h.assertValueEqual(Arvore.regen(c, sup), 3f, "recuperação I: 2 -> 3 por segundo");
         EstadoJogador ec = EstadoJogador.de(c);
         ec.setEnergia(50f);
         Habilidades.usar(c, 0, true);
@@ -207,9 +215,11 @@ public final class Testes {
         Rede.ArvoreSync.encode(m, buf);
         h.assertValueEqual(Rede.ArvoreSync.decode(buf), m, "ArvoreSync ida e volta");
         h.assertValueEqual(m.itens().stream().filter(x -> !x.melhoria()).count(), 10L, "10 habilidades na árvore do Superman (o voo é nativo)");
-        h.assertValueEqual(m.itens().stream().filter(x -> x.melhoria() && x.pai().isEmpty()).count(), 13L, "13 melhorias do herói");
-        h.assertValueEqual(m.itens().stream().filter(Rede.ArvoreItem::melhoria).count(), 51L, "51 melhorias no total");
+        h.assertValueEqual(m.itens().stream().filter(x -> x.melhoria() && x.pai().isEmpty()).count(), 16L, "16 melhorias do herói");
+        h.assertValueEqual(m.itens().stream().filter(Rede.ArvoreItem::melhoria).count(), 54L, "54 melhorias no total");
         h.assertTrue(m.compradas().containsAll(iniciais), "o cliente vê as iniciais como suas");
+        Rede.ArvoreItem en2 = m.item("heroi.energia_2");
+        h.assertTrue(en2.valor() == 200f && en2.depois() == 300f, "energia II mostra 200 -> 300");
         h.assertTrue(m.podeComprar("palmas_sonicas") == Arvore.podeComprar(p, sup, "palmas_sonicas"), "cliente e servidor concordam");
         h.assertTrue(m.podeComprar("heroi.vida_1") == Arvore.podeComprar(p, sup, "heroi.vida_1"), "cliente e servidor concordam na melhoria do herói");
         // Comida assada: o que morre marcado pelo raio solta a comida pronta.

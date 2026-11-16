@@ -377,7 +377,7 @@ public final class ArvoreScreen extends Screen {
         if (!tem) g.fill(x + 2, y + 2, x + s - 2, y + s - 2, pode ? 0x50101521 : 0xA0101521);
         if (sobre && tem) brilhoIcone(g, x + 1, y + 1, s - 2, cor, t);
         String chave = "melhoria.dcuniverse." + it.id() + ".rotulo";
-        String r = !it.tipo().isEmpty() ? romano(it.nivel()) : net.minecraft.client.resources.language.I18n.get(chave);
+        String r = !it.tipo().isEmpty() ? num(it.depois()) : net.minecraft.client.resources.language.I18n.get(chave);
         if (!r.equals(chave)) {
             int w = Math.round(font.width(r) * 0.75f) + 2;
             g.fill(x + s - w, y + s - 7, x + s + 1, y + s + 1, 0xE0101521);
@@ -393,19 +393,25 @@ public final class ArvoreScreen extends Screen {
 
     /** Nome de um nó: a habilidade, a melhoria própria ou a padrão com o nível ("Energia máxima II"). */
     static Component nome(Rede.ArvoreItem it) {
-        if (!it.tipo().isEmpty()) return Component.translatable("dcuniverse.melhoria." + it.tipo(), romano(it.nivel()));
+        if (it.melhoria() && !it.tipo().isEmpty()) return Component.translatable("dcuniverse.melhoria." + it.tipo(), romano(it.nivel()));
         return it.melhoria() ? Component.translatable("melhoria.dcuniverse." + it.id()) : Component.translatable("habilidade.dcuniverse." + it.id());
     }
 
     static Component descricao(Rede.ArvoreItem it) {
-        if (!it.tipo().isEmpty()) {
-            return Component.translatable("dcuniverse.melhoria." + it.tipo() + ".desc", pct(it.valor()), pct(it.valor() * it.nivel()));
+        if (it.melhoria() && !it.tipo().isEmpty()) {
+            return Component.translatable("dcuniverse.melhoria." + it.tipo() + ".desc", valor(it, it.valor()), valor(it, it.depois()));
         }
         return Component.translatable((it.melhoria() ? "melhoria.dcuniverse." : "habilidade.dcuniverse.") + it.id() + ".desc");
     }
 
-    private static String pct(float v) {
-        return Math.round(v * 100) + "%";
+    /** Um número de melhoria padrão com a unidade dele: "200 de energia", "15 ❤", "64 blocos/s". */
+    static Component valor(Rede.ArvoreItem it, float v) {
+        String chave = "dcuniverse.melhoria." + it.tipo() + ".valor";
+        if (it.tipo().equals("dano") || it.tipo().equals("custo")) {
+            Rede.ArvoreItem pai = EstadoCliente.arvore.item(it.pai());
+            if (pai != null && pai.hold()) chave += "_s";
+        }
+        return Component.translatable(chave, num(v));
     }
 
     static String romano(int n) {
@@ -475,10 +481,27 @@ public final class ArvoreScreen extends Screen {
         g.fill(px + 6, ty - 3, px + dw - 6, ty - 2, LINHA);
         pequeno(g, font, estado, px + 6, ty, corEstado);
         ty += 10;
-        // Gasto de energia da habilidade numa linha própria, em azul.
-        if (!it.melhoria() && it.valor() > 0) {
-            pequeno(g, font, Component.translatable(it.hold() ? "dcuniverse.arvore.energia_s" : "dcuniverse.arvore.energia", num(it.valor())), px + 6, ty, 0xFF7FB8FF);
-            ty += 9;
+        // Números da habilidade, cada um numa linha: energia (azul), dano em corações e os efeitos (queimadura, gelo).
+        if (!it.melhoria()) {
+            if (it.valor() > 0) {
+                pequeno(g, font, Component.translatable(it.hold() ? "dcuniverse.arvore.energia_s" : "dcuniverse.arvore.energia", num(it.valor())), px + 6, ty, 0xFF7FB8FF);
+                ty += 9;
+            }
+            if (it.depois() > 0) {
+                pequeno(g, font, Component.translatable(it.hold() ? "dcuniverse.arvore.dano_s" : "dcuniverse.arvore.dano", num(it.depois())), px + 6, ty, 0xFFFF8A7A);
+                ty += 9;
+            }
+            for (String x : it.tipo().split(",")) {
+                if (x.isEmpty()) continue;
+                pequeno(g, font, Component.translatable("dcuniverse.arvore.extra." + x), px + 6, ty, x.equals("gelo") ? 0xFFA0E0FF : 0xFFFFB060);
+                ty += 9;
+            }
+        } else if (!it.tipo().isEmpty()) {
+            // Melhoria padrão: o número de agora e o com ela, em destaque.
+            Component antesDepois = valor(it, it.valor()).copy().withStyle(ChatFormatting.GRAY).append(Component.literal("  →  ").withStyle(ChatFormatting.WHITE))
+                .append(valor(it, it.depois()).copy().withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+            pequeno(g, font, antesDepois, px + 6, ty, 0xFFFFFFFF);
+            ty += 10;
         }
         boolean desfaz = tem && a.criativo() && !it.inicial();
         // Descrição.
@@ -718,8 +741,10 @@ public final class ArvoreScreen extends Screen {
         return out.append(modo);
     }
 
-    private static String num(float v) {
-        return String.format(Locale.ROOT, Math.abs(v - Math.round(v)) < 0.05f ? "%.0f" : "%.1f", v);
+    /** Número curto, com vírgula em português: 12, 1,5. */
+    static String num(float v) {
+        String t = String.format(Locale.ROOT, Math.abs(v - Math.round(v)) < 0.05f ? "%.0f" : "%.1f", v);
+        return net.minecraft.client.Minecraft.getInstance().getLanguageManager().getSelected().startsWith("pt") ? t.replace('.', ',') : t;
     }
 
     static void icone(GuiGraphicsExtractor g, String id, int x, int y, int tam, int tinta) {

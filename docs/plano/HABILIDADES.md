@@ -7,7 +7,7 @@ Aprovado por Dalton em 16/11/2026 e refeito no mesmo dia no estilo **Justice Lea
 ## 1. A ideia
 
 - Você joga com os heróis da DC. Um herói é **desbloqueado pelos itens dele**, e o mundo funciona no estilo Zelda: algumas áreas, chefes e missões pedem um herói específico.
-- Cada herói tem a própria **barra de energia**. As habilidades gastam energia, e ela volta a encher sozinha depois de alguns segundos sem gastar (como em Justice League Heroes).
+- Cada herói tem a própria **barra de energia**. As habilidades gastam energia, e ela volta sozinha aos poucos, um tanto por segundo.
 - Cada herói tem um **catálogo de habilidades**. Algumas já vêm liberadas; as outras se liberam com pontos de nível.
 - Os **6 slots** já vêm abertos. Conforme libera habilidades, você escolhe quais vão para os slots.
 - O que você libera é seu para sempre. Você monta a build como quiser e troca a hora que quiser.
@@ -17,7 +17,7 @@ Aprovado por Dalton em 16/11/2026 e refeito no mesmo dia no estilo **Justice Lea
 
 - Uma **barra comum** por herói. Cada herói tem a própria energia máxima e a própria recuperação, e isso ajuda a diferenciar os heróis (uns têm mais energia, outros mais vida).
 - Habilidade de apertar gasta a energia de uma vez. Habilidade contínua (visão de calor, sopro) se usa **segurando a tecla** e gasta energia por segundo enquanto você segura.
-- A recuperação **começa depois de alguns segundos sem gastar** e enche a barra rápido.
+- A recuperação é **contínua**: cada herói recupera um tanto de energia por segundo, sempre (decisão do Dalton em 16/11/2026, depois de testar a recuperação que enchia tudo após uma pausa e achar fácil demais). Quem gasta mais do que recupera precisa de cadência e de pausas maiores.
 - A **recarga (cooldown) é curta** e serve só para evitar repetir a mesma habilidade sem parar. Quem limita o uso é a energia.
 - Energia zerada: as habilidades e o impulso do voo param até a barra voltar um pouco. O voo de cruzeiro continua.
 - Fontes antigas continuam valendo: o sol recarrega o Superman e a kryptonita drena.
@@ -42,32 +42,37 @@ Aprovado por Dalton em 16/11/2026 e refeito no mesmo dia no estilo **Justice Lea
 
 ## 4. Melhorias padrão
 
-As melhorias agora são **padrão**, iguais para todos os heróis, e se compram com pontos. Cada uma tem níveis (I, II, III) e cada nível exige o anterior. Os números são provisórios até o balanceamento.
+As melhorias são **padrão**, iguais para todos os heróis, e se compram com pontos. Cada uma tem níveis (I, II, III) e cada nível exige o anterior. O custo em pontos é 1 no nível I, 2 no II e 3 no III.
 
-**Do herói** (penduradas no tronco da árvore):
+**A tela mostra números reais, nunca porcentagem** (pedido do Dalton): cada melhoria mostra o valor de agora e o valor com ela, por exemplo "100 de energia → 200 de energia". Cada herói tem os próprios valores de base e de cada nível, então uns começam com mais e chegam mais longe que outros.
 
-| Melhoria | Níveis | Cada nível | Custo dos níveis |
-|---|---|---|---|
-| Energia máxima | 3 | +20% | 1, 2, 3 |
-| Vida | 3 | +15% | 1, 2, 3 |
-| Recuperação de energia | 3 | +25% mais rápida | 1, 2, 3 |
-| Velocidade de voo (só quem voa) | 2 | +15% | 1, 2 |
-| Impulso do voo (só quem voa) | 2 | -25% de gasto, o impulso dura mais | 1, 2 |
+**Do herói** (penduradas no tronco da árvore). Os valores do Superman são do Dalton (energia e vida) ou provisórios:
+
+| Melhoria | Unidade | Superman: base → I → II → III |
+|---|---|---|
+| Energia máxima | energia | 100 → 200 → 300 → 400 |
+| Vida | corações | 10 → 15 → 20 → 30 |
+| Recuperação de energia | energia por segundo | 2 → 3 → 4 → 5 |
+| Armadura (resistência a dano) | pontos de armadura | 10 → 14 → 18 → 22 |
+| Velocidade de voo (só quem voa) | blocos por segundo | 56 → 64 → 72 |
+| Impulso do voo (só quem voa) | energia por segundo do impulso | 8 → 6 → 4 |
 
 **De cada habilidade:**
 
-| Melhoria | Níveis | Cada nível | Custo dos níveis |
-|---|---|---|---|
-| Dano (só se ela causa dano) | 2 | +20% | 1, 2 |
-| Eficiência (só se ela gasta energia) | 2 | -20% de energia | 1, 2 |
+| Melhoria | Unidade | Padrão |
+|---|---|---|
+| Dano (só se ela causa dano) | corações (por segundo nas contínuas) | base → ×1,5 → ×2 |
+| Eficiência (só se ela gasta energia) | energia (por segundo nas contínuas) | base → ×0,8 → ×0,6 |
 
+- Exemplo: a Visão de Calor causa 5 ❤/s, depois 7,5 e depois 10, e gasta 12 de energia por segundo, depois 9,5 e depois 7. A tela também mostra os efeitos com números, como a queimadura (0,5 ❤/s por 4 s) e o congelamento do sopro.
+- Os valores de cada habilidade podem ser trocados no arquivo do herói quando o Dalton quiser números próprios.
 - Uma habilidade ainda pode ter **melhorias próprias** quando fizer sentido. Exemplo do Dalton: o Super Pulo sobe 10 blocos, depois 20 e depois 30.
 
 ## 5. Voo e saltos
 
 - **O voo é nativo** para quem voa: não ocupa slot e não precisa ser comprado. Vem completo: cruzeiro, impulso, manobras, rastro e trilha sonora.
 - **O cruzeiro não gasta energia. Só o impulso (Ctrl) gasta.**
-- As melhorias do voo são as padrão do herói: velocidade máxima e duração do impulso. Cada herói tem o próprio teto de velocidade.
+- As melhorias do voo são as padrão do herói: velocidade máxima (em blocos por segundo) e o gasto do impulso. Cada herói tem o próprio teto de velocidade.
 - O **super pulo** é nativo para heróis que não voam. Para quem voa, ele pode vir como uma habilidade extra de slot. No Superman ficou assim: o voo é nativo e o Super Pulo é uma habilidade de slot com as melhorias de altura.
 - O planar do Batman e as outras travessias seguem a mesma regra: nativos e completos, melhorados pelas melhorias padrão.
 
@@ -108,7 +113,7 @@ As melhorias agora são **padrão**, iguais para todos os heróis, e se compram 
 
 - **Combate da v0.7 (PR #17, protótipo do Superman):**
   - A suprema (o mergulho de meteoro) sai como suprema. Se o Dalton quiser, ela pode voltar como uma habilidade comum.
-  - A energia continua, agora no estilo Justice League Heroes (recuperação depois de alguns segundos sem gastar).
+  - A energia continua, com recuperação contínua por segundo.
   - Os atalhos Z X C V B e R passam a ser os 6 slots da build, e o R deixa de ser a suprema.
 - **Modo combate e modo mundo:** existe um só conjunto de slots, montado pelo jogador.
 - **Kits fixos de 4 habilidades por personagem:** saem. As ideias de habilidade do plano antigo ficam no elenco só como referência, até o Dalton definir as habilidades de cada um.
@@ -120,7 +125,7 @@ As melhorias agora são **padrão**, iguais para todos os heróis, e se compram 
 Estes pontos são de balanceamento ou de detalhe e ficam para a implementação:
 
 - Quais e quantas habilidades cada herói traz liberadas.
-- A energia de cada herói. Provisório no Superman: 100 de energia, recupera 20 por segundo depois de 3 segundos sem gastar, e o impulso do voo gasta 8 por segundo.
+- Os números de cada herói (energia, vida, recuperação, armadura, voo) e de cada habilidade. No Superman, energia e vida são do Dalton; o resto é provisório.
 - O nível máximo e a curva de experiência. Provisório: nível máximo 50, XP de abate igual à vida máxima do inimigo.
 - O custo de cada habilidade e melhoria (provisório: 1 a 3 pontos) e quanto cada nível de melhoria soma.
 - Se o combo do botão esquerdo é uma habilidade da árvore ou fica sempre disponível.

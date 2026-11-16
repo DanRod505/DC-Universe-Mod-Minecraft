@@ -27,10 +27,12 @@ public final class Atributos {
     /** @param curar enche a vida no novo máximo (só ao transformar, não ao reaplicar). */
     public static void aplicar(Player player, Personagem p, boolean curar) {
         Personagem.Ficha f = p.ficha();
-        // A melhoria de vida da árvore (ability/Arvore) multiplica a vida da ficha.
-        set(player, Attributes.MAX_HEALTH, f.vida() * 2 * com.danrod.dcuniverse.ability.Arvore.multVida(player, p) - 20, AttributeModifier.Operation.ADD_VALUE);
+        // Herói da árvore (ability/Arvore): vida em corações e armadura do nível das melhorias, no lugar da ficha.
+        float coracoes = com.danrod.dcuniverse.ability.Arvore.vida(player, p);
+        set(player, Attributes.MAX_HEALTH, (coracoes > 0 ? coracoes : f.vida()) * 2 - 20, AttributeModifier.Operation.ADD_VALUE);
         if (player.getHealth() > player.getMaxHealth()) player.setHealth(player.getMaxHealth());
-        set(player, Attributes.ARMOR, f.armadura(), AttributeModifier.Operation.ADD_VALUE);
+        float armadura = com.danrod.dcuniverse.ability.Arvore.armadura(player, p);
+        set(player, Attributes.ARMOR, armadura >= 0 ? armadura : f.armadura(), AttributeModifier.Operation.ADD_VALUE);
         set(player, Attributes.ATTACK_DAMAGE, f.dano() * 2 - 1, AttributeModifier.Operation.ADD_VALUE);
         set(player, Attributes.MOVEMENT_SPEED, f.terra() / CORRIDA_VANILLA - 1, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         // Altura do personagem (docs/SKINS.md: altura / 1,85): muda o visual e a hitbox.

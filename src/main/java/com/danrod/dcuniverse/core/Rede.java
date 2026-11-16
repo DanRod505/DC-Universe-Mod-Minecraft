@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 20;
+    private static final int VERSAO = 21;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -168,12 +168,13 @@ public final class Rede {
      * o item do ícone). rajada = segundos do disparo por toque (0 = segura ou instantânea).
      */
     /**
-     * Um nó da árvore. Habilidade: custo em pontos, recarga, segurar, se já vem liberada (inicial) e valor = gasto de
-     * energia (por segundo se segura). Melhoria (id "pai.melhoria", pai "" = do herói): a exigida antes, o item do
-     * ícone, o tipo padrão ("" = própria da habilidade, com texto no lang) e valor = quanto soma (fração).
+     * Um nó da árvore. Habilidade: custo em pontos, recarga, segurar, se já vem liberada (inicial), valor = gasto de
+     * energia (por segundo se segura), tipo = efeitos extras ("fogo,gelo") e depois = dano em corações (por segundo
+     * se segura). Melhoria (id "pai.melhoria", pai "" = do herói): a exigida antes, o item do ícone, o tipo padrão
+     * ("" = própria da habilidade, com texto no lang), valor = o número antes dela e depois = o número com ela.
      */
     public record ArvoreItem(String id, int custo, float recarga, boolean hold, boolean inicial, float rajada, String pai, String requer, String icone,
-                             float valor, String tipo) {
+                             float valor, String tipo, float depois) {
         public boolean melhoria() {
             return id.contains(".");
         }
@@ -238,6 +239,7 @@ public final class Rede {
                 b.writeUtf(i.icone());
                 b.writeFloat(i.valor());
                 b.writeUtf(i.tipo());
+                b.writeFloat(i.depois());
             }
             b.writeFloat(m.salto);
         }
@@ -251,7 +253,7 @@ public final class Rede {
             int n = b.readVarInt();
             List<ArvoreItem> itens = new ArrayList<>(n);
             for (int i = 0; i < n; i++) itens.add(new ArvoreItem(b.readUtf(), b.readVarInt(), b.readFloat(), b.readBoolean(), b.readBoolean(),
-                b.readFloat(), b.readUtf(), b.readUtf(), b.readUtf(), b.readFloat(), b.readUtf()));
+                b.readFloat(), b.readUtf(), b.readUtf(), b.readUtf(), b.readFloat(), b.readUtf(), b.readFloat()));
             return new ArvoreSync(h, nivel, xp, xn, xprox, pts, abertos, cri, comp, slots, List.copyOf(itens), b.readFloat());
         }
     }

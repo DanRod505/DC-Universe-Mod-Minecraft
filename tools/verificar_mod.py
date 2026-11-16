@@ -214,16 +214,21 @@ def verificar_personagens(raiz, recursos, erros):
                 erros.append(f"{nome}: árvore com habilidade repetida")
             # Melhorias padrão (energia, vida, dano, custo...), geradas em ability/Arvore.java: nome e descrição nos dois idiomas.
             fonte = (raiz / "src/main/java/com/danrod/dcuniverse/ability/Arvore.java").read_text(encoding="utf-8")
-            for t in re.findall(r'new Padrao\("(\w+)"', fonte):
+            for t in re.findall(r'new Status\("(\w+)"', fonte) + ["dano", "custo"]:
                 for i in IDIOMAS:
-                    for k in (f"dcuniverse.melhoria.{t}", f"dcuniverse.melhoria.{t}.desc"):
+                    for k in (f"dcuniverse.melhoria.{t}", f"dcuniverse.melhoria.{t}.desc", f"dcuniverse.melhoria.{t}.valor"):
                         if k not in lang[i]:
                             erros.append(f"{nome}: falta {k} em {i}.json")
-            # Energia da árvore (estilo Justice League Heroes): máximo, recuperação e atraso positivos.
-            en = arv.get("energy", {})
-            for k in ("max", "regen", "delay"):
-                if k in en and not en[k] > 0:
-                    erros.append(f"{nome}: skill_tree.energy.{k} = {en[k]}, deve ser maior que 0")
+            # Status do herói por nível (base + um valor por melhoria): listas não vazias de números positivos.
+            for k, v in arv.get("stats", {}).items():
+                if k not in ("energy", "health", "regen", "armor", "flight_speed", "boost_drain"):
+                    erros.append(f"{nome}: skill_tree.stats.{k} desconhecido")
+                elif not isinstance(v, list) or not v or any(not isinstance(x, (int, float)) or x < 0 for x in v):
+                    erros.append(f"{nome}: skill_tree.stats.{k} deve ser uma lista de números (base e um por nível)")
+            for x in arv.get("abilities", []):
+                for k in ("damage", "energy"):
+                    if k in x and (not isinstance(x[k], list) or not x[k]):
+                        erros.append(f"{nome}: árvore: {x.get('id')}.{k} deve ser uma lista (base e um por nível)")
             if not arv.get("starters"):
                 erros.append(f"{nome}: árvore sem habilidades iniciais")
             for x in arv.get("starters", []):

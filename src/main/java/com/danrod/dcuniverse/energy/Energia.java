@@ -16,9 +16,6 @@ public final class Energia {
 
     private Energia() {}
 
-    /** Quando cada jogador gastou energia pela última vez (tempo do mundo), para o atraso da recuperação. */
-    private static final java.util.Map<java.util.UUID, Long> GASTOU = new java.util.concurrent.ConcurrentHashMap<>();
-
     /** Chamado a cada tick do servidor para jogadores transformados. */
     public static void tick(Player player, Personagem p) {
         adicionar(player, p, recargaAgora(player, p) / 20f);
@@ -28,23 +25,13 @@ public final class Energia {
         }
     }
 
-    /**
-     * Quanto a energia sobe por segundo agora. Herói da árvore (estilo Justice League Heroes): só recupera depois de
-     * alguns segundos sem gastar; a kryptonita drena mesmo assim.
-     */
+    /** Quanto a energia sobe por segundo agora: a recuperação do herói, sempre, mais as fontes (sol, kryptonita...). */
     public static float recargaAgora(Player player, Personagem p) {
-        float r = Recargas.porSegundo(player, p);
-        float atraso = com.danrod.dcuniverse.ability.Arvore.atrasoRecuperacao(player, p);
-        if (r > 0 && atraso > 0) {
-            Long t = GASTOU.get(player.getUUID());
-            if (t != null && player.level().getGameTime() - t < atraso * 20) return 0f;
-        }
-        return r;
+        return Recargas.porSegundo(player, p);
     }
 
     public static void adicionar(Player player, Personagem p, float qtd) {
         EstadoJogador estado = EstadoJogador.de(player);
-        if (qtd < 0) GASTOU.put(player.getUUID(), player.level().getGameTime());
         float max = com.danrod.dcuniverse.ability.Arvore.energiaMax(player, p);
         float nova = Mth.clamp(estado.energia() + qtd, 0f, max);
         estado.setEnergia(nova);
