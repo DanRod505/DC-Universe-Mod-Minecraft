@@ -36,6 +36,7 @@ public final class Cliente {
             for (var k : Teclas.HABILIDADES) e.register(k);
             e.register(Teclas.SUPREMA);
             e.register(Teclas.RADIAL);
+            e.register(Teclas.ARVORE);
             e.register(Teclas.COMBATE);
             e.register(Teclas.OMBRO);
             e.register(Teclas.TRAVA);
@@ -202,6 +203,13 @@ public final class Cliente {
             if (livre && transformado) Trava.apertar(mc);
         }
         Trava.tick(mc);
+        while (Teclas.ARVORE.consumeClick()) {
+            if (livre && transformado && EstadoCliente.temArvore()) {
+                mc.gui.setScreen(EstadoCliente.arvore.precisaEscolher() ? new EscolhaInicialScreen() : new ArvoreScreen());
+                livre = false;
+            }
+        }
+        EscolhaInicialScreen.tick(mc, livre && transformado);
         while (Teclas.RADIAL.consumeClick()) {
             if (livre && transformado) {
                 mc.gui.setScreen(new RadialScreen());

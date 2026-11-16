@@ -65,12 +65,18 @@ Cada habilidade tem as **próprias** melhorias, pensadas para ela. Elas são de 
 
 ## 5. Slots e build
 
-- Você começa com **1 slot**, e mais slots abrem com o nível, até **6 slots** (decisão do Dalton em 16/11/2026).
+- Você começa com **1 slot**, e mais slots abrem com o nível, até **6 slots** (decisão do Dalton em 16/11/2026): slot 1 no nível 1, slot 2 no nível 3, slot 3 no 5, slot 4 no 10, slot 5 no 20 e slot 6 no 30.
 - **Os slots são livres.** Qualquer habilidade em qualquer slot, na ordem que você quiser, voo incluído. Não há slot de tipo (combate, mobilidade, utilidade), nem limite de quantas habilidades do mesmo ramo, nem trava para habilidades de recarga longa. Montar uma build só de habilidades fortes e ficar sem nada pronto por um tempo é uma escolha do jogador.
 - **Presets de build por herói:** salvar e trocar builds prontas (ex.: uma de combate e uma de exploração).
 - Trocar as habilidades dos slots ou o preset é livre, a hora que você quiser.
 - Os 6 slots ficam nos atalhos diretos **Z, X, C, V, B e R** (o R ficou livre sem a suprema).
-- Uma tecla própria abre a tela da árvore e da build (a tecla ainda vai ser escolhida).
+- A tecla **K** abre a tela da árvore e da build. O HUD mostra uma dica discreta da tecla, que pulsa quando há pontos para gastar ou a escolha inicial pendente.
+
+### Habilidade inicial
+
+- Na primeira vez com um herói, depois de escolher o herói (tela de início que já existe), o jogador **escolhe 1 entre as habilidades iniciais** dele. Ela vai para o slot 1 e é de graça; as outras se compram na árvore.
+- Iniciais do Superman (definidas pelo Dalton): **Visão de Calor** (raio contínuo), **Voo** (completo, o voo atual) e **Sopro Congelante**.
+- A troca de herói ganha uma tela própria mais adiante.
 
 ## 6. As telas
 
@@ -100,9 +106,7 @@ Cada habilidade tem as **próprias** melhorias, pensadas para ela. Elas são de 
 
 Estes pontos são de balanceamento ou de detalhe e ficam para a implementação:
 
-- O nível máximo, quantos pontos cada nível dá e a curva de experiência.
-- Em que níveis os slots 2 a 6 abrem.
-- A tecla que abre a tela da árvore e da build.
-- Se o jogador começa com uma habilidade padrão ou escolhe a primeira entre algumas iniciais.
+- O nível máximo, quantos pontos cada nível dá e a curva de experiência. Provisório na primeira build: nível máximo 30, 1 ponto por nível, XP de abate igual à vida máxima do inimigo.
+- O custo de cada habilidade (provisório na primeira build: 1 ou 2 pontos).
 - Se o combo do botão esquerdo é uma habilidade da árvore (decisão de 08/11) ou fica sempre disponível.
 - A duração e a recarga de cada reforço.

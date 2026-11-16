@@ -25,6 +25,14 @@ public final class Atalhos {
     /** O mesmo, num modo escolhido (o Guia mostra a tecla de cada modo). */
     public static int indice(int atalho, boolean combate) {
         List<Rede.HabInfo> habs = EstadoCliente.habilidades();
+        if (EstadoCliente.temArvore()) {
+            // Árvore nova: as 6 teclas são os 6 slots da build, na ordem montada pelo jogador (pode ter vazios).
+            List<String> slots = EstadoCliente.arvore.slots();
+            if (atalho < 0 || atalho >= slots.size() || atalho >= EstadoCliente.arvore.slotsAbertos()) return -1;
+            String id = slots.get(atalho);
+            for (int i = 0; i < habs.size(); i++) if (!id.isEmpty() && habs.get(i).id().equals(id)) return i;
+            return -1;
+        }
         int n = 0;
         for (int i = 0; i < habs.size(); i++) {
             Rede.HabInfo h = habs.get(i);

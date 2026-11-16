@@ -182,6 +182,28 @@ def verificar_personagens(raiz, recursos, erros):
             for i in IDIOMAS:
                 if f"habilidade.dcuniverse.{h.get('id')}" not in lang[i]:
                     erros.append(f"{nome}: falta habilidade.dcuniverse.{h.get('id')} em {i}.json")
+        # Árvore de habilidades (Plano 2): habilidades do personagem, custo 1-3, iniciais dentro da árvore, e as
+        # passivas presas a uma habilidade ("unlocks_passive") existem no personagem.
+        arv = c.get("skill_tree")
+        if arv:
+            ids_hab = {h.get("id") for h in c.get("abilities", [])}
+            na_arvore = [x.get("id") for x in arv.get("abilities", [])]
+            for x in arv.get("abilities", []):
+                if x.get("id") not in ids_hab:
+                    erros.append(f"{nome}: árvore com {x.get('id')}, que não é uma habilidade do personagem")
+                if not 1 <= x.get("cost", 0) <= 3:
+                    erros.append(f"{nome}: árvore: {x.get('id')} custa {x.get('cost')}, deve ser 1-3")
+            if len(set(na_arvore)) != len(na_arvore):
+                erros.append(f"{nome}: árvore com habilidade repetida")
+            if not arv.get("starters"):
+                erros.append(f"{nome}: árvore sem habilidades iniciais")
+            for x in arv.get("starters", []):
+                if x not in na_arvore:
+                    erros.append(f"{nome}: inicial {x} fora da árvore")
+            tipos_passiva = {p.get("type") for p in c.get("passives", [])}
+            for h in c.get("abilities", []):
+                if h.get("unlocks_passive") and h["unlocks_passive"] not in tipos_passiva:
+                    erros.append(f"{nome}: {h.get('id')} libera a passiva {h['unlocks_passive']}, que o personagem não tem")
         for p in c.get("passives", []):
             if p.get("type") not in passivas:
                 erros.append(f"{nome}: tipo de passiva inexistente {p.get('type')}")

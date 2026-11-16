@@ -81,6 +81,8 @@ public final class Cinto {
      * espaços e a suprema escolhida. Sem cinto, todas as do personagem.
      */
     public static List<Personagem.Habilidade> equipadas(Player player, Personagem p) {
+        // Herói do sistema novo: o que está nos slots da árvore (ability/Arvore).
+        if (player instanceof net.minecraft.server.level.ServerPlayer sp && com.danrod.dcuniverse.ability.Arvore.ativa(sp, p)) return com.danrod.dcuniverse.ability.Arvore.equipadas(sp, p);
         if (p.cinto() == null) return p.habilidades();
         List<Personagem.Habilidade> out = new ArrayList<>();
         for (Personagem.Habilidade h : p.habilidades()) {

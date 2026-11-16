@@ -90,6 +90,15 @@ public final class EstadoJogador {
         tag.putBoolean("detetive", v);
     }
 
+    /** Só nos GameTests: o jogador usa o kit antigo (energia, suprema) mesmo num herói com árvore (ability/Arvore). */
+    public boolean kitAntigo() {
+        return tag.getBooleanOr("kit_antigo", false);
+    }
+
+    public void setKitAntigo(boolean v) {
+        tag.putBoolean("kit_antigo", v);
+    }
+
     public int selecionada() {
         return tag.getIntOr("selecionada", 0);
     }

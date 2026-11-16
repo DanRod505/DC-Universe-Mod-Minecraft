@@ -54,12 +54,13 @@ public final class Habilidades {
             return;
         }
         if (e.destransformarEm() != 0L || Coreografia.emCena(player)) return;
-        // Cada modo tem o seu conjunto de habilidades nas mesmas teclas (combate/Combo.conjunto).
-        if (!com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) return;
+        // Cada modo tem o seu conjunto de habilidades nas mesmas teclas (combate/Combo.conjunto). Na árvore nova não há modos.
+        if (!Arvore.ativa(player, p) && !com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) return;
         if (indice >= 0 && indice != e.selecionada()) e.setSelecionada(indice);
         if (h.modo() == Personagem.Modo.HOLD) {
             if (e.prontaEm(h.id()) > player.level().getGameTime()) return;
             if (e.esgotado() && !player.isCreative()) {
+                // Na árvore nova "esgotado" só acontece com kryptonita: o herói fica fraco demais para os poderes.
                 Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
                 return;
             }
@@ -82,8 +83,17 @@ public final class Habilidades {
         Personagem p = e.personagem();
         if (p == null) return;
         Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
-        if (h != null && !com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) parar(player, e);
+        if (h != null && !Arvore.ativa(player, p) && !com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) parar(player, e);
         Rede.sincronizar(player);
+    }
+
+    /** Mudou a build: a habilidade canalizada que saiu dos slots para. */
+    public static void conferirCanalizada(ServerPlayer player) {
+        EstadoJogador e = EstadoJogador.de(player);
+        Personagem p = e.personagem();
+        if (p == null || e.canalizando().isEmpty()) return;
+        String id = e.canalizando();
+        if (com.danrod.dcuniverse.character.Cinto.equipadas(player, p).stream().noneMatch(h -> h.id().equals(id))) parar(player, e);
     }
 
     /** Liga a canalização da habilidade segurada (direto, ou no fim do preparo coreografado). */
@@ -105,8 +115,9 @@ public final class Habilidades {
         TipoHabilidade tipo = TiposHabilidade.TIPOS.get(h.tipo());
         if (tipo.gratis(player, h)) return tipo.usar(player, p, h);
         if (e.prontaEm(h.id()) > agora || Coreografia.emCena(player)) return false;
-        boolean criativo = player.isCreative();
-        if (!criativo && (e.esgotado() || e.energia() < h.custo())) {
+        // Criativo e heróis da árvore nova (só recarga) não gastam energia; a kryptonita (esgotado) ainda bloqueia.
+        boolean criativo = player.isCreative() || Arvore.semEnergia(player, p);
+        if (!player.isCreative() && e.esgotado() || !criativo && e.energia() < h.custo()) {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
             return false;
         }
@@ -136,7 +147,8 @@ public final class Habilidades {
         String id = e.canalizando();
         if (id.isEmpty()) return;
         Personagem.Habilidade h = p.habilidade(id);
-        if (h == null || !player.isCreative() && !Energia.gastar(player, p, h.custo() / 20f)) {
+        boolean semCusto = player.isCreative() || Arvore.semEnergia(player, p) && !e.esgotado();
+        if (h == null || !semCusto && !Energia.gastar(player, p, h.custo() / 20f)) {
             parar(player, e);
             return;
         }

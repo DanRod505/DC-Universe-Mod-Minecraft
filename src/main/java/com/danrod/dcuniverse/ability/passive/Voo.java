@@ -55,6 +55,10 @@ public final class Voo implements Passiva {
     @Override
     public void aoTransformar(ServerPlayer player, Params p) {
         if (modoLivre(player)) return;
+        if (!com.danrod.dcuniverse.ability.Arvore.passivaLiberada(player, EstadoJogador.de(player).personagem(), "flight")) {
+            desligado(player);
+            return;
+        }
         liberar(player);
     }
 
@@ -77,6 +81,11 @@ public final class Voo implements Passiva {
     public void tick(ServerPlayer player, Params p) {
         if (modoLivre(player)) return;
         EstadoJogador e = EstadoJogador.de(player);
+        // Árvore nova: o voo só vale com a habilidade Voo num slot (ability/Arvore).
+        if (!com.danrod.dcuniverse.ability.Arvore.passivaLiberada(player, e.personagem(), "flight")) {
+            desligado(player);
+            return;
+        }
         Abilities a = player.getAbilities();
         Rastro r = RASTROS.computeIfAbsent(player.getUUID(), u -> new Rastro());
         Vec3 pos = player.position();
@@ -96,7 +105,7 @@ public final class Voo implements Passiva {
             player.resetFallDistance();
             Personagem pers = e.personagem();
             float dreno = player.isSprinting() ? p.f("boost_drain", p.f("drain", 0f)) : p.f("drain", 0f);
-            if (pers != null && dreno > 0 && !criativo) Energia.adicionar(player, pers, -dreno / 20f);
+            if (pers != null && dreno > 0 && !criativo && !com.danrod.dcuniverse.ability.Arvore.semEnergia(player, pers)) Energia.adicionar(player, pers, -dreno / 20f);
             Guia.concluir(player, "voar");
         }
         if (r.voando != a.flying) {
@@ -162,7 +171,7 @@ public final class Voo implements Passiva {
         if (agora - r.manobraEm < MANOBRA_INTERVALO - 2) return;
         EstadoJogador e = EstadoJogador.de(player);
         Personagem pers = e.personagem();
-        if (tipo == ARRANCADA && !player.isCreative()
+        if (tipo == ARRANCADA && !player.isCreative() && !com.danrod.dcuniverse.ability.Arvore.semEnergia(player, pers)
             && !Energia.gastar(player, pers, pers.passiva("flight").params().f("dash_cost", 15f))) return;
         r.manobraEm = agora;
         ServerLevel lvl = player.level();
@@ -203,6 +212,47 @@ public final class Voo implements Passiva {
         for (ServerPlayer quem : lvl.players()) {
             if (quem.connection != null) lvl.sendParticles(quem, tipo, true, true, x, y, z, qtd, dx, dy, dz, vel);
         }
+    }
+
+    /**
+     * O herói voa, mas a habilidade Voo não está num slot: no criativo fica o voo normal do criativo; fora dele o voo
+     * desliga (e quem estava no ar desce planando, sem dano).
+     */
+    private static void desligado(ServerPlayer player) {
+        Abilities a = player.getAbilities();
+        Rastro r = RASTROS.remove(player.getUUID());
+        if (player.isCreative()) {
+            if (!a.mayfly || a.getFlyingSpeed() != 0.05f) {
+                a.mayfly = true;
+                a.setFlyingSpeed(0.05f);
+                avisar(player);
+            }
+        } else if (a.mayfly) {
+            boolean voava = a.flying;
+            travar(player);
+            if (voava) QuedaAmortecida.iniciarSeNoAr(player);
+        }
+        if (r != null && r.voando) Rede.aparencia(player);
+    }
+
+    /** Liga ou desliga o voo pela tecla da habilidade Voo (ability/active/VooAtivo). Devolve false se não dá para voar. */
+    public static boolean alternar(ServerPlayer player) {
+        Abilities a = player.getAbilities();
+        EstadoJogador e = EstadoJogador.de(player);
+        if (!a.mayfly || e.esgotado() && !player.isCreative()) return false;
+        if (a.flying) {
+            a.flying = false;
+        } else {
+            // Decola: um impulso para cima antes de ligar, senão o jogo desliga o voo no chão na hora.
+            if (player.onGround()) {
+                player.setDeltaMovement(player.getDeltaMovement().x, 0.75, player.getDeltaMovement().z);
+                player.hurtMarked = true;
+            }
+            a.flying = true;
+        }
+        avisar(player);
+        Rede.aparencia(player);
+        return true;
     }
 
     /** Libera o pulo duplo para voar. A velocidade do criativo fica zerada: quem move é o cliente. */

@@ -24,7 +24,9 @@ public record Personagem(
     int cor,
     float escala,
     Cinto.Config cinto,
-    com.danrod.dcuniverse.combate.Combo.Config combo
+    com.danrod.dcuniverse.combate.Combo.Config combo,
+    /** Árvore de habilidades do Plano 2 ("skill_tree"), ou null para quem ainda usa o kit antigo com energia. */
+    com.danrod.dcuniverse.ability.Arvore.Config arvore
 ) {
     /** Números da ficha, nas unidades de docs/BALANCEAMENTO.md (vida e dano em corações, velocidade em blocos/s). */
     public record Ficha(double vida, double armadura, double dano, double terra) {}
@@ -141,7 +143,8 @@ public record Personagem(
         }
         return new Personagem(id, j.get("level").getAsInt(), ficha, energia, List.copyOf(traje), passivas, List.copyOf(habs),
             new Params(j).color("color", 0xFFFFFF), j.has("scale") ? j.get("scale").getAsFloat() : 1f, cinto,
-            j.has("combo") ? com.danrod.dcuniverse.combate.Combo.Config.parse(j.getAsJsonObject("combo")) : null);
+            j.has("combo") ? com.danrod.dcuniverse.combate.Combo.Config.parse(j.getAsJsonObject("combo")) : null,
+            j.has("skill_tree") ? com.danrod.dcuniverse.ability.Arvore.Config.parse(j.getAsJsonObject("skill_tree"), habs) : null);
     }
 
     private static List<Tipo> tipos(JsonArray arr) {

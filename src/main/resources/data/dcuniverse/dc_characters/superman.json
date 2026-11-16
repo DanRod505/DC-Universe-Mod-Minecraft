@@ -44,6 +44,21 @@
     "guard": { "anim": "superman.defesa", "parry_anim": "superman.aparo", "parry": 0.3, "reduction": 0.75,
       "parry_stun": 1.5, "parry_knockback": 1.4, "arc": 200 }
   },
+  "skill_tree": {
+    "starters": [ "visao_de_calor", "voo", "sopro_congelante" ],
+    "abilities": [
+      { "id": "visao_de_calor", "cost": 1 },
+      { "id": "voo", "cost": 1 },
+      { "id": "sopro_congelante", "cost": 1 },
+      { "id": "investida_de_aco", "cost": 2 },
+      { "id": "palmas_sonicas", "cost": 2 },
+      { "id": "soco_sonico", "cost": 2 },
+      { "id": "calor_focado", "cost": 1 },
+      { "id": "sopro_gelido", "cost": 1 },
+      { "id": "visao_raio_x", "cost": 1 },
+      { "id": "pisao_sismico", "cost": 2 }
+    ]
+  },
   "abilities": [
     { "id": "visao_de_calor", "type": "projectile_beam", "set": "combat", "mode": "hold", "cost": 12, "cooldown": 2,
       "range": 24, "damage_mult": 0.4, "color": "#FF2A1A", "sets_fire": true, "melts": true,
@@ -69,6 +84,7 @@
       "radius": 7, "damage_mult": 0.75, "knockback": 1.2, "launch": 0.7, "stun": 1.5, "spread_ticks": 10 },
     { "id": "fortaleza_da_solidao", "type": "structure", "supreme": true, "cost_pct": 70, "cooldown": 150,
       "range": 24, "radius": 6, "duration": 120, "regen_level": 2, "energy_per_second": 8,
-      "meteor": true, "impact_damage_mult": 1.5, "anim": "superman.suprema", "windup": 2.4 }
+      "meteor": true, "impact_damage_mult": 1.5, "anim": "superman.suprema", "windup": 2.4 },
+    { "id": "voo", "type": "flight", "cost": 0, "cooldown": 0.5, "unlocks_passive": "flight" }
   ]
 }

@@ -78,6 +78,22 @@ public final class EstadoCliente {
     /** Abre a tela do início guiado ou o mapa do mundo (client/InicioScreen::receber). */
     public static volatile java.util.function.Consumer<Rede.InicioAbrir> inicio = m -> {};
 
+    /** Árvore de habilidades do herói atual (ability/Arvore); heroi "" = o herói não usa a árvore nova. */
+    public static volatile Rede.ArvoreSync arvore = Rede.ArvoreSync.VAZIO;
+    /** Chegou uma árvore nova (a tela aberta se atualiza; o cliente abre a escolha da inicial). */
+    public static volatile java.util.function.Consumer<Rede.ArvoreSync> aoArvore = m -> {};
+
+    public static void arvore(Rede.ArvoreSync m) {
+        arvore = emReplay.getAsBoolean() ? Rede.ArvoreSync.VAZIO : m;
+        aoArvore.accept(arvore);
+    }
+
+    /** O herói atual usa a árvore nova (slots livres, sem suprema nem energia). */
+    public static boolean temArvore() {
+        Rede.ArvoreSync a = arvore;
+        return !a.heroi().isEmpty() && a.heroi().equals(atual.personagem());
+    }
+
     private EstadoCliente() {}
 
     public static void npcCatalogo(Rede.NpcCatalogo c) {
@@ -115,6 +131,8 @@ public final class EstadoCliente {
 
     private static String passivasDe = "";
     private static Map<String, com.danrod.dcuniverse.character.Params> passivas = Map.of();
+    /** Passiva -> habilidade da árvore que a libera ("unlocks_passive", ex.: flight -> voo). */
+    private static Map<String, String> donas = Map.of();
 
     /** Parâmetros de uma passiva do personagem do jogador local (lidos do catálogo), ou null se não tiver. */
     public static synchronized com.danrod.dcuniverse.character.Params passiva(String tipo) {
@@ -123,6 +141,7 @@ public final class EstadoCliente {
         if (!id.equals(passivasDe)) {
             passivasDe = id;
             Map<String, com.danrod.dcuniverse.character.Params> m = new java.util.HashMap<>();
+            Map<String, String> d = new java.util.HashMap<>();
             try {
                 var json = com.google.gson.JsonParser.parseString(catalogo.getOrDefault(id, "{}")).getAsJsonObject();
                 if (json.has("passives")) {
@@ -131,11 +150,21 @@ public final class EstadoCliente {
                         m.put(o.get("type").getAsString(), new com.danrod.dcuniverse.character.Params(o));
                     }
                 }
+                if (json.has("abilities")) {
+                    for (var e : json.getAsJsonArray("abilities")) {
+                        var o = e.getAsJsonObject();
+                        if (o.has("unlocks_passive")) d.put(o.get("unlocks_passive").getAsString(), o.get("id").getAsString());
+                    }
+                }
             } catch (RuntimeException ex) {
                 passivasDe = "";
             }
             passivas = m;
+            donas = d;
         }
+        // Árvore nova: a passiva presa a uma habilidade (o voo) só vale com ela num slot.
+        String dona = donas.get(tipo);
+        if (dona != null && temArvore() && atual.habilidades().stream().noneMatch(h -> h.id().equals(dona))) return null;
         return passivas.get(tipo);
     }
 
@@ -146,6 +175,7 @@ public final class EstadoCliente {
     public static void limpar() {
         ILHAS.clear();
         atual = Rede.Sync.VAZIO;
+        arvore = Rede.ArvoreSync.VAZIO;
         catalogo = Map.of();
         passivasDe = "";
         guia = Rede.GuiaSync.VAZIO;

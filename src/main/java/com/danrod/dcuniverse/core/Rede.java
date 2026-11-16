@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 17;
+    private static final int VERSAO = 18;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -161,6 +161,76 @@ public final class Rede {
             return new GuiaSync(List.copyOf(b.readList(FriendlyByteBuf::readUtf)), List.copyOf(b.readList(FriendlyByteBuf::readUtf)), b.readUtf());
         }
     }
+
+    /** Uma habilidade da árvore como a tela precisa: custo em pontos, recarga, se é segurada e se é uma das iniciais. */
+    public record ArvoreItem(String id, int custo, float recarga, boolean hold, boolean inicial) {}
+
+    /**
+     * Árvore de habilidades do herói atual (ability/Arvore): nível, xp (com o começo e o fim do nível), pontos livres,
+     * slots abertos, se está no criativo, a inicial ("" = ainda não escolheu), as compradas, os 6 slots ("" = vazio) e a
+     * árvore toda. heroi "" = o herói atual não usa o sistema novo.
+     */
+    public record ArvoreSync(String heroi, int nivel, int xp, int xpNivel, int xpProximo, int pontos, int slotsAbertos,
+                             boolean criativo, String inicial, List<String> compradas, List<String> slots, List<ArvoreItem> itens) {
+        public static final ArvoreSync VAZIO = new ArvoreSync("", 0, 0, 0, 0, 0, 0, false, "", List.of(), List.of(), List.of());
+
+        public boolean precisaEscolher() {
+            return !heroi.isEmpty() && inicial.isEmpty();
+        }
+
+        public ArvoreItem item(String id) {
+            for (ArvoreItem i : itens) if (i.id().equals(id)) return i;
+            return null;
+        }
+
+        public boolean tem(String id) {
+            return item(id) != null && (criativo || compradas.contains(id));
+        }
+
+        public static void encode(ArvoreSync m, FriendlyByteBuf b) {
+            b.writeUtf(m.heroi);
+            b.writeVarInt(m.nivel);
+            b.writeVarInt(m.xp);
+            b.writeVarInt(m.xpNivel);
+            b.writeVarInt(m.xpProximo);
+            b.writeVarInt(m.pontos + 1000);
+            b.writeVarInt(m.slotsAbertos);
+            b.writeBoolean(m.criativo);
+            b.writeUtf(m.inicial);
+            b.writeCollection(m.compradas, FriendlyByteBuf::writeUtf);
+            b.writeCollection(m.slots, FriendlyByteBuf::writeUtf);
+            b.writeVarInt(m.itens.size());
+            for (ArvoreItem i : m.itens) {
+                b.writeUtf(i.id());
+                b.writeVarInt(i.custo());
+                b.writeFloat(i.recarga());
+                b.writeBoolean(i.hold());
+                b.writeBoolean(i.inicial());
+            }
+        }
+
+        public static ArvoreSync decode(FriendlyByteBuf b) {
+            String h = b.readUtf();
+            int nivel = b.readVarInt(), xp = b.readVarInt(), xn = b.readVarInt(), xprox = b.readVarInt(), pts = b.readVarInt() - 1000, abertos = b.readVarInt();
+            boolean cri = b.readBoolean();
+            String ini = b.readUtf();
+            List<String> comp = List.copyOf(b.readList(FriendlyByteBuf::readUtf));
+            List<String> slots = List.copyOf(b.readList(FriendlyByteBuf::readUtf));
+            int n = b.readVarInt();
+            List<ArvoreItem> itens = new ArrayList<>(n);
+            for (int i = 0; i < n; i++) itens.add(new ArvoreItem(b.readUtf(), b.readVarInt(), b.readFloat(), b.readBoolean(), b.readBoolean()));
+            return new ArvoreSync(h, nivel, xp, xn, xprox, pts, abertos, cri, ini, comp, slots, List.copyOf(itens));
+        }
+    }
+
+    /** Escolha da habilidade inicial do herói (uma das iniciais da árvore). */
+    public record ArvoreInicial(String id) {}
+
+    /** Comprar uma habilidade da árvore com pontos. */
+    public record ArvoreComprar(String id) {}
+
+    /** Os 6 slots montados na tela da árvore ("" = vazio). */
+    public record ArvoreSlots(List<String> slots) {}
 
     /** Escolha no menu radial (índice na lista de habilidades). */
     public record Selecionar(int indice) {}
@@ -561,6 +631,27 @@ public final class Rede {
                     if (q == p || q.distanceToSqr(p) < 160 * 160) aparenciaPara(p, q);
             }))
             .add();
+        CANAL.messageBuilder(ArvoreSync.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(ArvoreSync::encode).decoder(ArvoreSync::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.arvore(m))
+            .add();
+        CANAL.messageBuilder(ArvoreInicial.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeUtf(m.id())).decoder(b -> new ArvoreInicial(b.readUtf(64)))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.ability.Arvore.escolherInicial(p, m.id())))
+            .add();
+        CANAL.messageBuilder(ArvoreComprar.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeUtf(m.id())).decoder(b -> new ArvoreComprar(b.readUtf(64)))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.ability.Arvore.comprar(p, m.id())))
+            .add();
+        CANAL.messageBuilder(ArvoreSlots.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeCollection(m.slots(), FriendlyByteBuf::writeUtf))
+            .decoder(b -> new ArvoreSlots(List.copyOf(b.<String, java.util.ArrayList<String>>readCollection(n -> new ArrayList<String>(Math.min(n, 8)), x -> x.readUtf(64)))))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.ability.Arvore.definirSlots(p, m.slots())))
+            .add();
         CANAL.messageBuilder(Sync.class)
             .direction(PacketFlow.CLIENTBOUND)
             .encoder(Sync::encode).decoder(Sync::decode)
@@ -888,6 +979,7 @@ public final class Rede {
     /** Envia o estado completo ao próprio jogador. */
     public static void sincronizar(ServerPlayer player) {
         if (player.connection == null) return;
+        com.danrod.dcuniverse.ability.Arvore.sincronizar(player);
         CANAL.send(montar(player), Canal.jogador(player));
     }
 
@@ -905,10 +997,12 @@ public final class Rede {
         for (Personagem.Habilidade h : com.danrod.dcuniverse.character.Cinto.equipadas(player, p)) {
             int restante = (int) Math.max(0, e.prontaEm(h.id()) - agora);
             int max = com.danrod.dcuniverse.ability.Cargas.max(h);
-            habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD, h.suprema(), player.isCreative() ? 0 : h.custo(), restante,
+            boolean semCusto = player.isCreative() || com.danrod.dcuniverse.ability.Arvore.semEnergia(player, p);
+            habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD, h.suprema(), semCusto ? 0 : h.custo(), restante,
                 Math.round(h.recargaSeg() * 20), max == 0 ? -1 : player.isCreative() ? max : com.danrod.dcuniverse.ability.Cargas.atuais(player, h), max,
                 max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.faltam(player, h),
-                max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.ticksPorCarga(player, p, h), com.danrod.dcuniverse.combate.Combo.conjunto(h)));
+                max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.ticksPorCarga(player, p, h),
+                com.danrod.dcuniverse.ability.Arvore.ativa(player, p) ? com.danrod.dcuniverse.combate.Combo.AMBOS : com.danrod.dcuniverse.combate.Combo.conjunto(h)));
         }
         int selecionada = e.selecionada();
         if (DemoHud.ativa(player)) {
@@ -918,7 +1012,8 @@ public final class Rede {
         boolean solar = p.energia().recargas().stream().anyMatch(r -> r.tipo().equals("sunlight"));
         return new Sync(p.id().toString(), e.energia(), p.energia().max(), e.esgotado(), selecionada,
             e.canalizando(), List.copyOf(habs), planar == null ? 0f : planar.params().f("speed", 10f), e.amortecendo(),
-            Recargas.porSegundo(player, p), solar, solar && Recargas.sobOSol(player), Voo.velocidade(p),
+            Recargas.porSegundo(player, p), solar, solar && Recargas.sobOSol(player),
+            com.danrod.dcuniverse.ability.Arvore.passivaLiberada(player, p, "flight") ? Voo.velocidade(p) : 0f,
             p.passiva("flight") == null ? 0f : p.passiva("flight").params().f("dash_cost", 15f),
             Recargas.tecnologica(p), Recargas.tecnologica(p) && Recargas.naEstacao(player, p));
     }

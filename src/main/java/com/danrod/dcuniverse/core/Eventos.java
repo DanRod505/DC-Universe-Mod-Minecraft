@@ -86,7 +86,10 @@ public final class Eventos {
         NeoForge.EVENT_BUS.addListener(LivingDeathEvent.class, e -> {
             if (e.getSource().getEntity() instanceof ServerPlayer sp && !(e.getEntity() instanceof net.minecraft.world.entity.player.Player)) {
                 com.danrod.dcuniverse.missao.Diario.abateu(sp, e.getEntity());
-                if (e.getEntity() instanceof net.minecraft.world.entity.monster.Enemy) com.danrod.dcuniverse.npc.Afinidade.protegeu(sp, e.getEntity());
+                if (e.getEntity() instanceof net.minecraft.world.entity.monster.Enemy) {
+                    com.danrod.dcuniverse.npc.Afinidade.protegeu(sp, e.getEntity());
+                    com.danrod.dcuniverse.ability.Arvore.abateu(sp, e.getEntity());
+                }
             }
         });
         NeoForge.EVENT_BUS.addListener(PlayerEvent.ItemCraftedEvent.class, e -> {
@@ -116,6 +119,7 @@ public final class Eventos {
                 com.danrod.dcuniverse.combate.Combo.esquecer(sp);
                 com.danrod.dcuniverse.combate.Defesa.esquecer(sp);
                 com.danrod.dcuniverse.ability.Coreografia.esquecer(sp);
+                com.danrod.dcuniverse.ability.Arvore.esquecer(sp);
             }
         });
         NeoForge.EVENT_BUS.addListener(PlayerEvent.StartTracking.class, e -> {

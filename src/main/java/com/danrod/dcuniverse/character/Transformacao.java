@@ -61,6 +61,7 @@ public final class Transformacao {
         Atributos.aplicar(player, p, true);
         Passivas.aoTransformar(player, p);
         efeito(player, true);
+        com.danrod.dcuniverse.ability.Arvore.esquecer(player);
         Rede.sincronizar(player);
         Rede.aparencia(player);
         Guia.descobrir(player, id);

@@ -794,6 +794,43 @@ def icone_modo_mundo():
     return t
 
 
+def icone_voo():
+    """Voo (árvore nova): o Superman subindo na diagonal, punho à frente, capa ondulando e nuvens ficando para trás."""
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # Linhas de velocidade atrás (embaixo à esquerda).
+    for (x0, y0, x1, y1), cor in (((0, 20, 9, 11), "#DDEBFF"), ((3, 30, 12, 21), "#9FC4FF"), ((8, 31, 14, 25), "#FFFFFF")):
+        d.line([(x0, y0), (x1, y1)], fill=hexa(cor), width=1)
+    # Nuvens que ficam para trás.
+    for cx, cy, r in ((4, 27, 3), (8, 29, 3), (2, 30, 2), (12, 30, 2)):
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=hexa("#E8F0FF"))
+    for cx, cy, r in ((5, 26, 1), (9, 28, 1)):
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=hexa("#FFFFFF"))
+    # Capa vermelha ondulando para trás do ombro.
+    d.polygon([(17, 13), (20, 16), (15, 21), (12, 27), (8, 24), (10, 22), (7, 21), (12, 17)], fill=hexa("#C81E26"))
+    d.line([(16, 15), (11, 20), (9, 22)], fill=hexa("#8E1418"), width=1)
+    d.line([(18, 14), (13, 19)], fill=hexa("#F0505A"), width=1)
+    # Corpo azul na diagonal, pernas para trás com botas vermelhas.
+    d.line([(12, 22), (20, 14)], fill=hexa("#1F48A8"), width=5)
+    d.line([(13, 21), (20, 14)], fill=hexa("#3A7BFF"), width=3)
+    d.line([(14, 19), (18, 15)], fill=hexa("#7FB0FF"), width=1)
+    d.line([(9, 25), (12, 22)], fill=hexa("#C81E26"), width=3)
+    # Escudo no peito: losango amarelo com o vermelho dentro.
+    d.polygon([(17, 15), (19, 16), (18, 18), (16, 17)], fill=hexa("#F7C531"))
+    d.point((17, 16), fill=hexa("#C81E26"))
+    # Braço esticado e punho à frente.
+    d.line([(20, 13), (26, 7)], fill=hexa("#3A7BFF"), width=2)
+    d.ellipse([25, 4, 29, 8], fill=hexa("#2C62D8"))
+    # Cabeça: cabelo preto e rosto.
+    d.ellipse([20, 9, 24, 13], fill=hexa("#F2C49B"))
+    d.polygon([(20, 11), (21, 9), (24, 9), (22, 10)], fill=hexa("#141826"))
+    contornar(t)
+    # Brilho no punho, cortando o ar.
+    brilho(t, 28, 5, 4, hexa("#FFFFFF"), 0.7)
+    return t
+
+
 ICONES = {
     "visao_de_calor": icone_visao_de_calor,
     "sopro_congelante": icone_sopro_congelante,
@@ -805,6 +842,7 @@ ICONES = {
     "palmas_sonicas": icone_palmas_sonicas,
     "calor_focado": icone_calor_focado,
     "sopro_gelido": icone_sopro_gelido,
+    "voo": icone_voo,
 }
 
 
