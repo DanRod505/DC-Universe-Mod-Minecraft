@@ -316,26 +316,33 @@ habs = {}
 NEUTRO = [0, 0, 0]
 
 # ---------------------------------------------------------------- Visão de Calor
-# Os olhos acendem: o peito estufa, os punhos fecham ao lado do corpo, a cabeça baixa de leve e o raio sai com o corpo
-# tremendo de esforço (laço).
-V_D, V_E = [14, 0, 14], [14, 0, -14]
+# Pose das referências do Dalton (habilidades.8): ele se abaixa numa base larga, joelhos dobrados, tronco inclinado para
+# o alvo, punhos fechados baixos ao lado do corpo e a cabeça firme mirando; os olhos acendem com faíscas correndo para
+# eles e o raio sai com o corpo tremendo de esforço (laço).
+V_D, V_E = [22, 0, 16], [22, 0, -16]
+V_CD, V_CE = [-24, 0, 10], [8, 0, -10]
+V_RAIZ = [0, 2.4, 0.4]
 habs["superman.visao.inicio"] = {
     "animation_length": 0.5, "dcuniverse:entrada": 0.06, "dcuniverse:saida": 0.1,
     "dcuniverse:eventos": [
         {"t": 0.0, "som": "dcuniverse:habilidade.olhos_acendem", "vol": 1.0},
-        {"t": 0.12, "fx": "olhos"},
-        {"t": 0.3, "fx": "olhos", "tremor": 1.2, "tremor_ticks": 4, "flash": "#FF3A1A", "clarao": 0.18, "zoom": 0.05},
+        {"t": 0.04, "fx": "visao_carga"},
+        {"t": 0.14, "fx": "olhos"},
+        {"t": 0.2, "fx": "visao_carga", "tremor": 0.6, "tremor_ticks": 4},
+        {"t": 0.32, "fx": "olhos", "tremor": 1.4, "tremor_ticks": 5, "flash": "#FF3A1A", "clarao": 0.2, "zoom": 0.06},
     ],
     "bones": {
-        "root": {"position": kf([(0, NEUTRO), (0.18, [0, 1.2, 0.6]), (0.35, [0, 0.6, -0.4]), (0.5, [0, 0.6, -0.4])], "tudo")},
-        "body": {"rotation": kf([(0, NEUTRO), (0.18, [-8, 0, 0]), (0.35, [8, 0, 0]), (0.5, [6, 0, 0])], "tudo")},
-        "head": {"rotation": kf([(0, NEUTRO), (0.18, [-10, 0, 4]), (0.35, [12, 0, -3]), (0.5, [8, 0, -2])], "tudo")},
-        "right_arm": {"rotation": kf([(0, NEUTRO), (0.18, [-12, 0, 22]), (0.35, V_D), (0.5, V_D)], "tudo")},
-        "left_arm": {"rotation": kf([(0, NEUTRO), (0.18, [-12, 0, -22]), (0.35, V_E), (0.5, V_E)], "tudo")},
-        "right_forearm": {"rotation": kf([(0, NEUTRO), (0.18, [-50, 0, 0]), (0.35, [-24, 0, 0]), (0.5, [-24, 0, 0])], "tudo")},
-        "left_forearm": {"rotation": kf([(0, NEUTRO), (0.18, [-50, 0, 0]), (0.35, [-24, 0, 0]), (0.5, [-24, 0, 0])], "tudo")},
-        "right_leg": {"rotation": kf([(0, NEUTRO), (0.35, [-4, 0, 6]), (0.5, [-4, 0, 6])])},
-        "left_leg": {"rotation": kf([(0, NEUTRO), (0.35, [4, 0, -6]), (0.5, [4, 0, -6])])},
+        "root": {"position": kf([(0, NEUTRO), (0.16, [0, 3.2, -0.4]), (0.35, V_RAIZ), (0.5, V_RAIZ)], "tudo")},
+        "body": {"rotation": kf([(0, NEUTRO), (0.16, [24, 0, 0]), (0.35, [18, 0, 0]), (0.5, [18, 0, 0])], "tudo")},
+        "head": {"rotation": kf([(0, NEUTRO), (0.16, [6, 0, 0]), (0.35, [-14, 0, -2]), (0.5, [-14, 0, -2])], "tudo")},
+        "right_arm": {"rotation": kf([(0, NEUTRO), (0.16, [30, 0, 22]), (0.35, V_D), (0.5, V_D)], "tudo")},
+        "left_arm": {"rotation": kf([(0, NEUTRO), (0.16, [30, 0, -22]), (0.35, V_E), (0.5, V_E)], "tudo")},
+        "right_forearm": {"rotation": kf([(0, NEUTRO), (0.16, [-44, 0, 0]), (0.35, [-30, 0, 0]), (0.5, [-30, 0, 0])], "tudo")},
+        "left_forearm": {"rotation": kf([(0, NEUTRO), (0.16, [-44, 0, 0]), (0.35, [-30, 0, 0]), (0.5, [-30, 0, 0])], "tudo")},
+        "right_leg": {"rotation": kf([(0, NEUTRO), (0.16, [-30, 0, 12]), (0.35, V_CD), (0.5, V_CD)], "tudo")},
+        "left_leg": {"rotation": kf([(0, NEUTRO), (0.16, [10, 0, -12]), (0.35, V_CE), (0.5, V_CE)], "tudo")},
+        "right_shin": {"rotation": kf([(0, NEUTRO), (0.16, [44, 0, 0]), (0.35, [36, 0, 0]), (0.5, [36, 0, 0])], "tudo")},
+        "left_shin": {"rotation": kf([(0, NEUTRO), (0.16, [32, 0, 0]), (0.35, [26, 0, 0]), (0.5, [26, 0, 0])], "tudo")},
         # Primeira pessoa: os punhos sobem tremendo nos cantos de baixo da tela.
         "fp_right_arm": {"position": kf([(0, [0, -10, 4]), (0.35, [1, -3, 1]), (0.5, [1, -3, 1])], "tudo"), "rotation": [-12, 10, -4]},
         "fp_right_forearm": {"rotation": [-46, 0, 0]},
@@ -346,15 +353,17 @@ habs["superman.visao.inicio"] = {
 habs["superman.visao"] = {
     "loop": True, "animation_length": 0.3, "dcuniverse:entrada": 0.08, "dcuniverse:saida": 0.25,
     "bones": {
-        "root": {"position": kf([(0, [0, 0.6, -0.4]), (0.1, [0.15, 0.7, -0.4]), (0.2, [-0.15, 0.5, -0.4]), (0.3, [0, 0.6, -0.4])])},
-        "body": {"rotation": kf([(0, [6, 0, 0]), (0.15, [7, 0, 0.6]), (0.3, [6, 0, 0])])},
-        "head": {"rotation": kf([(0, [8, 0, -2]), (0.08, [8.6, 0, -1.4]), (0.16, [7.6, 0, -2.4]), (0.3, [8, 0, -2])])},
-        "right_arm": {"rotation": kf([(0, V_D), (0.15, [15, 0, 15]), (0.3, V_D)])},
-        "left_arm": {"rotation": kf([(0, V_E), (0.15, [15, 0, -15]), (0.3, V_E)])},
-        "right_forearm": {"rotation": [-24, 0, 0]},
-        "left_forearm": {"rotation": [-24, 0, 0]},
-        "right_leg": {"rotation": [-4, 0, 6]},
-        "left_leg": {"rotation": [4, 0, -6]},
+        "root": {"position": kf([(0, V_RAIZ), (0.1, [0.15, 2.5, 0.4]), (0.2, [-0.15, 2.3, 0.4]), (0.3, V_RAIZ)])},
+        "body": {"rotation": kf([(0, [18, 0, 0]), (0.15, [19, 0, 0.6]), (0.3, [18, 0, 0])])},
+        "head": {"rotation": kf([(0, [-14, 0, -2]), (0.08, [-13.4, 0, -1.4]), (0.16, [-14.4, 0, -2.4]), (0.3, [-14, 0, -2])])},
+        "right_arm": {"rotation": kf([(0, V_D), (0.15, [23, 0, 17]), (0.3, V_D)])},
+        "left_arm": {"rotation": kf([(0, V_E), (0.15, [23, 0, -17]), (0.3, V_E)])},
+        "right_forearm": {"rotation": [-30, 0, 0]},
+        "left_forearm": {"rotation": [-30, 0, 0]},
+        "right_leg": {"rotation": V_CD},
+        "left_leg": {"rotation": V_CE},
+        "right_shin": {"rotation": [36, 0, 0]},
+        "left_shin": {"rotation": [26, 0, 0]},
         "fp_right_arm": {"position": kf([(0, [1, -3, 1]), (0.1, [1.2, -2.8, 1]), (0.2, [0.8, -3.2, 1]), (0.3, [1, -3, 1])]), "rotation": [-12, 10, -4]},
         "fp_right_forearm": {"rotation": [-46, 0, 0]},
         "fp_left_arm": {"position": kf([(0, [-1, -3, 1]), (0.1, [-0.8, -3.2, 1]), (0.2, [-1.2, -2.8, 1]), (0.3, [-1, -3, 1])]), "rotation": [-12, -10, 4]},

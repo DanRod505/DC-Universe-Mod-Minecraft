@@ -213,6 +213,24 @@ public final class Testes {
         h.assertBlockPresent(net.minecraft.world.level.block.Blocks.IRON_ORE, new net.minecraft.core.BlockPos(4, 0, 4));
         h.assertBlockPresent(net.minecraft.world.level.block.Blocks.STONE_BRICKS, new net.minecraft.core.BlockPos(5, 1, 4));
         h.assertBlockPresent(net.minecraft.world.level.block.Blocks.CHEST, new net.minecraft.core.BlockPos(3, 1, 4));
+        // Visão de Calor cava: desfaz terra, mas nunca minério nem tijolo (as mesmas regras da cratera).
+        h.setBlock(new net.minecraft.core.BlockPos(8, 1, 8), net.minecraft.world.level.block.Blocks.DIRT);
+        h.setBlock(new net.minecraft.core.BlockPos(8, 1, 0), net.minecraft.world.level.block.Blocks.IRON_ORE);
+        h.setBlock(new net.minecraft.core.BlockPos(0, 1, 8), net.minecraft.world.level.block.Blocks.STONE_BRICKS);
+        var pe = h.absolutePos(new net.minecraft.core.BlockPos(4, 2, 4));
+        double vx = c.getX(), vy = c.getY(), vz = c.getZ();
+        float vyaw = c.getYRot(), vpitch = c.getXRot();
+        c.snapTo(pe.getX() + 0.5, pe.getY(), pe.getZ() + 0.5, 0f, 0f);
+        var lv = h.getLevel();
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Raio.queimar(lv, c, h.absolutePos(new net.minecraft.core.BlockPos(8, 1, 8))), "o raio desfaz a terra");
+        h.assertBlockNotPresent(net.minecraft.world.level.block.Blocks.DIRT, new net.minecraft.core.BlockPos(8, 1, 8));
+        h.assertFalse(com.danrod.dcuniverse.ability.active.Raio.queimar(lv, c, h.absolutePos(new net.minecraft.core.BlockPos(8, 1, 0))), "minério fica");
+        h.assertFalse(com.danrod.dcuniverse.ability.active.Raio.queimar(lv, c, h.absolutePos(new net.minecraft.core.BlockPos(0, 1, 8))), "tijolo fica");
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.IRON_ORE, new net.minecraft.core.BlockPos(8, 1, 0));
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.STONE_BRICKS, new net.minecraft.core.BlockPos(0, 1, 8));
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Raio.ticksParaQuebrar(net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), 1f)
+            < com.danrod.dcuniverse.ability.active.Raio.ticksParaQuebrar(net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 1f), "pedra demora mais que terra");
+        c.snapTo(vx, vy, vz, vyaw, vpitch);
         Personagem.Habilidade giro0 = Arvore.habilidade(c, sup, "giro_de_calor");
         h.assertValueEqual(giro0.params().f("range", 0f), 12f, "giro de calor: 12 blocos de base");
         // No teste o alcance cai para 4 blocos, para não acertar os testes vizinhos.

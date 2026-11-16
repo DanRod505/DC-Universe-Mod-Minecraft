@@ -32,8 +32,13 @@ public final class Config {
         .define("crateraGiro", true);
 
     public static final ModConfigSpec.BooleanValue CRATERA_GIRO_SERVIDOR = B
-        .comment("Em servidor dedicado a cratera do Giro de Calor fica desligada, a não ser que esta opção seja true.")
-        .define("crateraGiroServidor", false);
+        .comment("Cratera do Giro de Calor também em servidor dedicado (multiplayer). Ponha false para desligar só no servidor.")
+        .define("crateraGiroServidor", true);
+
+    public static final ModConfigSpec.BooleanValue VISAO_DESTROI = B
+        .comment("Visão de Calor cava: parada num bloco de chão natural (terra, grama, areia, pedra comum e afins) ela racha e",
+            "desfaz o bloco, até 3 blocos abaixo dos pés. Nunca minérios, baús, construções nem perto de estruturas.")
+        .define("visaoDestroi", true);
 
     public static final ModConfigSpec SPEC = B.build();
 

@@ -65,7 +65,7 @@ public final class Pecas {
     private static final Map<Integer, Asa> ASAS = new HashMap<>();
 
     /** Tamanho da capa em pixels do modelo: largura em cima e embaixo, comprimento e espessura. */
-    private static final float LARG_CIMA = 10, LARG_BAIXO = 12.5f, COMPRIMENTO = 21, ESPESSURA = 0.45f;
+    private static final float LARG_CIMA = 10, LARG_BAIXO = 12.5f, COMPRIMENTO = 22, ESPESSURA = 0.45f;
     /** Faixas ao longo da capa e colunas na largura (para as ondas). */
     private static final int FAIXAS = 10, COLUNAS = 12;
 
@@ -284,6 +284,8 @@ public final class Pecas {
                 xLado += dir.x * passo;
             }
         }
+        // Pernas e braços que vão para trás (correndo, chutando) empurram a capa em vez de atravessá-la.
+        if (g < 0.5f) afastar(pt, m);
         final float meia = ESPESSURA / 2;
         col.submitCustomGeometry(ps, RenderTypes.entityCutout(textura), (pose, buf) -> {
             int over = OverlayTexture.NO_OVERLAY;
@@ -713,6 +715,59 @@ public final class Pecas {
                              Vector3f normal, int luz, int over) {
         float x = (p.x + n.x * off) / 16f, y = (p.y + n.y * off) / 16f, z = (p.z + n.z * off) / 16f;
         buf.addVertex(pose, x, y, z).setColor(-1).setUv(u, v).setOverlay(over).setLight(luz).setNormal(pose, normal.x, normal.y, normal.z);
+    }
+
+    /** Caixas (em pixels, no espaço de cada parte) de pernas e braços, com x, y e z mínimos e máximos. */
+    private static final float[][] CAIXAS = {
+        {-2, 0, -2, 2, 12, 2}, {-2, 0, -2, 2, 12, 2},          // pernas direita e esquerda
+        {-3, -2, -2, 1, 10, 2}, {-1, -2, -2, 3, 10, 2},        // braços direito e esquerdo
+    };
+    /** Folga entre a capa e o corpo (pixels): a capa passa por fora com a espessura dela e um pouco de ar. */
+    private static final float FOLGA = 0.8f;
+
+    /**
+     * Colisão da capa com as pernas e os braços: cada faixa da capa (de cima para baixo) que entraria numa delas é
+     * empurrada para fora pelo lado de trás da parte, e o empurrão passa para as faixas de baixo (a capa escorre por
+     * cima da perna em vez de dobrar dentro dela). Os pontos estão no espaço do corpo (pixels, y para baixo).
+     */
+    static void afastar(Vector3f[][] pt, PlayerModel m) {
+        net.minecraft.client.model.geom.ModelPart[] partes = {m.rightLeg, m.leftLeg, m.rightArm, m.leftArm};
+        org.joml.Matrix4f corpo = matriz(m.body);
+        org.joml.Matrix4f[] para = new org.joml.Matrix4f[partes.length], de = new org.joml.Matrix4f[partes.length];
+        for (int k = 0; k < partes.length; k++) {
+            org.joml.Matrix4f parte = matriz(partes[k]);
+            para[k] = new org.joml.Matrix4f(parte).invert().mul(corpo);        // corpo -> parte
+            de[k] = new org.joml.Matrix4f(para[k]).invert();                    // parte -> corpo
+        }
+        Vector3f acum = new Vector3f();
+        for (Vector3f[] linha : pt) {
+            Vector3f maior = new Vector3f();
+            for (Vector3f p : linha) {
+                p.add(acum);
+                for (int k = 0; k < partes.length; k++) {
+                    if (!partes[k].visible) continue;
+                    float[] c = CAIXAS[k];
+                    Vector3f q = para[k].transformPosition(new Vector3f(p));
+                    if (q.x < c[0] - FOLGA || q.x > c[3] + FOLGA || q.y < c[1] || q.y > c[4] + FOLGA || q.z < c[2]) continue;
+                    float dz = c[5] + FOLGA - q.z;
+                    if (dz <= 0) continue;
+                    Vector3f push = de[k].transformDirection(new Vector3f(0, 0, dz));
+                    if (push.lengthSquared() > maior.lengthSquared()) maior.set(push);
+                }
+            }
+            if (maior.lengthSquared() > 0) {
+                for (Vector3f p : linha) p.add(maior);
+                acum.add(maior);
+            }
+        }
+    }
+
+    /** A mesma transformação do ModelPart.translateAndRotate, em pixels. */
+    private static org.joml.Matrix4f matriz(net.minecraft.client.model.geom.ModelPart p) {
+        org.joml.Matrix4f mt = new org.joml.Matrix4f().translate(p.x, p.y, p.z);
+        if (p.xRot != 0 || p.yRot != 0 || p.zRot != 0) mt.rotate(new org.joml.Quaternionf().rotationZYX(p.zRot, p.yRot, p.xRot));
+        if (p.xScale != 1 || p.yScale != 1 || p.zScale != 1) mt.scale(p.xScale, p.yScale, p.zScale);
+        return mt;
     }
 
     /**

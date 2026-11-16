@@ -322,7 +322,7 @@ public final class GiroVisual {
         }
     }
 
-    private static void pedaco(Vec3 pos, Vec3 vel, BlockState b, float tam, RandomSource rnd) {
+    static void pedaco(Vec3 pos, Vec3 vel, BlockState b, float tam, RandomSource rnd) {
         if (PEDACOS.size() > 160) PEDACOS.remove(0);
         Vec3 eixo = new Vec3(rnd.nextGaussian(), rnd.nextGaussian(), rnd.nextGaussian());
         eixo = eixo.lengthSqr() < 1e-4 ? new Vec3(0, 1, 0) : eixo.normalize();

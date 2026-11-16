@@ -73,7 +73,8 @@
   "abilities": [
     { "id": "visao_de_calor", "type": "projectile_beam", "set": "combat", "mode": "hold", "cost": 12, "cooldown": 2,
       "range": 24, "damage_mult": 0.4, "color": "#FF2A1A", "sets_fire": true, "melts": true,
-      "lights_furnace": true, "cooks_drops": true, "anim": "superman.visao.inicio", "windup": 0.35, "loop_anim": "superman.visao" },
+      "lights_furnace": true, "cooks_drops": true, "knockback": 0.35, "digs": true, "dig_speed": 1.0,
+      "anim": "superman.visao.inicio", "windup": 0.35, "loop_anim": "superman.visao" },
     { "id": "sopro_congelante", "type": "area_cone", "set": "combat", "mode": "hold", "cost": 10, "cooldown": 3,
       "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze",
       "anim": "superman.sopro.inicio", "windup": 0.6, "loop_anim": "superman.sopro" },

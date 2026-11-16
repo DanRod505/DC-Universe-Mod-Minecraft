@@ -80,7 +80,7 @@
 
 **Corpo:** masculino, 1,91 m (escala 1,03), musculoso, modelo humano, braços largo · peças: capa, brilho
 
-**Traje de Krypton (base):** Malha azul-royal com textura de escamas finas (padrão kryptoniano em relevo de 1 pixel), S vermelho e amarelo em relevo no peito com borda escura, cinto amarelo fino, botas vermelhas até o meio da canela com costura em V e capa vermelha longa com o S amarelo nas costas. Cabelo preto com o cacho na testa. Olhos ganham brilho vermelho (camada emissiva) ao usar visão de calor.
+**Traje de Krypton (base):** Inspirado nas fotos de traje que o Dalton mandou (16/11/2026): malha azul funda com trama texturizada e costuras em relevo marcando os painéis (peito, costelas, ombros, braços e joelhos), gola alta, S vermelho e amarelo em relevo no peito com borda escura, cinto dourado largo com fivela, sunga vermelha, botas vermelhas até o joelho e capa vermelha longa caindo pelos ombros, com o S amarelo grande nas costas. Cabelo preto com o cacho na testa. Olhos ganham brilho vermelho (camada emissiva) ao usar visão de calor.
 
 - **Clássico com Sunga** (Liberada desde o início): Azul mais claro, sunga vermelha por fora, cinto amarelo largo e capa mais curta; S com fundo amarelo maior.
 - **Clark Kent** (Liberada desde o início): Terno cinza com gravata frouxa, óculos de armação grossa e a camisa aberta mostrando o S. Modo identidade secreta: NPCs não reconhecem; usar habilidade troca para o traje.

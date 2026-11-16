@@ -1,4 +1,9 @@
-"""Skin final do Superman (Traje de Krypton, docs/SKINS.md): textura 128x128, capa da peça 3D e brilho dos olhos.
+"""Skin final do Superman: textura 128x128, capa da peça 3D e brilho dos olhos.
+
+Desde a habilidades.8, inspirada nas fotos de traje que o Dalton mandou: azul mais fundo e texturizado, com costuras
+em relevo marcando os painéis (peito, costelas, ombros, braços e joelhos), gola alta, brasão vermelho e amarelo em
+relevo, cinto dourado largo com fivela, sunga vermelha, botas vermelhas até o joelho e capa vermelha longa caindo
+pelos ombros, com o S amarelo grande nas costas.
 
 Usado por tools/arte/skins.py. O volume vem de mapas de altura: cada músculo é uma elevação suave, e a luz
 (de cima e da esquerda) clareia o lado de cima das elevações e escurece o de baixo, como em relevo pintado.
@@ -8,11 +13,12 @@ import random
 
 from pixel import clarear, escurecer, hexa, mistura
 
-AZUL = hexa("#2050CC")
-AZUL_ESCURO = hexa("#0F2669")
-VERMELHO = hexa("#C61F2B")
+AZUL = hexa("#2A62B4")
+AZUL_ESCURO = hexa("#12335F")
+COSTURA = hexa("#5C93D6")
+VERMELHO = hexa("#BE1A26")
 VERMELHO_ESCURO = hexa("#6E0D16")
-AMARELO = hexa("#F7C631")
+AMARELO = hexa("#EDB52E")
 CONTORNO = hexa("#2A070B")
 PELE = hexa("#E9B48D")
 CABELO = hexa("#14151C")
@@ -54,10 +60,11 @@ def relevo(p, base, bumps, k=0.55, luz_topo=0.10, sombra_base=0.16, borda=0.12, 
             if x == 0 or x == p.w - 1:
                 s -= borda
             if escamas:
-                if y % 3 == 0 and (x + (y // 3) % 2 * 2) % 4 == 0:
-                    s += 0.045
-                elif y % 3 == 1 and (x + (y // 3) % 2 * 2) % 4 == 0:
-                    s -= 0.025
+                # trama do tecido: losangos miúdos em relevo (o "texturizado" do traje)
+                if (x + y) % 4 == 0:
+                    s += 0.02
+                elif (x - y) % 4 == 0:
+                    s -= 0.018
             if rnd is not None:
                 s += rnd.uniform(-0.008, 0.008)
             p.p(x, y, tom(base, s))
@@ -398,6 +405,173 @@ def capa_textura(capa, rnd):
     brasao(Area(), 10, 10, grande, letra=escurecer(VERMELHO, 0.05), borda=AMARELO)
 
 
+def costura(p, pontos):
+    """Costura em relevo: o fio claro (luz de cima) com a sombra logo embaixo."""
+    for x, y in pontos:
+        if 0 <= x < p.w and 0 <= y < p.h:
+            p.p(x, y, mistura(p.get(x, y), COSTURA, 0.75))
+            if y + 1 < p.h and (x, y + 1) not in pontos:
+                p.p(x, y + 1, mistura(p.get(x, y + 1), AZUL_ESCURO, 0.6))
+
+
+def linha(x0, y0, x1, y1):
+    n = max(abs(x1 - x0), abs(y1 - y0), 1)
+    return {(round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n)) for i in range(n + 1)}
+
+
+def vermelho(y, x, w, rnd, base=None):
+    """Tecido vermelho com a mesma trama do azul e luz de cima."""
+    c = base or VERMELHO
+    s = 0.06 - 0.10 * (y / 24) + rnd.uniform(-0.015, 0.015)
+    if (x + y) % 4 == 0:
+        s += 0.03
+    if x in (0, w - 1):
+        s -= 0.10
+    return tom(c, s)
+
+
+def traje(t, Pincel, rnd):
+    """Por cima da base: painéis com costura, gola alta, sunga, cinto largo, ombros da capa e botas altas."""
+    # --- tronco: gola, painéis do peito e costelas, sunga, cinto
+    f = Pincel(t, "corpo", "frente")
+    for x in range(5, 11):
+        f.p(x, 0, tom(AZUL_ESCURO, 0.25))
+    costura(f, {(4, 0), (11, 0)} | linha(0, 3, 3, 1) | linha(15, 3, 12, 1))
+    costura(f, linha(1, 13, 4, 18) | linha(14, 13, 11, 18))           # costelas
+    costura(f, linha(2, 16, 1, 18) | linha(13, 16, 14, 18))
+    tr = Pincel(t, "corpo", "tras")
+    costura(tr, linha(0, 5, 5, 12) | linha(15, 5, 10, 12) | linha(5, 12, 7, 18) | linha(10, 12, 8, 18))
+    for face in ("dir", "esq"):
+        costura(Pincel(t, "corpo", face), linha(1, 4, 1, 17))
+    # sunga: a última faixa do tronco
+    for face in ("frente", "tras", "dir", "esq"):
+        p = Pincel(t, "corpo", face)
+        for y in range(22, 24):
+            for x in range(p.w):
+                p.p(x, y, vermelho(y, x, p.w, rnd))
+    # cinto dourado largo (2 pixels da skin comum) com borda e fivela retangular com a faixa vermelha no meio
+    for camada in ("corpo", "jaqueta"):
+        for face in ("frente", "tras", "dir", "esq"):
+            p = Pincel(t, camada, face)
+            for x in range(p.w):
+                for y, c in ((18, clarear(AMARELO, 0.25)), (19, AMARELO), (20, AMARELO), (21, escurecer(AMARELO, 0.35))):
+                    p.p(x, y, tom(c, rnd.uniform(-0.03, 0.03)))
+            if face in ("dir", "esq") and camada == "corpo":
+                p.ret(3, 18, 2, 4, escurecer(VERMELHO, 0.1))      # passadores vermelhos
+        p = Pincel(t, camada, "frente")
+        p.ret(5, 17, 6, 6, escurecer(AMARELO, 0.45))
+        p.ret(6, 18, 4, 4, clarear(AMARELO, 0.1))
+        p.ret(7, 18, 2, 4, VERMELHO)
+        p.p(7, 18, clarear(VERMELHO, 0.25)); p.p(8, 21, escurecer(VERMELHO, 0.3))
+        p.p(6, 18, clarear(AMARELO, 0.5))
+    # ombros: a capa cai por cima deles (o vermelho aparece no alto das costas e em cima dos ombros)
+    cima = Pincel(t, "corpo", "cima")
+    for y in range(cima.h):
+        for x in list(range(0, 4)) + list(range(12, 16)):
+            cima.p(x, y, vermelho(2, x, cima.w, rnd))
+    for x in range(tr.w):
+        for y in range(0, 3):
+            tr.p(x, y, vermelho(y, x, tr.w, rnd, escurecer(VERMELHO, 0.1)))
+    # --- braços: painel do ombro, costura lateral, o vermelho da capa por cima do ombro
+    for parte, externo in (("braco_d", "dir"), ("braco_e", "esq")):
+        for face in ("frente", "tras", externo):
+            p = Pincel(t, parte, face)
+            costura(p, linha(0, 6, 3, 8) | linha(4, 8, 7, 6))
+        costura(Pincel(t, parte, externo), linha(4, 9, 4, 18))
+        costura(Pincel(t, parte, "frente"), linha(2, 12, 5, 12))
+        c = Pincel(t, parte, "cima")
+        for y in range(c.h):
+            for x in range(c.w):
+                c.p(x, y, vermelho(1, x, c.w, rnd))
+        for face, linhas in (("tras", 3), (externo, 2)):
+            p = Pincel(t, parte, face)
+            for y in range(linhas):
+                for x in range(p.w):
+                    p.p(x, y, vermelho(y, x, p.w, rnd, escurecer(VERMELHO, 0.08)))
+    # --- pernas: sunga com o recorte da perna, costura do joelho e botas vermelhas até o joelho
+    for parte, externo in (("perna_d", "dir"), ("perna_e", "esq")):
+        for face in ("frente", "tras", "dir", "esq"):
+            p = Pincel(t, parte, face)
+            for x in range(p.w):
+                # o recorte sobe para o lado de fora da perna
+                if face == externo:
+                    fundo = 3
+                elif face in ("frente", "tras"):
+                    fundo = 3 + round(3 * (1 - x / (p.w - 1) if parte == "perna_e" else x / (p.w - 1)))
+                else:
+                    fundo = 6
+                for y in range(fundo):
+                    p.p(x, y, vermelho(y + 20, x, p.w, rnd))
+                p.p(x, fundo, mistura(p.get(x, fundo), AZUL_ESCURO, 0.5))
+            # botas: do joelho para baixo, com a borda dobrada, a costura da frente e a sola
+            for y in range(12, 24):
+                for x in range(p.w):
+                    tt = (y - 12) / 11
+                    c = tom(VERMELHO, 0.12 * (1 - tt) - 0.12 * tt + rnd.uniform(-0.02, 0.02))
+                    if x in (0, p.w - 1):
+                        c = escurecer(c, 0.14)
+                    if y == 12:
+                        c = clarear(VERMELHO, 0.16)
+                    if y == 13:
+                        c = escurecer(VERMELHO, 0.32)
+                    if y == 23:
+                        c = VERMELHO_ESCURO
+                    p.p(x, y, c)
+            if face == "frente":
+                p.p(3, 12, clarear(VERMELHO, 0.12)); p.p(4, 12, clarear(VERMELHO, 0.12))
+                p.p(3, 11, escurecer(VERMELHO, 0.1)); p.p(4, 11, escurecer(VERMELHO, 0.1))
+                for y in range(15, 22):
+                    p.p(2, y, clarear(p.get(2, y), 0.10))
+                for x in range(1, 7):
+                    p.p(x, 20, escurecer(p.get(x, 20), 0.14))
+                costura(p, linha(1, 9, 6, 9))                     # joelho
+            if face == externo:
+                for y in range(16, 22, 2):
+                    p.p(4, y, escurecer(VERMELHO, 0.25))
+            costura(p, linha(3, 6, 3, 8) if face == "frente" else set())
+        Pincel(t, parte, "baixo").ret(0, 0, 8, 8, VERMELHO_ESCURO)
+        for face in ("frente", "tras", "dir", "esq"):
+            calca = Pincel(t, "calca_" + parte[-1], face)
+            for x in range(calca.w):
+                calca.p(x, 12, escurecer(VERMELHO, 0.12))
+                calca.p(x, 13, VERMELHO)
+
+
+def capa_textura_nova(capa, rnd):
+    """Capa vermelha longa e pesada, com dobras fundas, e o S amarelo grande nas costas (em relevo, no tom do dourado)."""
+    cor = hexa("#B3141F")
+    for y in range(64):
+        t_ = y / 63
+        for x in range(40):
+            dobra = 0.13 * math.sin(x / 40 * math.pi * 6 + 0.4) * (0.35 + 0.65 * t_) + 0.04 * math.sin(x / 40 * math.pi * 17)
+            luz = 0.08 * (1 - t_) - 0.16 * t_ + dobra + rnd.uniform(-0.012, 0.012)
+            if x in (0, 39):
+                luz -= 0.12
+            fora = tom(cor, luz)
+            if y >= 61:
+                fora = escurecer(fora, 0.2)
+            capa.p(x, y, fora)
+            capa.p(40 + x, y, tom(escurecer(cor, 0.32), luz * 0.6))
+        for x in range(4):
+            capa.p(80 + x, y, escurecer(cor, 0.28))
+    grande = []
+    for l in ESCUDO:
+        d = "".join(ch * 2 for ch in l)
+        grande += [d, d]
+
+    class Area:
+        def __init__(self):
+            self.w, self.h = 40, 64
+
+        def p(self, x, y, c):
+            if 0 <= x < 40 and 0 <= y < 64:
+                capa.p(x, y, c)
+
+    ouro = AMARELO
+    brasao(Area(), 10, 9, grande, fundo=ouro, letra=escurecer(ouro, 0.28), borda=clarear(ouro, 0.05),
+           contorno=escurecer(cor, 0.45))
+
+
 def olhos_brilho(glow, Pincel):
     """Olhos vermelhos acesos (camada emissiva da visão de calor)."""
     f = Pincel(glow, "cabeca", "frente")
@@ -414,5 +588,6 @@ def superman(t, capa, glow, Pincel):
     corpo(t, Pincel, rnd)
     bracos(t, Pincel, rnd)
     pernas(t, Pincel, rnd)
-    capa_textura(capa, rnd)
+    traje(t, Pincel, rnd)
+    capa_textura_nova(capa, rnd)
     olhos_brilho(glow, Pincel)

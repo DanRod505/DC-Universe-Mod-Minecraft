@@ -105,6 +105,7 @@ public final class Cliente {
             EstadoCliente.limpar();
             Skins.limpar();
             Pecas.limpar();
+            VisaoVisual.limpar();
             Hud.limpar();
             Voador.limpar();
             Planador.limpar();

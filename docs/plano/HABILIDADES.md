@@ -103,7 +103,15 @@ Visão de Calor, Super Pulo e Sopro Congelante (iniciais), Investida de Aço, Pa
 2. **Giro (2,5 s):** parado no ar, ele gira a visão de calor em alta velocidade, acelerando até 6 voltas. O raio sobe e desce enquanto gira, e o rastro dele forma os anéis em espiral do conceito. Embaixo fica uma cratera em brasa, com fumaça, poeira e pedaços do chão voando. Quem o raio cruza queima, é empurrado e fica com o contorno vermelho aceso.
 3. **Queda:** ele cai e bate no chão de joelho, e a onda de choque arremessa quem sobrou.
 
-A batida abre uma **cratera de verdade** (pedido do Dalton, habilidades.7): rasa (2 a 3 blocos), com fundo de magma, basalto e terra queimada. Ela só cava chão natural (terra, grama, areia, cascalho, pedra comum) e nunca mexe em minérios, baús, blocos colocados pelo jogador nem em estruturas e locais da campanha (Smallville e outros): perto de uma estrutura, não abre cratera. Também respeita áreas protegidas (spawn, claims). Pode ser desligada na configuração (`crateraGiro`) e vem desligada em servidor dedicado (`crateraGiroServidor`).
+A batida abre uma **cratera de verdade** (pedido do Dalton, habilidades.7): rasa (2 a 3 blocos), com fundo de magma, basalto e terra queimada. Ela só cava chão natural (terra, grama, areia, cascalho, pedra comum) e nunca mexe em minérios, baús, blocos colocados pelo jogador nem em estruturas e locais da campanha (Smallville e outros): perto de uma estrutura, não abre cratera. Também respeita áreas protegidas (spawn, claims). Pode ser desligada na configuração (`crateraGiro`) e vale também no multiplayer (pedido do Dalton; `crateraGiroServidor` desliga só no servidor dedicado).
+
+**Visão de Calor (habilidades.8, das referências do Dalton por momento).** Mantém tudo que já fazia (fogo, fornalhas acesas, comida assada, gelo e areia derretendo) e ficou mais destrutiva:
+
+1. **Preparo:** ele se abaixa numa base larga, tronco inclinado para o alvo e punhos fechados, e faíscas vermelhas correm para os olhos.
+2. **Feixe:** mais grosso, com núcleo quase branco, clarão nos olhos e no ponto de impacto. Quem é atravessado pega fogo e é empurrado para trás. Onde bate, o bloco estilhaça (pedaços com a textura dele voando).
+3. **Rastro:** por onde o raio passa a grama vira terra queimada, com marcas de carvão, brasas acesas e fumaça que esfriam devagar. Parado num ponto, o raio racha e desfaz o bloco (terra rápido, pedra mais devagar), cavando buracos rasos.
+
+A destruição segue os cuidados da cratera: só chão natural (terra, grama, areia, cascalho, pedra comum e afins), nunca minérios, baús, blocos com conteúdo ou perto de estruturas e locais da campanha, nunca mais de 3 blocos abaixo dos pés, respeitando áreas protegidas. A opção `visaoDestroi` desliga.
 
 É das mais fortes: 3 pontos, 60 de energia, recarga de 12 s, alcance 12 → 16 → 20 blocos.
 

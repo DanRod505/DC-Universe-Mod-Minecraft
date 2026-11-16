@@ -49,6 +49,7 @@ public final class Efeitos {
         });
         EstadoCliente.TRANSFORMOU.clear();
         GiroVisual.tick(level);
+        VisaoVisual.tick(level);
         if (mc.player != null && Planador.amortecendo(mc.player)) rastro(level, mc.player);
     }
 
@@ -68,6 +69,7 @@ public final class Efeitos {
             Vec3 p = olhos.add(dir.scale(t)).add(lado.scale((rnd.nextDouble() - 0.5) * 0.3));
             level.addParticle(fora, p.x, p.y - 0.1, p.z, 0, 0.01, 0);
         }
+        VisaoVisual.feixe(level, pl, a);
         if (rnd.nextFloat() < 0.5f) level.addParticle(nucleo, fim.x, fim.y, fim.z, 0, 0, 0);
         for (int i = 0; i < Math.round(3 * a.escala()); i++) {
             level.addParticle(ParticleTypes.SMALL_FLAME, fim.x, fim.y, fim.z,
@@ -146,7 +148,7 @@ public final class Efeitos {
             float k = a.escala();
             for (int s = -1; s <= 1; s += 2) {
                 Vec3 de = base.add(lado.scale(0.125 * s));
-                e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 1f, cor, k));
+                e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 1.7f, cor, k));
             }
         });
     }
@@ -184,7 +186,7 @@ public final class Efeitos {
         float tremor = 0.9f + 0.1f * Mth.sin((mc.level.getGameTime() + pt) * 1.7f);
         for (int s = -1; s <= 1; s += 2) {
             Vec3 de = olhos.subtract(cam).add(dir.scale(0.4)).add(lado.scale(0.09 * s)).add(baixo.scale(0.13));
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 0.56f * tremor, cor, k));
+            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 0.8f * tremor, cor, k));
         }
     }
 
