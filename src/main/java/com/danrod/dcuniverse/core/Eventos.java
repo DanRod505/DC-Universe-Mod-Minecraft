@@ -92,6 +92,9 @@ public final class Eventos {
                 }
             }
         });
+        // Visão de calor com a melhoria "comida assada": o que ela mata solta a comida pronta.
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.living.LivingDropsEvent.class,
+            e -> com.danrod.dcuniverse.ability.Assar.assar(e.getEntity(), e.getDrops()));
         NeoForge.EVENT_BUS.addListener(PlayerEvent.ItemCraftedEvent.class, e -> {
             if (e.getEntity() instanceof ServerPlayer sp) com.danrod.dcuniverse.missao.Diario.fabricou(sp, e.getCrafting());
         });

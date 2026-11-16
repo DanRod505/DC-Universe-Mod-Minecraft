@@ -13,6 +13,9 @@ import net.minecraft.server.level.ServerPlayer;
 public final class Habilidades {
     private Habilidades() {}
 
+    /** Fim do disparo por toque em andamento (tick do jogo), por jogador: ability/Arvore.rajada. */
+    private static final java.util.Map<java.util.UUID, Long> RAJADA_ATE = new java.util.concurrent.ConcurrentHashMap<>();
+
     public static void selecionar(ServerPlayer player, int indice) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
@@ -48,7 +51,10 @@ public final class Habilidades {
         var habs = com.danrod.dcuniverse.character.Cinto.equipadas(player, p);
         if (habs.isEmpty() || indice >= habs.size()) return;
         Personagem.Habilidade h = habs.get(indice < 0 ? Math.min(e.selecionada(), habs.size() - 1) : indice);
+        boolean rajada = Arvore.rajada(h) > 0;
         if (!pressionado) {
+            // Disparo por toque: soltar a tecla não para, ele dura o tempo dele.
+            if (rajada) return;
             if (h.id().equals(e.canalizando())) parar(player, e);
             else if (h.modo() == Personagem.Modo.HOLD && Coreografia.preparando(player, h.id())) Coreografia.cancelar(player);
             return;
@@ -64,7 +70,7 @@ public final class Habilidades {
                 Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
                 return;
             }
-            if (h.id().equals(e.canalizando())) return;
+            if (h.id().equals(e.canalizando()) || rajada && Coreografia.preparando(player, h.id())) return;
             boolean trocou = !e.canalizando().isEmpty();
             if (trocou) parar(player, e);
             Guia.concluir(player, "habilidade");
@@ -82,7 +88,7 @@ public final class Habilidades {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
         if (p == null) return;
-        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
+        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : Arvore.habilidade(player, p, e.canalizando());
         if (h != null && !Arvore.ativa(player, p) && !com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) parar(player, e);
         Rede.sincronizar(player);
     }
@@ -100,6 +106,9 @@ public final class Habilidades {
     static void canalizarJa(ServerPlayer player, Personagem.Habilidade h) {
         EstadoJogador e = EstadoJogador.de(player);
         e.setCanalizando(h.id());
+        float rajada = Arvore.rajada(h);
+        if (rajada > 0) RAJADA_ATE.put(player.getUUID(), player.level().getGameTime() + Math.round(rajada * 20));
+        else RAJADA_ATE.remove(player.getUUID());
         Rede.aparencia(player);
         Rede.sincronizar(player);
     }
@@ -146,7 +155,12 @@ public final class Habilidades {
         EstadoJogador e = EstadoJogador.de(player);
         String id = e.canalizando();
         if (id.isEmpty()) return;
-        Personagem.Habilidade h = p.habilidade(id);
+        Personagem.Habilidade h = Arvore.habilidade(player, p, id);
+        Long fim = RAJADA_ATE.get(player.getUUID());
+        if (fim != null && player.level().getGameTime() >= fim) {
+            parar(player, e);
+            return;
+        }
         boolean semCusto = player.isCreative() || Arvore.semEnergia(player, p) && !e.esgotado();
         if (h == null || !semCusto && !Energia.gastar(player, p, h.custo() / 20f)) {
             parar(player, e);
@@ -159,8 +173,9 @@ public final class Habilidades {
         String id = e.canalizando();
         if (id.isEmpty()) return;
         e.setCanalizando("");
+        RAJADA_ATE.remove(player.getUUID());
         Personagem p = e.personagem();
-        Personagem.Habilidade h = p == null ? null : p.habilidade(id);
+        Personagem.Habilidade h = p == null ? null : Arvore.habilidade(player, p, id);
         if (h != null) e.setProntaEm(id, player.level().getGameTime() + Math.round(h.recargaSeg() * 20));
         if (h != null && Coreografia.preparo(h) > 0) Coreografia.animar(player, h.params().s("end_anim", ""));
         Rede.sincronizar(player);

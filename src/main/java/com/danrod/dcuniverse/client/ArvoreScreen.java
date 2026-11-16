@@ -24,9 +24,11 @@ import java.util.Locale;
 /**
  * Tela da árvore de habilidades e da build (tecla K, Plano 2: docs/plano/HABILIDADES.md).
  *
- * <p>Em cima: o herói, o nível, a experiência e os pontos livres. À esquerda, as habilidades da árvore (compradas com
- * moldura dourada, as que dá para comprar acesas, as outras apagadas com o custo). À direita, a habilidade em foco:
- * números, descrição e o botão de comprar. Embaixo, os 6 slots com as teclas Z X C V B R (os trancados mostram o nível
+ * <p>Em cima: o herói, o nível, a experiência e os pontos livres. À esquerda, a árvore de verdade: o emblema do herói
+ * no tronco, um galho para cada habilidade e, pendurados nela, os galhos das melhorias (uma melhoria que exige outra
+ * fica embaixo dela). Comprado tem moldura e galho dourados, o que dá para comprar pulsa, o resto fica apagado com o
+ * custo. Se a árvore não cabe, arrasta-se o fundo ou usa-se a rodinha para os lados. À direita, o nó em foco (sob o
+ * mouse, ou o último clicado): números, descrição e o botão de comprar. Embaixo, os 6 slots com as teclas Z X C V B R (os trancados mostram o nível
  * em que abrem). Para montar a build: arrastar uma habilidade comprada até um slot, ou clicar nela e depois no slot.
  * Arrastar de um slot para outro troca os dois; botão direito num slot esvazia.
  *
@@ -36,7 +38,7 @@ public final class ArvoreScreen extends Screen {
     static final int OURO = 0xFFE8C468, TEXTO = 0xFFEDE6D6, SUAVE = 0xFF9C9584, VERDE = 0xFF7CE08A, VERMELHO = 0xFFFF7A6A;
     private static final int FUNDO = 0xE8101521, FUNDO2 = 0xF0171D2C, LINHA = 0x40E8C468;
 
-    private int foco = -1;               // índice na lista de itens sob o mouse
+    private String foco = "";            // nó da árvore sob o mouse
     private String escolhido = "";       // habilidade em foco no painel (clicada)
     private String pegando = "";         // habilidade sendo arrastada ("" = nenhuma)
     private int pegouDoSlot = -1;        // slot de onde saiu o arrasto (-1 = da grade)
@@ -45,8 +47,20 @@ public final class ArvoreScreen extends Screen {
     private float idade;
 
     // Layout.
-    private int x0, y0, x1, y1, gx, gy, gw, colunas, tile, dx, dw, sy, sx0, slot;
+    private int x0, y0, x1, y1, gx, gy, gw, gh, dx, dw, sy, sx0, slot;
     private int bx, by, bw, bh;          // botão comprar
+    private int ux, uy, uw, uh;          // botão desfazer (criativo)
+
+    /** Um nó da árvore já posicionado: coluna (pode ser fracionária, centrada sobre os filhos) e linha (0 = tronco). */
+    private record No(Rede.ArvoreItem it, float col, int linha, String paiNo) {}
+
+    private List<No> nos = List.of();
+    private List<Rede.ArvoreItem> nosDe;
+    private float colunas = 1;
+    private int linhas = 1;
+    private int colW, rowH, tam, tamM;
+    private double pan;
+    private boolean panando;
 
     public ArvoreScreen() {
         super(Component.translatable("dcuniverse.arvore.titulo"));
@@ -67,17 +81,8 @@ public final class ArvoreScreen extends Screen {
         gx = x0 + 8;
         gy = corpoY + 14;
         gw = dx - gx - 10;
-        tile = 38;
-        colunas = Math.max(2, (gw + 4) / (tile + 4));
-        int itens = Math.max(1, EstadoCliente.arvore.itens().size());
-        int linhas = (itens + colunas - 1) / colunas;
-        int cabe = sy - 18 - gy;
-        // Se não cabe, diminui os quadros.
-        while (linhas * (tile + 4) > cabe && tile > 26) {
-            tile -= 2;
-            colunas = Math.max(2, (gw + 4) / (tile + 4));
-            linhas = (itens + colunas - 1) / colunas;
-        }
+        gh = sy - 18 - gy;
+        nosDe = null;
         sx0 = (x0 + x1) / 2 - (Arvore.SLOTS * (slot + 6) - 6) / 2;
         if (escolhido.isEmpty() && !EstadoCliente.arvore.itens().isEmpty()) {
             List<String> s = EstadoCliente.arvore.slots();
@@ -115,7 +120,7 @@ public final class ArvoreScreen extends Screen {
         g.fill(x0 + 1, y0 + 1, x1 - 1, y0 + 27, FUNDO2);
         g.fill(x0 + 1, y0 + 27, x1 - 1, y0 + 28, LINHA);
         cabecalho(g, a, cor, t);
-        grade(g, a, mx, my, cor, t);
+        arvore(g, a, mx, my, cor, t);
         painel(g, a, cor, t);
         slots(g, a, mx, my, cor, t);
         // A habilidade arrastada segue o mouse.
@@ -149,47 +154,228 @@ public final class ArvoreScreen extends Screen {
         Component pts = a.criativo() ? Component.translatable("dcuniverse.arvore.criativo")
             : Component.translatable("dcuniverse.arvore.pontos", a.pontos());
         int pw = font.width(pts) + 12, px = x1 - 8 - pw;
-        boolean tem = a.pontos() > 0 && !a.criativo();
+        boolean tem = a.pontos() > 0;
         g.fill(px, y0 + 6, px + pw, y0 + 21, tem ? 0xE04A3A12 : 0xC0202838);
         moldura(g, px, y0 + 6, pw, 15, tem ? pulso(OURO, t) : 0xFF3A4458);
         g.text(font, pts, px + 6, y0 + 10, tem ? OURO : TEXTO, true);
     }
 
-    private void grade(GuiGraphicsExtractor g, Rede.ArvoreSync a, int mx, int my, int cor, float t) {
+    // ------------------------------------------------------------------ a árvore
+
+    /** Posiciona os nós: folhas lado a lado, cada pai centrado sobre os filhos, melhoria exigida em cima da seguinte. */
+    private void montarNos(Rede.ArvoreSync a) {
+        if (a.itens() == nosDe) return;
+        nosDe = a.itens();
+        List<No> out = new ArrayList<>();
+        float[] prox = {0};
+        int[] fundo = {1};
+        List<Float> raizes = new ArrayList<>();
+        for (Rede.ArvoreItem it : a.itens()) {
+            if (it.melhoria()) continue;
+            raizes.add(posicionar(a, it, 1, "", out, prox, fundo));
+            prox[0] += 0.35f;
+        }
+        colunas = Math.max(1, prox[0] - 0.35f);
+        linhas = fundo[0] + 1;
+        nos = List.copyOf(out);
+        // Tamanhos: o maior que couber, e rolagem para os lados se nem o menor couber.
+        colW = Mth.clamp(Math.round(gw / colunas), 26, 44);
+        rowH = Mth.clamp((gh - 4) / linhas, 26, 44);
+        tam = Math.min(colW, rowH) - 6;
+        tamM = Math.max(18, tam - 6);
+        pan = Mth.clamp(pan, 0, maxPan());
+    }
+
+    private float posicionar(Rede.ArvoreSync a, Rede.ArvoreItem it, int linha, String pai, List<No> out, float[] prox, int[] fundo) {
+        fundo[0] = Math.max(fundo[0], linha);
+        List<Rede.ArvoreItem> filhos = new ArrayList<>();
+        for (Rede.ArvoreItem f : a.itens()) {
+            if (!f.melhoria()) continue;
+            boolean dele = it.melhoria() ? f.requer().equals(it.id()) : f.pai().equals(it.id()) && f.requer().isEmpty();
+            if (dele) filhos.add(f);
+        }
+        float col;
+        if (filhos.isEmpty()) {
+            col = prox[0]++;
+        } else {
+            float primeiro = 0, ultimo = 0;
+            for (int i = 0; i < filhos.size(); i++) {
+                float c = posicionar(a, filhos.get(i), linha + 1, it.id(), out, prox, fundo);
+                if (i == 0) primeiro = c;
+                ultimo = c;
+            }
+            col = (primeiro + ultimo) / 2;
+        }
+        out.add(new No(it, col, linha, pai));
+        return col;
+    }
+
+    private int larguraConteudo() {
+        return Math.round(colunas * colW);
+    }
+
+    private double maxPan() {
+        return Math.max(0, larguraConteudo() - gw + 8);
+    }
+
+    private int noX(float col) {
+        int w = larguraConteudo();
+        int base = w <= gw ? gx + (gw - w) / 2 : gx + 4 - (int) Math.round(pan);
+        return base + Math.round(col * colW + colW / 2f);
+    }
+
+    private int noY(int linha) {
+        return gy + 2 + linha * rowH + rowH / 2;
+    }
+
+    private int tamanho(No n) {
+        return n.linha() == 0 ? tam : n.it().melhoria() ? tamM : tam;
+    }
+
+    private void arvore(GuiGraphicsExtractor g, Rede.ArvoreSync a, int mx, int my, int cor, float t) {
+        montarNos(a);
         g.text(font, Component.translatable("dcuniverse.arvore.habilidades").withStyle(ChatFormatting.BOLD), gx, gy - 12, SUAVE, false);
-        List<Rede.ArvoreItem> itens = a.itens();
-        foco = -1;
-        for (int i = 0; i < itens.size(); i++) {
-            Rede.ArvoreItem it = itens.get(i);
-            int x = gx + (i % colunas) * (tile + 4), y = gy + (i / colunas) * (tile + 4);
-            boolean sobre = dentro(mx, my, x, y, tile, tile);
-            if (sobre) foco = i;
-            boolean tem = a.tem(it.id());
-            boolean podeComprar = !tem && a.pontos() >= it.custo() && !a.precisaEscolher();
-            boolean noSlot = a.slots().contains(it.id()) && a.slots().indexOf(it.id()) < a.slotsAbertos();
-            int fundo = it.id().equals(escolhido) ? 0xE02A3450 : sobre ? 0xD0222C42 : 0xC0141A28;
-            g.fill(x, y, x + tile, y + tile, fundo);
-            if (tem) g.fillGradient(x, y + tile / 2, x + tile, y + tile, 0x00000000, comAlfa(cor, 0x40));
-            int borda = tem ? OURO : podeComprar ? pulso(0xFFFFFFFF, t) : 0xFF2E3546;
-            moldura(g, x, y, tile, tile, borda);
-            if (it.id().equals(escolhido)) moldura(g, x - 1, y - 1, tile + 2, tile + 2, 0x80FFFFFF);
-            int tam = tile - 14;
-            icone(g, it.id(), x + (tile - tam) / 2, y + 3, tam, tem ? 0xFFFFFFFF : podeComprar ? 0xFFB8B8B8 : 0xFF5A5A5A);
-            if (sobre && tem) brilhoIcone(g, x + (tile - tam) / 2, y + 3, tam, cor, t);
-            // Custo em pontos (losangos) embaixo, ou o selo de equipada.
-            int baseY = y + tile - 8;
-            if (tem) {
-                if (noSlot) {
-                    String tecla = teclaDoSlot(a.slots().indexOf(it.id()));
-                    pequeno(g, font, Component.literal(tecla), x + tile / 2 - Math.round(font.width(tecla) * 0.75f / 2), baseY, OURO);
-                }
+        g.fill(gx - 2, gy - 2, gx + gw + 2, gy + gh, 0x60080B12);
+        moldura(g, gx - 2, gy - 2, gw + 4, gh + 2, 0xFF222838);
+        foco = "";
+        boolean dentroArea = dentro(mx, my, gx, gy, gw, gh);
+        g.enableScissor(gx - 1, gy - 1, gx + gw + 1, gy + gh - 1);
+        // O tronco: o emblema do herói, centrado sobre as habilidades.
+        float meio = 0;
+        int nh = 0;
+        for (No n : nos) if (n.linha() == 1) { meio += n.col(); nh++; }
+        meio = nh == 0 ? 0 : meio / nh;
+        int rx = noX(meio), ry = noY(0);
+        // Galhos primeiro (embaixo dos nós).
+        for (No n : nos) {
+            int px, py, pt;
+            if (n.paiNo().isEmpty()) {
+                px = rx;
+                py = ry;
+                pt = tam;
             } else {
-                for (int c = 0; c < it.custo(); c++) {
-                    int lx = x + tile / 2 - it.custo() * 3 + c * 6 + 1;
-                    losango(g, lx, baseY + 1, podeComprar ? OURO : 0xFF6A6A6A);
-                }
+                No pai = no(n.paiNo());
+                if (pai == null) continue;
+                px = noX(pai.col());
+                py = noY(pai.linha());
+                pt = tamanho(pai);
+            }
+            boolean tem = a.tem(n.it().id());
+            boolean pode = a.podeComprar(n.it().id());
+            int c = tem ? OURO : pode ? pulso(0xFFFFFFFF, t) : 0xFF3A4152;
+            galho(g, px, py + pt / 2, noX(n.col()), noY(n.linha()) - tamanho(n) / 2, c, tem ? 2 : 1);
+        }
+        raiz(g, a, rx, ry, cor, t);
+        for (No n : nos) {
+            int x = noX(n.col()), y = noY(n.linha()), s = tamanho(n);
+            boolean sobre = dentroArea && dentro(mx, my, x - s / 2, y - s / 2, s, s);
+            if (sobre) foco = n.it().id();
+            if (n.it().melhoria()) noMelhoria(g, a, n.it(), x, y, s, sobre, cor, t);
+            else noHabilidade(g, a, n.it(), x, y, s, sobre, cor, t);
+        }
+        g.disableScissor();
+        // Setas de rolagem quando a árvore não cabe.
+        if (maxPan() > 0) {
+            if (pan > 0) g.text(font, "<", gx + 1, gy + gh / 2 - 4, pulso(OURO, t), true);
+            if (pan < maxPan()) g.text(font, ">", gx + gw - 6, gy + gh / 2 - 4, pulso(OURO, t), true);
+        }
+    }
+
+    private No no(String id) {
+        for (No n : nos) if (n.it().id().equals(id)) return n;
+        return null;
+    }
+
+    /** Galho em cotovelo: desce do pai, corre na horizontal e desce até o filho. */
+    private static void galho(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int cor, int esp) {
+        int meio = (y0 + y1) / 2;
+        int e0 = esp / 2, e1 = esp - e0;
+        g.fill(x0 - e0, y0, x0 + e1, meio + e1, cor);
+        g.fill(Math.min(x0, x1) - e0, meio - e0, Math.max(x0, x1) + e1, meio + e1, cor);
+        g.fill(x1 - e0, meio - e0, x1 + e1, y1, cor);
+    }
+
+    private void raiz(GuiGraphicsExtractor g, Rede.ArvoreSync a, int x, int y, int cor, float t) {
+        int s = tam + 2;
+        int x0 = x - s / 2, y0 = y - s / 2;
+        g.fill(x0 + 2, y0, x0 + s - 2, y0 + s, 0xF0141A28);
+        g.fill(x0, y0 + 2, x0 + s, y0 + s - 2, 0xF0141A28);
+        g.fill(x0 + 1, y0 + 1, x0 + s - 1, y0 + s - 1, 0xF0141A28);
+        moldura(g, x0 + 1, y0 + 1, s - 2, s - 2, OURO);
+        Identifier id = Identifier.tryParse(a.heroi());
+        if (id != null) {
+            Identifier emblema = id.withPath("textures/gui/emblema/" + id.getPath() + ".png");
+            int e = s - 6;
+            if (minecraft.getResourceManager().getResource(emblema).isPresent()) {
+                g.blit(RenderPipelines.GUI_TEXTURED, emblema, x0 + 3, y0 + 3, 0, 0, e, e, 48, 48, 48, 48);
             }
         }
+    }
+
+    private void noHabilidade(GuiGraphicsExtractor g, Rede.ArvoreSync a, Rede.ArvoreItem it, int cx, int cy, int s, boolean sobre, int cor, float t) {
+        int x = cx - s / 2, y = cy - s / 2;
+        boolean tem = a.tem(it.id());
+        boolean pode = a.podeComprar(it.id());
+        int fundo = it.id().equals(escolhido) ? 0xF02A3450 : sobre ? 0xF0222C42 : 0xF0141A28;
+        g.fill(x, y, x + s, y + s, fundo);
+        if (tem) g.fillGradient(x, y + s / 2, x + s, y + s, 0x00000000, comAlfa(cor, 0x50));
+        moldura(g, x, y, s, s, tem ? OURO : pode ? pulso(0xFFFFFFFF, t) : 0xFF2E3546);
+        if (it.id().equals(escolhido)) moldura(g, x - 1, y - 1, s + 2, s + 2, 0x80FFFFFF);
+        int ic = s - 6;
+        icone(g, it.id(), x + 3, y + 3, ic, tem ? 0xFFFFFFFF : pode ? 0xFFB8B8B8 : 0xFF5A5A5A);
+        if (sobre && tem) brilhoIcone(g, x + 3, y + 3, ic, cor, t);
+        int s0 = a.slots().indexOf(it.id());
+        if (tem && s0 >= 0 && s0 < a.slotsAbertos()) {
+            // A tecla do slot num selo no canto.
+            String tecla = teclaDoSlot(s0);
+            int w = Math.round(font.width(tecla) * 0.75f) + 3;
+            g.fill(x + s - w - 1, y + s - 8, x + s - 1, y + s - 1, 0xE0101521);
+            pequeno(g, font, Component.literal(tecla), x + s - w + 1, y + s - 7, OURO);
+        } else if (!tem) {
+            custo(g, it.custo(), cx, y + s + 2, pode);
+        }
+    }
+
+    private void noMelhoria(GuiGraphicsExtractor g, Rede.ArvoreSync a, Rede.ArvoreItem it, int cx, int cy, int s, boolean sobre, int cor, float t) {
+        int x = cx - s / 2, y = cy - s / 2;
+        boolean tem = a.tem(it.id());
+        boolean pode = a.podeComprar(it.id());
+        int borda = tem ? OURO : pode ? pulso(0xFFFFFFFF, t) : 0xFF2E3546;
+        int fundo = it.id().equals(escolhido) ? 0xF02A3450 : sobre ? 0xF0222C42 : tem ? 0xF0262014 : 0xF0141A28;
+        // Losango de cantos cortados: a melhoria tem outra forma que a habilidade.
+        g.fill(x + 2, y, x + s - 2, y + s, borda);
+        g.fill(x, y + 2, x + s, y + s - 2, borda);
+        g.fill(x + 1, y + 1, x + s - 1, y + s - 1, borda);
+        g.fill(x + 3, y + 1, x + s - 3, y + s - 1, fundo);
+        g.fill(x + 1, y + 3, x + s - 1, y + s - 3, fundo);
+        g.fill(x + 2, y + 2, x + s - 2, y + s - 2, fundo);
+        if (it.id().equals(escolhido)) moldura(g, x - 1, y - 1, s + 2, s + 2, 0x80FFFFFF);
+        var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(it.icone().isEmpty() ? "minecraft:book" : it.icone()));
+        g.item(new net.minecraft.world.item.ItemStack(item.orElse(net.minecraft.world.item.Items.BOOK)), cx - 8, cy - 8);
+        if (!tem) g.fill(x + 2, y + 2, x + s - 2, y + s - 2, pode ? 0x50101521 : 0xA0101521);
+        if (sobre && tem) brilhoIcone(g, x + 1, y + 1, s - 2, cor, t);
+        String chave = "melhoria.dcuniverse." + it.id() + ".rotulo";
+        String r = net.minecraft.client.resources.language.I18n.get(chave);
+        if (!r.equals(chave)) {
+            int w = Math.round(font.width(r) * 0.75f) + 2;
+            g.fill(x + s - w, y + s - 7, x + s + 1, y + s + 1, 0xE0101521);
+            pequeno(g, font, Component.literal(r), x + s - w + 1, y + s - 6, tem ? OURO : TEXTO);
+        }
+        if (!tem) custo(g, it.custo(), cx, y + s + 2, pode);
+    }
+
+    /** Custo em losangos embaixo do nó. */
+    private static void custo(GuiGraphicsExtractor g, int n, int cx, int y, boolean pode) {
+        for (int c = 0; c < n; c++) losango(g, cx - n * 3 + c * 6 + 1, y, pode ? OURO : 0xFF6A6A6A);
+    }
+
+    /** Nome de um nó: a habilidade, ou "Habilidade: melhoria". */
+    static Component nome(Rede.ArvoreItem it) {
+        return it.melhoria() ? Component.translatable("melhoria.dcuniverse." + it.id()) : Component.translatable("habilidade.dcuniverse." + it.id());
+    }
+
+    static Component descricao(Rede.ArvoreItem it) {
+        return Component.translatable((it.melhoria() ? "melhoria.dcuniverse." : "habilidade.dcuniverse.") + it.id() + ".desc");
     }
 
     private void painel(GuiGraphicsExtractor g, Rede.ArvoreSync a, int cor, float t) {
@@ -197,22 +383,37 @@ public final class ArvoreScreen extends Screen {
         g.fill(px, py, px + dw, py + ph, 0xC0121826);
         moldura(g, px, py, dw, ph, 0xFF2E3546);
         bw = 0;
-        Rede.ArvoreItem it = a.item(escolhido);
+        uw = 0;
+        Rede.ArvoreItem it = a.item(foco.isEmpty() ? escolhido : foco);
         if (it == null) return;
         boolean tem = a.tem(it.id());
-        icone(g, it.id(), px + 6, py + 6, 24, tem ? 0xFFFFFFFF : 0xFF8A8A8A);
-        g.text(font, Component.translatable("habilidade.dcuniverse." + it.id()).withStyle(ChatFormatting.BOLD), px + 36, py + 7, tem ? OURO : TEXTO, true);
-        pequeno(g, font, resumo(it), px + 36, py + 19, SUAVE);
+        boolean pode = a.podeComprar(it.id());
+        int tx = px + 36;
+        if (it.melhoria()) {
+            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(it.icone().isEmpty() ? "minecraft:book" : it.icone()));
+            g.item(new net.minecraft.world.item.ItemStack(item.orElse(net.minecraft.world.item.Items.BOOK)), px + 10, py + 10);
+            pequeno(g, font, Component.translatable("dcuniverse.arvore.melhoria_de", Component.translatable("habilidade.dcuniverse." + it.pai())), tx, py + 19, SUAVE);
+        } else {
+            icone(g, it.id(), px + 6, py + 6, 24, tem ? 0xFFFFFFFF : 0xFF8A8A8A);
+            pequeno(g, font, resumo(it), tx, py + 19, SUAVE);
+        }
+        g.text(font, nome(it).copy().withStyle(ChatFormatting.BOLD), tx, py + 7, tem ? OURO : TEXTO, true);
         // Estado e ação.
         Component estado;
         int corEstado;
+        Rede.ArvoreItem falta = falta(a, it);
         if (tem) {
             int s = a.slots().indexOf(it.id());
-            estado = s >= 0 && s < a.slotsAbertos() ? Component.translatable("dcuniverse.arvore.no_slot", teclaDoSlot(s))
+            estado = it.melhoria() ? Component.translatable("dcuniverse.arvore.melhoria_ativa")
+                : s >= 0 && s < a.slotsAbertos() ? Component.translatable("dcuniverse.arvore.no_slot", teclaDoSlot(s))
                 : Component.translatable("dcuniverse.arvore.comprada");
             corEstado = VERDE;
-        } else if (a.pontos() >= it.custo()) {
-            estado = Component.translatable("dcuniverse.arvore.pode_comprar", it.custo());
+        } else if (falta != null) {
+            estado = Component.translatable("dcuniverse.arvore.exige", nome(falta));
+            corEstado = VERMELHO;
+        } else if (pode) {
+            estado = a.criativo() ? Component.translatable("dcuniverse.arvore.pode_criativo")
+                : Component.translatable("dcuniverse.arvore.pode_comprar", it.custo());
             corEstado = OURO;
         } else {
             estado = Component.translatable("dcuniverse.arvore.faltam", it.custo() - Math.max(0, a.pontos()));
@@ -222,9 +423,10 @@ public final class ArvoreScreen extends Screen {
         g.fill(px + 6, ty - 3, px + dw - 6, ty - 2, LINHA);
         pequeno(g, font, estado, px + 6, ty, corEstado);
         ty += 10;
+        boolean desfaz = tem && a.criativo() && !it.id().equals(a.inicial());
         // Descrição.
-        List<FormattedCharSequence> linhas = font.split(Component.translatable("habilidade.dcuniverse." + it.id() + ".desc"), Math.round((dw - 12) / 0.75f));
-        int fundoTexto = py + ph - (tem ? 18 : 26);
+        List<FormattedCharSequence> linhas = font.split(descricao(it), Math.round((dw - 12) / 0.75f));
+        int fundoTexto = py + ph - (!tem || desfaz ? 26 : 18);
         for (FormattedCharSequence l : linhas) {
             if (ty + 7 > fundoTexto) break;
             g.pose().pushMatrix();
@@ -234,20 +436,39 @@ public final class ArvoreScreen extends Screen {
             g.pose().popMatrix();
             ty += 8;
         }
-        // Botão de comprar (ou a dica de como equipar).
-        if (!tem && !a.criativo()) {
+        // Botão de comprar (o painel segue o nó clicado, então o botão só vale para ele).
+        boolean doEscolhido = it.id().equals(escolhido);
+        if (!tem) {
             bw = dw - 12;
             bh = 16;
             bx = px + 6;
             by = py + ph - bh - 6;
-            boolean ok = a.pontos() >= it.custo();
+            boolean ok = pode && doEscolhido;
             g.fill(bx, by, bx + bw, by + bh, ok ? comAlfa(cor, 0xE0) : 0xC0262C38);
             moldura(g, bx, by, bw, bh, ok ? pulso(OURO, t) : 0xFF3A4458);
-            Component c = Component.translatable("dcuniverse.arvore.comprar", it.custo()).withStyle(ChatFormatting.BOLD);
+            Component c = doEscolhido ? Component.translatable("dcuniverse.arvore.comprar", it.custo()).withStyle(ChatFormatting.BOLD)
+                : Component.translatable("dcuniverse.arvore.clique_comprar");
             g.centeredText(font, c, bx + bw / 2, by + 4, ok ? 0xFFFFFFFF : 0xFF8A8A8A);
-        } else {
+            if (!doEscolhido) bw = 0;
+        } else if (desfaz && doEscolhido) {
+            uw = dw - 12;
+            uh = 16;
+            ux = px + 6;
+            uy = py + ph - uh - 6;
+            g.fill(ux, uy, ux + uw, uy + uh, 0xC0302024);
+            moldura(g, ux, uy, uw, uh, 0xFF6A3A3A);
+            g.centeredText(font, Component.translatable("dcuniverse.arvore.desfazer"), ux + uw / 2, uy + 4, 0xFFFFB0A0);
+        } else if (!it.melhoria()) {
             pequeno(g, font, Component.translatable("dcuniverse.arvore.dica_equipar"), px + 6, py + ph - 12, SUAVE);
         }
+    }
+
+    /** O que falta comprar antes deste nó (a habilidade ou a melhoria exigida), ou null. */
+    private static Rede.ArvoreItem falta(Rede.ArvoreSync a, Rede.ArvoreItem it) {
+        if (!it.melhoria()) return null;
+        if (!a.tem(it.pai())) return a.item(it.pai());
+        if (!it.requer().isEmpty() && !a.tem(it.requer())) return a.item(it.requer());
+        return null;
     }
 
     private void slots(GuiGraphicsExtractor g, Rede.ArvoreSync a, int mx, int my, int cor, float t) {
@@ -288,20 +509,35 @@ public final class ArvoreScreen extends Screen {
         }
         if (e.button() != 0) return super.mouseClicked(e, duplo);
         if (bw > 0 && dentro(mx, my, bx, by, bw, bh)) {
-            Rede.ArvoreItem it = a.item(escolhido);
-            if (it != null && a.pontos() >= it.custo()) {
-                Rede.CANAL.send(new Rede.ArvoreComprar(it.id()), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+            if (a.podeComprar(escolhido)) {
+                Rede.CANAL.send(new Rede.ArvoreComprar(escolhido, false), com.danrod.dcuniverse.core.Canal.SERVIDOR);
                 som(1.0f);
             } else {
                 som(0.5f);
             }
             return true;
         }
-        if (foco >= 0 && foco < a.itens().size()) {
-            String id = a.itens().get(foco).id();
+        if (uw > 0 && dentro(mx, my, ux, uy, uw, uh)) {
+            Rede.CANAL.send(new Rede.ArvoreComprar(escolhido, true), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+            som(0.7f);
+            return true;
+        }
+        if (!foco.isEmpty()) {
+            String id = foco;
+            Rede.ArvoreItem it = a.item(id);
+            // Duplo clique num nó que dá para comprar: compra direto.
+            if (duplo && id.equals(escolhido) && a.podeComprar(id)) {
+                Rede.CANAL.send(new Rede.ArvoreComprar(id, false), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+                som(1.0f);
+                return true;
+            }
             escolhido = id;
-            if (a.tem(id)) comecarArrasto(id, -1, mx, my);
+            if (a.tem(id) && it != null && !it.melhoria()) comecarArrasto(id, -1, mx, my);
             som(1.4f);
+            return true;
+        }
+        if (dentro(mx, my, gx, gy, gw, gh) && maxPan() > 0) {
+            panando = true;
             return true;
         }
         if (s >= 0 && s < a.slotsAbertos()) {
@@ -317,12 +553,26 @@ public final class ArvoreScreen extends Screen {
 
     @Override
     public boolean mouseDragged(MouseButtonEvent e, double ddx, double ddy) {
+        if (panando) {
+            pan = Mth.clamp(pan - ddx, 0, maxPan());
+            return true;
+        }
         if (!pegando.isEmpty() && Math.abs(e.x() - pegouX) + Math.abs(e.y() - pegouY) > 3) arrastou = true;
         return !pegando.isEmpty() || super.mouseDragged(e, ddx, ddy);
     }
 
     @Override
+    public boolean mouseScrolled(double x, double y, double sx, double sy) {
+        if (maxPan() > 0 && dentro(x, y, gx, gy, gw, gh)) {
+            pan = Mth.clamp(pan - (sy + sx) * 24, 0, maxPan());
+            return true;
+        }
+        return super.mouseScrolled(x, y, sx, sy);
+    }
+
+    @Override
     public boolean mouseReleased(MouseButtonEvent e) {
+        panando = false;
         if (pegando.isEmpty() || e.button() != 0) return super.mouseReleased(e);
         Rede.ArvoreSync a = EstadoCliente.arvore;
         int s = slotEm(e.x(), e.y());
@@ -379,7 +629,7 @@ public final class ArvoreScreen extends Screen {
         // Mostra já; o servidor confirma em seguida.
         Rede.ArvoreSync a = EstadoCliente.arvore;
         EstadoCliente.arvore = new Rede.ArvoreSync(a.heroi(), a.nivel(), a.xp(), a.xpNivel(), a.xpProximo(), a.pontos(), a.slotsAbertos(),
-            a.criativo(), a.inicial(), a.compradas(), List.copyOf(novos), a.itens());
+            a.criativo(), a.inicial(), a.compradas(), List.copyOf(novos), a.itens(), a.salto());
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.ARMOR_EQUIP_IRON.value(), 1.2f, 0.7f));
     }
 
@@ -404,7 +654,8 @@ public final class ArvoreScreen extends Screen {
     /** Recarga e jeito de usar: "Recarga 6 s • apertar". */
     static Component resumo(Rede.ArvoreItem it) {
         String rec = it.recarga() <= 0 ? "" : String.format(Locale.ROOT, it.recarga() % 1 == 0 ? "%.0f" : "%.1f", it.recarga());
-        Component modo = Component.translatable(it.hold() ? "dcuniverse.arvore.segurar" : "dcuniverse.arvore.apertar");
+        Component modo = it.rajada() > 0 ? Component.translatable("dcuniverse.arvore.rajada", String.format(Locale.ROOT, "%.0f", it.rajada()))
+            : Component.translatable(it.hold() ? "dcuniverse.arvore.segurar" : "dcuniverse.arvore.apertar");
         return rec.isEmpty() ? modo : Component.translatable("dcuniverse.arvore.recarga", rec).append(" • ").append(modo);
     }
 

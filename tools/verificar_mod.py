@@ -193,6 +193,23 @@ def verificar_personagens(raiz, recursos, erros):
                     erros.append(f"{nome}: árvore com {x.get('id')}, que não é uma habilidade do personagem")
                 if not 1 <= x.get("cost", 0) <= 3:
                     erros.append(f"{nome}: árvore: {x.get('id')} custa {x.get('cost')}, deve ser 1-3")
+                # Melhorias: custo 1-3, a exigida vem antes, nome e descrição nos dois idiomas, ícone de item válido.
+                vistas = set()
+                for u in x.get("upgrades", []):
+                    mid = f"{x.get('id')}.{u.get('id')}"
+                    if not 1 <= u.get("cost", 0) <= 3:
+                        erros.append(f"{nome}: melhoria {mid} custa {u.get('cost')}, deve ser 1-3")
+                    if u.get("requires") and u["requires"] not in vistas:
+                        erros.append(f"{nome}: melhoria {mid} exige {u['requires']}, que não vem antes")
+                    if mid in vistas:
+                        erros.append(f"{nome}: melhoria {mid} repetida")
+                    vistas.add(u.get("id"))
+                    if not u.get("icon", "").startswith("minecraft:"):
+                        erros.append(f"{nome}: melhoria {mid} sem ícone (um item minecraft:...)")
+                    for i in IDIOMAS:
+                        for k in (f"melhoria.dcuniverse.{mid}", f"melhoria.dcuniverse.{mid}.desc"):
+                            if k not in lang[i]:
+                                erros.append(f"{nome}: falta {k} em {i}.json")
             if len(set(na_arvore)) != len(na_arvore):
                 erros.append(f"{nome}: árvore com habilidade repetida")
             if not arv.get("starters"):

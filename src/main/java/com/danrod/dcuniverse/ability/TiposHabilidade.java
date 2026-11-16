@@ -31,7 +31,8 @@ public final class TiposHabilidade {
         Map.entry("tk_shield", new com.danrod.dcuniverse.ability.active.EscudoTk()),
         Map.entry("floating_island", new com.danrod.dcuniverse.ability.active.Ilha()),
         Map.entry("sonic_clap", new com.danrod.dcuniverse.ability.active.Palmas()),
-        Map.entry("flight", new com.danrod.dcuniverse.ability.active.VooAtivo())
+        Map.entry("flight", new com.danrod.dcuniverse.ability.active.VooAtivo()),
+        Map.entry("leap", new com.danrod.dcuniverse.ability.active.SuperPulo())
     ));
 
     private TiposHabilidade() {}

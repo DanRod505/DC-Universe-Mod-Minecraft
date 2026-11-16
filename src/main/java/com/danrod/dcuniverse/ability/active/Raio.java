@@ -31,7 +31,8 @@ import java.util.Map;
 
 /**
  * projectile_beam: raio contínuo (visão de calor). Parâmetros: range, damage_mult (por segundo),
- * color, sets_fire, melts (derrete e funde blocos atingidos). O feixe é desenhado no cliente (client/Efeitos).
+ * color, sets_fire, melts (derrete e funde blocos atingidos), lights_furnace (acende fornalhas, padrão sim) e
+ * cooks_drops (o que o raio mata solta a comida assada, mesmo sem pegar fogo). O feixe é desenhado no cliente (client/Efeitos).
  */
 public final class Raio implements TipoHabilidade {
     /** O que o raio de calor funde a cada meio segundo no bloco atingido (gelo e neve viram água ou somem). */
@@ -64,11 +65,12 @@ public final class Raio implements TipoHabilidade {
             Entity e = eh.getEntity();
             // Pega fogo antes do dano: se morrer com o golpe, já está em chamas e a comida cai assada (loot do jogo).
             if (prm.b("sets_fire", false) && Alvos.podeAtingir(player, e)) e.igniteForSeconds(4);
+            if (prm.b("cooks_drops", false)) com.danrod.dcuniverse.ability.Assar.marcar(e);
             Alvos.ferir(player, e, level.damageSources().playerAttack(player), Alvos.dano(p, prm.d("damage_mult", 0.4)) / 2);
             if (e instanceof net.minecraft.world.entity.LivingEntity vivo) Congelamento.derreter(vivo);
         } else if (alvo instanceof BlockHitResult bh && alvo.getType() == HitResult.Type.BLOCK && tick % 10 == 9
             && player.mayBuild() && level.mayInteract(player, bh.getBlockPos())) {
-            esquentar(level, player, bh, prm.b("melts", false), prm.b("sets_fire", false) && tick % 20 == 19);
+            esquentar(level, player, bh, prm.b("melts", false), prm.b("sets_fire", false) && tick % 20 == 19, prm.b("lights_furnace", true));
         }
     }
 
@@ -101,6 +103,10 @@ public final class Raio implements TipoHabilidade {
 
     /** Funde o bloco atingido (e a neve em cima dele); com fogo, acende fogueiras, velas e TNT ou põe fogo na face. */
     public static void esquentar(ServerLevel level, ServerPlayer player, BlockHitResult bh, boolean funde, boolean fogo) {
+        esquentar(level, player, bh, funde, fogo, true);
+    }
+
+    public static void esquentar(ServerLevel level, ServerPlayer player, BlockHitResult bh, boolean funde, boolean fogo, boolean forno) {
         BlockPos pos = bh.getBlockPos();
         BlockState st = level.getBlockState(pos);
         if (funde) {
@@ -114,8 +120,8 @@ public final class Raio implements TipoHabilidade {
                 return;
             }
         }
-        if (level.getBlockEntity(pos) instanceof AbstractFurnaceBlockEntity forno) {
-            esquentarForno(level, pos, st, forno);
+        if (level.getBlockEntity(pos) instanceof AbstractFurnaceBlockEntity f) {
+            if (forno) esquentarForno(level, pos, st, f);
             return;
         }
         if (!fogo) return;

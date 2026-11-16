@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 18;
+    private static final int VERSAO = 19;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -163,7 +163,15 @@ public final class Rede {
     }
 
     /** Uma habilidade da árvore como a tela precisa: custo em pontos, recarga, se é segurada e se é uma das iniciais. */
-    public record ArvoreItem(String id, int custo, float recarga, boolean hold, boolean inicial) {}
+    /**
+     * Um nó da árvore: habilidade (pai "") ou melhoria (id "habilidade.melhoria", com o pai, a melhoria exigida antes e
+     * o item do ícone). rajada = segundos do disparo por toque (0 = segura ou instantânea).
+     */
+    public record ArvoreItem(String id, int custo, float recarga, boolean hold, boolean inicial, float rajada, String pai, String requer, String icone) {
+        public boolean melhoria() {
+            return !pai.isEmpty();
+        }
+    }
 
     /**
      * Árvore de habilidades do herói atual (ability/Arvore): nível, xp (com o começo e o fim do nível), pontos livres,
@@ -171,8 +179,8 @@ public final class Rede {
      * árvore toda. heroi "" = o herói atual não usa o sistema novo.
      */
     public record ArvoreSync(String heroi, int nivel, int xp, int xpNivel, int xpProximo, int pontos, int slotsAbertos,
-                             boolean criativo, String inicial, List<String> compradas, List<String> slots, List<ArvoreItem> itens) {
-        public static final ArvoreSync VAZIO = new ArvoreSync("", 0, 0, 0, 0, 0, 0, false, "", List.of(), List.of(), List.of());
+                             boolean criativo, String inicial, List<String> compradas, List<String> slots, List<ArvoreItem> itens, float salto) {
+        public static final ArvoreSync VAZIO = new ArvoreSync("", 0, 0, 0, 0, 0, 0, false, "", List.of(), List.of(), List.of(), 0f);
 
         public boolean precisaEscolher() {
             return !heroi.isEmpty() && inicial.isEmpty();
@@ -184,7 +192,14 @@ public final class Rede {
         }
 
         public boolean tem(String id) {
-            return item(id) != null && (criativo || compradas.contains(id));
+            return item(id) != null && compradas.contains(id);
+        }
+
+        /** Pode comprar agora (a mesma regra do servidor em Arvore.podeComprar). */
+        public boolean podeComprar(String id) {
+            ArvoreItem i = item(id);
+            if (i == null || tem(id) || precisaEscolher() || pontos < i.custo()) return false;
+            return !i.melhoria() || tem(i.pai()) && (i.requer().isEmpty() || tem(i.requer()));
         }
 
         public static void encode(ArvoreSync m, FriendlyByteBuf b) {
@@ -206,7 +221,12 @@ public final class Rede {
                 b.writeFloat(i.recarga());
                 b.writeBoolean(i.hold());
                 b.writeBoolean(i.inicial());
+                b.writeFloat(i.rajada());
+                b.writeUtf(i.pai());
+                b.writeUtf(i.requer());
+                b.writeUtf(i.icone());
             }
+            b.writeFloat(m.salto);
         }
 
         public static ArvoreSync decode(FriendlyByteBuf b) {
@@ -218,16 +238,17 @@ public final class Rede {
             List<String> slots = List.copyOf(b.readList(FriendlyByteBuf::readUtf));
             int n = b.readVarInt();
             List<ArvoreItem> itens = new ArrayList<>(n);
-            for (int i = 0; i < n; i++) itens.add(new ArvoreItem(b.readUtf(), b.readVarInt(), b.readFloat(), b.readBoolean(), b.readBoolean()));
-            return new ArvoreSync(h, nivel, xp, xn, xprox, pts, abertos, cri, ini, comp, slots, List.copyOf(itens));
+            for (int i = 0; i < n; i++) itens.add(new ArvoreItem(b.readUtf(), b.readVarInt(), b.readFloat(), b.readBoolean(), b.readBoolean(),
+                b.readFloat(), b.readUtf(), b.readUtf(), b.readUtf()));
+            return new ArvoreSync(h, nivel, xp, xn, xprox, pts, abertos, cri, ini, comp, slots, List.copyOf(itens), b.readFloat());
         }
     }
 
     /** Escolha da habilidade inicial do herói (uma das iniciais da árvore). */
     public record ArvoreInicial(String id) {}
 
-    /** Comprar uma habilidade da árvore com pontos. */
-    public record ArvoreComprar(String id) {}
+    /** Comprar uma habilidade ou melhoria da árvore com pontos (desfazer = tirar a compra, só no criativo). */
+    public record ArvoreComprar(String id, boolean desfazer) {}
 
     /** Os 6 slots montados na tela da árvore ("" = vazio). */
     public record ArvoreSlots(List<String> slots) {}
@@ -643,8 +664,14 @@ public final class Rede {
             .add();
         CANAL.messageBuilder(ArvoreComprar.class)
             .direction(PacketFlow.SERVERBOUND)
-            .encoder((m, b) -> b.writeUtf(m.id())).decoder(b -> new ArvoreComprar(b.readUtf(64)))
-            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.ability.Arvore.comprar(p, m.id())))
+            .encoder((m, b) -> {
+                b.writeUtf(m.id());
+                b.writeBoolean(m.desfazer());
+            }).decoder(b -> new ArvoreComprar(b.readUtf(96), b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> {
+                if (m.desfazer()) com.danrod.dcuniverse.ability.Arvore.desfazer(p, m.id());
+                else com.danrod.dcuniverse.ability.Arvore.comprar(p, m.id());
+            }))
             .add();
         CANAL.messageBuilder(ArvoreSlots.class)
             .direction(PacketFlow.SERVERBOUND)
@@ -964,7 +991,7 @@ public final class Rede {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
         if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0, e.planar());
-        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
+        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : com.danrod.dcuniverse.ability.Arvore.habilidade(player, p, e.canalizando());
         boolean voando = Voo.voando(player);
         Personagem.Tipo voo = p.passiva("flight");
         int rastro = voo == null ? 0 : voo.params().color("trail_color", p.cor());
@@ -998,7 +1025,7 @@ public final class Rede {
             int restante = (int) Math.max(0, e.prontaEm(h.id()) - agora);
             int max = com.danrod.dcuniverse.ability.Cargas.max(h);
             boolean semCusto = player.isCreative() || com.danrod.dcuniverse.ability.Arvore.semEnergia(player, p);
-            habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD, h.suprema(), semCusto ? 0 : h.custo(), restante,
+            habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD && com.danrod.dcuniverse.ability.Arvore.rajada(h) <= 0, h.suprema(), semCusto ? 0 : h.custo(), restante,
                 Math.round(h.recargaSeg() * 20), max == 0 ? -1 : player.isCreative() ? max : com.danrod.dcuniverse.ability.Cargas.atuais(player, h), max,
                 max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.faltam(player, h),
                 max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.ticksPorCarga(player, p, h),

@@ -831,6 +831,50 @@ def icone_voo():
     return t
 
 
+def icone_super_pulo():
+    """Super Pulo (árvore nova): o Superman subindo reto, punho para o céu, chão rachado e poeira ficando embaixo."""
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    # Chão rachado e anel de poeira embaixo.
+    d.polygon([(2, 31), (30, 31), (27, 27), (5, 27)], fill=hexa("#6B4E2E"))
+    d.line([(5, 27), (27, 27)], fill=hexa("#8C6A40"), width=1)
+    for (x0, y0, x1, y1) in ((16, 28, 13, 31), (16, 28, 20, 31), (11, 28, 8, 30), (21, 28, 24, 30)):
+        d.line([(x0, y0), (x1, y1)], fill=hexa("#2E2014"), width=1)
+    for cx, cy, r in ((5, 25, 3), (27, 25, 3), (9, 27, 2), (23, 27, 2), (2, 27, 2), (30, 27, 2)):
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=hexa("#D9D2C4"))
+    for cx, cy in ((5, 24), (27, 24)):
+        d.point((cx, cy), fill=hexa("#FFFFFF"))
+    # Linhas de velocidade saindo do chão até o herói.
+    for x, y0, y1, cor in ((10, 24, 14, "#DDEBFF"), (22, 24, 14, "#DDEBFF"), (13, 25, 19, "#9FC4FF"), (19, 25, 19, "#9FC4FF")):
+        d.line([(x, y0), (x, y1)], fill=hexa(cor), width=1)
+    # Capa vermelha caindo atrás, aberta pelo vento.
+    d.polygon([(14, 9), (18, 9), (21, 20), (16, 18), (11, 20)], fill=hexa("#C81E26"))
+    d.line([(16, 10), (16, 17)], fill=hexa("#8E1418"), width=1)
+    d.line([(14, 10), (12, 18)], fill=hexa("#F0505A"), width=1)
+    # Corpo azul reto, pernas juntas com botas vermelhas.
+    d.rectangle([14, 8, 18, 16], fill=hexa("#1F48A8"))
+    d.rectangle([15, 8, 17, 15], fill=hexa("#3A7BFF"))
+    d.rectangle([14, 16, 18, 19], fill=hexa("#1F48A8"))
+    d.rectangle([14, 20, 18, 22], fill=hexa("#C81E26"))
+    d.line([(16, 16), (16, 22)], fill=hexa("#141826"), width=1)
+    # Cinto amarelo e escudo no peito.
+    d.line([(14, 15), (18, 15)], fill=hexa("#F7C531"), width=1)
+    d.polygon([(16, 10), (18, 11), (16, 13), (14, 11)], fill=hexa("#F7C531"))
+    d.point((16, 11), fill=hexa("#C81E26"))
+    # Braço direito esticado para cima com o punho; o esquerdo junto do corpo.
+    d.line([(18, 8), (20, 3)], fill=hexa("#3A7BFF"), width=2)
+    d.ellipse([19, 0, 22, 3], fill=hexa("#2C62D8"))
+    d.line([(13, 9), (13, 14)], fill=hexa("#2C62D8"), width=1)
+    # Cabeça: rosto e cabelo preto.
+    d.ellipse([14, 3, 18, 7], fill=hexa("#F2C49B"))
+    d.polygon([(14, 5), (14, 3), (18, 3), (17, 4)], fill=hexa("#141826"))
+    contornar(t)
+    # Brilho no punho, rompendo o ar.
+    brilho(t, 20, 1, 4, hexa("#FFFFFF"), 0.7)
+    return t
+
+
 ICONES = {
     "visao_de_calor": icone_visao_de_calor,
     "sopro_congelante": icone_sopro_congelante,
@@ -843,6 +887,7 @@ ICONES = {
     "calor_focado": icone_calor_focado,
     "sopro_gelido": icone_sopro_gelido,
     "voo": icone_voo,
+    "super_pulo": icone_super_pulo,
 }
 
 

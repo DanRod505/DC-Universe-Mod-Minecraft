@@ -2,6 +2,7 @@ package com.danrod.dcuniverse.test;
 
 import com.danrod.dcuniverse.DCUniverse;
 import com.danrod.dcuniverse.ability.DemoHud;
+import com.danrod.dcuniverse.ability.Arvore;
 import com.danrod.dcuniverse.ability.Habilidades;
 import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.ability.QuedaAmortecida;
@@ -116,77 +117,116 @@ public final class Testes {
         Transformacao.transformar(p, SUPERMAN, true);
         Personagem sup = EstadoJogador.de(p).personagem();
         h.assertTrue(sup.arvore() != null, "Superman usa a árvore nova");
-        h.assertValueEqual(sup.arvore().iniciais(), List.of("visao_de_calor", "voo", "sopro_congelante"), "as 3 iniciais");
-        h.assertTrue(com.danrod.dcuniverse.ability.Arvore.precisaEscolher(p, sup), "começa sem a inicial");
+        h.assertValueEqual(sup.arvore().iniciais(), List.of("visao_de_calor", "super_pulo", "sopro_congelante"), "as 3 iniciais");
+        h.assertTrue(Arvore.precisaEscolher(p, sup), "começa sem a inicial");
         h.assertTrue(com.danrod.dcuniverse.character.Cinto.equipadas(p, sup).isEmpty(), "nada equipado antes de escolher");
         // Sem o Voo num slot o voo não vale.
         TiposPassiva.TIPOS.get("flight").tick(p, sup.passiva("flight").params());
         h.assertFalse(p.getAbilities().mayfly, "sem a habilidade Voo, não voa");
-        com.danrod.dcuniverse.ability.Arvore.escolherInicial(p, "investida_de_aco");
-        h.assertTrue(com.danrod.dcuniverse.ability.Arvore.precisaEscolher(p, sup), "só vale uma das iniciais");
-        com.danrod.dcuniverse.ability.Arvore.escolherInicial(p, "voo");
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.inicial(p, sup), "voo", "inicial guardada");
-        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, sup)), List.of("voo"), "a inicial vai para o slot 1");
-        com.danrod.dcuniverse.ability.Arvore.escolherInicial(p, "visao_de_calor");
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.inicial(p, sup), "voo", "não escolhe duas vezes");
-        TiposPassiva.TIPOS.get("flight").tick(p, sup.passiva("flight").params());
-        h.assertTrue(p.getAbilities().mayfly, "com o Voo num slot, voa");
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.pontos(p, sup), 0, "a inicial é de graça");
-        h.assertFalse(com.danrod.dcuniverse.ability.Arvore.comprar(p, "visao_de_calor"), "sem pontos não compra");
+        h.assertTrue(com.danrod.dcuniverse.ability.Passivas.params(p, "super_jump") == null, "sem o Super Pulo, sem salto carregado");
+        Arvore.escolherInicial(p, "investida_de_aco");
+        h.assertTrue(Arvore.precisaEscolher(p, sup), "só vale uma das iniciais");
+        Arvore.escolherInicial(p, "super_pulo");
+        h.assertValueEqual(Arvore.inicial(p, sup), "super_pulo", "inicial guardada");
+        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, sup)), List.of("super_pulo"), "a inicial vai para o slot 1");
+        Arvore.escolherInicial(p, "visao_de_calor");
+        h.assertValueEqual(Arvore.inicial(p, sup), "super_pulo", "não escolhe duas vezes");
+        h.assertTrue(com.danrod.dcuniverse.ability.Passivas.params(p, "super_jump") != null, "Super Pulo no slot libera o salto carregado");
+        h.assertValueEqual(Arvore.alturaSalto(p, sup), 10f, "Super Pulo começa em 10 blocos");
+        h.assertValueEqual(Arvore.pontos(p, sup), 0, "a inicial é de graça");
+        h.assertFalse(Arvore.comprar(p, "visao_de_calor"), "sem pontos não compra");
+        // Pontos por nível (Dalton): 1 nos níveis 1-9, 2 nos 10-19, 3 nos 20-29, 4 do 30 em diante.
+        int[][] pts = {{1, 0}, {2, 1}, {9, 8}, {10, 10}, {19, 28}, {20, 31}, {29, 58}, {30, 62}, {31, 66}};
+        for (int[] x : pts) h.assertValueEqual(Arvore.pontosAteNivel(x[0]), x[1], "pontos até o nível " + x[0]);
         // Níveis e slots (decisão do Dalton: 1, 3, 5, 10, 20, 30).
         int[][] slots = {{1, 1}, {2, 1}, {3, 2}, {5, 3}, {9, 3}, {10, 4}, {19, 4}, {20, 5}, {29, 5}, {30, 6}};
-        for (int[] s : slots) h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.slotsDoNivel(s[0]), s[1], "slots no nível " + s[0]);
-        for (int n = 1; n <= 30; n++) h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.nivelDaXp(com.danrod.dcuniverse.ability.Arvore.xpDoNivel(n)), n, "xp do nível " + n);
-        com.danrod.dcuniverse.ability.Arvore.definirXp(p, sup, com.danrod.dcuniverse.ability.Arvore.xpDoNivel(3));
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.slotsAbertos(p, sup), 2, "nível 3 abre o slot 2");
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.pontos(p, sup), 2, "1 ponto por nível");
-        h.assertTrue(com.danrod.dcuniverse.ability.Arvore.comprar(p, "visao_de_calor"), "compra com pontos");
-        h.assertFalse(com.danrod.dcuniverse.ability.Arvore.comprar(p, "visao_de_calor"), "não compra duas vezes");
-        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, sup)), List.of("voo", "visao_de_calor"), "comprou e foi para o slot vazio");
-        h.assertFalse(com.danrod.dcuniverse.ability.Arvore.comprar(p, "palmas_sonicas"), "custa 2, só tem 1");
-        // Build livre: qualquer ordem, vazios no meio, e o que não tem fica de fora.
-        com.danrod.dcuniverse.ability.Arvore.definirSlots(p, List.of("visao_de_calor", "palmas_sonicas", "", "", "", ""));
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.slots(p, sup).subList(0, 2), List.of("visao_de_calor", ""), "não equipa o que não comprou");
-        TiposPassiva.TIPOS.get("flight").tick(p, sup.passiva("flight").params());
-        h.assertFalse(p.getAbilities().mayfly, "tirou o Voo do slot: o voo desliga");
-        com.danrod.dcuniverse.ability.Arvore.definirSlots(p, List.of("", "", "", "", "", "voo"));
-        h.assertTrue(com.danrod.dcuniverse.ability.Arvore.equipadas(p, sup).isEmpty(), "slot 6 ainda trancado no nível 3");
-        com.danrod.dcuniverse.ability.Arvore.definirSlots(p, List.of("", "visao_de_calor", "", "", "", ""));
-        h.assertValueEqual(ids(com.danrod.dcuniverse.ability.Arvore.equipadas(p, sup)), List.of("visao_de_calor"), "vazio no slot 1 vale");
-        // Sem energia: o raio canalizado não gasta nada.
+        for (int[] x : slots) h.assertValueEqual(Arvore.slotsDoNivel(x[0]), x[1], "slots no nível " + x[0]);
+        for (int n = 1; n <= Arvore.NIVEL_MAX; n++) h.assertValueEqual(Arvore.nivelDaXp(Arvore.xpDoNivel(n)), n, "xp do nível " + n);
+        Arvore.definirXp(p, sup, Arvore.xpDoNivel(3));
+        h.assertValueEqual(Arvore.slotsAbertos(p, sup), 2, "nível 3 abre o slot 2");
+        h.assertValueEqual(Arvore.pontos(p, sup), 2, "1 ponto por nível no começo");
+        // Melhoria: precisa da habilidade antes, e a exigida antes da seguinte.
+        h.assertFalse(Arvore.comprar(p, "visao_de_calor.fogo"), "melhoria sem a habilidade não compra");
+        h.assertFalse(Arvore.comprar(p, "super_pulo.altura_30"), "altura 30 exige a 20 antes");
+        h.assertTrue(Arvore.comprar(p, "super_pulo.altura_20"), "compra a melhoria do Super Pulo");
+        h.assertValueEqual(Arvore.alturaSalto(p, sup), 20f, "melhoria sobe a altura para 20");
+        h.assertTrue(Arvore.comprar(p, "visao_de_calor"), "compra com pontos");
+        h.assertFalse(Arvore.comprar(p, "visao_de_calor"), "não compra duas vezes");
+        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, sup)), List.of("super_pulo", "visao_de_calor"), "comprou e foi para o slot vazio");
+        h.assertFalse(Arvore.comprar(p, "palmas_sonicas"), "sem pontos");
+        // Visão de calor na árvore: toque de 3 s, recarga 5 s, sem fogo nem fornalha sem as melhorias.
+        Personagem.Habilidade vis = Arvore.habilidade(p, sup, "visao_de_calor");
+        h.assertValueEqual(Arvore.rajada(vis), 3f, "toque dispara 3 s");
+        h.assertValueEqual(vis.recargaSeg(), 5f, "recarga de 5 s");
+        h.assertFalse(vis.params().b("sets_fire", true), "sem a melhoria, não põe fogo");
+        h.assertFalse(vis.params().b("lights_furnace", true), "sem a melhoria, não acende fornalha");
+        h.assertTrue(sup.habilidade("visao_de_calor").params().b("sets_fire", false), "o kit antigo continua com fogo");
+        // Disparo por toque: soltar não para, e para sozinho depois de 3 s.
+        Arvore.definirSlots(p, List.of("visao_de_calor", "super_pulo", "", "", "", ""));
         EstadoJogador e = EstadoJogador.de(p);
         float energia = e.energia();
         Habilidades.usar(p, 0, true);
         com.danrod.dcuniverse.ability.Coreografia.adiantar(p);
-        for (int i = 0; i < 40; i++) Habilidades.tick(p, sup);
-        h.assertValueEqual(e.canalizando(), "visao_de_calor", "canaliza pelo slot");
+        Habilidades.usar(p, 0, false);
+        h.assertValueEqual(e.canalizando(), "visao_de_calor", "soltar a tecla não para o toque");
         h.assertValueEqual(e.energia(), energia, "a árvore nova não gasta energia");
+        // Fim da rajada: o tick do jogo precisa andar (GameTest roda o mundo; aqui o fim é conferido na hora pelo tempo).
+        Habilidades.tick(p, sup);
+        h.assertValueEqual(e.canalizando(), "visao_de_calor", "ainda dentro dos 3 s");
         // Tirou do slot no meio da canalização: para.
-        com.danrod.dcuniverse.ability.Arvore.definirSlots(p, List.of("voo", "", "", "", "", ""));
+        Arvore.definirSlots(p, List.of("super_pulo", "", "", "", "", ""));
         h.assertValueEqual(e.canalizando(), "", "saiu da build, parou de canalizar");
+        // Build livre: o que não tem fica de fora, melhoria não vai para slot.
+        Arvore.definirSlots(p, List.of("palmas_sonicas", "super_pulo.altura_20", "", "", "", ""));
+        h.assertValueEqual(Arvore.slots(p, sup).subList(0, 2), List.of("", ""), "não equipa o que não comprou nem melhoria");
+        Arvore.definirSlots(p, List.of("", "", "", "", "", "super_pulo"));
+        h.assertTrue(Arvore.equipadas(p, sup).isEmpty(), "slot 6 ainda trancado no nível 3");
         // Fica guardado ao destransformar e transformar de novo.
         Transformacao.destransformar(p);
         Transformacao.transformar(p, SUPERMAN, true);
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.compradas(p, sup), List.of("voo", "visao_de_calor"), "compras guardadas");
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.nivel(p, sup), 3, "nível guardado");
-        // Criativo: tudo liberado, 6 slots, sem gastar pontos de verdade.
+        h.assertValueEqual(Arvore.compradas(p, sup), List.of("super_pulo", "super_pulo.altura_20", "visao_de_calor"), "compras guardadas");
+        h.assertValueEqual(Arvore.nivel(p, sup), 3, "nível guardado");
+        // Criativo: 6 slots e pontos infinitos, mas compra de verdade o que quiser (e desfaz para testar).
         ServerPlayer c = jogadorArvore(h, GameType.CREATIVE);
         Transformacao.transformar(c, SUPERMAN, true);
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.slotsAbertos(c, sup), 6, "criativo abre os 6 slots");
-        h.assertTrue(com.danrod.dcuniverse.ability.Arvore.tem(c, sup, "pisao_sismico"), "criativo tem tudo");
-        h.assertFalse(com.danrod.dcuniverse.ability.Arvore.comprar(c, "pisao_sismico"), "criativo não compra de verdade");
-        h.assertTrue(com.danrod.dcuniverse.ability.Arvore.compradas(c, sup).isEmpty(), "nada comprado de verdade no criativo");
-        h.assertFalse(com.danrod.dcuniverse.ability.Arvore.tem(p, sup, "pisao_sismico"), "o outro jogador não ganhou nada");
+        h.assertValueEqual(Arvore.slotsAbertos(c, sup), 6, "criativo abre os 6 slots");
+        h.assertFalse(Arvore.tem(c, sup, "pisao_sismico"), "criativo não vem com tudo comprado");
+        h.assertFalse(Arvore.comprar(c, "pisao_sismico"), "antes precisa escolher a inicial");
+        Arvore.escolherInicial(c, "visao_de_calor");
+        for (String id : List.of("pisao_sismico", "voo", "visao_de_calor.fogo", "visao_de_calor.fornalha", "visao_de_calor.assado",
+            "visao_de_calor.duracao_5", "visao_de_calor.duracao_10")) h.assertTrue(Arvore.comprar(c, id), "criativo compra " + id);
+        h.assertValueEqual(Arvore.pontos(c, sup), Arvore.PONTOS_CRIATIVO, "pontos infinitos no criativo");
+        Personagem.Habilidade visC = Arvore.habilidade(c, sup, "visao_de_calor");
+        h.assertValueEqual(Arvore.rajada(visC), 10f, "melhoria de 10 s");
+        h.assertTrue(visC.params().b("sets_fire", false) && visC.params().b("lights_furnace", false) && visC.params().b("cooks_drops", false),
+            "melhorias de fogo, fornalha e comida assada");
+        h.assertTrue(Arvore.desfazer(c, "visao_de_calor.duracao_5"), "criativo desfaz");
+        h.assertFalse(Arvore.tem(c, sup, "visao_de_calor.duracao_10"), "desfazer leva junto o que dependia dela");
+        h.assertValueEqual(Arvore.rajada(Arvore.habilidade(c, sup, "visao_de_calor")), 3f, "voltou para 3 s");
+        h.assertFalse(Arvore.desfazer(c, "visao_de_calor"), "a inicial não sai");
+        h.assertFalse(Arvore.desfazer(p, "super_pulo.altura_20"), "fora do criativo não desfaz");
+        h.assertFalse(Arvore.tem(p, sup, "pisao_sismico"), "o outro jogador não ganhou nada");
         // Pacote ida e volta.
-        Rede.ArvoreSync m = com.danrod.dcuniverse.ability.Arvore.montar(p);
+        Rede.ArvoreSync m = Arvore.montar(p);
         FriendlyByteBuf buf = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
         Rede.ArvoreSync.encode(m, buf);
         h.assertValueEqual(Rede.ArvoreSync.decode(buf), m, "ArvoreSync ida e volta");
-        h.assertValueEqual(m.itens().size(), 10, "10 habilidades na árvore do Superman");
+        h.assertValueEqual(m.itens().stream().filter(x -> !x.melhoria()).count(), 11L, "11 habilidades na árvore do Superman");
+        h.assertValueEqual(m.itens().stream().filter(Rede.ArvoreItem::melhoria).count(), 7L, "7 melhorias");
+        h.assertTrue(m.podeComprar("palmas_sonicas") == Arvore.podeComprar(p, sup, "palmas_sonicas"), "cliente e servidor concordam");
+        // Comida assada: o que morre marcado pelo raio solta a comida pronta.
+        var vaca = h.spawn(net.minecraft.world.entity.EntityTypes.COW, new net.minecraft.core.BlockPos(1, 2, 1));
+        com.danrod.dcuniverse.ability.Assar.marcar(vaca);
+        var drops = new java.util.ArrayList<net.minecraft.world.entity.item.ItemEntity>();
+        drops.add(new net.minecraft.world.entity.item.ItemEntity(h.getLevel(), vaca.getX(), vaca.getY(), vaca.getZ(), new ItemStack(Items.BEEF, 2)));
+        drops.add(new net.minecraft.world.entity.item.ItemEntity(h.getLevel(), vaca.getX(), vaca.getY(), vaca.getZ(), new ItemStack(Items.LEATHER)));
+        com.danrod.dcuniverse.ability.Assar.assar(vaca, drops);
+        h.assertTrue(drops.get(0).getItem().is(Items.COOKED_BEEF) && drops.get(0).getItem().getCount() == 2, "carne cai assada");
+        h.assertTrue(drops.get(1).getItem().is(Items.LEATHER), "couro continua couro");
         // Batman continua no kit antigo.
         Transformacao.transformar(p, BATMAN, true);
         h.assertTrue(EstadoJogador.de(p).personagem().arvore() == null, "Batman sem árvore ainda");
-        h.assertValueEqual(com.danrod.dcuniverse.ability.Arvore.montar(p), Rede.ArvoreSync.VAZIO, "sem árvore, pacote vazio");
+        h.assertValueEqual(Arvore.montar(p), Rede.ArvoreSync.VAZIO, "sem árvore, pacote vazio");
         h.succeed();
     }
 

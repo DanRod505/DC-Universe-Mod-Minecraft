@@ -65,7 +65,10 @@ public final class Saltador {
         float f = carga;
         cancelar();
         if (f < 0.15f) return;
-        double v = Math.max(0.42, prm.d("power", 2) * f);
+        // Árvore nova: a carga cheia sobe a altura do Super Pulo equipado (com as melhorias).
+        float altura = EstadoCliente.temArvore() ? EstadoCliente.arvore.salto() : 0f;
+        double max = altura > 0 ? com.danrod.dcuniverse.ability.passive.SuperSalto.velocidadeParaAltura(altura) : prm.d("power", 2);
+        double v = Math.max(0.42, max * f);
         Vec3 olhar = p.getLookAngle();
         Vec3 frente = new Vec3(olhar.x, 0, olhar.z);
         double h = p.input.hasForwardImpulse() && frente.lengthSqr() > 1e-4 ? 0.7 * f : 0;
