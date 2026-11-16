@@ -31,8 +31,8 @@ Etapas 2 a 4 entram em 16/11/2026: o sistema de habilidades é o próximo passo 
 
 ### v0.8: Combate (sistema)
 
-1. Combo, golpe pesado e sensação de impacto
-2. Atalhos, cancelamentos e novo HUD
+1. Combo para todos os arquétipos, golpe pesado e golpes no ar
+2. Cancelamentos, atalhos por personagem e novo HUD
 3. Esquiva, aparar e mira travada
 4. Inimigos com IA de combate (GeckoLib)
 

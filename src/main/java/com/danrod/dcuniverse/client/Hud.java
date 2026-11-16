@@ -22,7 +22,8 @@ import java.util.Map;
 
 /**
  * HUD do personagem, no canto de cima à esquerda: medalhão com o emblema, barra de energia (com o custo da
- * suprema marcado), recarga por segundo, espaços das habilidades com as recargas e o aviso da suprema pronta.
+ * suprema marcado), recarga por segundo, espaços das habilidades com as recargas e a tecla de cada uma, e o aviso
+ * da suprema pronta.
  * O servidor manda o estado a cada 5 ticks; entre um e outro o cliente prevê energia e recargas para a
  * barra andar liso. A arte vem de textures/gui/hud.png (tools/arte/hud.py).
  */
@@ -145,6 +146,20 @@ public final class Hud {
         return Component.translatable("habilidade.dcuniverse." + h.id());
     }
 
+    /** Cor do personagem do próprio jogador (para outras camadas da tela). */
+    public static int corPersonagem() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.player == null ? 0x3A7BFF : cor(mc);
+    }
+
+    /** Idade do jogador quando o modo (combate ou mundo) trocou: as habilidades viram na barra. */
+    private static float trocaEm = -100;
+
+    public static void trocouModo() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) trocaEm = mc.player.tickCount;
+    }
+
     private static int cor(Minecraft mc) {
         Rede.Aparencia a = EstadoCliente.APARENCIAS.get(mc.player.getId());
         return a == null ? 0x3A7BFF : a.cor() & 0xFFFFFF;
@@ -247,8 +262,24 @@ public final class Hud {
         if (habs.isEmpty()) return;
         int x = X0, y = ESPACOS_Y;
         int sel = Math.min(s.selecionada(), habs.size() - 1);
+        boolean combate = Atalhos.combate();
+        boolean temModos = Combate.config() != null;
+        if (temModos) modo(g, font, combate, x, y + 32, tempo);
+        // Trocou de modo: a barra vira (encolhe na vertical e abre de novo com as habilidades do outro conjunto).
+        float k = Mth.clamp((tempo - trocaEm) / 5f, 0, 1);
+        boolean virando = k < 1;
+        if (virando) {
+            float esc = 0.15f + 0.85f * (1 - (1 - k) * (1 - k));
+            g.pose().pushMatrix();
+            g.pose().translate(0, y + 11);
+            g.pose().scale(1, esc);
+            g.pose().translate(0, -(y + 11));
+        }
+        boolean selVisivel = false;
         for (int i = 0; i < habs.size(); i++) {
             Rede.HabInfo h = habs.get(i);
+            if (!h.noModo(combate)) continue;
+            if (i == sel) selVisivel = true;
             boolean pronta = pronta(s, h);
             int tam, ix, iy;
             if (h.suprema()) {
@@ -280,11 +311,56 @@ public final class Hud {
                 g.text(font, seg, ix + 8 - font.width(seg) / 2 + 1, iy + 4, 0xFFFFFFFF, true);
             }
             if (h.cargas() >= 0) cargas(g, font, h, ix, iy);
+            tecla(g, font, i, x + tam / 2, y + (h.suprema() ? 24 : 22));
             x += tam + 2;
         }
+        if (virando) g.pose().popMatrix();
+        if (!selVisivel) return;
         Rede.HabInfo h = habs.get(sel);
         int cor = h.suprema() ? 0xFFFFD84A : 0xFFE8ECF4;
         g.text(font, nome(h).copy().withStyle(h.suprema() ? ChatFormatting.BOLD : ChatFormatting.RESET), x + 2, y + 7, cor, true);
+    }
+
+    private static final Identifier MODO_COMBATE = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "textures/gui/modo_combate.png");
+    private static final Identifier MODO_MUNDO = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "textures/gui/modo_mundo.png");
+
+    /** Indicador do modo embaixo das habilidades: ícone, nome do modo e a tecla que troca. */
+    private static void modo(GuiGraphicsExtractor g, Font font, boolean combate, int x, int y, float tempo) {
+        int cor = combate ? 0xFFFF6A4A : 0xFF5AB4FF;
+        Component nome = Component.translatable(combate ? "dcuniverse.hud.modo.combate" : "dcuniverse.hud.modo.mundo").withStyle(ChatFormatting.BOLD);
+        Component tecla = Component.translatable("dcuniverse.hud.modo.trocar", Teclas.COMBATE.getTranslatedKeyMessage());
+        int wNome = font.width(nome), wTecla = Math.round(font.width(tecla) * 0.75f);
+        int w = 3 + 12 + 3 + wNome + 5 + wTecla + 4, h = 14;
+        // Pulso na troca: a borda acende e apaga.
+        float k = Mth.clamp((tempo - trocaEm) / 12f, 0, 1);
+        int borda = k < 1 ? clarearArgb(cor, 1 - k) : cor;
+        g.fill(x, y, x + w, y + h, 0xC0101218);
+        contorno(g, x, y, w, h, borda);
+        g.fill(x + 1, y + 1, x + 2, y + h - 1, cor);
+        g.blit(RenderPipelines.GUI_TEXTURED, combate ? MODO_COMBATE : MODO_MUNDO, x + 3, y + 1, 0, 0, 12, 12, 32, 32, 32, 32);
+        g.text(font, nome, x + 18, y + 3, cor, true);
+        g.pose().pushMatrix();
+        g.pose().translate(x + 18 + wNome + 5, y + 4.5f);
+        g.pose().scale(0.75f, 0.75f);
+        g.text(font, tecla, 0, 0, 0xFFB8C0D0, true);
+        g.pose().popMatrix();
+    }
+
+    private static int clarearArgb(int argb, float t) {
+        return (argb & 0xFF000000) | clarear(argb & 0xFFFFFF, t);
+    }
+
+    /** Tecla do atalho embaixo do espaço (as que só estão no radial ficam sem). */
+    private static void tecla(GuiGraphicsExtractor g, Font font, int indice, int cx, int y) {
+        int a = Atalhos.atalhoDe(indice);
+        if (a < 0) return;
+        String nome = Atalhos.tecla(a).getTranslatedKeyMessage().getString();
+        if (nome.length() > 3) nome = nome.substring(0, 3);
+        g.pose().pushMatrix();
+        g.pose().translate(cx - font.width(nome) * 0.75f / 2, y + 1);
+        g.pose().scale(0.75f, 0.75f);
+        g.text(font, nome, 0, 0, a == Atalhos.SUPREMA ? 0xFFFFD84A : 0xFFC8D0E0, true);
+        g.pose().popMatrix();
     }
 
     /** Gadget: cargas no canto do ícone e, enquanto o cinto fabrica, um filete âmbar que enche embaixo. */

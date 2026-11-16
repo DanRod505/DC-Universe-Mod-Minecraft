@@ -390,6 +390,12 @@ public final class Pecas {
         if (ASAS.size() > 64) ASAS.entrySet().removeIf(en -> agora - en.getValue().ultimo > 10_000_000_000L);
     }
 
+    /** A capa-asa da entidade está aberta (planando). */
+    public static boolean planando(int id) {
+        Asa a = ASAS.get(id);
+        return a != null && a.abertura > 0.05f;
+    }
+
     /** Depois da animação do modelo (mixin PlayerModelMixin): braços abertos segurando a asa, pernas juntas. */
     public static void posePlanar(PlayerModel m, AvatarRenderState s) {
         Asa a = ASAS.get(s.id);

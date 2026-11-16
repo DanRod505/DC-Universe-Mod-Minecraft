@@ -36,7 +36,8 @@ public final class Alvos {
         if (alvo instanceof EndCrystal cristal) return cristal.isAlive();
         if (alvo instanceof EnderDragonPart parte) alvo = parte.parentMob;
         if (alvo == atacante || !(alvo instanceof LivingEntity vivo) || !vivo.isAlive()) return false;
-        if (alvo instanceof Player outro) return atacante.canHarmPlayer(outro);
+        // Espectador (o câmera do Modo Diretor, quem assiste) nunca é atingido.
+        if (alvo instanceof Player outro) return !outro.isSpectator() && atacante.canHarmPlayer(outro);
         return !alvo.isAlliedTo(atacante);
     }
 

@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 13;
+    private static final int VERSAO = 17;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -32,9 +32,14 @@ public final class Rede {
      * (cargas = -1 sem munição), o máximo e quantos ticks faltam para a próxima de um total de cargaTotal.
      */
     public record HabInfo(String id, boolean hold, boolean suprema, float custo, int restante, int recargaTotal,
-                          int cargas, int cargasMax, int cargaFalta, int cargaTotal) {
+                          int cargas, int cargasMax, int cargaFalta, int cargaTotal, int conjunto) {
         public HabInfo(String id, boolean hold, boolean suprema, float custo, int restante, int recargaTotal) {
-            this(id, hold, suprema, custo, restante, recargaTotal, -1, 0, 0, 0);
+            this(id, hold, suprema, custo, restante, recargaTotal, -1, 0, 0, 0, 0);
+        }
+
+        /** Está nas teclas e no HUD agora (combate/Combo.conjunto: as de combate no modo combate, as de mundo fora). */
+        public boolean noModo(boolean combate) {
+            return com.danrod.dcuniverse.combate.Combo.disponivel(conjunto, combate);
         }
     }
 
@@ -72,6 +77,7 @@ public final class Rede {
                 b.writeVarInt(h.cargasMax);
                 b.writeVarInt(h.cargaFalta);
                 b.writeVarInt(h.cargaTotal);
+                b.writeByte(h.conjunto);
             }
             b.writeFloat(m.planar);
             b.writeBoolean(m.amortecendo);
@@ -94,7 +100,7 @@ public final class Rede {
             List<HabInfo> habs = new ArrayList<>(n);
             for (int i = 0; i < n; i++) {
                 habs.add(new HabInfo(b.readUtf(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readVarInt(), b.readVarInt(),
-                    b.readVarInt() - 1, b.readVarInt(), b.readVarInt(), b.readVarInt()));
+                    b.readVarInt() - 1, b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readByte()));
             }
             return new Sync(p, e, max, esg, sel, can, List.copyOf(habs), b.readFloat(), b.readBoolean(),
                 b.readFloat(), b.readBoolean(), b.readBoolean(), b.readFloat(), b.readFloat(), b.readBoolean(), b.readBoolean());
@@ -160,7 +166,39 @@ public final class Rede {
     public record Selecionar(int indice) {}
 
     /** Tecla de uso apertada (true) ou solta (false). */
-    public record Usar(boolean pressionado) {}
+    /** Tecla de habilidade apertada ou solta: indice na lista de habilidades do Sync (-1 = a escolhida no radial). */
+    public record Usar(int indice, boolean pressionado) {}
+
+    /** Golpe do combo corpo a corpo (combate/Combo): passo 0 começa o combo. */
+    public record Golpe(int passo) {}
+
+    /** Liga ou desliga o modo combate (combate/Combo.modo). */
+    public record ModoCombate(boolean ligar) {}
+
+    /** Alguém entrou (postura = animação da guarda) ou saiu ("") do modo combate. */
+    public record ModoVisto(int entidade, String postura) {}
+
+    /** Golpe carregado do modo combate: começou a carregar (true) ou soltou (false). */
+    public record Carregar(boolean comecar) {}
+
+    /** Defesa do modo combate (combate/Defesa): levantou (true) ou baixou (false) a guarda. */
+    public record Defender(boolean ligar) {}
+
+    /** Tarefa do Guia que só o cliente vê acontecer (a trava de mira). O servidor aceita só as de TAREFAS_DO_CLIENTE. */
+    public record Tarefa(String tarefa) {}
+
+    private static final java.util.Set<String> TAREFAS_DO_CLIENTE = java.util.Set.of("trava");
+
+    /** Alguém começou um golpe: a animação para quem vê. */
+    /** Animação que a entidade começou. proprio: o próprio jogador também toca (habilidades; o combo ele já previu). */
+    public record GolpeVisto(int entidade, String anim, boolean proprio) {
+        public GolpeVisto(int entidade, String anim) {
+            this(entidade, anim, false);
+        }
+    }
+
+    /** Um golpe acertou: hit-stop, tremor, partículas e som no ponto (x, y, z), com a direção do golpe (dx, dy, dz). */
+    public record Impacto(int atacante, int alvo, int fx, double x, double y, double z, float dx, float dy, float dz) {}
 
     /** O cliente passou da barreira do som voando (o servidor confere e solta o estrondo). */
     public record Estrondo() {}
@@ -550,8 +588,61 @@ public final class Rede {
             .add();
         CANAL.messageBuilder(Usar.class)
             .direction(PacketFlow.SERVERBOUND)
-            .encoder((m, b) -> b.writeBoolean(m.pressionado())).decoder(b -> new Usar(b.readBoolean()))
-            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Habilidades.usar(p, m.pressionado())))
+            .encoder((m, b) -> b.writeVarInt(m.indice() + 1).writeBoolean(m.pressionado())).decoder(b -> new Usar(b.readVarInt() - 1, b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> Habilidades.usar(p, m.indice(), m.pressionado())))
+            .add();
+        CANAL.messageBuilder(Golpe.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.passo())).decoder(b -> new Golpe(b.readVarInt()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.combate.Combo.golpe(p, m.passo())))
+            .add();
+        CANAL.messageBuilder(ModoCombate.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeBoolean(m.ligar())).decoder(b -> new ModoCombate(b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.combate.Combo.modo(p, m.ligar())))
+            .add();
+        CANAL.messageBuilder(ModoVisto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeUtf(m.postura()))
+            .decoder(b -> new ModoVisto(b.readVarInt(), b.readUtf()))
+            .consumerMainThread((m, ctx) -> {
+                if (m.postura().isEmpty()) EstadoCliente.POSTURAS.remove(m.entidade());
+                else EstadoCliente.POSTURAS.put(m.entidade(), m.postura());
+            })
+            .add();
+        CANAL.messageBuilder(Carregar.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeBoolean(m.comecar())).decoder(b -> new Carregar(b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.combate.Combo.carregar(p, m.comecar())))
+            .add();
+        CANAL.messageBuilder(Defender.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeBoolean(m.ligar())).decoder(b -> new Defender(b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.combate.Defesa.defender(p, m.ligar())))
+            .add();
+        CANAL.messageBuilder(Tarefa.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeUtf(m.tarefa(), 32)).decoder(b -> new Tarefa(b.readUtf(32)))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> {
+                if (TAREFAS_DO_CLIENTE.contains(m.tarefa()) && com.danrod.dcuniverse.combate.Combo.emModo(p)) com.danrod.dcuniverse.guia.Guia.concluir(p, m.tarefa());
+            }))
+            .add();
+        CANAL.messageBuilder(GolpeVisto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> b.writeVarInt(m.entidade()).writeUtf(m.anim()).writeBoolean(m.proprio()))
+            .decoder(b -> new GolpeVisto(b.readVarInt(), b.readUtf(), b.readBoolean()))
+            .consumerMainThread((m, ctx) -> EstadoCliente.GOLPES.add(m))
+            .add();
+        CANAL.messageBuilder(Impacto.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder((m, b) -> {
+                b.writeVarInt(m.atacante()).writeVarInt(m.alvo()).writeVarInt(m.fx());
+                b.writeDouble(m.x()).writeDouble(m.y()).writeDouble(m.z());
+                b.writeFloat(m.dx()).writeFloat(m.dy()).writeFloat(m.dz());
+            })
+            .decoder(b -> new Impacto(b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readDouble(), b.readDouble(), b.readDouble(),
+                b.readFloat(), b.readFloat(), b.readFloat()))
+            .consumerMainThread((m, ctx) -> EstadoCliente.IMPACTOS.add(m))
             .add();
         CANAL.messageBuilder(Estrondo.class)
             .direction(PacketFlow.SERVERBOUND)
@@ -817,7 +908,7 @@ public final class Rede {
             habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD, h.suprema(), player.isCreative() ? 0 : h.custo(), restante,
                 Math.round(h.recargaSeg() * 20), max == 0 ? -1 : player.isCreative() ? max : com.danrod.dcuniverse.ability.Cargas.atuais(player, h), max,
                 max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.faltam(player, h),
-                max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.ticksPorCarga(player, p, h)));
+                max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.ticksPorCarga(player, p, h), com.danrod.dcuniverse.combate.Combo.conjunto(h)));
         }
         int selecionada = e.selecionada();
         if (DemoHud.ativa(player)) {

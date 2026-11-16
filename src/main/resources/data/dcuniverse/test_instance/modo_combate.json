@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "dcuniverse:modo_combate",
+  "environment": "minecraft:default",
+  "structure": "minecraft:empty",
+  "max_ticks": 70
+}

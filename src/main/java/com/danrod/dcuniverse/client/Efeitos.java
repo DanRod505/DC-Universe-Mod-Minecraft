@@ -206,7 +206,7 @@ public final class Efeitos {
         return ent != null ? ent.getLocation() : fim;
     }
 
-    static int misturar(int a, int b, float t) {
+    public static int misturar(int a, int b, float t) {
         int r = (int) (((a >> 16) & 255) * (1 - t) + ((b >> 16) & 255) * t);
         int g = (int) (((a >> 8) & 255) * (1 - t) + ((b >> 8) & 255) * t);
         int bl = (int) ((a & 255) * (1 - t) + (b & 255) * t);

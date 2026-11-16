@@ -50,6 +50,7 @@ public final class DCUniverse {
         com.danrod.dcuniverse.world.mundo.MundoDC.FONTES.register(bus);
         Testes.FUNCOES.register(bus);
         container.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
+        container.registerConfig(ModConfig.Type.CLIENT, com.danrod.dcuniverse.core.ConfigCliente.SPEC);
         Rede.registrar();
         bus.addListener(RegisterPayloadHandlersEvent.class, Rede.CANAL::registrar);
         Eventos.registrar();

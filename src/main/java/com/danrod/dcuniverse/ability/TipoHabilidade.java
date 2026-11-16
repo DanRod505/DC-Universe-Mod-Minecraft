@@ -18,6 +18,12 @@ public interface TipoHabilidade {
         return false;
     }
 
+    /**
+     * Começo do preparo coreografado (ability/Coreografia, "windup" no JSON): o efeito sai daqui a segundos. Para a
+     * habilidade guardar o alvo do aperto ou mexer o jogador durante a cena (o salto da suprema).
+     */
+    default void preparar(ServerPlayer player, Personagem p, Personagem.Habilidade h, float segundos) {}
+
     /** Modo HOLD: chamado a cada tick enquanto a tecla está segurada e há energia. */
     default void canalizar(ServerPlayer player, Personagem p, Personagem.Habilidade h, int tick) {}
 }

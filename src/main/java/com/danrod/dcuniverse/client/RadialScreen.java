@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Menu radial: abre enquanto R está segurada, com as habilidades em volta do centro. A habilidade fica em
- * foco pela direção do mouse; soltar R (ou clicar) escolhe. O centro mostra nome, custo, recarga e se dá
+ * Menu radial: abre enquanto a tecla dele (Y) está segurada, com as habilidades em volta do centro. A habilidade fica em
+ * foco pela direção do mouse; soltar a tecla (ou clicar) usa a habilidade na hora. O centro mostra nome, custo, recarga e se dá
  * para usar agora. A arte vem de textures/gui/radial.png (tools/arte/hud.py).
  */
 public final class RadialScreen extends Screen {
@@ -72,21 +72,38 @@ public final class RadialScreen extends Screen {
 
     private void escolherEFechar() {
         int i = hover();
-        if (i >= 0 && i != EstadoCliente.atual.selecionada()) {
+        if (i >= 0) {
+            // Soltar sobre uma habilidade usa ela na hora (as canalizadas ficam nos atalhos, que dá para segurar).
             Rede.CANAL.send(new Rede.Selecionar(i), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+            if (!EstadoCliente.habilidades().get(i).hold()) {
+                Rede.CANAL.send(new Rede.Usar(i, true), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+                Rede.CANAL.send(new Rede.Usar(i, false), com.danrod.dcuniverse.core.Canal.SERVIDOR);
+            }
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.4f, 0.5f));
         }
         onClose();
     }
 
+    /** As habilidades do modo atual (posições na lista do Sync): o radial mostra só o conjunto em uso. */
+    private static List<Integer> visiveis() {
+        List<Rede.HabInfo> habs = EstadoCliente.habilidades();
+        boolean combate = Atalhos.combate();
+        List<Integer> out = new java.util.ArrayList<>();
+        for (int i = 0; i < habs.size(); i++) {
+            if (habs.get(i).noModo(combate)) out.add(i);
+        }
+        return out;
+    }
+
     private int hover() {
-        int n = EstadoCliente.habilidades().size();
+        List<Integer> vis = visiveis();
+        int n = vis.size();
         double dx = mouseX - width / 2.0, dy = mouseY - height / 2.0;
         if (n == 0 || dx * dx + dy * dy < ZONA_MORTA * ZONA_MORTA) return -1;
         double ang = Math.atan2(dx, -dy);
         if (ang < 0) ang += Math.PI * 2;
         double fatia = Math.PI * 2 / n;
-        return (int) Math.floor((ang + fatia / 2) / fatia) % n;
+        return vis.get((int) Math.floor((ang + fatia / 2) / fatia) % n);
     }
 
     @Override
@@ -96,7 +113,8 @@ public final class RadialScreen extends Screen {
         this.mouseY = mouseY;
         Rede.Sync s = EstadoCliente.atual;
         List<Rede.HabInfo> habs = s.habilidades();
-        int n = habs.size();
+        List<Integer> vis = visiveis();
+        int n = vis.size();
         int cx = width / 2, cy = height / 2;
         int novo = hover();
         if (novo != foco && novo >= 0) {
@@ -116,9 +134,10 @@ public final class RadialScreen extends Screen {
         g.blit(RenderPipelines.GUI_TEXTURED, TEX, cx - 48, cy - 48, 0, 64, 96, 96, TW, TH);
 
         float tempo = minecraft.player == null ? 0 : minecraft.player.tickCount + a;
-        for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            int i = vis.get(j);
             Rede.HabInfo h = habs.get(i);
-            double ang = Math.PI * 2 * i / n;
+            double ang = Math.PI * 2 * j / n;
             int x = cx + (int) Math.round(Math.sin(ang) * RAIO);
             int y = cy - (int) Math.round(Math.cos(ang) * RAIO);
             no(g, s, h, x, y, i == foco, i == s.selecionada(), tempo);

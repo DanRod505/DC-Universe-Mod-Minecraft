@@ -39,6 +39,12 @@ public abstract class CameraMixin {
     @Shadow
     private boolean detached;
 
+    @Shadow
+    private float eyeHeight;
+
+    @Shadow
+    private float eyeHeightOld;
+
     @Inject(method = "alignWithEntity", at = @At("TAIL"))
     private void dcuniverse$cabine(float partialTicks, CallbackInfo ci) {
         if (com.danrod.dcuniverse.client.Diretor.ativo()) {
@@ -47,7 +53,17 @@ public abstract class CameraMixin {
             com.danrod.dcuniverse.client.Diretor.posicionar((Camera) (Object) this, this::setPosition);
             return;
         }
-        if (isDetached()) return;
+        if (isDetached()) {
+            // Terceira pessoa de costas: câmera de aventura sobre o ombro (client/CameraAventura).
+            Entity e = entity();
+            if (e != null) {
+                Vec3 olho = new Vec3(net.minecraft.util.Mth.lerp(partialTicks, e.xo, e.getX()),
+                    net.minecraft.util.Mth.lerp(partialTicks, e.yo, e.getY()) + net.minecraft.util.Mth.lerp(partialTicks, eyeHeightOld, eyeHeight),
+                    net.minecraft.util.Mth.lerp(partialTicks, e.zo, e.getZ()));
+                com.danrod.dcuniverse.client.CameraAventura.posicionar((Camera) (Object) this, olho, partialTicks, this::setPosition);
+            }
+            return;
+        }
         Vec3 d = Piloto.olhoNaCabine(entity(), partialTicks);
         if (d == null) d = com.danrod.dcuniverse.client.Motorista.olhoNoBanco(entity(), partialTicks);
         if (d != null) setPosition(position().add(d));
