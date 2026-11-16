@@ -162,7 +162,7 @@ public final class SoproVisual {
             float raio = (float) (Math.tan(Math.toRadians(a.angulo())) * comp) * 0.85f;
             float alfa = (primeira ? 0.22f : 0.42f) * Math.min(1.4f, 0.8f + 0.2f * k);
             float fase = agora * 0.25f;
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
                 for (int p = 0; p < 3; p++) {
                     double ang = p * Math.PI / 3 + fase * 0.3;
                     cone(pose.pose(), buf, boca, dir, comp, raio, ang, AZUL, alfa);

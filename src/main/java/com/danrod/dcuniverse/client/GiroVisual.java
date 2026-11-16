@@ -351,11 +351,11 @@ public final class GiroVisual {
             if (calor > 0) {
                 float rIn = raioDentro(g, dono), rOut = raioFora(g, dono);
                 float pulso = 0.85f + 0.15f * Mth.sin(t * 0.7f);
-                col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> cratera(pose.pose(), buf, centro.subtract(cam), rIn, rOut, cor, calor * pulso));
+                Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> cratera(pose.pose(), buf, centro.subtract(cam), rIn, rOut, cor, calor * pulso));
             }
             if (t >= 0 && t < m.ticks()) {
                 boolean euPrimeira = dono == mc.player && mc.options.getCameraType().isFirstPerson();
-                col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+                Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
                     aneis(pose.pose(), buf, g, olhos.subtract(cam), centro.y - cam.y, t, cor, k);
                     risco(pose.pose(), buf, g, olhos.subtract(cam), centro.y - cam.y + 0.04, t, cor);
                 });
@@ -368,14 +368,14 @@ public final class GiroVisual {
                 for (int s = -1; s <= 1; s += 2) {
                     Vec3 de = olhos.subtract(cam).add(dir.scale(euPrimeira ? 0.45 : 0.27)).add(lado.scale(0.12 * s))
                         .add(0, euPrimeira ? -0.14 : 0, 0);
-                    col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> Efeitos.camadas(pose.pose(), buf, de, fim, 1.8f, cor, k));
+                    Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> Efeitos.camadas(pose.pose(), buf, de, fim, 1.8f, cor, k));
                 }
             }
             // Onda de choque da batida: um anel no chão abrindo rápido.
             float dt = t - m.ticks() - GiroCalor.QUEDA;
             if (dt >= 0 && dt < 14) {
                 float r = m.alcance() * 0.9f * Mth.sqrt(dt / 14f), a = 1 - dt / 14f;
-                col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> cratera(pose.pose(), buf, centro.subtract(cam), Math.max(0, r - 1.6f), r,
+                Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> cratera(pose.pose(), buf, centro.subtract(cam), Math.max(0, r - 1.6f), r,
                     Efeitos.misturar(cor, 0xFFFFFF, 0.5f), a * 1.4f));
             }
         }

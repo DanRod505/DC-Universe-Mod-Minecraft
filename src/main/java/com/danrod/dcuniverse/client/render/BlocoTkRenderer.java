@@ -75,7 +75,7 @@ public final class BlocoTkRenderer extends EntityRenderer<BlocoTelecinetico, Blo
         ps.popPose();
         float pulso = 0.5f + 0.5f * Mth.sin(s.ageInTicks * 0.25f);
         float alfa = s.fase == BlocoTelecinetico.VOANDO ? 0.16f : 0.1f + 0.06f * pulso;
-        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> aura(pose.pose(), buf, 0.56f, alfa));
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> aura(pose.pose(), buf, 0.56f, alfa));
         ps.popPose();
         super.submit(s, ps, col, cam);
     }

@@ -150,7 +150,7 @@ public final class Efeitos {
             float k = a.escala();
             for (int s = -1; s <= 1; s += 2) {
                 Vec3 de = base.add(lado.scale(0.125 * s));
-                e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 1.7f, cor, k));
+                Luz.depoisDaAgua(e.getPoseStack(), e.getSubmitNodeCollector(), Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 1.7f, cor, k));
             }
         });
     }
@@ -188,7 +188,7 @@ public final class Efeitos {
         float tremor = 0.9f + 0.1f * Mth.sin((mc.level.getGameTime() + pt) * 1.7f);
         for (int s = -1; s <= 1; s += 2) {
             Vec3 de = olhos.subtract(cam).add(dir.scale(0.4)).add(lado.scale(0.09 * s)).add(baixo.scale(0.13));
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 0.8f * tremor, cor, k));
+            Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 0.8f * tremor, cor, k));
         }
     }
 

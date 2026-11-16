@@ -212,7 +212,7 @@ public final class VisaoVisual {
                 }
             });
             // ...e as brasas acesas por cima (luz aditiva, tremulando, do branco quente ao vermelho apagando).
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
                 for (Marca m : copia) {
                     float calor = calor(m, agora, pt);
                     if (calor > 0.02f) brasas(pose.pose(), buf, m, cam, calor, agora);
@@ -233,7 +233,7 @@ public final class VisaoVisual {
             Vec3 dir = pl.getViewVector(pt);
             Vec3 fim = mirar(level, pl, olhos, dir, a.alcance()).getLocation();
             float dist = (float) fim.distanceTo(olhos);
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
                 if (!primeira) {
                     Vec3 o = olhos.add(dir.scale(0.3)).subtract(cam);
                     clarao(pose.pose(), buf, o, rot, 0.55f * k * pulso, cor, 0.75f * inicio);

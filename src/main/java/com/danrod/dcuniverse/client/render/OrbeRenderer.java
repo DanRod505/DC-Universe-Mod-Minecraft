@@ -33,7 +33,7 @@ public final class OrbeRenderer extends EntityRenderer<OrbeSolar, EntityRenderSt
         ps.pushPose();
         ps.translate(0, 0.3, 0);
         ps.mulPose(cam.orientation);
-        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             disco(m, buf, 1.05f * pulso, 1f, 0.72f, 0.2f, 0.18f);
             disco(m, buf, 0.62f * pulso, 1f, 0.84f, 0.4f, 0.42f);

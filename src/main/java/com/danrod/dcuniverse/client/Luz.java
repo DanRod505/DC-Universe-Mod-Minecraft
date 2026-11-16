@@ -72,4 +72,20 @@ public final class Luz {
     public static RenderType tipo() {
         return TIPO;
     }
+
+    /**
+     * Envia o brilho para a fase desenhada depois do terreno translúcido (a mesma das partículas translúcidas).
+     * Na fase normal de geometria translúcida a água vem depois e, como o brilho não grava profundidade,
+     * ela é pintada por cima e o feixe parece transparente sobre a água.
+     */
+    public static void depoisDaAgua(com.mojang.blaze3d.vertex.PoseStack ps, net.minecraft.client.renderer.SubmitNodeCollector col,
+                                    RenderType tipo, net.minecraft.client.renderer.SubmitNodeCollector.CustomGeometryRenderer r) {
+        net.minecraft.client.renderer.SubmitNodeCollection c = col instanceof net.minecraft.client.renderer.SubmitNodeStorage s ? s.order(0)
+            : col instanceof net.minecraft.client.renderer.SubmitNodeCollection n ? n : null;
+        if (c == null) {
+            col.submitCustomGeometry(ps, tipo, r);
+            return;
+        }
+        c.afterTerrain.submit(new net.minecraft.client.renderer.feature.CustomFeatureRenderer.Submit(ps.last().copy(), tipo, r));
+    }
 }

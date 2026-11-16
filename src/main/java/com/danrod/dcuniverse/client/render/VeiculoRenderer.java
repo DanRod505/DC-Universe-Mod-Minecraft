@@ -111,7 +111,7 @@ public final class VeiculoRenderer extends EntityRenderer<VeiculoBat, VeiculoRen
         float escuro = 1 - Math.max(ceu, bloco) / 15f;
         if (s.farol && escuro > 0.25f) {
             float alfa = 0.16f * (escuro - 0.25f) / 0.75f;
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+            Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
                 Matrix4f m = pose.pose();
                 for (Vector3f f : k.fachos) facho(m, buf, f, s.modelo.equals("batmoto") ? 7 : 9, alfa);
             });
