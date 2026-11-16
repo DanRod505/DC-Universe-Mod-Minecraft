@@ -9,6 +9,7 @@ import com.danrod.dcuniverse.character.Params;
 import com.danrod.dcuniverse.character.Personagem;
 import com.danrod.dcuniverse.core.Canal;
 import com.danrod.dcuniverse.core.Rede;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -18,6 +19,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -170,6 +174,107 @@ public final class GiroCalor implements TipoHabilidade {
         }
         Alvos.cristais(pl, area, level.damageSources().playerAttack(pl));
         level.playSound(null, pl.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.8f, 0.7f);
+        if (crateraLigada(level) && pl.mayBuild()) {
+            cratera(level, pl, pl.blockPosition(), a.prm.f("crater_radius", 4.5f), a.prm.f("crater_depth", 2.5f));
+        }
+    }
+
+    /** A cratera está ligada: opção crateraGiro, e em servidor dedicado também crateraGiroServidor. */
+    public static boolean crateraLigada(ServerLevel level) {
+        boolean dedicado = level.getServer() != null && level.getServer().isDedicatedServer();
+        return com.danrod.dcuniverse.core.Config.CRATERA_GIRO.get() && (!dedicado || com.danrod.dcuniverse.core.Config.CRATERA_GIRO_SERVIDOR.get());
+    }
+
+    /**
+     * Cratera rasa onde ele bateu: uma tigela de até "crater_depth" blocos no meio, sumindo até a borda. Só tira o que é
+     * chão natural (terra, grama, areia, cascalho, argila, neve e pedra comum, mais as plantas em cima); minério, bloco
+     * com conteúdo (baú, fornalha...) e qualquer outro bloco ficam onde estão. Perto de qualquer estrutura (Smallville,
+     * cidades, vilas) não abre nada. O fundo fica em brasa (magma no meio, basalto e terra queimada em volta).
+     */
+    public static int cratera(ServerLevel level, ServerPlayer pl, BlockPos centro, float raio, float fundo) {
+        int r = (int) Math.ceil(raio);
+        // Achar o chão embaixo de quem bateu.
+        BlockPos.MutableBlockPos m = centro.mutable();
+        for (int i = 0; i < 6 && level.getBlockState(m).isAir(); i++) m.move(0, -1, 0);
+        BlockPos chao = m.immutable();
+        if (perto(level, chao, r + 4)) return 0;
+        int tirados = 0;
+        net.minecraft.util.RandomSource rnd = level.getRandom();
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                double d = Math.sqrt(dx * dx + dz * dz) / raio;
+                if (d > 1.25) continue;
+                // Topo do terreno nessa coluna (até 3 acima e 4 abaixo do chão do centro).
+                BlockPos topo = null;
+                for (int dy = 3; dy >= -4; dy--) {
+                    BlockPos p = chao.offset(dx, dy, dz);
+                    if (!level.getBlockState(p).isAir() && !level.getBlockState(p).canBeReplaced()) {
+                        topo = p;
+                        break;
+                    }
+                }
+                if (topo == null || !level.mayInteract(pl, topo)) continue;
+                // Plantas por cima saem junto.
+                BlockPos acima = topo.above();
+                if (level.getBlockState(acima).canBeReplaced() && !level.getBlockState(acima).isAir() && level.getBlockEntity(acima) == null) {
+                    level.setBlock(acima, Blocks.AIR.defaultBlockState(), 3);
+                }
+                int prof = d >= 1 ? 0 : (int) Math.round(fundo * (1 - d * d) + (rnd.nextFloat() - 0.5f) * 0.6f);
+                BlockPos p = topo;
+                boolean parou = false;
+                for (int i = 0; i < prof; i++, p = p.below()) {
+                    if (!natural(level, p)) {
+                        parou = true;
+                        break;
+                    }
+                    level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
+                    tirados++;
+                }
+                // O fundo (ou a borda) fica queimado, se for chão natural.
+                if (!parou && natural(level, p)) {
+                    BlockState queimado = d < 0.45 ? (rnd.nextFloat() < 0.7f ? Blocks.MAGMA_BLOCK.defaultBlockState() : Blocks.BLACKSTONE.defaultBlockState())
+                        : d < 0.95 ? (rnd.nextFloat() < 0.5f ? Blocks.BASALT.defaultBlockState() : Blocks.COARSE_DIRT.defaultBlockState())
+                        : (rnd.nextFloat() < 0.55f ? Blocks.COARSE_DIRT.defaultBlockState() : null);
+                    if (queimado != null) level.setBlock(p, queimado, 3);
+                    if (d < 0.95 && rnd.nextFloat() < 0.18f && level.getBlockState(p.above()).isAir()) {
+                        level.setBlock(p.above(), net.minecraft.world.level.block.BaseFireBlock.getState(level, p.above()), 3);
+                    }
+                }
+            }
+        }
+        return tirados;
+    }
+
+    /** Chão natural que a cratera pode tirar. */
+    static boolean natural(ServerLevel level, BlockPos p) {
+        BlockState b = level.getBlockState(p);
+        if (b.isAir() || level.getBlockEntity(p) != null) return false;
+        return b.is(net.minecraft.tags.BlockTags.DIRT) || b.is(net.minecraft.tags.BlockTags.GRASS_BLOCKS) || b.is(net.minecraft.tags.BlockTags.SAND)
+            || b.is(Blocks.MYCELIUM) || b.is(Blocks.PODZOL) || b.is(Blocks.DIRT_PATH) || b.is(Blocks.GRAVEL) || b.is(Blocks.CLAY)
+            || b.is(Blocks.SNOW_BLOCK) || b.is(Blocks.SNOW) || b.is(Blocks.STONE) || b.is(Blocks.GRANITE) || b.is(Blocks.DIORITE)
+            || b.is(Blocks.ANDESITE) || b.is(Blocks.TUFF) || b.is(Blocks.DEEPSLATE) || b.is(Blocks.SANDSTONE) || b.is(Blocks.RED_SANDSTONE)
+            || b.is(Blocks.NETHERRACK) || b.is(Blocks.END_STONE);
+    }
+
+    /** Há alguma estrutura (do jogo ou do mod) a menos de `margem` blocos? Aí a cratera não abre. */
+    static boolean perto(ServerLevel level, BlockPos p, int margem) {
+        var sm = level.structureManager();
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                BlockPos q = p.offset(dx * 16, 0, dz * 16);
+                for (var en : sm.getAllStructuresAt(q).entrySet()) {
+                    StructureStart st = sm.getStructureAt(q, en.getKey());
+                    if (st.isValid() && st.getBoundingBox().inflatedBy(margem).isInside(p)) return true;
+                    for (long ref : en.getValue()) {
+                        net.minecraft.world.level.ChunkPos cp = net.minecraft.world.level.ChunkPos.unpack(ref);
+                        StructureStart s2 = sm.getStartForStructure(net.minecraft.core.SectionPos.of(cp, 0), en.getKey(),
+                            level.getChunk(cp.x(), cp.z()));
+                        if (s2 != null && s2.isValid() && s2.getBoundingBox().inflatedBy(margem).isInside(p)) return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private static void atingir(ServerLevel level, ServerPlayer pl, Params prm, LivingEntity e, float dano, float empurrao, float lancar) {

@@ -201,6 +201,18 @@ public final class Testes {
             z.setHealth(1000);
             cerco.add(z);
         }
+        // Cratera da batida: tira só chão natural; baú, tijolo e minério ficam.
+        for (int x = 0; x <= 8; x++) for (int z = 0; z <= 8; z++) for (int y = 0; y <= 1; y++)
+            h.setBlock(new net.minecraft.core.BlockPos(x, y, z), y == 1 ? net.minecraft.world.level.block.Blocks.GRASS_BLOCK : net.minecraft.world.level.block.Blocks.DIRT);
+        h.setBlock(new net.minecraft.core.BlockPos(4, 0, 4), net.minecraft.world.level.block.Blocks.IRON_ORE);
+        h.setBlock(new net.minecraft.core.BlockPos(5, 1, 4), net.minecraft.world.level.block.Blocks.STONE_BRICKS);
+        h.setBlock(new net.minecraft.core.BlockPos(3, 1, 4), net.minecraft.world.level.block.Blocks.CHEST);
+        int tirados = com.danrod.dcuniverse.ability.active.GiroCalor.cratera(h.getLevel(), c, h.absolutePos(new net.minecraft.core.BlockPos(4, 2, 4)), 3.5f, 2.5f);
+        h.assertTrue(tirados > 10, "a batida abre uma cratera (" + tirados + " blocos)");
+        h.assertFalse(h.getBlockState(new net.minecraft.core.BlockPos(4, 1, 4)).is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK), "o meio da cratera afunda (grama também)");
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.IRON_ORE, new net.minecraft.core.BlockPos(4, 0, 4));
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.STONE_BRICKS, new net.minecraft.core.BlockPos(5, 1, 4));
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.CHEST, new net.minecraft.core.BlockPos(3, 1, 4));
         Personagem.Habilidade giro0 = Arvore.habilidade(c, sup, "giro_de_calor");
         h.assertValueEqual(giro0.params().f("range", 0f), 12f, "giro de calor: 12 blocos de base");
         // No teste o alcance cai para 4 blocos, para não acertar os testes vizinhos.

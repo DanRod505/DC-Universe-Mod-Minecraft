@@ -26,6 +26,15 @@ public final class Config {
         .comment("Itens de transformação guardados nos locais (ex.: o do Superman na nave de Kal-El), um por jogador.")
         .define("itensNosLocais", true);
 
+    public static final ModConfigSpec.BooleanValue CRATERA_GIRO = B
+        .comment("Giro de Calor abre uma cratera rasa de verdade na batida final (só em terra, grama, areia, pedra e afins;",
+            "nunca em minérios, baús, construções nem perto de estruturas como Smallville e as cidades).")
+        .define("crateraGiro", true);
+
+    public static final ModConfigSpec.BooleanValue CRATERA_GIRO_SERVIDOR = B
+        .comment("Em servidor dedicado a cratera do Giro de Calor fica desligada, a não ser que esta opção seja true.")
+        .define("crateraGiroServidor", false);
+
     public static final ModConfigSpec SPEC = B.build();
 
     private Config() {}

@@ -96,6 +96,7 @@
       "charge": 1.0, "duration": 2.5, "turns": 6, "height": 3, "range": 12, "pitch_min": 14, "pitch_max": 42,
       "damage_mult": 0.35, "hit_interval": 0.5, "knockback": 0.7, "launch": 0.35,
       "blast_damage_mult": 1.2, "blast_knockback": 2.2, "blast_launch": 0.8, "glow": 3, "color": "#FF2A1A",
+      "crater_radius": 4.5, "crater_depth": 2.5,
       "sets_fire": true, "melts": true, "cooks_drops": true, "lights_furnace": true, "anim": "superman.giro" },
     { "id": "super_pulo", "type": "leap", "cost": 10, "cooldown": 1.5, "height": 10, "unlocks_passive": "super_jump" }
   ]

@@ -103,6 +103,8 @@ Visão de Calor, Super Pulo e Sopro Congelante (iniciais), Investida de Aço, Pa
 2. **Giro (2,5 s):** parado no ar, ele gira a visão de calor em alta velocidade, acelerando até 6 voltas. O raio sobe e desce enquanto gira, e o rastro dele forma os anéis em espiral do conceito. Embaixo fica uma cratera em brasa, com fumaça, poeira e pedaços do chão voando. Quem o raio cruza queima, é empurrado e fica com o contorno vermelho aceso.
 3. **Queda:** ele cai e bate no chão de joelho, e a onda de choque arremessa quem sobrou.
 
+A batida abre uma **cratera de verdade** (pedido do Dalton, habilidades.7): rasa (2 a 3 blocos), com fundo de magma, basalto e terra queimada. Ela só cava chão natural (terra, grama, areia, cascalho, pedra comum) e nunca mexe em minérios, baús, blocos colocados pelo jogador nem em estruturas e locais da campanha (Smallville e outros): perto de uma estrutura, não abre cratera. Também respeita áreas protegidas (spawn, claims). Pode ser desligada na configuração (`crateraGiro`) e vem desligada em servidor dedicado (`crateraGiroServidor`).
+
 É das mais fortes: 3 pontos, 60 de energia, recarga de 12 s, alcance 12 → 16 → 20 blocos.
 
 ### Habilidades que vêm liberadas
