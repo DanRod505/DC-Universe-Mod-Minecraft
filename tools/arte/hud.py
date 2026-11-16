@@ -689,67 +689,6 @@ def icone_palmas_sonicas():
     return t
 
 
-def icone_calor_focado():
-    """Visão de calor de precisão (mundo): um feixe fino e firme acendendo a boca de uma fornalha."""
-    t = Tela(32, 32)
-    img = t.img
-    d = ImageDraw.Draw(img)
-    # Fornalha embaixo à direita: pedra com a boca em brasa.
-    d.rectangle([15, 15, 30, 30], fill=hexa("#5E5E62"))
-    d.rectangle([15, 15, 30, 16], fill=hexa("#8A8A90"))
-    d.rectangle([15, 15, 16, 30], fill=hexa("#7A7A80"))
-    d.rectangle([29, 15, 30, 30], fill=hexa("#3E3E44"))
-    d.rectangle([15, 29, 30, 30], fill=hexa("#34343A"))
-    for x, y in ((19, 18), (25, 19), (22, 27), (27, 25)):
-        d.point((x, y), fill=hexa("#4A4A50"))
-    d.rectangle([18, 21, 27, 27], fill=hexa("#1A0E0A"))
-    d.rectangle([19, 24, 26, 27], fill=hexa("#E8501A"))
-    d.rectangle([20, 23, 25, 26], fill=hexa("#FFB040"))
-    d.line([(21, 22), (22, 24)], fill=hexa("#FFF0A0"))
-    d.line([(24, 22), (24, 24)], fill=hexa("#FFE07A"))
-    # Um olho no alto à esquerda e o feixe fino até a boca da fornalha.
-    d.polygon([(0, 3), (10, 3), (12, 6), (10, 9), (0, 9)], fill=hexa("#2A1418"))
-    ox, oy = 6, 6
-    d.line([(ox, oy), (22, 23)], fill=hexa("#8E1410"), width=3)
-    d.line([(ox, oy), (22, 23)], fill=hexa("#F0301E"), width=1)
-    d.ellipse([ox - 3, oy - 2, ox + 3, oy + 2], fill=hexa("#E8261E"))
-    d.ellipse([ox - 2, oy - 1, ox + 2, oy + 1], fill=hexa("#FF9A3A"))
-    d.point((ox, oy), fill=hexa("#FFF6C8"))
-    brilho(t, 22, 23, 4, hexa("#FFD27A"), 0.8)
-    contornar(t)
-    return t
-
-
-def icone_sopro_gelido():
-    """Sopro gélido (mundo): o ar gelado varre a água e deixa um caminho de gelo."""
-    t = Tela(32, 32)
-    img = t.img
-    d = ImageDraw.Draw(img)
-    # Água embaixo (ondas) virando gelo da esquerda para a direita.
-    d.rectangle([0, 20, 31, 31], fill=hexa("#2456A8"))
-    for y in (23, 27):
-        for x in range(0, 32, 6):
-            d.line([(x, y), (x + 2, y - 1), (x + 4, y)], fill=hexa("#4A86D8"))
-    d.polygon([(6, 20), (31, 20), (31, 31), (12, 31)], fill=hexa("#A8D8F4"))
-    d.line([(6, 20), (31, 20)], fill=hexa("#E8F8FF"))
-    for a, b in (((15, 22), (19, 29)), ((22, 21), (20, 26)), ((26, 23), (30, 28))):
-        d.line([a, b], fill=hexa("#78B8E0"))
-    d.line([(9, 22), (12, 30)], fill=hexa("#E8F8FF"))
-    # O jato de ar descendo do alto à esquerda.
-    bolhas = [(4, 6, 2), (8, 8, 3), (13, 10, 3), (18, 13, 4), (23, 15, 4)]
-    for x, y, r in bolhas:
-        d.ellipse([x - r - 1, y - r - 1, x + r + 1, y + r + 1], fill=hexa("#2F6FB8"))
-    for x, y, r in bolhas:
-        d.ellipse([x - r, y - r, x + r, y + r], fill=hexa("#6CBDF4"))
-    for x, y, r in bolhas:
-        if r >= 3:
-            d.ellipse([x - r + 1, y - r + 1, x + r - 2, y + r - 2], fill=hexa("#B8E8FF"))
-    d.line([(3, 6), (20, 13)], fill=hexa("#FFFFFF"))
-    contornar(t)
-    floco(d, 26, 7, 3, hexa("#FFFFFF"))
-    return t
-
-
 def icone_modo_combate():
     """Modo combate (HUD): punho fechado em guarda com as linhas do golpe."""
     t = Tela(32, 32)
@@ -875,6 +814,44 @@ def icone_super_pulo():
     return t
 
 
+def icone_giro_de_calor():
+    """Giro de calor: visto de cima, o herói no centro e os dois raios varrendo um anel de fogo em volta."""
+    t = Tela(32, 32)
+    img = t.img
+    d = ImageDraw.Draw(img)
+    cx, cy, R = 16, 16, 12.5
+    raios = (-40, 140)
+    # Rastro de cada raio no chão: brasa que esfria atrás dele (meia volta cada um).
+    for base in raios:
+        for i in range(0, 176, 4):
+            k = 1 - i / 176
+            a0, a1 = math.radians(base - i - 5), math.radians(base - i)
+            cor = mistura(hexa("#3A0806"), hexa("#FF7A26"), k ** 1.4)
+            w = 3 if k > 0.35 else 2
+            d.line([(cx + R * math.cos(a0), cy + R * math.sin(a0)), (cx + R * math.cos(a1), cy + R * math.sin(a1))],
+                   fill=cor, width=w)
+    # Os dois raios: halo escuro, corpo vermelho e núcleo claro.
+    for ang in raios:
+        ex, ey = cx + R * math.cos(math.radians(ang)), cy + R * math.sin(math.radians(ang))
+        d.line([(cx, cy), (ex, ey)], fill=hexa("#8E1410"), width=5)
+        d.line([(cx, cy), (ex, ey)], fill=hexa("#F0301E"), width=3)
+        d.line([(cx, cy), (ex, ey)], fill=hexa("#FFD27A"), width=1)
+    # Cabeça vista de cima (cabelo escuro com reflexo) e o brilho dos olhos no centro.
+    d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=hexa("#141624"))
+    d.ellipse([cx - 4, cy - 4, cx + 3, cy + 3], fill=hexa("#262A40"))
+    d.arc([cx - 4, cy - 4, cx + 3, cy + 3], 200, 280, fill=hexa("#4A5478"), width=1)
+    contornar(t)
+    brilho(t, cx, cy, 3, hexa("#FF6A3A"), 0.8)
+    # Impactos onde os raios tocam o chão, por cima do contorno.
+    for ang in raios:
+        ex, ey = round(cx + R * math.cos(math.radians(ang))), round(cy + R * math.sin(math.radians(ang)))
+        brilho(t, ex, ey, 5, hexa("#FFC050"), 1.0)
+        d.point((ex, ey), fill=hexa("#FFFFFF"))
+        for dx, dy in ((2, -1), (-1, 2), (1, 2)):
+            d.point((ex + dx * (1 if ang < 0 else -1), ey + dy * (1 if ang < 0 else -1)), fill=hexa("#FFE07A"))
+    return t
+
+
 ICONES = {
     "visao_de_calor": icone_visao_de_calor,
     "sopro_congelante": icone_sopro_congelante,
@@ -884,8 +861,7 @@ ICONES = {
     "fortaleza_da_solidao": icone_fortaleza_da_solidao,
     "investida_de_aco": icone_investida_de_aco,
     "palmas_sonicas": icone_palmas_sonicas,
-    "calor_focado": icone_calor_focado,
-    "sopro_gelido": icone_sopro_gelido,
+    "giro_de_calor": icone_giro_de_calor,
     "voo": icone_voo,
     "super_pulo": icone_super_pulo,
 }

@@ -42,6 +42,16 @@ public final class EstadoCliente {
     public static final java.util.Queue<Rede.GolpeVisto> GOLPES = new java.util.concurrent.ConcurrentLinkedQueue<>();
     public static final java.util.Queue<Rede.Impacto> IMPACTOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
     public static final java.util.Queue<Rede.ManobraVista> MANOBRAS = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    /** Um raio giratório em andamento e quando chegou (relógio do cliente, em ms). */
+    public record GiroAtivo(Rede.Giro giro, long inicio) {
+        /** Fração já girada (0 a 1; acima de 1 = acabou). */
+        public float progresso(long agora) {
+            return (agora - inicio) / (giro.ticks() * 50f);
+        }
+    }
+
+    /** Raios giratórios em andamento, por entidade. */
+    public static final java.util.Map<Integer, GiroAtivo> GIROS = new java.util.concurrent.ConcurrentHashMap<>();
 
     /** Efeitos pontuais no mundo que o cliente ainda vai começar a desenhar. */
     public static final java.util.Queue<Rede.Efeito> EFEITOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
@@ -190,6 +200,7 @@ public final class EstadoCliente {
         COLEIRAS.clear();
         TRANSFORMOU.clear();
         MANOBRAS.clear();
+        GIROS.clear();
         GOLPES.clear();
         POSTURAS.clear();
         IMPACTOS.clear();

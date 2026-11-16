@@ -30,6 +30,7 @@ Aprovado por Dalton em 16/11/2026 e refeito no mesmo dia no estilo **Justice Lea
 - **O catálogo é aberto.** Uma habilidade nova entra depois sem mexer no que já existe. É assim que as atualizações acrescentam poderes a um herói.
 - O catálogo de cada herói é definido em dados (um arquivo por herói). A habilidade nova entra no arquivo e aparece na árvore, no Guia e na build sem código novo, a não ser que ela tenha uma mecânica nova.
 - Os efeitos no mundo continuam reais, como sempre foram: fogo de verdade, fornalha acesa de verdade, comida cozida de verdade.
+- **Sem duplicatas** (pedido do Dalton em 16/11/2026): uma habilidade que já faz tudo não ganha uma "versão do mundo". No Superman saíram a Visão de Calor Focada (acender fornalha) e o Sopro Gélido (congelar água), porque a Visão de Calor e o Sopro Congelante já fazem isso.
 
 ### Tipos de habilidade
 
@@ -63,7 +64,9 @@ As melhorias são **padrão**, iguais para todos os heróis, e se compram com po
 |---|---|---|
 | Dano (só se ela causa dano) | corações (por segundo nas contínuas) | base → ×1,5 → ×2 |
 | Eficiência (só se ela gasta energia) | energia (por segundo nas contínuas) | base → ×0,8 → ×0,6 |
+| Alcance (quando o arquivo do herói dá os valores) | blocos | ex.: Visão de Calor 24 → 32 → 40 |
 
+- **O dano também aparece no visual:** a cada nível de dano o raio fica mais grosso e mais brilhante, com o núcleo mais branco e mais chamas no ponto de impacto. Vale para todo efeito de raio, de qualquer herói.
 - Exemplo: a Visão de Calor causa 5 ❤/s, depois 7,5 e depois 10, e gasta 12 de energia por segundo, depois 9,5 e depois 7. A tela também mostra os efeitos com números, como a queimadura (0,5 ❤/s por 4 s) e o congelamento do sopro.
 - Os valores de cada habilidade podem ser trocados no arquivo do herói quando o Dalton quiser números próprios.
 - Uma habilidade ainda pode ter **melhorias próprias** quando fizer sentido. Exemplo do Dalton: o Super Pulo sobe 10 blocos, depois 20 e depois 30.
@@ -91,6 +94,10 @@ As melhorias são **padrão**, iguais para todos os heróis, e se compram com po
 - **Os slots são livres.** Qualquer habilidade em qualquer slot, na ordem que você quiser.
 - **Presets de build por herói:** salvar e trocar builds prontas (ex.: uma de combate e uma de exploração).
 - A tecla **K** abre a tela da árvore e da build. O HUD mostra uma dica discreta da tecla, que pulsa quando há pontos para gastar.
+
+### Catálogo atual do Superman
+
+Visão de Calor, Super Pulo e Sopro Congelante (iniciais), Investida de Aço, Palmas Sônicas, Soco Sônico, Visão de Raio X, Pisão Sísmico e **Giro de Calor** (pedido do Dalton em 16/11/2026): o Superman gira no lugar disparando a visão de calor e os raios varrem tudo em volta, duas voltas, ferindo e incendiando todos no alcance, uma vez por volta. É das mais fortes: 3 pontos, 60 de energia, recarga de 12 s, alcance 12 → 16 → 20 blocos.
 
 ### Habilidades que vêm liberadas
 

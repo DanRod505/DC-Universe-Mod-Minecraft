@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 21;
+    private static final int VERSAO = 22;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -114,7 +114,7 @@ public final class Rede {
      * (ability/passive/Planar: 0 fechada, 1 aberta, 2 mergulho, 3 freio).
      */
     public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo, boolean voando,
-                            int rastro, int rastro2, int rastro3, int planar) {
+                            int rastro, int rastro2, int rastro3, int planar, float escala) {
         public static void encode(Aparencia m, FriendlyByteBuf b) {
             b.writeVarInt(m.entidade);
             b.writeUtf(m.personagem);
@@ -128,11 +128,12 @@ public final class Rede {
             b.writeInt(m.rastro2);
             b.writeInt(m.rastro3);
             b.writeVarInt(m.planar);
+            b.writeFloat(m.escala);
         }
 
         public static Aparencia decode(FriendlyByteBuf b) {
             return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat(), b.readBoolean(),
-                b.readInt(), b.readInt(), b.readInt(), b.readVarInt());
+                b.readInt(), b.readInt(), b.readInt(), b.readVarInt(), b.readFloat());
         }
     }
 
@@ -310,6 +311,23 @@ public final class Rede {
 
     /** O cliente abriu, fechou ou mudou a capa do planar (ability/passive/Planar.FECHADA...FREIO). */
     public record Planar(int estado) {}
+
+    /**
+     * Raio de calor giratório (ability/active/GiroCalor): quem vê desenha os dois feixes girando em volta do herói.
+     * ticks de duração, quantas voltas, alcance, cor, yaw de onde começa e a escala do feixe (melhorias de dano).
+     */
+    public record Giro(int entidade, int ticks, float voltas, float alcance, int cor, float yaw0, float escala) {
+        public static void encode(Giro m, FriendlyByteBuf b) {
+            b.writeVarInt(m.entidade).writeVarInt(m.ticks);
+            b.writeFloat(m.voltas).writeFloat(m.alcance);
+            b.writeInt(m.cor);
+            b.writeFloat(m.yaw0).writeFloat(m.escala);
+        }
+
+        public static Giro decode(FriendlyByteBuf b) {
+            return new Giro(b.readVarInt(), b.readVarInt(), b.readFloat(), b.readFloat(), b.readInt(), b.readFloat(), b.readFloat());
+        }
+    }
 
     /** Outro jogador fez uma manobra: quem vê anima a pose dele. */
     public record ManobraVista(int entidade, int tipo) {}
@@ -789,6 +807,11 @@ public final class Rede {
             .encoder((m, b) -> b.writeVarInt(m.estado())).decoder(b -> new Planar(b.readVarInt()))
             .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.ability.passive.Planar.definir(p, m.estado())))
             .add();
+        CANAL.messageBuilder(Giro.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(Giro::encode).decoder(Giro::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.GIROS.put(m.entidade(), new EstadoCliente.GiroAtivo(m, System.currentTimeMillis())))
+            .add();
         CANAL.messageBuilder(ManobraVista.class)
             .direction(PacketFlow.CLIENTBOUND)
             .encoder((m, b) -> b.writeVarInt(m.entidade()).writeVarInt(m.tipo()))
@@ -996,7 +1019,7 @@ public final class Rede {
     public static Aparencia montarAparencia(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0, e.planar());
+        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0, e.planar(), 1f);
         Personagem.Habilidade h = e.canalizando().isEmpty() ? null : com.danrod.dcuniverse.ability.Arvore.habilidade(player, p, e.canalizando());
         boolean voando = Voo.voando(player);
         Personagem.Tipo voo = p.passiva("flight");
@@ -1004,9 +1027,9 @@ public final class Rede {
         int rastro2 = voo == null ? 0 : voo.params().color("trail_color2", rastro);
         int rastro3 = voo == null ? 0 : voo.params().color("trail_color3", clarear(rastro));
         int planar = e.planar();
-        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), e.detetive() ? "detective_vision" : "", 0, 0, 0, voando, rastro, rastro2, rastro3, planar);
+        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), e.detetive() ? "detective_vision" : "", 0, 0, 0, voando, rastro, rastro2, rastro3, planar, 1f);
         return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
-            h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2, rastro3, planar);
+            h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2, rastro3, planar, h.params().f("beam_scale", 1f));
     }
 
     /** Envia o estado completo ao próprio jogador. */

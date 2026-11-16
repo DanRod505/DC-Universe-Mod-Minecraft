@@ -214,7 +214,7 @@ def verificar_personagens(raiz, recursos, erros):
                 erros.append(f"{nome}: árvore com habilidade repetida")
             # Melhorias padrão (energia, vida, dano, custo...), geradas em ability/Arvore.java: nome e descrição nos dois idiomas.
             fonte = (raiz / "src/main/java/com/danrod/dcuniverse/ability/Arvore.java").read_text(encoding="utf-8")
-            for t in re.findall(r'new Status\("(\w+)"', fonte) + ["dano", "custo"]:
+            for t in re.findall(r'new Status\("(\w+)"', fonte) + ["dano", "custo", "alcance"]:
                 for i in IDIOMAS:
                     for k in (f"dcuniverse.melhoria.{t}", f"dcuniverse.melhoria.{t}.desc", f"dcuniverse.melhoria.{t}.valor"):
                         if k not in lang[i]:

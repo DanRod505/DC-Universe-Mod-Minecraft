@@ -181,12 +181,41 @@ public final class Testes {
         float vida0 = c.getMaxHealth();
         float dano0 = Arvore.danoCoracoes(sup, Arvore.habilidade(c, sup, "visao_de_calor"));
         h.assertValueEqual(dano0, 5f, "visão de calor: 5 corações/s de base");
-        for (String id : List.of("pisao_sismico", "visao_de_calor.dano_1", "visao_de_calor.dano_2", "visao_de_calor.custo_1",
+        for (String id : List.of("pisao_sismico", "visao_de_calor.dano_1", "visao_de_calor.dano_2", "visao_de_calor.custo_1", "visao_de_calor.alcance_1", "giro_de_calor",
             "heroi.vida_1", "heroi.voo_velocidade_1", "heroi.impulso_1", "heroi.recuperacao_1", "heroi.armadura_1")) h.assertTrue(Arvore.comprar(c, id), "criativo compra " + id);
         h.assertValueEqual(Arvore.pontos(c, sup), Arvore.PONTOS_CRIATIVO, "pontos infinitos no criativo");
         Personagem.Habilidade visC = Arvore.habilidade(c, sup, "visao_de_calor");
         h.assertTrue(Math.abs(Arvore.danoCoracoes(sup, visC) - 10f) < 1e-3, "dano II: 5 -> 10 corações/s");
         h.assertTrue(Math.abs(visC.custo() - 9.5f) < 1e-4, "eficiência I: 12 -> 9,5 de energia/s");
+        h.assertValueEqual(visC.params().f("range", 0f), 32f, "alcance I: 24 -> 32 blocos");
+        h.assertTrue(Math.abs(visC.params().f("beam_scale", 0f) - 1.9f) < 1e-4, "dano II deixa o raio mais grosso e brilhante");
+        h.assertValueEqual(Arvore.habilidade(c, sup, "visao_raio_x").params().f("beam_scale", 1f), 1f, "sem melhoria de dano, raio normal");
+        // Giro de calor: os raios giram e acertam todo mundo em volta, uma vez por volta.
+        var centro = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 2.5));
+        c.snapTo(centro.x, centro.y, centro.z, 0, 0);
+        var cerco = new java.util.ArrayList<net.minecraft.world.entity.LivingEntity>();
+        for (int[] d : new int[][] {{2, 5}, {5, 2}, {0, 2}, {2, 0}}) {
+            var z = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(d[0], 2, d[1]));
+            z.setNoAi(true);
+            z.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(1000);
+            z.setHealth(1000);
+            cerco.add(z);
+        }
+        Personagem.Habilidade giro0 = Arvore.habilidade(c, sup, "giro_de_calor");
+        h.assertValueEqual(giro0.params().f("range", 0f), 12f, "giro de calor: 12 blocos de base");
+        // No teste o alcance cai para 4 blocos, para não acertar os testes vizinhos.
+        var curto = giro0.params().json().deepCopy();
+        curto.addProperty("range", 4f);
+        Personagem.Habilidade giro = new Personagem.Habilidade(giro0.id(), giro0.tipo(), giro0.modo(), giro0.custo(), giro0.recargaSeg(),
+            giro0.suprema(), new com.danrod.dcuniverse.character.Params(curto));
+        h.assertTrue(TiposHabilidade.TIPOS.get("spinning_beam").usar(c, sup, giro), "o giro começa");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.GiroCalor.girando(c), "está girando");
+        for (int t = 0; t < 60; t++) com.danrod.dcuniverse.ability.active.GiroCalor.tick();
+        h.assertFalse(com.danrod.dcuniverse.ability.active.GiroCalor.girando(c), "o giro acaba sozinho");
+        for (var z : cerco) {
+            h.assertTrue(z.getHealth() < 1000f && z.isOnFire(), "o giro acertou e incendiou todos em volta (" + z.getHealth() + ")");
+            z.discard();
+        }
         h.assertValueEqual(vida0, 20f, "10 corações");
         h.assertValueEqual(c.getMaxHealth(), 30f, "vida I: 10 -> 15 corações");
         h.assertValueEqual(Arvore.armadura(c, sup), 14f, "armadura I: 10 -> 14");
@@ -214,7 +243,7 @@ public final class Testes {
         FriendlyByteBuf buf = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
         Rede.ArvoreSync.encode(m, buf);
         h.assertValueEqual(Rede.ArvoreSync.decode(buf), m, "ArvoreSync ida e volta");
-        h.assertValueEqual(m.itens().stream().filter(x -> !x.melhoria()).count(), 10L, "10 habilidades na árvore do Superman (o voo é nativo)");
+        h.assertValueEqual(m.itens().stream().filter(x -> !x.melhoria()).count(), 9L, "9 habilidades na árvore do Superman (o voo é nativo, sem as duplicadas)");
         h.assertValueEqual(m.itens().stream().filter(x -> x.melhoria() && x.pai().isEmpty()).count(), 16L, "16 melhorias do herói");
         h.assertValueEqual(m.itens().stream().filter(Rede.ArvoreItem::melhoria).count(), 54L, "54 melhorias no total");
         h.assertTrue(m.compradas().containsAll(iniciais), "o cliente vê as iniciais como suas");
@@ -610,9 +639,9 @@ public final class Testes {
         zumbi.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE, 2000, 0, false, false));
         // Modo mundo: o clique é o do Minecraft, o combo não sai.
         com.danrod.dcuniverse.combate.Combo.golpe(p, 0);
-        int calor = sup.habilidades().indexOf(sup.habilidade("calor_focado"));
+        int raioX = sup.habilidades().indexOf(sup.habilidade("visao_raio_x"));
         int visao = sup.habilidades().indexOf(sup.habilidade("visao_de_calor"));
-        h.assertValueEqual(com.danrod.dcuniverse.combate.Combo.conjunto(sup.habilidade("calor_focado")), com.danrod.dcuniverse.combate.Combo.MUNDO, "a visão focada é do mundo");
+        h.assertValueEqual(com.danrod.dcuniverse.combate.Combo.conjunto(sup.habilidade("visao_raio_x")), com.danrod.dcuniverse.combate.Combo.MUNDO, "o raio X é do mundo");
         h.runAfterDelay(3, () -> {
             h.assertValueEqual(zumbi.getHealth(), 1000f, "o clique fora do modo combate não golpeou");
             // Os poderes de olhos para o lado (longe do zumbi).
@@ -620,15 +649,16 @@ public final class Testes {
             Habilidades.usar(p, visao, true);
             h.assertFalse(com.danrod.dcuniverse.ability.Coreografia.emCena(p) || !e.canalizando().isEmpty(), "fora do combate a visão de combate não sai");
             Habilidades.usar(p, visao, false);
-            Habilidades.usar(p, calor, true);
-            h.assertValueEqual(e.canalizando(), "calor_focado", "a visão focada sai na hora no modo mundo");
-            // Entrar no combate para o poder do mundo.
+            long agora = p.level().getGameTime();
+            Habilidades.usar(p, raioX, true);
+            Habilidades.usar(p, raioX, false);
+            h.assertTrue(e.prontaEm("visao_raio_x") > agora, "o raio X sai no modo mundo");
+            // No combate o poder do mundo não sai.
             com.danrod.dcuniverse.combate.Combo.modo(p, true);
-            h.assertValueEqual(e.canalizando(), "", "trocar de modo para o poder do outro conjunto");
-            Habilidades.usar(p, calor, false);
-            Habilidades.usar(p, calor, true);
-            h.assertValueEqual(e.canalizando(), "", "no combate a visão focada não sai");
-            Habilidades.usar(p, calor, false);
+            e.setProntaEm("visao_raio_x", 0L);
+            Habilidades.usar(p, raioX, true);
+            Habilidades.usar(p, raioX, false);
+            h.assertValueEqual(e.prontaEm("visao_raio_x"), 0L, "no combate o raio X não sai");
             p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
             // Defesa: no começo da guarda, aparo.
             var fonte = p.level().damageSources().mobAttack(zumbi);

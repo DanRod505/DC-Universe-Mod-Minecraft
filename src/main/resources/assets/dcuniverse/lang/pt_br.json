@@ -1023,10 +1023,6 @@
   "dcuniverse.guia.combo.trava": "Trava de mira (%s): prende o olhar no inimigo mais perto da mira, como nos Zelda em 3D. O herói fica de frente para ele (A e D andam em círculo em volta), os golpes e os poderes vão nele, a tela ganha faixas de cinema e uma seta marca o alvo com a vida dele. Aperte de novo para soltar; se o alvo cair, a trava passa para o próximo inimigo por perto.",
   "dcuniverse.guia.hab.conjunto.combate": "Poder de combate: nas teclas só no modo combate",
   "dcuniverse.guia.hab.conjunto.mundo": "Poder de mundo: nas teclas só fora do modo combate",
-  "habilidade.dcuniverse.calor_focado": "Visão de Calor Focada",
-  "habilidade.dcuniverse.calor_focado.desc": "Um feixe fino e preciso, na hora, enquanto você segura a tecla: a versão de trabalho da visão de calor. Gasta pouco e acerta exatamente onde a mira está: acende fornalhas (sem combustível), fogueiras, velas e TNT, derrete gelo e neve, funde blocos e cozinha a comida no chão. Machuca pouco.",
-  "habilidade.dcuniverse.sopro_gelido": "Sopro Gélido",
-  "habilidade.dcuniverse.sopro_gelido.desc": "Um jato de ar gelado longo e estreito, na hora, enquanto você segura a tecla. Feito para o mundo: transforma água em gelo (dá para fazer uma ponte sobre o rio), lava em obsidiana e apaga o fogo. Deixa os mobs lentos, mas quase não machuca.",
   "key.dcuniverse.arvore": "Árvore de habilidades e build",
   "dcuniverse.arvore.titulo": "Árvore de habilidades",
   "dcuniverse.arvore.subtitulo": "Habilidades, melhorias e build",
@@ -1095,5 +1091,10 @@
   "dcuniverse.arvore.dano": "Dano: %s ❤",
   "dcuniverse.arvore.dano_s": "Dano: %s ❤/s",
   "dcuniverse.arvore.extra.fogo": "Queimadura: 0,5 ❤/s por 4 s",
-  "dcuniverse.arvore.extra.gelo": "Congela em 1 s de sopro, por 3 s"
+  "dcuniverse.arvore.extra.gelo": "Congela em 1 s de sopro, por 3 s",
+  "habilidade.dcuniverse.giro_de_calor": "Giro de Calor",
+  "habilidade.dcuniverse.giro_de_calor.desc": "Uma das habilidades mais fortes do Superman: ele gira no lugar disparando a visão de calor, e os raios varrem tudo em volta dele, duas voltas completas. Cada volta queima todos os inimigos no alcance, põe fogo, derrete gelo e neve, acende fornalhas e risca o chão de brasa. O que morre já cai assado. Gasta muita energia.",
+  "dcuniverse.melhoria.alcance": "Alcance %s",
+  "dcuniverse.melhoria.alcance.desc": "O alcance vai de %s para %s.",
+  "dcuniverse.melhoria.alcance.valor": "%s blocos"
 }

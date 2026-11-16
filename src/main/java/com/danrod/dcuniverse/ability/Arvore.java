@@ -84,7 +84,9 @@ public final class Arvore {
         new Status("voo_velocidade", "flight_speed", "minecraft:feather", true),
         new Status("impulso", "boost_drain", "minecraft:firework_rocket", true));
     /** Ícones das melhorias padrão de cada habilidade. */
-    public static final String ICONE_DANO = "minecraft:diamond_sword", ICONE_CUSTO = "minecraft:emerald";
+    public static final String ICONE_DANO = "minecraft:diamond_sword", ICONE_CUSTO = "minecraft:emerald", ICONE_ALCANCE = "minecraft:spyglass";
+    /** Quanto o raio engrossa e brilha a cada nível de dano comprado (escala visual do feixe, client/Efeitos). */
+    public static final float BRILHO_POR_NIVEL = 0.45f;
     /** Sem lista no JSON: dano e gasto de energia de cada nível, em proporção ao de base (provisório). */
     private static final float[] DANO_PADRAO = {1f, 1.5f, 2f}, CUSTO_PADRAO = {1f, 0.8f, 0.6f};
 
@@ -142,6 +144,12 @@ public final class Arvore {
                     float[] v = o.has("energy") ? lista(o.getAsJsonArray("energy")) : escala(h.custo(), CUSTO_PADRAO);
                     valores.put(id + ":custo", v);
                     gerar(id, "custo", ICONE_CUSTO, v.length - 1, custos, melhorias);
+                }
+                // Alcance (blocos), só quando o JSON dá a lista: "range": [24, 32, 40].
+                if (o.has("range")) {
+                    float[] v = lista(o.getAsJsonArray("range"));
+                    valores.put(id + ":alcance", v);
+                    gerar(id, "alcance", ICONE_ALCANCE, v.length - 1, custos, melhorias);
                 }
             }
             JsonObject st = j.has("stats") ? j.getAsJsonObject("stats") : new JsonObject();
@@ -358,12 +366,17 @@ public final class Arvore {
         for (Melhoria m : p.arvore().melhorias().values()) if (m.pai().equals(h.id()) && c.contains(m.id())) ms.add(m);
         JsonObject j = h.params().json().deepCopy();
         if (base != null) base.entrySet().forEach(e -> j.add(e.getKey(), e.getValue()));
-        int dano = 0, eficiencia = 0;
+        int dano = 0, eficiencia = 0, alcance = 0;
         for (Melhoria m : ms) {
             m.params().entrySet().forEach(e -> j.add(e.getKey(), e.getValue()));
             if (m.tipo().equals("dano")) dano++;
             if (m.tipo().equals("custo")) eficiencia++;
+            if (m.tipo().equals("alcance")) alcance++;
         }
+        float blocos = p.arvore().valor(h.id() + ":alcance", alcance);
+        if (!Float.isNaN(blocos)) j.addProperty("range", blocos);
+        // Cada nível de dano deixa o raio mais grosso e mais brilhante.
+        j.addProperty("beam_scale", 1f + BRILHO_POR_NIVEL * dano);
         // Dano e energia nos valores reais do nível comprado (o dano em corações vira o multiplicador da ficha).
         float coracoes = p.arvore().valor(h.id() + ":dano", dano);
         if (!Float.isNaN(coracoes) && p.ficha().dano() > 0) j.addProperty("damage_mult", coracoes / p.ficha().dano());

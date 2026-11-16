@@ -1023,10 +1023,6 @@
   "dcuniverse.guia.combo.trava": "Lock-on (%s): locks your gaze on the enemy closest to the crosshair, like the 3D Zelda games. The hero keeps facing it (A and D circle around it), blows and powers go to it, the screen gets cinema bars and an arrow marks the target with its health. Press again to release; if the target falls, the lock moves to the next enemy nearby.",
   "dcuniverse.guia.hab.conjunto.combate": "Combat power: on the keys only in combat mode",
   "dcuniverse.guia.hab.conjunto.mundo": "World power: on the keys only outside combat mode",
-  "habilidade.dcuniverse.calor_focado": "Focused Heat Vision",
-  "habilidade.dcuniverse.calor_focado.desc": "A thin, precise beam, instantly, while you hold the key: the working version of heat vision. It costs little and hits exactly where the crosshair is: it lights furnaces (no fuel needed), campfires, candles and TNT, melts ice and snow, smelts blocks and cooks food on the ground. It does little damage.",
-  "habilidade.dcuniverse.sopro_gelido": "Chill Breath",
-  "habilidade.dcuniverse.sopro_gelido.desc": "A long, narrow jet of freezing air, instantly, while you hold the key. Made for the world: it turns water into ice (you can make a bridge over a river), lava into obsidian and puts out fire. It slows mobs down but barely hurts them.",
   "key.dcuniverse.arvore": "Skill tree and build",
   "dcuniverse.arvore.titulo": "Skill tree",
   "dcuniverse.arvore.subtitulo": "Abilities, upgrades and build",
@@ -1095,5 +1091,10 @@
   "dcuniverse.arvore.dano": "Damage: %s ❤",
   "dcuniverse.arvore.dano_s": "Damage: %s ❤/s",
   "dcuniverse.arvore.extra.fogo": "Burn: 0.5 ❤/s for 4 s",
-  "dcuniverse.arvore.extra.gelo": "Freezes after 1 s of breath, for 3 s"
+  "dcuniverse.arvore.extra.gelo": "Freezes after 1 s of breath, for 3 s",
+  "habilidade.dcuniverse.giro_de_calor": "Heat Spin",
+  "habilidade.dcuniverse.giro_de_calor.desc": "One of Superman's strongest abilities: he spins in place firing his heat vision, and the beams sweep everything around him for two full turns. Each turn burns every enemy in range, sets fires, melts ice and snow, lights furnaces and scorches the ground. Whatever dies drops already cooked. Costs a lot of energy.",
+  "dcuniverse.melhoria.alcance": "Range %s",
+  "dcuniverse.melhoria.alcance.desc": "Range goes from %s to %s.",
+  "dcuniverse.melhoria.alcance.valor": "%s blocks"
 }

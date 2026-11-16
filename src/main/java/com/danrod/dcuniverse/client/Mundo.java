@@ -277,6 +277,7 @@ public final class Mundo {
         RaioX.desenhar(ps, col, cam, pt);
         Detetive.desenhar(ps, col, cam, pt);
         Efeitos.feixePrimeiraPessoa(ps, col, cam, pt);
+        Efeitos.giroPrimeiraPessoa(ps, col, cam, pt);
         Gelo.desenhar(ps, col, cam, pt);
         Bolha.desenhar(ps, col, cam, pt);
     }
