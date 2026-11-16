@@ -124,8 +124,8 @@ public final class Habilidades {
         TipoHabilidade tipo = TiposHabilidade.TIPOS.get(h.tipo());
         if (tipo.gratis(player, h)) return tipo.usar(player, p, h);
         if (e.prontaEm(h.id()) > agora || Coreografia.emCena(player)) return false;
-        // Criativo e heróis da árvore nova (só recarga) não gastam energia; a kryptonita (esgotado) ainda bloqueia.
-        boolean criativo = player.isCreative() || Arvore.semEnergia(player, p);
+        // O criativo não gasta energia; a kryptonita (esgotado) ainda bloqueia.
+        boolean criativo = player.isCreative();
         if (!player.isCreative() && e.esgotado() || !criativo && e.energia() < h.custo()) {
             Transformacao.avisar(player, Component.translatable("dcuniverse.msg.sem_energia"));
             return false;
@@ -161,7 +161,7 @@ public final class Habilidades {
             parar(player, e);
             return;
         }
-        boolean semCusto = player.isCreative() || Arvore.semEnergia(player, p) && !e.esgotado();
+        boolean semCusto = player.isCreative();
         if (h == null || !semCusto && !Energia.gastar(player, p, h.custo() / 20f)) {
             parar(player, e);
             return;

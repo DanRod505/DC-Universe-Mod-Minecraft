@@ -27,7 +27,9 @@ public final class Atributos {
     /** @param curar enche a vida no novo máximo (só ao transformar, não ao reaplicar). */
     public static void aplicar(Player player, Personagem p, boolean curar) {
         Personagem.Ficha f = p.ficha();
-        set(player, Attributes.MAX_HEALTH, f.vida() * 2 - 20, AttributeModifier.Operation.ADD_VALUE);
+        // A melhoria de vida da árvore (ability/Arvore) multiplica a vida da ficha.
+        set(player, Attributes.MAX_HEALTH, f.vida() * 2 * com.danrod.dcuniverse.ability.Arvore.multVida(player, p) - 20, AttributeModifier.Operation.ADD_VALUE);
+        if (player.getHealth() > player.getMaxHealth()) player.setHealth(player.getMaxHealth());
         set(player, Attributes.ARMOR, f.armadura(), AttributeModifier.Operation.ADD_VALUE);
         set(player, Attributes.ATTACK_DAMAGE, f.dano() * 2 - 1, AttributeModifier.Operation.ADD_VALUE);
         set(player, Attributes.MOVEMENT_SPEED, f.terra() / CORRIDA_VANILLA - 1, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);

@@ -48,7 +48,7 @@ public final class DemoHud {
         Personagem p = e.personagem();
         if (p != null) {
             e.setEsgotado(false);
-            e.setEnergia(p.energia().max());
+            e.setEnergia(com.danrod.dcuniverse.ability.Arvore.energiaMax(player, p));
         }
         ATIVAS.put(player.getUUID(), new Demo(player.level().getGameTime()));
         if (player.connection != null) player.sendSystemMessage(Component.translatable("dcuniverse.hud.demo.inicio"));

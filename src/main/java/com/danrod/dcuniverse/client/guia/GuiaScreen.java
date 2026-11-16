@@ -902,7 +902,11 @@ public final class GuiaScreen extends Screen {
         out.add(atributo("vida", f.vida(), FichaEscala.VIDA, fmt(f.vida())));
         out.add(atributo("armadura", f.armadura(), FichaEscala.ARMADURA, fmt(f.armadura())));
         out.add(atributo("dano", f.dano(), FichaEscala.DANO, fmt(f.dano())));
-        out.add(atributo("energia", p.energia().max(), FichaEscala.ENERGIA, fmt(p.energia().max())));
+        // Herói da árvore: a energia dela (estilo Justice League Heroes), sem as melhorias.
+        var ea = p.arvore() == null ? null : p.arvore().energia();
+        float emax = ea != null && ea.max() > 0 ? ea.max() : p.energia().max();
+        float eregen = ea != null && ea.regen() > 0 ? ea.regen() : p.energia().regen();
+        out.add(atributo("energia", emax, FichaEscala.ENERGIA, fmt(emax)));
         out.add(atributo("velocidade", f.terra(), FichaEscala.VELOCIDADE, fmt(f.terra())));
         Personagem.Tipo voo = p.passiva("flight");
         if (voo != null) out.add(atributo("voo", voo.params().d("speed", 12), FichaEscala.VOO, fmt(voo.params().d("speed", 12))));
@@ -911,7 +915,8 @@ public final class GuiaScreen extends Screen {
         texto(out, Component.translatable("dcuniverse.guia.ficha.unidades"), SUAVE, 0);
         out.add(espaco(4));
         out.add(secao(topicos, "dcuniverse.guia.secao.energia"));
-        out.add(item(Component.translatable("dcuniverse.guia.recarga.base", fmt(p.energia().regen()))));
+        out.add(item(Component.translatable("dcuniverse.guia.recarga.base", fmt(eregen))));
+        if (ea != null && ea.atraso() > 0) out.add(item(Component.translatable("dcuniverse.guia.recarga.atraso", fmt(ea.atraso()))));
         for (Personagem.Tipo r : p.energia().recargas()) {
             out.add(item(Component.translatable("dcuniverse.guia.recarga." + r.tipo(), fmt(r.params().d("per_second", 0)))));
         }

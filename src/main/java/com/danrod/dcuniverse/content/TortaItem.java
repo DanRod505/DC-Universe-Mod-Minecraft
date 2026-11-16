@@ -43,7 +43,7 @@ public final class TortaItem extends Item {
     public static boolean recarregar(Player p) {
         Personagem pers = EstadoJogador.de(p).personagem();
         if (pers == null || !kryptoniano(pers)) return false;
-        Energia.adicionar(p, pers, pers.energia().max() * ENERGIA);
+        Energia.adicionar(p, pers, com.danrod.dcuniverse.ability.Arvore.energiaMax(p, pers) * ENERGIA);
         if (p.level() instanceof ServerLevel l) {
             // em volta das pernas: na altura dos olhos as faíscas tapam a visão em primeira pessoa
             l.sendParticles(ParticleTypes.WAX_ON, p.getX(), p.getY() + 0.35, p.getZ(), 12, 0.55, 0.2, 0.55, 0.01);

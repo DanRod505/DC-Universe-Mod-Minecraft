@@ -195,7 +195,9 @@ public final class Voador {
         Vec3 dir = p.getLookAngle().scale(frente).add(esquerda.scale(lado)).add(0, vertical, 0);
         Vec3 alvo = Vec3.ZERO;
         if (dir.lengthSqr() > 1e-6) {
-            boolean correndo = mc.options.keySprint.isDown() || p.isSprinting();
+            // Herói da árvore sem energia: o cruzeiro continua, o impulso não.
+            boolean semImpulso = EstadoCliente.temArvore() && !p.isCreative() && EstadoCliente.atual.energia() < 1f;
+            boolean correndo = (mc.options.keySprint.isDown() || p.isSprinting()) && !semImpulso;
             double v = frente > 0 ? (correndo ? max : max * CRUZEIRO) : max * CRUZEIRO * 0.6;
             alvo = dir.normalize().scale(v);
         }

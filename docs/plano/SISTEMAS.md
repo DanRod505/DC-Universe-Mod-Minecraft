@@ -24,7 +24,7 @@ Gerado por `tools/plano.py` a partir de `docs/plano/dados/sistemas.json`.
 | Sistema | O que faz | Versão |
 |---|---|---|
 | Combate | Combo no botão esquerdo, golpe pesado segurando, golpes aéreos e investida, sensação de impacto (pausa, tremor, partículas e som), cancelar golpes em habilidades e golpes em dupla no multiplayer. | v0.8 |
-| Atalhos e novo HUD | Os 6 slots da build ficam nos atalhos Z, X, C, V, B e R, configuráveis, e uma tecla abre a tela da árvore e da build. O HUD mostra vida, os slots com as recargas e o reforço ativo. Sem suprema e sem energia. | v0.8 |
+| Atalhos e novo HUD | Os 6 slots da build ficam nos atalhos Z, X, C, V, B e R, configuráveis, e uma tecla abre a tela da árvore e da build. O HUD mostra vida, a barra de energia, o nível e os slots com as recargas. Sem suprema. | v0.8 |
 | Defesa e mira | Esquiva com invencibilidade, aparar no tempo certo com contra-ataque, avisos visuais de ataque inimigo e mira travada que a câmera segue. | v0.8 |
 | Inimigos com IA de combate | Capangas que cercam, esperam a vez, avisam o ataque, bloqueiam e fogem; 7 papéis de inimigo e facções por cidade. Modelos e animações com GeckoLib. | v0.8 |
 | Chefes com fases | Arena, fases com cena de transição, ataques assinatura avisados, pontos fracos e música própria. | v0.11 |
@@ -59,7 +59,7 @@ Gerado por `tools/plano.py` a partir de `docs/plano/dados/sistemas.json`.
 
 | Sistema | O que faz | Versão |
 |---|---|---|
-| Sistema de habilidades | Árvore aberta por herói, definida em dados: cada variação é uma habilidade (ativa, ligar e desligar, passiva ou reforço) com as próprias melhorias (números, efeitos no mundo, transformações). Pontos só por nível, compras para sempre, só recarga (sem energia nem suprema). Salvo por jogador e por herói, conferido pelo servidor e sincronizado no multiplayer. Funciona no criativo. | v0.7 |
-| Tela da árvore | Uma árvore de verdade (emblema no tronco, galhos para as habilidades e as melhorias penduradas nelas), cada habilidade com as melhorias, custos, o que já foi comprado e os pontos livres, com números completos e prévia animada. Abre na tecla K, com dica discreta no HUD; na primeira vez com um herói o jogador escolhe 1 entre as habilidades iniciais dele. | v0.7 |
-| Build e presets | Até 6 slots livres (Z X C V B R; abrem nos níveis 1, 3, 5, 10, 20 e 30) para qualquer habilidade comprada, em qualquer ordem, e presets de build por herói para trocar a hora que quiser. | v0.7 |
+| Sistema de habilidades | Catálogo aberto por herói, definido em dados e no estilo Justice League Heroes: algumas habilidades já vêm liberadas e as outras se liberam com pontos de nível; cada uma vem completa, com todos os efeitos. Energia comum que volta a encher depois de alguns segundos sem gastar, recargas curtas, voo nativo e sem suprema. Melhorias padrão: energia máxima, vida, recuperação e voo do herói; dano e custo de cada habilidade. Compras para sempre. Salvo por jogador e por herói, conferido pelo servidor e sincronizado no multiplayer. Funciona no criativo. | v0.7 |
+| Tela da árvore | Uma árvore de verdade (emblema no tronco, galhos para as habilidades e as melhorias penduradas nelas), as melhorias do herói no tronco, cada habilidade com as melhorias, gasto de energia, custos, o que já foi comprado e os pontos livres, com números completos e prévia animada. Abre na tecla K, com dica discreta no HUD. | v0.7 |
+| Build e presets | 6 slots livres abertos desde o começo (Z X C V B R) para qualquer habilidade liberada, em qualquer ordem, e presets de build por herói para trocar a hora que quiser. | v0.7 |
 

@@ -26,19 +26,21 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Sistema de habilidades do Plano 2 (docs/plano/HABILIDADES.md): cada herói com "skill_tree" no JSON tem uma árvore
- * de habilidades compradas com pontos de nível, que ficam para sempre, e até 6 slots livres (Z X C V B R) montados
- * pelo jogador. Sem suprema e sem gasto de energia: só recarga.
+ * Sistema de habilidades do Plano 2 (docs/plano/HABILIDADES.md), no estilo Justice League Heroes: cada herói com
+ * "skill_tree" no JSON tem um catálogo de habilidades. Algumas já vêm liberadas (as iniciais); as outras e as melhorias
+ * se compram com pontos de nível e ficam para sempre. Os 6 slots (Z X C V B R) vêm abertos desde o começo. As
+ * habilidades gastam energia de uma barra comum, que volta a encher depois de alguns segundos sem gastar.
  *
- * <p>Por jogador e por herói, na parte persistente (sobrevive à morte): xp, a habilidade inicial, as compradas e os
- * 6 slots ("" = vazio). O nível sai da xp. No criativo tudo conta como comprado e os 6 slots ficam abertos, sem
- * mexer no que foi comprado de verdade.
+ * <p>Melhorias padrão, geradas para todo herói: energia máxima, vida e recuperação de energia (e, se ele voa,
+ * velocidade de voo e impulso); em cada habilidade, dano e custo de energia. Melhorias próprias de uma habilidade
+ * (ex.: a altura do Super Pulo) vêm do JSON.
+ *
+ * <p>Por jogador e por herói, na parte persistente (sobrevive à morte): xp, as compradas e os 6 slots ("" = vazio).
+ * O nível sai da xp. No criativo os pontos são infinitos e a compra pode ser desfeita.
  */
 public final class Arvore {
     private static final String RAIZ = "arvore";
     public static final int SLOTS = 6;
-    /** Nível em que cada slot abre (decisão do Dalton em 16/11/2026). */
-    public static final int[] SLOT_NIVEL = {1, 3, 5, 10, 20, 30};
     /** Nível máximo (provisório: a progressão de pontos do Dalton vai além do 30). */
     public static final int NIVEL_MAX = 50;
     /** Pontos no criativo: ilimitados para testar qualquer habilidade e melhoria (decisão do Dalton em 16/11/2026). */
@@ -60,7 +62,46 @@ public final class Arvore {
      * Melhoria de uma habilidade: id completo "habilidade.melhoria", o pai, a melhoria exigida antes ("" = nenhuma),
      * o custo, os parâmetros que ela troca na habilidade e o item que serve de ícone na tela.
      */
-    public record Melhoria(String id, String pai, String requer, int custo, JsonObject params, String icone) {}
+    public record Melhoria(String id, String pai, String requer, int custo, JsonObject params, String icone, String tipo, float valor) {
+        /** Melhoria do herói (energia, vida...), pendurada no tronco e não numa habilidade. */
+        public boolean doHeroi() {
+            return pai.isEmpty();
+        }
+    }
+
+    /**
+     * Uma melhoria padrão: o tipo, o item do ícone, quanto cada nível soma (fração) e o custo de cada nível.
+     * Provisório até o balanceamento com o Dalton.
+     */
+    public record Padrao(String tipo, String icone, float valor, int[] custos) {}
+
+    public static final String HEROI = "heroi";
+    public static final List<Padrao> PADRAO_HEROI = List.of(
+        new Padrao("energia", "minecraft:glowstone_dust", 0.20f, new int[]{1, 2, 3}),
+        new Padrao("vida", "minecraft:golden_apple", 0.15f, new int[]{1, 2, 3}),
+        new Padrao("recuperacao", "minecraft:sugar", 0.25f, new int[]{1, 2, 3}));
+    public static final List<Padrao> PADRAO_VOO = List.of(
+        new Padrao("voo_velocidade", "minecraft:feather", 0.15f, new int[]{1, 2}),
+        new Padrao("impulso", "minecraft:firework_rocket", 0.25f, new int[]{1, 2}));
+    public static final Padrao PADRAO_DANO = new Padrao("dano", "minecraft:diamond_sword", 0.20f, new int[]{1, 2});
+    public static final Padrao PADRAO_CUSTO = new Padrao("custo", "minecraft:emerald", 0.20f, new int[]{1, 2});
+    /** Parâmetros de dano que a melhoria de dano multiplica. */
+    private static final List<String> DANOS = List.of("damage_mult", "impact_damage_mult");
+
+    /**
+     * A energia de um herói da árvore ("energy" no skill_tree): máximo, quanto recupera por segundo, quantos segundos
+     * sem gastar até começar a recuperar e o gasto do impulso do voo por segundo. 0 = o valor da ficha antiga.
+     */
+    public record EnergiaArvore(float max, float regen, float atraso, float impulso) {
+        static EnergiaArvore parse(JsonObject j) {
+            if (j == null) return new EnergiaArvore(0, 0, 3, 0);
+            return new EnergiaArvore(f(j, "max", 0), f(j, "regen", 0), f(j, "delay", 3), f(j, "boost_drain", 0));
+        }
+
+        private static float f(JsonObject j, String k, float d) {
+            return j.has(k) ? j.get(k).getAsFloat() : d;
+        }
+    }
 
     /**
      * A árvore de um herói, lida de "skill_tree": as habilidades compráveis, as iniciais, as melhorias de cada uma e
@@ -68,8 +109,8 @@ public final class Arvore {
      * custos tem habilidades e melhorias.
      */
     public record Config(Map<String, Integer> custos, List<String> iniciais, List<String> lista, Map<String, Melhoria> melhorias,
-                         Map<String, JsonObject> bases) {
-        public static Config parse(JsonObject j, List<Personagem.Habilidade> habs) {
+                         Map<String, JsonObject> bases, EnergiaArvore energia) {
+        public static Config parse(JsonObject j, List<Personagem.Habilidade> habs, boolean voa) {
             Map<String, Integer> custos = new LinkedHashMap<>();
             Map<String, Melhoria> melhorias = new LinkedHashMap<>();
             Map<String, JsonObject> bases = new LinkedHashMap<>();
@@ -83,8 +124,7 @@ public final class Arvore {
                 if (custos.put(id, custo) != null) throw new IllegalArgumentException("árvore: " + id + " repetida");
                 lista.add(id);
                 if (o.has("base")) bases.put(id, o.getAsJsonObject("base"));
-                if (!o.has("upgrades")) continue;
-                for (JsonElement um : o.getAsJsonArray("upgrades")) {
+                for (JsonElement um : o.has("upgrades") ? o.getAsJsonArray("upgrades") : new com.google.gson.JsonArray()) {
                     JsonObject u = um.getAsJsonObject();
                     String mid = id + "." + u.get("id").getAsString();
                     int mc = u.get("cost").getAsInt();
@@ -93,9 +133,15 @@ public final class Arvore {
                     if (!req.isEmpty() && !melhorias.containsKey(req)) throw new IllegalArgumentException("árvore: " + mid + " exige " + req + ", que não vem antes");
                     if (custos.put(mid, mc) != null) throw new IllegalArgumentException("árvore: " + mid + " repetida");
                     melhorias.put(mid, new Melhoria(mid, id, req, mc, u.has("params") ? u.getAsJsonObject("params") : new JsonObject(),
-                        u.has("icon") ? u.get("icon").getAsString() : ""));
+                        u.has("icon") ? u.get("icon").getAsString() : "", "", 0f));
                 }
+                // Melhorias padrão da habilidade: dano (se ela causa dano) e custo de energia (se ela gasta).
+                Personagem.Habilidade h = habs.stream().filter(x -> x.id().equals(id)).findFirst().orElseThrow();
+                if (DANOS.stream().anyMatch(k -> h.params().json().has(k))) gerar(id, PADRAO_DANO, custos, melhorias);
+                if (h.custo() > 0) gerar(id, PADRAO_CUSTO, custos, melhorias);
             }
+            for (Padrao pd : PADRAO_HEROI) gerar("", pd, custos, melhorias);
+            if (voa) for (Padrao pd : PADRAO_VOO) gerar("", pd, custos, melhorias);
             List<String> iniciais = new ArrayList<>();
             for (JsonElement el : j.getAsJsonArray("starters")) {
                 String id = el.getAsString();
@@ -104,7 +150,18 @@ public final class Arvore {
             }
             if (iniciais.isEmpty()) throw new IllegalArgumentException("árvore sem habilidades iniciais");
             return new Config(java.util.Collections.unmodifiableMap(custos), List.copyOf(iniciais), List.copyOf(lista),
-                java.util.Collections.unmodifiableMap(melhorias), Map.copyOf(bases));
+                java.util.Collections.unmodifiableMap(melhorias), Map.copyOf(bases), EnergiaArvore.parse(j.getAsJsonObject("energy")));
+        }
+
+        /** Uma corrente de melhorias padrão (nível I, II, III...), cada uma exigindo a anterior. */
+        private static void gerar(String pai, Padrao pd, Map<String, Integer> custos, Map<String, Melhoria> melhorias) {
+            String antes = "";
+            for (int n = 1; n <= pd.custos().length; n++) {
+                String mid = (pai.isEmpty() ? HEROI : pai) + "." + pd.tipo() + "_" + n;
+                if (custos.put(mid, pd.custos()[n - 1]) != null) throw new IllegalArgumentException("árvore: " + mid + " repetida");
+                melhorias.put(mid, new Melhoria(mid, pai, antes, pd.custos()[n - 1], new JsonObject(), pd.icone(), pd.tipo(), pd.valor()));
+                antes = mid;
+            }
         }
 
         public boolean ehHabilidade(String id) {
@@ -130,12 +187,6 @@ public final class Arvore {
     public static int nivelDaXp(int xp) {
         int n = 1;
         while (n < NIVEL_MAX && xp >= xpDoNivel(n + 1)) n++;
-        return n;
-    }
-
-    public static int slotsDoNivel(int nivel) {
-        int n = 0;
-        for (int s : SLOT_NIVEL) if (nivel >= s) n++;
         return n;
     }
 
@@ -176,20 +227,82 @@ public final class Arvore {
         return lista(dados(player, p), "compradas");
     }
 
-    /** Os 6 slots como estão guardados ("" = vazio), inclusive os ainda trancados. */
+    /** Os 6 slots como estão guardados ("" = vazio). Sem nada guardado ainda: as iniciais, na ordem. */
     public static List<String> slots(ServerPlayer player, Personagem p) {
-        List<String> s = lista(dados(player, p), "slots");
+        CompoundTag d = dados(player, p);
+        List<String> s = d.contains("slots") ? lista(d, "slots") : new ArrayList<>(p.arvore() == null ? List.of() : p.arvore().iniciais());
         while (s.size() < SLOTS) s.add("");
         return s.subList(0, SLOTS);
     }
 
-    public static String inicial(ServerPlayer player, Personagem p) {
-        return dados(player, p).getStringOr("inicial", "");
+    /** As habilidades que o herói já traz liberadas, sem gastar pontos. */
+    public static boolean inicial(Personagem p, String id) {
+        return p.arvore() != null && p.arvore().iniciais().contains(id);
     }
 
-    /** Comprou esta habilidade ou melhoria (no criativo também se compra, com pontos ilimitados). */
+    /** Tem esta habilidade (inicial ou comprada) ou melhoria (no criativo também se compra, com pontos ilimitados). */
     public static boolean tem(ServerPlayer player, Personagem p, String id) {
-        return p.arvore() != null && p.arvore().custos().containsKey(id) && compradas(player, p).contains(id);
+        return p.arvore() != null && p.arvore().custos().containsKey(id) && (inicial(p, id) || compradas(player, p).contains(id));
+    }
+
+    /** As que o jogador tem: as iniciais e as compradas (o que o cliente mostra como dourado). */
+    public static List<String> tem(ServerPlayer player, Personagem p) {
+        List<String> out = new ArrayList<>(p.arvore().iniciais());
+        for (String id : compradas(player, p)) if (!out.contains(id) && p.arvore().custos().containsKey(id)) out.add(id);
+        return out;
+    }
+
+    /** Soma das melhorias compradas de um tipo padrão, num pai ("" = o herói). Ex.: energia II = 0,4 (+40%). */
+    public static float bonus(ServerPlayer player, Personagem p, String tipo, String pai) {
+        if (!ativa(player, p)) return 0f;
+        float t = 0;
+        List<String> c = compradas(player, p);
+        for (Melhoria m : p.arvore().melhorias().values()) {
+            if (m.tipo().equals(tipo) && m.pai().equals(pai) && c.contains(m.id())) t += m.valor();
+        }
+        return t;
+    }
+
+    // ------------------------------------------------------------------ energia, vida e voo do herói
+
+    /** Energia máxima: a da árvore (ou da ficha) mais a melhoria de energia. */
+    public static float energiaMax(net.minecraft.world.entity.player.Player player, Personagem p) {
+        if (!(player instanceof ServerPlayer sp) || !ativa(player, p)) return p.energia().max();
+        float base = p.arvore().energia().max() > 0 ? p.arvore().energia().max() : p.energia().max();
+        return base * (1 + bonus(sp, p, "energia", ""));
+    }
+
+    /** Recuperação base por segundo (sem as fontes como o sol): a da árvore mais a melhoria de recuperação. */
+    public static float regen(net.minecraft.world.entity.player.Player player, Personagem p) {
+        if (!(player instanceof ServerPlayer sp) || !ativa(player, p)) return p.energia().regen();
+        float base = p.arvore().energia().regen() > 0 ? p.arvore().energia().regen() : p.energia().regen();
+        return base * (1 + bonus(sp, p, "recuperacao", ""));
+    }
+
+    /** Segundos sem gastar até a energia voltar a encher (0 = sempre enche, o sistema antigo). */
+    public static float atrasoRecuperacao(net.minecraft.world.entity.player.Player player, Personagem p) {
+        return ativa(player, p) ? p.arvore().energia().atraso() : 0f;
+    }
+
+    /** Multiplicador da vida máxima do herói (melhoria de vida). */
+    public static float multVida(net.minecraft.world.entity.player.Player player, Personagem p) {
+        return player instanceof ServerPlayer sp ? 1 + bonus(sp, p, "vida", "") : 1f;
+    }
+
+    /** Velocidade máxima de voo com a melhoria (blocos/s). */
+    public static float velocidadeVoo(ServerPlayer player, Personagem p) {
+        return com.danrod.dcuniverse.ability.passive.Voo.velocidade(p) * (1 + bonus(player, p, "voo_velocidade", ""));
+    }
+
+    /**
+     * Gasto de energia por segundo no voo. Herói da árvore: o cruzeiro é de graça e só o impulso gasta (menos com a
+     * melhoria de impulso). Sistema antigo: drain e boost_drain da passiva.
+     */
+    public static float drenoVoo(ServerPlayer player, Personagem p, com.danrod.dcuniverse.character.Params voo, boolean impulso) {
+        if (!ativa(player, p)) return impulso ? voo.f("boost_drain", voo.f("drain", 0f)) : voo.f("drain", 0f);
+        if (!impulso) return 0f;
+        float base = p.arvore().energia().impulso() > 0 ? p.arvore().energia().impulso() : voo.f("boost_drain", 0f);
+        return base * Math.max(0f, 1 - bonus(player, p, "impulso", ""));
     }
 
     /**
@@ -205,9 +318,16 @@ public final class Arvore {
         if (base == null && ms.isEmpty()) return h;
         JsonObject j = h.params().json().deepCopy();
         if (base != null) base.entrySet().forEach(e -> j.add(e.getKey(), e.getValue()));
-        for (Melhoria m : ms) m.params().entrySet().forEach(e -> j.add(e.getKey(), e.getValue()));
+        float dano = 0, menos = 0;
+        for (Melhoria m : ms) {
+            m.params().entrySet().forEach(e -> j.add(e.getKey(), e.getValue()));
+            if (m.tipo().equals("dano")) dano += m.valor();
+            if (m.tipo().equals("custo")) menos += m.valor();
+        }
+        for (String k : DANOS) if (j.has(k)) j.addProperty(k, j.get(k).getAsFloat() * (1 + dano));
+        float custo = (j.has("cost") ? j.get("cost").getAsFloat() : h.custo()) * Math.max(0f, 1 - menos);
         float recarga = j.has("cooldown") ? j.get("cooldown").getAsFloat() : h.recargaSeg();
-        return new Personagem.Habilidade(h.id(), h.tipo(), h.modo(), h.custo(), recarga, h.suprema(), new com.danrod.dcuniverse.character.Params(j));
+        return new Personagem.Habilidade(h.id(), h.tipo(), h.modo(), custo, recarga, h.suprema(), new com.danrod.dcuniverse.character.Params(j));
     }
 
     /** A habilidade id do herói como vale para este jogador (com as melhorias). */
@@ -220,24 +340,14 @@ public final class Arvore {
         return h.modo() == Personagem.Modo.HOLD ? h.params().f("burst", 0f) : 0f;
     }
 
-    public static int slotsAbertos(ServerPlayer player, Personagem p) {
-        return player.isCreative() ? SLOTS : slotsDoNivel(nivel(player, p));
-    }
-
     public static int pontos(ServerPlayer player, Personagem p) {
         if (player.isCreative()) return PONTOS_CRIATIVO;
         int ganhos = pontosAteNivel(nivel(player, p));
-        String ini = inicial(player, p);
         int gastos = 0;
         for (String id : compradas(player, p)) {
-            if (!id.equals(ini)) gastos += p.arvore().custos().getOrDefault(id, 0);
+            if (!inicial(p, id)) gastos += p.arvore().custos().getOrDefault(id, 0);
         }
         return ganhos - gastos;
-    }
-
-    /** Ainda não escolheu a habilidade inicial deste herói. */
-    public static boolean precisaEscolher(ServerPlayer player, Personagem p) {
-        return p.arvore() != null && inicial(player, p).isEmpty();
     }
 
     // ------------------------------------------------------------------ o que vale em jogo
@@ -246,8 +356,7 @@ public final class Arvore {
     public static List<Personagem.Habilidade> equipadas(ServerPlayer player, Personagem p) {
         List<Personagem.Habilidade> out = new ArrayList<>();
         List<String> s = slots(player, p);
-        int abertos = slotsAbertos(player, p);
-        for (int i = 0; i < abertos; i++) {
+        for (int i = 0; i < SLOTS; i++) {
             String id = s.get(i);
             Personagem.Habilidade h = id.isEmpty() ? null : p.habilidade(id);
             if (h != null && tem(player, p, id) && out.stream().noneMatch(x -> x.id().equals(id))) out.add(efetiva(player, p, h));
@@ -284,38 +393,15 @@ public final class Arvore {
         return p != null && p.arvore() != null && !EstadoJogador.de(player).kitAntigo();
     }
 
-    /** Herói do sistema novo: as habilidades não gastam energia (só recarga). */
-    public static boolean semEnergia(net.minecraft.world.entity.player.Player player, Personagem p) {
-        return ativa(player, p);
-    }
-
     // ------------------------------------------------------------------ pedidos do cliente
-
-    public static void escolherInicial(ServerPlayer player, String id) {
-        Personagem p = EstadoJogador.de(player).personagem();
-        if (!ativa(player, p) || !precisaEscolher(player, p) || !p.arvore().iniciais().contains(id)) return;
-        CompoundTag d = dados(player, p);
-        d.putString("inicial", id);
-        List<String> c = lista(d, "compradas");
-        if (!c.contains(id)) c.add(id);
-        d.put("compradas", tag(c));
-        List<String> s = slots(player, p);
-        s = new ArrayList<>(s);
-        if (!s.contains(id)) s.set(0, id);
-        d.put("slots", tag(s));
-        salvar(player, p, d);
-        player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.4f);
-        avisar(player, Component.translatable("dcuniverse.arvore.msg.inicial", nome(id)).withStyle(ChatFormatting.GOLD));
-        atualizou(player);
-    }
 
     /** Pode comprar agora: existe, ainda não tem, tem o pai e a melhoria exigida, e pontos (o criativo tem sempre). */
     public static boolean podeComprar(ServerPlayer player, Personagem p, String id) {
-        if (!ativa(player, p) || precisaEscolher(player, p)) return false;
+        if (!ativa(player, p)) return false;
         Integer custo = p.arvore().custos().get(id);
         if (custo == null || tem(player, p, id) || pontos(player, p) < custo) return false;
         Melhoria m = p.arvore().melhorias().get(id);
-        return m == null || tem(player, p, m.pai()) && (m.requer().isEmpty() || tem(player, p, m.requer()));
+        return m == null || (m.doHeroi() || tem(player, p, m.pai())) && (m.requer().isEmpty() || tem(player, p, m.requer()));
     }
 
     /** Compra uma habilidade ou melhoria com pontos. */
@@ -328,8 +414,7 @@ public final class Arvore {
         d.put("compradas", tag(c));
         // Comprou uma habilidade e tem slot aberto vazio: já vai para ele.
         List<String> s = new ArrayList<>(slots(player, p));
-        int abertos = slotsAbertos(player, p);
-        for (int i = 0; i < abertos && p.arvore().ehHabilidade(id); i++) {
+        for (int i = 0; i < SLOTS && p.arvore().ehHabilidade(id); i++) {
             if (s.get(i).isEmpty()) {
                 s.set(i, id);
                 break;
@@ -344,11 +429,11 @@ public final class Arvore {
 
     /**
      * Desfaz uma compra, só no criativo (para testar as melhorias): sai junto o que depende dela (melhorias da
-     * habilidade ou a melhoria seguinte). A inicial não sai.
+     * habilidade ou a melhoria seguinte). As iniciais não saem.
      */
     public static boolean desfazer(ServerPlayer player, String id) {
         Personagem p = EstadoJogador.de(player).personagem();
-        if (!ativa(player, p) || !player.isCreative() || !tem(player, p, id) || id.equals(inicial(player, p))) return false;
+        if (!ativa(player, p) || !player.isCreative() || !tem(player, p, id) || inicial(p, id)) return false;
         CompoundTag d = dados(player, p);
         List<String> c = lista(d, "compradas");
         List<String> sai = new ArrayList<>(List.of(id));
@@ -373,7 +458,7 @@ public final class Arvore {
         return true;
     }
 
-    /** Monta os 6 slots. Só entra o que o jogador tem; slot trancado pode guardar (vale quando abrir). */
+    /** Monta os 6 slots. Só entra o que o jogador tem. */
     public static boolean definirSlots(ServerPlayer player, List<String> novos) {
         Personagem p = EstadoJogador.de(player).personagem();
         if (!ativa(player, p) || novos.size() != SLOTS) return false;
@@ -404,17 +489,13 @@ public final class Arvore {
 
     public static void definirXp(ServerPlayer player, Personagem p, int xp) {
         int antes = nivel(player, p);
-        int slotsAntes = slotsDoNivel(antes);
         CompoundTag d = dados(player, p);
         d.putInt("xp", Math.max(0, Math.min(xp, xpDoNivel(NIVEL_MAX))));
         salvar(player, p, d);
         int agora = nivel(player, p);
         if (agora > antes) {
-            boolean slot = slotsDoNivel(agora) > slotsAntes;
             player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.9f, 1.0f);
-            Component msg = Component.translatable("dcuniverse.arvore.msg.nivel", agora, pontosAteNivel(agora) - pontosAteNivel(antes)).withStyle(ChatFormatting.GOLD);
-            if (slot) msg = msg.copy().append(Component.translatable("dcuniverse.arvore.msg.slot").withStyle(ChatFormatting.AQUA));
-            avisar(player, msg);
+            avisar(player, Component.translatable("dcuniverse.arvore.msg.nivel", agora, pontosAteNivel(agora) - pontosAteNivel(antes)).withStyle(ChatFormatting.GOLD));
         }
         atualizou(player);
     }
@@ -427,11 +508,13 @@ public final class Arvore {
         if (player.connection != null) player.sendOverlayMessage(msg);
     }
 
-    private static Component nome(String id) {
-        return Component.translatable("habilidade.dcuniverse." + id);
-    }
-
     private static void atualizou(ServerPlayer player) {
+        Personagem p = EstadoJogador.de(player).personagem();
+        // A vida e a energia máximas podem ter mudado com uma melhoria.
+        if (p != null) {
+            com.danrod.dcuniverse.character.Atributos.aplicar(player, p, false);
+            com.danrod.dcuniverse.energy.Energia.adicionar(player, p, 0f);
+        }
         Habilidades.conferirCanalizada(player);
         sincronizar(player);
         Rede.sincronizar(player);
@@ -445,15 +528,22 @@ public final class Arvore {
         for (String id : p.arvore().ordem(p)) {
             Personagem.Habilidade h = efetiva(player, p, p.habilidade(id));
             itens.add(new Rede.ArvoreItem(id, p.arvore().custos().get(id), h.recargaSeg(), h.modo() == Personagem.Modo.HOLD && rajada(h) <= 0,
-                p.arvore().iniciais().contains(id), rajada(h), "", "", ""));
-            for (Melhoria m : p.arvore().melhorias().values()) {
-                if (m.pai().equals(id)) itens.add(new Rede.ArvoreItem(m.id(), m.custo(), 0f, false, false, 0f, m.pai(), m.requer(), m.icone()));
-            }
+                inicial(p, id), rajada(h), "", "", "", h.custo(), ""));
         }
-        List<String> compradas = compradas(player, p);
+        // As melhorias depois: as do herói primeiro (penduradas no tronco), depois as de cada habilidade.
+        for (Melhoria m : p.arvore().melhorias().values()) {
+            if (m.doHeroi()) itens.add(item(m));
+        }
+        for (String id : p.arvore().ordem(p)) {
+            for (Melhoria m : p.arvore().melhorias().values()) if (m.pai().equals(id)) itens.add(item(m));
+        }
         return new Rede.ArvoreSync(p.id().toString(), nivel, xp, xpDoNivel(nivel), nivel >= NIVEL_MAX ? xp : xpDoNivel(nivel + 1),
-            pontos(player, p), slotsAbertos(player, p), player.isCreative(), inicial(player, p), List.copyOf(compradas),
+            pontos(player, p), SLOTS, player.isCreative(), List.copyOf(tem(player, p)),
             List.copyOf(slots(player, p)), List.copyOf(itens), alturaSalto(player, p));
+    }
+
+    private static Rede.ArvoreItem item(Melhoria m) {
+        return new Rede.ArvoreItem(m.id(), m.custo(), 0f, false, false, 0f, m.pai(), m.requer(), m.icone(), m.valor(), m.tipo());
     }
 
     /** Altura do Super Pulo equipado (0 = sem ele): o cliente usa no salto carregado (agachar + pulo). */

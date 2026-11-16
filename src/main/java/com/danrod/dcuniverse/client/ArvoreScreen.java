@@ -100,7 +100,6 @@ public final class ArvoreScreen extends Screen {
     public void tick() {
         idade++;
         if (!EstadoCliente.temArvore()) onClose();
-        else if (EstadoCliente.arvore.precisaEscolher()) minecraft.gui.setScreen(new EscolhaInicialScreen());
     }
 
     @Override
@@ -133,7 +132,7 @@ public final class ArvoreScreen extends Screen {
     }
 
     private void cabecalho(GuiGraphicsExtractor g, Rede.ArvoreSync a, int cor, float t) {
-        Component heroi = Component.translatable(EscolhaInicialScreen.chaveHeroi(a.heroi()));
+        Component heroi = Component.translatable(chaveHeroi(a.heroi()));
         String nome = heroi.getString();
         int p = nome.indexOf(" (");
         if (p > 0) nome = nome.substring(0, p);
@@ -170,10 +169,16 @@ public final class ArvoreScreen extends Screen {
         List<No> out = new ArrayList<>();
         float[] prox = {0};
         int[] fundo = {1};
-        List<Float> raizes = new ArrayList<>();
+        // Primeiro as melhorias do herói (energia, vida...), presas direto no tronco; depois as habilidades.
+        for (Rede.ArvoreItem it : a.itens()) {
+            if (!it.melhoria() || !it.pai().isEmpty() || !it.requer().isEmpty()) continue;
+            posicionar(a, it, 1, "", out, prox, fundo);
+            prox[0] += 0.15f;
+        }
+        if (prox[0] > 0) prox[0] += 0.4f;
         for (Rede.ArvoreItem it : a.itens()) {
             if (it.melhoria()) continue;
-            raizes.add(posicionar(a, it, 1, "", out, prox, fundo));
+            posicionar(a, it, 1, "", out, prox, fundo);
             prox[0] += 0.35f;
         }
         colunas = Math.max(1, prox[0] - 0.35f);
@@ -372,7 +377,7 @@ public final class ArvoreScreen extends Screen {
         if (!tem) g.fill(x + 2, y + 2, x + s - 2, y + s - 2, pode ? 0x50101521 : 0xA0101521);
         if (sobre && tem) brilhoIcone(g, x + 1, y + 1, s - 2, cor, t);
         String chave = "melhoria.dcuniverse." + it.id() + ".rotulo";
-        String r = net.minecraft.client.resources.language.I18n.get(chave);
+        String r = !it.tipo().isEmpty() ? romano(it.nivel()) : net.minecraft.client.resources.language.I18n.get(chave);
         if (!r.equals(chave)) {
             int w = Math.round(font.width(r) * 0.75f) + 2;
             g.fill(x + s - w, y + s - 7, x + s + 1, y + s + 1, 0xE0101521);
@@ -386,13 +391,40 @@ public final class ArvoreScreen extends Screen {
         for (int c = 0; c < n; c++) losango(g, cx - n * 3 + c * 6 + 1, y, pode ? OURO : 0xFF6A6A6A);
     }
 
-    /** Nome de um nó: a habilidade, ou "Habilidade: melhoria". */
+    /** Nome de um nó: a habilidade, a melhoria própria ou a padrão com o nível ("Energia máxima II"). */
     static Component nome(Rede.ArvoreItem it) {
+        if (!it.tipo().isEmpty()) return Component.translatable("dcuniverse.melhoria." + it.tipo(), romano(it.nivel()));
         return it.melhoria() ? Component.translatable("melhoria.dcuniverse." + it.id()) : Component.translatable("habilidade.dcuniverse." + it.id());
     }
 
     static Component descricao(Rede.ArvoreItem it) {
+        if (!it.tipo().isEmpty()) {
+            return Component.translatable("dcuniverse.melhoria." + it.tipo() + ".desc", pct(it.valor()), pct(it.valor() * it.nivel()));
+        }
         return Component.translatable((it.melhoria() ? "melhoria.dcuniverse." : "habilidade.dcuniverse.") + it.id() + ".desc");
+    }
+
+    private static String pct(float v) {
+        return Math.round(v * 100) + "%";
+    }
+
+    static String romano(int n) {
+        return switch (n) {
+            case 1 -> "I";
+            case 2 -> "II";
+            case 3 -> "III";
+            case 4 -> "IV";
+            case 5 -> "V";
+            default -> Integer.toString(n);
+        };
+    }
+
+    /** Dono de uma melhoria: a habilidade, ou o herói (melhorias de energia, vida...). */
+    private static Component dono(Rede.ArvoreSync a, Rede.ArvoreItem it) {
+        if (!it.pai().isEmpty()) return Component.translatable("habilidade.dcuniverse." + it.pai());
+        String nome = Component.translatable(chaveHeroi(a.heroi())).getString();
+        int p = nome.indexOf(" (");
+        return Component.literal(p > 0 ? nome.substring(0, p) : nome);
     }
 
     private void painel(GuiGraphicsExtractor g, Rede.ArvoreSync a, int cor, float t) {
@@ -409,7 +441,7 @@ public final class ArvoreScreen extends Screen {
         if (it.melhoria()) {
             var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(it.icone().isEmpty() ? "minecraft:book" : it.icone()));
             g.item(new net.minecraft.world.item.ItemStack(item.orElse(net.minecraft.world.item.Items.BOOK)), px + 10, py + 10);
-            pequeno(g, font, Component.translatable("dcuniverse.arvore.melhoria_de", Component.translatable("habilidade.dcuniverse." + it.pai())), tx, py + 19, SUAVE);
+            pequeno(g, font, Component.translatable("dcuniverse.arvore.melhoria_de", dono(a, it)), tx, py + 19, SUAVE);
         } else {
             icone(g, it.id(), px + 6, py + 6, 24, tem ? 0xFFFFFFFF : 0xFF8A8A8A);
             pequeno(g, font, resumo(it), tx, py + 19, SUAVE);
@@ -426,7 +458,7 @@ public final class ArvoreScreen extends Screen {
             int s = a.slots().indexOf(it.id());
             estado = it.melhoria() ? Component.translatable("dcuniverse.arvore.melhoria_ativa")
                 : s >= 0 && s < a.slotsAbertos() ? Component.translatable("dcuniverse.arvore.no_slot", teclaDoSlot(s))
-                : Component.translatable("dcuniverse.arvore.comprada");
+                : Component.translatable(it.inicial() ? "dcuniverse.arvore.inicial" : "dcuniverse.arvore.comprada");
             corEstado = VERDE;
         } else if (falta != null) {
             estado = Component.translatable("dcuniverse.arvore.exige", nome(falta));
@@ -443,7 +475,12 @@ public final class ArvoreScreen extends Screen {
         g.fill(px + 6, ty - 3, px + dw - 6, ty - 2, LINHA);
         pequeno(g, font, estado, px + 6, ty, corEstado);
         ty += 10;
-        boolean desfaz = tem && a.criativo() && !it.id().equals(a.inicial());
+        // Gasto de energia da habilidade numa linha própria, em azul.
+        if (!it.melhoria() && it.valor() > 0) {
+            pequeno(g, font, Component.translatable(it.hold() ? "dcuniverse.arvore.energia_s" : "dcuniverse.arvore.energia", num(it.valor())), px + 6, ty, 0xFF7FB8FF);
+            ty += 9;
+        }
+        boolean desfaz = tem && a.criativo() && !it.inicial();
         // Descrição.
         List<FormattedCharSequence> linhas = font.split(descricao(it), Math.round((dw - 12) / 0.75f));
         int fundoTexto = py + ph - (!tem || desfaz ? 26 : 18);
@@ -486,7 +523,7 @@ public final class ArvoreScreen extends Screen {
     /** O que falta comprar antes deste nó (a habilidade ou a melhoria exigida), ou null. */
     private static Rede.ArvoreItem falta(Rede.ArvoreSync a, Rede.ArvoreItem it) {
         if (!it.melhoria()) return null;
-        if (!a.tem(it.pai())) return a.item(it.pai());
+        if (!it.pai().isEmpty() && !a.tem(it.pai())) return a.item(it.pai());
         if (!it.requer().isEmpty() && !a.tem(it.requer())) return a.item(it.requer());
         return null;
     }
@@ -504,11 +541,6 @@ public final class ArvoreScreen extends Screen {
             moldura(g, x, sy, slot, slot, borda);
             if (aberto && !id.isEmpty() && !(id.equals(pegando) && pegouDoSlot == i && arrastou)) {
                 icone(g, id, x + 3, sy + 3, slot - 6, 0xFFFFFFFF);
-            }
-            if (!aberto) {
-                cadeado(g, x + slot / 2, sy + 7);
-                String nv = Component.translatable("dcuniverse.arvore.nivel_curto", Arvore.SLOT_NIVEL[i]).getString();
-                pequeno(g, font, Component.literal(nv), x + slot / 2 - Math.round(font.width(nv) * 0.75f / 2), sy + slot - 9, 0xFF6A6A6A);
             }
             String tecla = teclaDoSlot(i);
             pequeno(g, font, Component.literal(tecla), x + slot / 2 - Math.round(font.width(tecla) * 0.75f / 2), sy + slot + 3, aberto ? TEXTO : 0xFF5A5A5A);
@@ -649,7 +681,7 @@ public final class ArvoreScreen extends Screen {
         // Mostra já; o servidor confirma em seguida.
         Rede.ArvoreSync a = EstadoCliente.arvore;
         EstadoCliente.arvore = new Rede.ArvoreSync(a.heroi(), a.nivel(), a.xp(), a.xpNivel(), a.xpProximo(), a.pontos(), a.slotsAbertos(),
-            a.criativo(), a.inicial(), a.compradas(), List.copyOf(novos), a.itens(), a.salto());
+            a.criativo(), a.compradas(), List.copyOf(novos), a.itens(), a.salto());
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.ARMOR_EQUIP_IRON.value(), 1.2f, 0.7f));
     }
 
@@ -666,17 +698,28 @@ public final class ArvoreScreen extends Screen {
 
     // ------------------------------------------------------------------ peças compartilhadas
 
+    static String chaveHeroi(String heroi) {
+        var id = Identifier.tryParse(heroi);
+        return id == null ? "" : "personagem." + id.getNamespace() + "." + id.getPath();
+    }
+
     static String teclaDoSlot(int s) {
         String t = Atalhos.tecla(s).getTranslatedKeyMessage().getString();
         return t.length() > 3 ? t.substring(0, 3) : t;
     }
 
-    /** Recarga e jeito de usar: "Recarga 6 s • apertar". */
+    /** Recarga e jeito de usar: "Recarga 2 s • segurar" (a energia vai numa linha própria no painel). */
     static Component resumo(Rede.ArvoreItem it) {
-        String rec = it.recarga() <= 0 ? "" : String.format(Locale.ROOT, it.recarga() % 1 == 0 ? "%.0f" : "%.1f", it.recarga());
+        String rec = it.recarga() <= 0 ? "" : num(it.recarga());
         Component modo = it.rajada() > 0 ? Component.translatable("dcuniverse.arvore.rajada", String.format(Locale.ROOT, "%.0f", it.rajada()))
             : Component.translatable(it.hold() ? "dcuniverse.arvore.segurar" : "dcuniverse.arvore.apertar");
-        return rec.isEmpty() ? modo : Component.translatable("dcuniverse.arvore.recarga", rec).append(" • ").append(modo);
+        net.minecraft.network.chat.MutableComponent out = Component.empty();
+        if (!rec.isEmpty()) out.append(Component.translatable("dcuniverse.arvore.recarga", rec)).append(" • ");
+        return out.append(modo);
+    }
+
+    private static String num(float v) {
+        return String.format(Locale.ROOT, Math.abs(v - Math.round(v)) < 0.05f ? "%.0f" : "%.1f", v);
     }
 
     static void icone(GuiGraphicsExtractor g, String id, int x, int y, int tam, int tinta) {
@@ -712,13 +755,6 @@ public final class ArvoreScreen extends Screen {
         g.fill(x + 1, y, x + 2, y + 1, cor);
         g.fill(x, y + 1, x + 3, y + 2, cor);
         g.fill(x + 1, y + 2, x + 2, y + 3, cor);
-    }
-
-    private static void cadeado(GuiGraphicsExtractor g, int cx, int y) {
-        int c = 0xFF5A5E68;
-        moldura(g, cx - 2, y, 5, 4, c);
-        g.fill(cx - 4, y + 3, cx + 5, y + 10, c);
-        g.fill(cx, y + 5, cx + 1, y + 8, 0xFF0A0D14);
     }
 
     static int comAlfa(int rgb, int alfa) {

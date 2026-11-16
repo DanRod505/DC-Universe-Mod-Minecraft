@@ -45,23 +45,15 @@
       "parry_stun": 1.5, "parry_knockback": 1.4, "arc": 200 }
   },
   "skill_tree": {
+    "energy": { "max": 100, "regen": 20, "delay": 3, "boost_drain": 8 },
     "starters": [ "visao_de_calor", "super_pulo", "sopro_congelante" ],
     "abilities": [
-      { "id": "visao_de_calor", "cost": 1,
-        "base": { "burst": 3, "cooldown": 5, "sets_fire": false, "lights_furnace": false, "cooks_drops": false },
-        "upgrades": [
-          { "id": "fogo", "cost": 1, "icon": "minecraft:fire_charge", "params": { "sets_fire": true } },
-          { "id": "fornalha", "cost": 1, "icon": "minecraft:furnace", "params": { "lights_furnace": true } },
-          { "id": "assado", "cost": 1, "icon": "minecraft:cooked_beef", "params": { "cooks_drops": true } },
-          { "id": "duracao_5", "cost": 1, "icon": "minecraft:clock", "params": { "burst": 5 } },
-          { "id": "duracao_10", "cost": 2, "requires": "duracao_5", "icon": "minecraft:clock", "params": { "burst": 10 } }
-        ] },
+      { "id": "visao_de_calor", "cost": 1 },
       { "id": "super_pulo", "cost": 1,
         "upgrades": [
           { "id": "altura_20", "cost": 1, "icon": "minecraft:rabbit_foot", "params": { "height": 20 } },
           { "id": "altura_30", "cost": 2, "requires": "altura_20", "icon": "minecraft:rabbit_foot", "params": { "height": 30 } }
         ] },
-      { "id": "voo", "cost": 1 },
       { "id": "sopro_congelante", "cost": 1 },
       { "id": "investida_de_aco", "cost": 2 },
       { "id": "palmas_sonicas", "cost": 2 },
@@ -75,7 +67,7 @@
   "abilities": [
     { "id": "visao_de_calor", "type": "projectile_beam", "set": "combat", "mode": "hold", "cost": 12, "cooldown": 2,
       "range": 24, "damage_mult": 0.4, "color": "#FF2A1A", "sets_fire": true, "melts": true,
-      "anim": "superman.visao.inicio", "windup": 0.35, "loop_anim": "superman.visao" },
+      "lights_furnace": true, "cooks_drops": true, "anim": "superman.visao.inicio", "windup": 0.35, "loop_anim": "superman.visao" },
     { "id": "sopro_congelante", "type": "area_cone", "set": "combat", "mode": "hold", "cost": 10, "cooldown": 3,
       "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze",
       "anim": "superman.sopro.inicio", "windup": 0.6, "loop_anim": "superman.sopro" },
@@ -98,7 +90,6 @@
     { "id": "fortaleza_da_solidao", "type": "structure", "supreme": true, "cost_pct": 70, "cooldown": 150,
       "range": 24, "radius": 6, "duration": 120, "regen_level": 2, "energy_per_second": 8,
       "meteor": true, "impact_damage_mult": 1.5, "anim": "superman.suprema", "windup": 2.4 },
-    { "id": "voo", "type": "flight", "cost": 0, "cooldown": 0.5, "unlocks_passive": "flight" },
-    { "id": "super_pulo", "type": "leap", "cost": 0, "cooldown": 1.5, "height": 10, "unlocks_passive": "super_jump" }
+    { "id": "super_pulo", "type": "leap", "cost": 10, "cooldown": 1.5, "height": 10, "unlocks_passive": "super_jump" }
   ]
 }

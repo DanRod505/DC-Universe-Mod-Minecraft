@@ -128,7 +128,7 @@ public final class Comandos {
                         }
                         String recarga = String.format(java.util.Locale.ROOT, "%+.1f", Recargas.porSegundo(alvo, p));
                         c.getSource().sendSuccess(() -> Component.translatable("dcuniverse.cmd.status", alvo.getDisplayName(),
-                            Component.translatable(p.chaveNome()), Math.round(e.energia()), Math.round(p.energia().max()), recarga,
+                            Component.translatable(p.chaveNome()), Math.round(e.energia()), Math.round(com.danrod.dcuniverse.ability.Arvore.energiaMax(alvo, p)), recarga,
                             Component.translatable(e.esgotado() ? "dcuniverse.cmd.sim" : "dcuniverse.cmd.nao")), false);
                         return 1;
                     })))

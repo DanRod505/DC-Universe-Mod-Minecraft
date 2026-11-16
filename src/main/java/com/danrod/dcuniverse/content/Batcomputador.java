@@ -154,7 +154,7 @@ public final class Batcomputador {
         Personagem p = e.personagem();
         if (p == null || !Recargas.tecnologica(p) || recargaFalta(player) > 0) return;
         Cargas.encher(player, p);
-        e.setEnergia(p.energia().max());
+        e.setEnergia(com.danrod.dcuniverse.ability.Arvore.energiaMax(player, p));
         e.setEsgotado(false);
         RECARREGOU.put(player.getUUID(), player.level().getGameTime());
         Rede.sincronizar(player);

@@ -212,6 +212,18 @@ def verificar_personagens(raiz, recursos, erros):
                                 erros.append(f"{nome}: falta {k} em {i}.json")
             if len(set(na_arvore)) != len(na_arvore):
                 erros.append(f"{nome}: árvore com habilidade repetida")
+            # Melhorias padrão (energia, vida, dano, custo...), geradas em ability/Arvore.java: nome e descrição nos dois idiomas.
+            fonte = (raiz / "src/main/java/com/danrod/dcuniverse/ability/Arvore.java").read_text(encoding="utf-8")
+            for t in re.findall(r'new Padrao\("(\w+)"', fonte):
+                for i in IDIOMAS:
+                    for k in (f"dcuniverse.melhoria.{t}", f"dcuniverse.melhoria.{t}.desc"):
+                        if k not in lang[i]:
+                            erros.append(f"{nome}: falta {k} em {i}.json")
+            # Energia da árvore (estilo Justice League Heroes): máximo, recuperação e atraso positivos.
+            en = arv.get("energy", {})
+            for k in ("max", "regen", "delay"):
+                if k in en and not en[k] > 0:
+                    erros.append(f"{nome}: skill_tree.energy.{k} = {en[k]}, deve ser maior que 0")
             if not arv.get("starters"):
                 erros.append(f"{nome}: árvore sem habilidades iniciais")
             for x in arv.get("starters", []):

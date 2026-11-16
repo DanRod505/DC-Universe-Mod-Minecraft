@@ -144,7 +144,8 @@ public record Personagem(
         return new Personagem(id, j.get("level").getAsInt(), ficha, energia, List.copyOf(traje), passivas, List.copyOf(habs),
             new Params(j).color("color", 0xFFFFFF), j.has("scale") ? j.get("scale").getAsFloat() : 1f, cinto,
             j.has("combo") ? com.danrod.dcuniverse.combate.Combo.Config.parse(j.getAsJsonObject("combo")) : null,
-            j.has("skill_tree") ? com.danrod.dcuniverse.ability.Arvore.Config.parse(j.getAsJsonObject("skill_tree"), habs) : null);
+            j.has("skill_tree") ? com.danrod.dcuniverse.ability.Arvore.Config.parse(j.getAsJsonObject("skill_tree"), habs,
+                passivas.stream().anyMatch(t -> t.tipo().equals("flight"))) : null);
     }
 
     private static List<Tipo> tipos(JsonArray arr) {

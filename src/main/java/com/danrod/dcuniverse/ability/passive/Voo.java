@@ -91,7 +91,7 @@ public final class Voo implements Passiva {
         Vec3 pos = player.position();
         double vel = r.pos == null ? 0 : pos.distanceTo(r.pos);
         boolean criativo = player.isCreative();
-        if (e.esgotado() && !criativo) {
+        if (e.esgotado() && !criativo && !com.danrod.dcuniverse.ability.Arvore.ativa(player, e.personagem())) {
             // Decisão 6: sem energia o voo desliga e o jogador desce planando, sem dano.
             if (a.mayfly) {
                 travar(player);
@@ -104,8 +104,8 @@ public final class Voo implements Passiva {
         if (a.flying) {
             player.resetFallDistance();
             Personagem pers = e.personagem();
-            float dreno = player.isSprinting() ? p.f("boost_drain", p.f("drain", 0f)) : p.f("drain", 0f);
-            if (pers != null && dreno > 0 && !criativo && !com.danrod.dcuniverse.ability.Arvore.semEnergia(player, pers)) Energia.adicionar(player, pers, -dreno / 20f);
+            float dreno = pers == null ? 0f : com.danrod.dcuniverse.ability.Arvore.drenoVoo(player, pers, p, player.isSprinting());
+            if (dreno > 0 && !criativo && e.energia() > 0) Energia.adicionar(player, pers, -dreno / 20f);
             Guia.concluir(player, "voar");
         }
         if (r.voando != a.flying) {
@@ -171,7 +171,7 @@ public final class Voo implements Passiva {
         if (agora - r.manobraEm < MANOBRA_INTERVALO - 2) return;
         EstadoJogador e = EstadoJogador.de(player);
         Personagem pers = e.personagem();
-        if (tipo == ARRANCADA && !player.isCreative() && !com.danrod.dcuniverse.ability.Arvore.semEnergia(player, pers)
+        if (tipo == ARRANCADA && !player.isCreative()
             && !Energia.gastar(player, pers, pers.passiva("flight").params().f("dash_cost", 15f))) return;
         r.manobraEm = agora;
         ServerLevel lvl = player.level();
@@ -239,7 +239,7 @@ public final class Voo implements Passiva {
     public static boolean alternar(ServerPlayer player) {
         Abilities a = player.getAbilities();
         EstadoJogador e = EstadoJogador.de(player);
-        if (!a.mayfly || e.esgotado() && !player.isCreative()) return false;
+        if (!a.mayfly || e.esgotado() && !player.isCreative() && !com.danrod.dcuniverse.ability.Arvore.ativa(player, e.personagem())) return false;
         if (a.flying) {
             a.flying = false;
         } else {

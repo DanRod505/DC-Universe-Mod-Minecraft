@@ -205,11 +205,10 @@ public final class Cliente {
         Trava.tick(mc);
         while (Teclas.ARVORE.consumeClick()) {
             if (livre && transformado && EstadoCliente.temArvore()) {
-                mc.gui.setScreen(EstadoCliente.arvore.precisaEscolher() ? new EscolhaInicialScreen() : new ArvoreScreen());
+                mc.gui.setScreen(new ArvoreScreen());
                 livre = false;
             }
         }
-        EscolhaInicialScreen.tick(mc, livre && transformado);
         while (Teclas.RADIAL.consumeClick()) {
             if (livre && transformado) {
                 mc.gui.setScreen(new RadialScreen());

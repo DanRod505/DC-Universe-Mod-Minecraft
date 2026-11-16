@@ -56,7 +56,7 @@ public final class Transformacao {
         estado.setPersonagem(id);
         estado.setUltimaTransformacao(agora);
         estado.setSelecionada(0);
-        estado.setEnergia((float) (p.energia().max() * Config.ENERGIA_INICIAL.get()));
+        estado.setEnergia((float) (com.danrod.dcuniverse.ability.Arvore.energiaMax(player, p) * Config.ENERGIA_INICIAL.get()));
         Traje.vestir(player, p);
         Atributos.aplicar(player, p, true);
         Passivas.aoTransformar(player, p);

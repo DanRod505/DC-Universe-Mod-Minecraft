@@ -105,8 +105,9 @@ public final class Hud {
         if (s.recarga() < 0) kryptonita(g, tempo);
         medalhao(g, mc, s, cor);
         if (EstadoCliente.temArvore()) {
-            // Árvore nova: sem energia. A barra vira nível e experiência, e os espaços são os slots da build.
-            barraNivel(g, mc.font, s, EstadoCliente.arvore, cor, tempo);
+            // Árvore nova: a barra de energia comum, o nível com a experiência embaixo dela e os slots da build.
+            barra(g, mc.font, s, cor, pt, tempo);
+            nivel(g, mc.font, EstadoCliente.arvore, cor, tempo);
             espacosArvore(g, mc.font, s, EstadoCliente.arvore, cor, tempo);
         } else {
             barra(g, mc.font, s, cor, pt, tempo);
@@ -245,37 +246,26 @@ public final class Hud {
         else if (s.tecnologica()) g.blit(RenderPipelines.GUI_TEXTURED, TEX, tx - 13, ty - 2, s.estacao() ? 176 : 188, 32, 11, 11, TW, TH);
     }
 
-    /** Nível do herói e a experiência até o próximo, na moldura da barra de energia. Kryptonita: a barra fica doente. */
-    private static void barraNivel(GuiGraphicsExtractor g, Font font, Rede.Sync s, Rede.ArvoreSync a, int cor, float tempo) {
-        int mx = BX + 3, my = BY + 3;
+    /**
+     * Nível do herói na linha do nome (à direita) e a experiência num filete dourado logo abaixo da barra de energia,
+     * com um brilho que corre pela parte ganha.
+     */
+    private static void nivel(GuiGraphicsExtractor g, Font font, Rede.ArvoreSync a, int cor, float tempo) {
         int faixa = Math.max(1, a.xpProximo() - a.xpNivel());
-        float k = a.nivel() >= com.danrod.dcuniverse.ability.Arvore.NIVEL_MAX ? 1f : Mth.clamp((a.xp() - a.xpNivel()) / (float) faixa, 0f, 1f);
-        int w = Math.round(MIOLO_W * k);
-        g.fill(mx, my, mx + MIOLO_W, my + MIOLO_H, 0xFF0E1220);
-        int tinta = s.esgotado() ? 0xFF2EA04A : 0xFF000000 | clarear(cor, 0.30f);
-        float desliza = (tempo * 0.4f) % 8f;
-        if (w > 0) g.blit(RenderPipelines.GUI_TEXTURED, TEX, mx, my, 8 - desliza, 16, w, MIOLO_H, TW, TH, tinta);
-        // Brilho dourado que corre pela experiência ganha.
+        boolean max = a.nivel() >= com.danrod.dcuniverse.ability.Arvore.NIVEL_MAX;
+        float k = max ? 1f : Mth.clamp((a.xp() - a.xpNivel()) / (float) faixa, 0f, 1f);
+        Component nivel = Component.translatable("dcuniverse.hud.nivel", a.nivel()).withStyle(ChatFormatting.BOLD);
+        g.text(font, nivel, BX + 124 - font.width(nivel), Y0 + 2, 0xFFFFE08A, true);
+        int fx = BX + 3, fy = BY + 12, fw = MIOLO_W;
+        g.fill(fx, fy, fx + fw, fy + 2, 0xC00E1220);
+        int w = Math.round(fw * k);
+        if (w > 0) g.fillGradient(fx, fy, fx + w, fy + 2, 0xFFFFE6A0, 0xFFC89A30);
         if (w > 2) {
-            int bx = mx + Math.round(((tempo * 1.5f) % (w + 20)) - 10);
+            int bx = fx + Math.round(((tempo * 1.5f) % (w + 20)) - 10);
             for (int i = -3; i <= 3; i++) {
                 int x = bx + i;
-                if (x >= mx && x < mx + w) g.fill(x, my, x + 1, my + MIOLO_H, ((0x50 - Math.abs(i) * 0x14) << 24) | 0xFFE6A0);
+                if (x >= fx && x < fx + w) g.fill(x, fy, x + 1, fy + 2, ((0xC0 - Math.abs(i) * 0x30) << 24) | 0xFFFFFF);
             }
-        }
-        g.blit(RenderPipelines.GUI_TEXTURED, TEX, BX, BY, 0, 0, 124, 13, TW, TH);
-        g.text(font, nomeCurto(s), BX + 1, Y0 + 2, 0xFF000000 | clarear(cor, 0.55f), true);
-        int ty = BY + 15;
-        if (s.esgotado()) {
-            boolean pisca = ((int) (tempo / 6)) % 2 == 0;
-            g.text(font, Component.translatable("dcuniverse.hud.enfraquecido"), BX + 1, ty, pisca ? 0xFF7CFF8A : 0xFFB8F0C0, true);
-            return;
-        }
-        Component nivel = Component.translatable("dcuniverse.hud.nivel", a.nivel()).withStyle(ChatFormatting.BOLD);
-        g.text(font, nivel, BX + 1, ty, 0xFFFFE08A, true);
-        if (a.nivel() < com.danrod.dcuniverse.ability.Arvore.NIVEL_MAX) {
-            String xp = (a.xp() - a.xpNivel()) + " / " + faixa + " XP";
-            pequeno(g, font, Component.literal(xp), BX + 124 - Math.round(font.width(xp) * 0.75f), ty + 2, 0xFFB8C0D0);
         }
     }
 
@@ -307,7 +297,7 @@ public final class Hud {
                     g.text(font, seg, ix + 8 - font.width(seg) / 2 + 1, iy + 4, 0xFFFFFFFF, true);
                 }
                 // Ligada agora (o voo no ar, o raio segurado): um filete na cor do herói embaixo.
-                boolean ligada = h.id().equals(s.canalizando()) || h.id().equals("voo") && Minecraft.getInstance().player.getAbilities().flying;
+                boolean ligada = h.id().equals(s.canalizando());
                 if (ligada) g.fill(ix, iy + 17, ix + 16, iy + 18, 0xFF000000 | clarear(cor, 0.35f));
             }
             String tecla = Atalhos.tecla(slot).getTranslatedKeyMessage().getString();
@@ -317,10 +307,9 @@ public final class Hud {
         }
         if (sel >= 0 && Atalhos.atalhoDe(sel) >= 0) g.text(font, nome(habs.get(sel)), x + 2, y + 7, 0xFFE8ECF4, true);
         // Dica da árvore: discreta sempre; com algo a fazer, pulsa dourada.
-        boolean chama = a.precisaEscolher() || a.pontos() > 0 && !a.criativo();
+        boolean chama = a.pontos() > 0 && !a.criativo();
         Component tecla = Teclas.ARVORE.getTranslatedKeyMessage();
-        Component dica = a.precisaEscolher() ? Component.translatable("dcuniverse.hud.arvore.escolher", tecla)
-            : a.pontos() > 0 && !a.criativo() ? Component.translatable("dcuniverse.hud.arvore.pontos", tecla, a.pontos())
+        Component dica = a.pontos() > 0 && !a.criativo() ? Component.translatable("dcuniverse.hud.arvore.pontos", tecla, a.pontos())
             : Component.translatable("dcuniverse.hud.arvore", tecla);
         int dy = y + 33;
         int corDica = 0xA0B8C0D0;
