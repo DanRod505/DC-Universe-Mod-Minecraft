@@ -1093,8 +1093,10 @@
   "dcuniverse.arvore.extra.fogo": "Queimadura: 0,5 ❤/s por 4 s",
   "dcuniverse.arvore.extra.gelo": "Congela em 1 s de sopro, por 3 s",
   "habilidade.dcuniverse.giro_de_calor": "Giro de Calor",
-  "habilidade.dcuniverse.giro_de_calor.desc": "Uma das habilidades mais fortes do Superman: ele gira no lugar disparando a visão de calor, e os raios varrem tudo em volta dele, duas voltas completas. Cada volta queima todos os inimigos no alcance, põe fogo, derrete gelo e neve, acende fornalhas e risca o chão de brasa. O que morre já cai assado. Gasta muita energia.",
+  "habilidade.dcuniverse.giro_de_calor.desc": "Uma das habilidades mais fortes do Superman. Ele sobe do chão com os olhos acendendo e, parado no ar, gira a visão de calor em alta velocidade: o raio varre tudo em volta, deixando anéis de fogo em espiral e uma cratera em brasa. Quem o raio cruza queima e é empurrado para longe. No fim ele cai e bate no chão, e a onda de choque arremessa quem sobrou. O que morre já cai assado. Gasta muita energia.",
   "dcuniverse.melhoria.alcance": "Alcance %s",
   "dcuniverse.melhoria.alcance.desc": "O alcance vai de %s para %s.",
-  "dcuniverse.melhoria.alcance.valor": "%s blocos"
+  "dcuniverse.melhoria.alcance.valor": "%s blocos",
+  "subtitles.dcuniverse.habilidade.giro_carga": "Calor se acumulando",
+  "subtitles.dcuniverse.habilidade.giro": "Raio de calor girando"
 }

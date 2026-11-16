@@ -79,7 +79,7 @@ public final class Locomocao {
 
     /** O jogador está numa pose de outro sistema (voo, asa, nado, montaria, cama). */
     private static boolean foraDoChao(Minecraft mc, Player p) {
-        return Voador.voandoVisto(mc, p) || Pecas.planando(p.getId()) || p.isPassenger() || p.isFallFlying()
+        return Voador.voandoVisto(mc, p) || com.danrod.dcuniverse.core.EstadoCliente.GIROS.containsKey(p.getId()) || Pecas.planando(p.getId()) || p.isPassenger() || p.isFallFlying()
             || p.isSwimming() || p.isInWater() || p.onClimbable() || p.isSleeping() || p.getAbilities().flying || p.isSpectator();
     }
 

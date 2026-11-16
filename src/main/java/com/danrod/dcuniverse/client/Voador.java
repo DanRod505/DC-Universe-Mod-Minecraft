@@ -169,6 +169,7 @@ public final class Voador {
             meteoro(p);
             return;
         }
+        if (GiroVisual.mover(p)) return;
         if (!voando(p)) {
             vel = null;
             armado = true;
@@ -613,7 +614,7 @@ public final class Voador {
     /** Pose de voo: deitado na direção do olhar, inclinado nas curvas e com o punho à frente em alta velocidade. */
     private static void pose(AvatarRenderState s) {
         Pose ps = POSES.get(s.id);
-        if (ps == null) return;
+        if (ps == null || EstadoCliente.GIROS.containsKey(s.id)) return;
         s.walkAnimationSpeed = 0;
         float giro = 0;
         if (ps.manobra == Voo.GIRO_ESQUERDA || ps.manobra == Voo.GIRO_DIREITA) {

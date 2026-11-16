@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
  * <p>
  * Campos de um evento: "t" (segundos), "tremor" (graus) e "tremor_ticks", "zoom" (positivo fecha, negativo abre),
  * "flash" ("#RRGGBB" ou "cor" = cor do herói) e "clarao" (força), "som" (id), "vol" e "tom", "fx" (partículas:
- * olhos, inspira, agacha, estrondo, decola, aterrissa, brilho).
+ * olhos, inspira, agacha, estrondo, decola, aterrissa, brilho, giro_sobe, giro_carga, giro_impacto).
  */
 public final class Cena {
     private Cena() {}
@@ -115,6 +115,9 @@ public final class Cena {
                 for (int i = 0; i < 20; i++) level.addParticle(ParticleTypes.END_ROD, c.x, c.y, c.z,
                     rnd.nextGaussian() * 0.15, rnd.nextGaussian() * 0.15, rnd.nextGaussian() * 0.15);
             }
+            case "giro_sobe" -> GiroVisual.sobe(level, e);
+            case "giro_carga" -> GiroVisual.carga(level, e);
+            case "giro_impacto" -> GiroVisual.impacto(level, e);
             default -> {}
         }
     }

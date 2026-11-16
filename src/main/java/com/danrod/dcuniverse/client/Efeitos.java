@@ -48,7 +48,7 @@ public final class Efeitos {
             if (level.getEntity(id) instanceof Player pl) transformacao(level, pl, a.cor());
         });
         EstadoCliente.TRANSFORMOU.clear();
-        giros(level);
+        GiroVisual.tick(level);
         if (mc.player != null && Planador.amortecendo(mc.player)) rastro(level, mc.player);
     }
 
@@ -129,6 +129,7 @@ public final class Efeitos {
 
     /** Feixe de luz (mistura aditiva, brilha no escuro) saindo dos olhos de quem é visto em terceira pessoa. */
     public static void registrarFeixe() {
+        GiroVisual.registrar();
         NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
             if (!(e.getRenderState() instanceof AvatarRenderState st)) return;
             Rede.Aparencia a = EstadoCliente.APARENCIAS.get(st.id);
@@ -148,49 +149,13 @@ public final class Efeitos {
                 e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 1f, cor, k));
             }
         });
-        // Raio giratório: o corpo gira junto com os feixes.
-        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Pre.class, e -> {
-            if (!(e.getRenderState() instanceof AvatarRenderState st)) return;
-            EstadoCliente.GiroAtivo g = EstadoCliente.GIROS.get(st.id);
-            if (g == null) return;
-            float p = g.progresso(System.currentTimeMillis());
-            if (p >= 1f) return;
-            st.bodyRot = yawGiro(g, p);
-            st.yRot = 0;
-        });
-        NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
-            if (!(e.getRenderState() instanceof AvatarRenderState st)) return;
-            EstadoCliente.GiroAtivo g = EstadoCliente.GIROS.get(st.id);
-            ClientLevel level = Minecraft.getInstance().level;
-            if (g == null || level == null || !(level.getEntity(st.id) instanceof Player pl)) return;
-            float p = g.progresso(System.currentTimeMillis());
-            if (p >= 1f) return;
-            float yaw = yawGiro(g, p);
-            Vec3 dir = Vec3.directionFromRotation(PITCH_GIRO, yaw);
-            Vec3 olhos = new Vec3(st.x, st.y + st.eyeHeight, st.z);
-            Vec3 fim = alvoBloco(level, pl, olhos, dir, g.giro().alcance()).subtract(st.x, st.y, st.z);
-            Vec3 lado = dir.cross(new Vec3(0, 1, 0)).normalize();
-            Vec3 base = new Vec3(0, st.eyeHeight, 0).add(dir.scale(0.27));
-            float k = g.giro().escala() * 1.3f;
-            for (int s = -1; s <= 1; s += 2) {
-                Vec3 de = base.add(lado.scale(0.125 * s));
-                e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 1f, g.giro().cor(), k));
-            }
-        });
-    }
-
-    /** O raio giratório aponta um pouco para baixo, riscando o chão no fim (o mesmo "pitch" do servidor). */
-    static final float PITCH_GIRO = 8f;
-
-    static float yawGiro(EstadoCliente.GiroAtivo g, float p) {
-        return g.giro().yaw0() + 360f * g.giro().voltas() * Math.min(1f, p);
     }
 
     /**
      * As três camadas do feixe (halo, corpo e núcleo quase branco). k = escala das melhorias de dano: mais grosso,
      * mais forte e com o núcleo mais branco. base = largura de base (1 = terceira pessoa).
      */
-    private static void camadas(Matrix4fc m, VertexConsumer buf, Vec3 de, Vec3 fim, float base, int cor, float k) {
+    static void camadas(Matrix4fc m, VertexConsumer buf, Vec3 de, Vec3 fim, float base, int cor, float k) {
         float forte = Math.min(1f, 0.75f + 0.25f * k);
         int claro = misturar(cor, 0xFFF4D0, Math.min(0.95f, 0.65f + 0.1f * k));
         feixe(m, buf, de, fim, 0.16f * base * k, cor, Math.min(0.45f, 0.18f * k));
@@ -223,60 +188,8 @@ public final class Efeitos {
         }
     }
 
-    /** O raio giratório visto em primeira pessoa: os feixes saem dos olhos e varrem em volta. */
-    static void giroPrimeiraPessoa(PoseStack ps, SubmitNodeCollector col, Vec3 cam, float pt) {
-        Minecraft mc = Minecraft.getInstance();
-        Player pl = mc.player;
-        if (pl == null || mc.level == null || !mc.options.getCameraType().isFirstPerson()) return;
-        EstadoCliente.GiroAtivo g = EstadoCliente.GIROS.get(pl.getId());
-        if (g == null) return;
-        float p = g.progresso(System.currentTimeMillis());
-        if (p >= 1f) return;
-        Vec3 dir = Vec3.directionFromRotation(PITCH_GIRO, yawGiro(g, p));
-        Vec3 olhos = pl.getEyePosition(pt);
-        Vec3 fim = alvoBloco(mc.level, pl, olhos, dir, g.giro().alcance()).subtract(cam);
-        Vec3 lado = dir.cross(new Vec3(0, 1, 0)).normalize();
-        float k = g.giro().escala() * 1.3f;
-        for (int s = -1; s <= 1; s += 2) {
-            Vec3 de = olhos.subtract(cam).add(dir.scale(0.4)).add(lado.scale(0.1 * s)).add(0, -0.12, 0);
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 0.8f, g.giro().cor(), k));
-        }
-    }
-
-    /** Onde o raio giratório bate: o primeiro bloco no caminho, ou o fim do alcance. */
-    private static Vec3 alvoBloco(ClientLevel level, Player pl, Vec3 olhos, Vec3 dir, double alcance) {
-        var hit = level.clip(new net.minecraft.world.level.ClipContext(olhos, olhos.add(dir.scale(alcance)),
-            net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, pl));
-        return hit.getLocation();
-    }
-
-    /** Fagulhas e fumaça onde o raio giratório risca o chão; some o giro que acabou. */
-    private static void giros(ClientLevel level) {
-        long agora = System.currentTimeMillis();
-        EstadoCliente.GIROS.entrySet().removeIf(en -> en.getValue().progresso(agora) >= 1.05f);
-        RandomSource rnd = level.getRandom();
-        EstadoCliente.GIROS.forEach((id, g) -> {
-            if (!(level.getEntity(id) instanceof Player pl)) return;
-            float p = g.progresso(agora);
-            if (p >= 1f) return;
-            Vec3 dir = Vec3.directionFromRotation(PITCH_GIRO, yawGiro(g, p));
-            Vec3 olhos = pl.getEyePosition();
-            Vec3 fim = alvoBloco(level, pl, olhos, dir, g.giro().alcance());
-            for (int i = 0; i < 4; i++) {
-                level.addParticle(ParticleTypes.FLAME, fim.x, fim.y + 0.05, fim.z,
-                    (rnd.nextDouble() - 0.5) * 0.15, rnd.nextDouble() * 0.12, (rnd.nextDouble() - 0.5) * 0.15);
-            }
-            if (rnd.nextFloat() < 0.5f) level.addParticle(ParticleTypes.LARGE_SMOKE, fim.x, fim.y + 0.1, fim.z, 0, 0.05, 0);
-            if (rnd.nextFloat() < 0.2f) level.addParticle(ParticleTypes.LAVA, fim.x, fim.y, fim.z, 0, 0, 0);
-            // Calor tremulando ao longo do feixe.
-            double t = 1 + rnd.nextDouble() * Math.max(0, fim.distanceTo(olhos) - 1);
-            Vec3 q = olhos.add(dir.scale(t));
-            level.addParticle(new DustParticleOptions(g.giro().cor(), 1.2f), q.x, q.y, q.z, 0, 0.01, 0);
-        });
-    }
-
     /** Dois planos cruzados ao longo do segmento, visíveis dos dois lados. */
-    private static void feixe(Matrix4fc m, VertexConsumer buf, Vec3 de, Vec3 ate, float largura, int cor, float alfa) {
+    static void feixe(Matrix4fc m, VertexConsumer buf, Vec3 de, Vec3 ate, float largura, int cor, float alfa) {
         Vec3 d = ate.subtract(de).normalize();
         Vec3 n1 = d.cross(new Vec3(0, 1, 0));
         n1 = (n1.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : n1.normalize()).scale(largura / 2);

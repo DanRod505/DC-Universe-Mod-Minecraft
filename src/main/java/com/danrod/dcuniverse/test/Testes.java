@@ -210,10 +210,15 @@ public final class Testes {
             giro0.suprema(), new com.danrod.dcuniverse.character.Params(curto));
         h.assertTrue(TiposHabilidade.TIPOS.get("spinning_beam").usar(c, sup, giro), "o giro começa");
         h.assertTrue(com.danrod.dcuniverse.ability.active.GiroCalor.girando(c), "está girando");
-        for (int t = 0; t < 60; t++) com.danrod.dcuniverse.ability.active.GiroCalor.tick();
-        h.assertFalse(com.danrod.dcuniverse.ability.active.GiroCalor.girando(c), "o giro acaba sozinho");
+        h.assertTrue(Habilidades.executar(c, sup, Arvore.habilidade(c, sup, "visao_raio_x")) == false, "girando, as outras habilidades esperam");
+        for (int t = 0; t < 15; t++) com.danrod.dcuniverse.ability.active.GiroCalor.tick();
+        h.assertValueEqual(cerco.get(0).getHealth(), 1000f, "no preparo (subindo, olhos acendendo) ainda não fere");
+        for (int t = 0; t < 80; t++) com.danrod.dcuniverse.ability.active.GiroCalor.tick();
+        h.assertFalse(com.danrod.dcuniverse.ability.active.GiroCalor.girando(c), "o giro acaba sozinho depois da batida no chão");
         for (var z : cerco) {
             h.assertTrue(z.getHealth() < 1000f && z.isOnFire(), "o giro acertou e incendiou todos em volta (" + z.getHealth() + ")");
+            h.assertTrue(z.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING), "quem foi atingido fica com o contorno aceso");
+            h.assertTrue(z.getDeltaMovement().horizontalDistanceSqr() > 0.01, "e é arremessado para longe");
             z.discard();
         }
         h.assertValueEqual(vida0, 20f, "10 corações");

@@ -538,6 +538,70 @@ habs["superman.suprema"] = {
 }
 
 
+# ---------------------------------------------------------------- Giro de Calor
+# 4.4 s, no compasso do servidor (ability/active/GiroCalor): 1.0 s de preparo (agacha, sobe uns 3 blocos com os braços
+# abertos e o corpo arqueado, os olhos acendendo), 2.5 s girando no ar de braços abertos (o corpo gira pelo código,
+# client/Efeitos, e a cabeça acompanha a inclinação do raio) e a queda: encolhe, cai e pousa de joelho com o punho no
+# chão (3.65 s), a onda de choque saindo dali.
+GA_D, GA_E = [-8, 0, 84], [-8, 0, -84]          # braços abertos no giro
+habs["superman.giro"] = {
+    "animation_length": 4.4, "dcuniverse:entrada": 0.06, "dcuniverse:saida": 0.3, "dcuniverse:pivo_raiz": 12,
+    "dcuniverse:rastros": {"right_arm": [[3.5, 3.66]]},
+    "dcuniverse:eventos": [
+        {"t": 0.0, "fx": "agacha", "som": "dcuniverse:habilidade.giro_carga", "vol": 1.4, "zoom": 0.05},
+        {"t": 0.25, "fx": "giro_sobe", "tremor": 2, "tremor_ticks": 6, "zoom": -0.12},
+        {"t": 0.35, "fx": "olhos", "som": "dcuniverse:habilidade.olhos_acendem", "vol": 1.2},
+        {"t": 0.4, "fx": "giro_carga"},
+        {"t": 0.6, "fx": "giro_carga"},
+        {"t": 0.8, "fx": "giro_carga"},
+        {"t": 0.96, "fx": "olhos", "som": "dcuniverse:habilidade.giro", "vol": 2.0, "tremor": 3.5, "tremor_ticks": 8,
+         "zoom": -0.28, "flash": "#FF3A1A", "clarao": 0.4},
+        {"t": 2.2, "tremor": 1.5, "tremor_ticks": 20},
+        {"t": 3.65, "fx": "giro_impacto", "tremor": 10, "tremor_ticks": 16, "zoom": 0.14, "flash": "#FFFFFF", "clarao": 0.7},
+    ],
+    "bones": {
+        "root": {"position": kf([(0, NEUTRO), (0.22, [0, 5, 1]), (0.4, [0, -1, 0]), (1.0, [0, 0, 0]), (2.2, [0, -0.6, 0]), (3.5, [0, 0, 0]),
+                                 (3.64, [0, -1, 0]), (3.66, [0, 7, 0]), (4.05, [0, 7, 0]), (4.4, NEUTRO)], suave=(0.22, 0.4, 1.0, 2.2, 3.5, 4.05, 4.4)),
+                 "rotation": kf([(0, NEUTRO), (0.22, [14, 0, 0]), (0.4, [-8, 0, 0]), (0.9, [-4, 0, 0]), (1.0, [0, 0, 0]), (3.5, [0, 0, 0]),
+                                 (3.64, [-6, 0, 0]), (3.66, [16, 0, 0]), (4.05, [14, 0, 0]), (4.4, NEUTRO)], suave=(0.22, 0.4, 0.9, 3.5, 4.05, 4.4))},
+        # Peito aberto, arqueado para trás na subida (o calor enchendo), e inclinado para o raio no giro.
+        "body": {"rotation": kf([(0, NEUTRO), (0.22, [18, 0, 0]), (0.4, [-6, 0, 0]), (0.85, [-16, 0, 0]), (1.0, [-4, 0, 0]), (2.2, [-2, 0, 0]),
+                                 (3.5, [-4, 0, 0]), (3.64, [-10, 0, 0]), (3.66, [26, 10, 0]), (4.05, [24, 10, 0]), (4.4, NEUTRO)],
+                                suave=(0.22, 0.4, 0.85, 2.2, 3.5, 4.05, 4.4))},
+        "head": {"rotation": kf([(0, NEUTRO), (0.22, [20, 0, 0]), (0.4, [-24, 0, 0]), (0.85, [-30, 0, 0]), (1.0, [0, 0, 0]), (3.5, [0, 0, 0]),
+                                 (3.64, [10, 0, 0]), (3.66, [-6, 0, 0]), (4.05, [-10, 0, 0]), (4.4, NEUTRO)], suave=(0.22, 0.4, 0.85, 4.05, 4.4))},
+        "right_arm": {"rotation": kf([(0, NEUTRO), (0.22, [24, 0, 18]), (0.4, [10, 0, 40]), (0.85, [-4, 0, 62]), (1.0, GA_D), (2.2, [-14, 0, 86]),
+                                      (3.5, GA_D), (3.64, [-172, -6, 10]), (3.66, [-40, 0, 6]), (4.05, [-38, 0, 6]), (4.4, NEUTRO)],
+                                     suave=(0.22, 0.4, 0.85, 1.0, 2.2, 3.5, 4.05, 4.4))},
+        "left_arm": {"rotation": kf([(0, NEUTRO), (0.22, [24, 0, -18]), (0.4, [10, 0, -40]), (0.85, [-4, 0, -62]), (1.0, GA_E), (2.2, [-14, 0, -86]),
+                                     (3.5, GA_E), (3.64, [-20, 10, -50]), (3.66, [-30, 20, -30]), (4.05, [-28, 20, -30]), (4.4, NEUTRO)],
+                                    suave=(0.22, 0.4, 0.85, 1.0, 2.2, 3.5, 4.05, 4.4))},
+        # Punhos fechados e cotovelos firmes: a força saindo pelos olhos.
+        "right_forearm": {"rotation": kf([(0, NEUTRO), (0.22, [-40, 0, 0]), (0.85, [-24, 0, 0]), (1.0, [-12, 0, 0]), (3.5, [-12, 0, 0]),
+                                          (3.64, [0, 0, 0]), (3.66, [-10, 0, 0]), (4.4, NEUTRO)])},
+        "left_forearm": {"rotation": kf([(0, NEUTRO), (0.22, [-40, 0, 0]), (0.85, [-24, 0, 0]), (1.0, [-12, 0, 0]), (3.5, [-12, 0, 0]),
+                                         (3.64, [-30, 0, 0]), (3.66, [-70, 0, 0]), (4.4, NEUTRO)])},
+        # Pernas: dobra fundo, estica na subida, juntas e pendentes no ar, encolhe na queda e pousa de joelho.
+        "right_leg": {"rotation": kf([(0, NEUTRO), (0.22, [-40, 0, 10]), (0.4, [6, 0, 2]), (1.0, [10, 0, 3]), (2.2, [14, 0, 3]), (3.5, [10, 0, 3]),
+                                      (3.64, [-50, 0, 6]), (3.66, [-82, 0, 8]), (4.05, [-80, 0, 8]), (4.4, NEUTRO)], suave=(0.22, 2.2, 4.05, 4.4))},
+        "left_leg": {"rotation": kf([(0, NEUTRO), (0.22, [-40, 0, -10]), (0.4, [10, 0, -2]), (1.0, [16, 0, -3]), (2.2, [20, 0, -3]), (3.5, [16, 0, -3]),
+                                     (3.64, [-30, 0, -6]), (3.66, [-6, 0, -6]), (4.05, [-6, 0, -6]), (4.4, NEUTRO)], suave=(0.22, 2.2, 4.05, 4.4))},
+        "right_shin": {"rotation": kf([(0, NEUTRO), (0.22, [90, 0, 0]), (0.4, [8, 0, 0]), (1.0, [18, 0, 0]), (3.5, [18, 0, 0]), (3.64, [80, 0, 0]),
+                                       (3.66, [96, 0, 0]), (4.05, [94, 0, 0]), (4.4, NEUTRO)])},
+        "left_shin": {"rotation": kf([(0, NEUTRO), (0.22, [90, 0, 0]), (0.4, [12, 0, 0]), (1.0, [30, 0, 0]), (3.5, [30, 0, 0]), (3.64, [70, 0, 0]),
+                                      (3.66, [100, 0, 0]), (4.05, [98, 0, 0]), (4.4, NEUTRO)])},
+        # Primeira pessoa: os punhos abrem para os cantos de baixo da tela e, no fim, o direito soca o chão.
+        "fp_right_arm": {"position": kf([(0, NEUTRO), (0.4, [4, -4, 2]), (1.0, [6, -6, 2]), (3.5, [6, -6, 2]), (3.64, [-2, 9, -3]),
+                                         (3.66, [-2, -4, -8]), (4.05, [-2, -4, -8]), (4.4, NEUTRO)], suave=(0.4, 1.0, 3.5, 4.05, 4.4)),
+                         "rotation": kf([(0, NEUTRO), (1.0, [0, -20, -30]), (3.5, [0, -20, -30]), (3.64, [-70, 20, 0]), (3.66, [40, 30, -10]),
+                                         (4.4, NEUTRO)])},
+        "fp_left_arm": {"position": kf([(0, NEUTRO), (0.4, [-4, -4, 2]), (1.0, [-6, -6, 2]), (3.5, [-6, -6, 2]), (3.66, [0, -10, 4]),
+                                        (4.4, NEUTRO)], suave=(0.4, 1.0, 3.5, 4.4)),
+                        "rotation": kf([(0, NEUTRO), (1.0, [0, 20, 30]), (3.5, [0, 20, 30]), (3.66, NEUTRO)])},
+    },
+}
+
+
 def gravar(nome, sobre, conteudo):
     arq = {"format_version": "1.8.0", "dcuniverse:sobre": sobre, "animations": conteudo}
     texto = json.dumps(arq, indent=2, ensure_ascii=False)
@@ -547,4 +611,4 @@ def gravar(nome, sobre, conteudo):
 
 
 gravar("superman_combo", "Guarda, combo, golpe carregado, defesa e aparo do Superman (v0.7). Eixos do modelo Java: graus somados/impostos ao osso, posição em pixels. Ver client/anim/Animacao.java e tools/arte/animacoes.py.", anims)
-gravar("superman_habilidades", "Habilidades coreografadas do Superman (v0.7): visão de calor, sopro congelante, investida de aço, palmas sônicas e a suprema. Os eventos são a coreografia (client/Cena). Ver tools/arte/animacoes.py.", habs)
+gravar("superman_habilidades", "Habilidades coreografadas do Superman (v0.7): visão de calor, sopro congelante, investida de aço, palmas sônicas, giro de calor e a suprema. Os eventos são a coreografia (client/Cena). Ver tools/arte/animacoes.py.", habs)

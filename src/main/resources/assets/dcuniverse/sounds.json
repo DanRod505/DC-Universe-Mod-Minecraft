@@ -752,5 +752,23 @@
       }
     ],
     "subtitle": "subtitles.dcuniverse.habilidade.trava_solta"
+  },
+  "habilidade.giro_carga": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/giro_carga",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.giro_carga"
+  },
+  "habilidade.giro": {
+    "sounds": [
+      {
+        "name": "dcuniverse:habilidade/giro",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.dcuniverse.habilidade.giro"
   }
 }

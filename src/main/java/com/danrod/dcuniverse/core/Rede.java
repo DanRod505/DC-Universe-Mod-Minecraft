@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 22;
+    private static final int VERSAO = 23;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -316,16 +316,23 @@ public final class Rede {
      * Raio de calor giratório (ability/active/GiroCalor): quem vê desenha os dois feixes girando em volta do herói.
      * ticks de duração, quantas voltas, alcance, cor, yaw de onde começa e a escala do feixe (melhorias de dano).
      */
-    public record Giro(int entidade, int ticks, float voltas, float alcance, int cor, float yaw0, float escala) {
+    /**
+     * Giro de Calor (ability/active/GiroCalor): preparo e giro em ticks, voltas, alcance, cor, direção inicial, escala
+     * do raio (melhoria de dano), altura que ele sobe e a inclinação do raio (graus abaixo do horizonte, mín. e máx.).
+     */
+    public record Giro(int entidade, int preparo, int ticks, float voltas, float alcance, int cor, float yaw0, float escala,
+                       float altura, float pitchMin, float pitchMax) {
         public static void encode(Giro m, FriendlyByteBuf b) {
-            b.writeVarInt(m.entidade).writeVarInt(m.ticks);
+            b.writeVarInt(m.entidade).writeVarInt(m.preparo).writeVarInt(m.ticks);
             b.writeFloat(m.voltas).writeFloat(m.alcance);
             b.writeInt(m.cor);
             b.writeFloat(m.yaw0).writeFloat(m.escala);
+            b.writeFloat(m.altura).writeFloat(m.pitchMin).writeFloat(m.pitchMax);
         }
 
         public static Giro decode(FriendlyByteBuf b) {
-            return new Giro(b.readVarInt(), b.readVarInt(), b.readFloat(), b.readFloat(), b.readInt(), b.readFloat(), b.readFloat());
+            return new Giro(b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readFloat(), b.readFloat(), b.readInt(), b.readFloat(),
+                b.readFloat(), b.readFloat(), b.readFloat(), b.readFloat());
         }
     }
 
@@ -810,7 +817,7 @@ public final class Rede {
         CANAL.messageBuilder(Giro.class)
             .direction(PacketFlow.CLIENTBOUND)
             .encoder(Giro::encode).decoder(Giro::decode)
-            .consumerMainThread((m, ctx) -> EstadoCliente.GIROS.put(m.entidade(), new EstadoCliente.GiroAtivo(m, System.currentTimeMillis())))
+            .consumerMainThread((m, ctx) -> EstadoCliente.GIROS.put(m.entidade(), new EstadoCliente.GiroAtivo(m, System.currentTimeMillis(), Double.NaN, Double.NaN)))
             .add();
         CANAL.messageBuilder(ManobraVista.class)
             .direction(PacketFlow.CLIENTBOUND)

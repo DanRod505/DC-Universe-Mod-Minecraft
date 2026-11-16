@@ -97,7 +97,13 @@ As melhorias são **padrão**, iguais para todos os heróis, e se compram com po
 
 ### Catálogo atual do Superman
 
-Visão de Calor, Super Pulo e Sopro Congelante (iniciais), Investida de Aço, Palmas Sônicas, Soco Sônico, Visão de Raio X, Pisão Sísmico e **Giro de Calor** (pedido do Dalton em 16/11/2026): o Superman gira no lugar disparando a visão de calor e os raios varrem tudo em volta, duas voltas, ferindo e incendiando todos no alcance, uma vez por volta. É das mais fortes: 3 pontos, 60 de energia, recarga de 12 s, alcance 12 → 16 → 20 blocos.
+Visão de Calor, Super Pulo e Sopro Congelante (iniciais), Investida de Aço, Palmas Sônicas, Soco Sônico, Visão de Raio X, Pisão Sísmico e **Giro de Calor** (pedido do Dalton em 16/11/2026, refeito no mesmo dia a partir da arte de conceito dele). É uma cena em três tempos:
+
+1. **Preparo (1 s):** ele agacha, sobe uns 3 blocos com os braços abertos e os olhos acendem, com a energia vermelha correndo em espiral para os olhos.
+2. **Giro (2,5 s):** parado no ar, ele gira a visão de calor em alta velocidade, acelerando até 6 voltas. O raio sobe e desce enquanto gira, e o rastro dele forma os anéis em espiral do conceito. Embaixo fica uma cratera em brasa, com fumaça, poeira e pedaços do chão voando. Quem o raio cruza queima, é empurrado e fica com o contorno vermelho aceso.
+3. **Queda:** ele cai e bate no chão de joelho, e a onda de choque arremessa quem sobrou.
+
+É das mais fortes: 3 pontos, 60 de energia, recarga de 12 s, alcance 12 → 16 → 20 blocos.
 
 ### Habilidades que vêm liberadas
 

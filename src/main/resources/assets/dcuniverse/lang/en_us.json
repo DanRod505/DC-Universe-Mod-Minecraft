@@ -1093,8 +1093,10 @@
   "dcuniverse.arvore.extra.fogo": "Burn: 0.5 ❤/s for 4 s",
   "dcuniverse.arvore.extra.gelo": "Freezes after 1 s of breath, for 3 s",
   "habilidade.dcuniverse.giro_de_calor": "Heat Spin",
-  "habilidade.dcuniverse.giro_de_calor.desc": "One of Superman's strongest abilities: he spins in place firing his heat vision, and the beams sweep everything around him for two full turns. Each turn burns every enemy in range, sets fires, melts ice and snow, lights furnaces and scorches the ground. Whatever dies drops already cooked. Costs a lot of energy.",
+  "habilidade.dcuniverse.giro_de_calor.desc": "One of Superman's strongest abilities. He rises off the ground with his eyes igniting and, hovering, spins his heat vision at high speed: the beam sweeps everything around, leaving spiral rings of fire and a glowing crater. Anyone the beam crosses burns and is pushed away. At the end he drops and slams the ground, and the shockwave hurls whoever is left. Whatever dies drops already cooked. Costs a lot of energy.",
   "dcuniverse.melhoria.alcance": "Range %s",
   "dcuniverse.melhoria.alcance.desc": "Range goes from %s to %s.",
-  "dcuniverse.melhoria.alcance.valor": "%s blocks"
+  "dcuniverse.melhoria.alcance.valor": "%s blocks",
+  "subtitles.dcuniverse.habilidade.giro_carga": "Heat building up",
+  "subtitles.dcuniverse.habilidade.giro": "Heat beam spinning"
 }

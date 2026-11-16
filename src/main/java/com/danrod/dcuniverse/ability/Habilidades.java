@@ -59,7 +59,7 @@ public final class Habilidades {
             else if (h.modo() == Personagem.Modo.HOLD && Coreografia.preparando(player, h.id())) Coreografia.cancelar(player);
             return;
         }
-        if (e.destransformarEm() != 0L || Coreografia.emCena(player)) return;
+        if (e.destransformarEm() != 0L || Coreografia.emCena(player) || com.danrod.dcuniverse.ability.active.GiroCalor.girando(player)) return;
         // Cada modo tem o seu conjunto de habilidades nas mesmas teclas (combate/Combo.conjunto). Na árvore nova não há modos.
         if (!Arvore.ativa(player, p) && !com.danrod.dcuniverse.combate.Combo.disponivel(player, h)) return;
         if (indice >= 0 && indice != e.selecionada()) e.setSelecionada(indice);
@@ -123,7 +123,7 @@ public final class Habilidades {
         long agora = player.level().getGameTime();
         TipoHabilidade tipo = TiposHabilidade.TIPOS.get(h.tipo());
         if (tipo.gratis(player, h)) return tipo.usar(player, p, h);
-        if (e.prontaEm(h.id()) > agora || Coreografia.emCena(player)) return false;
+        if (e.prontaEm(h.id()) > agora || Coreografia.emCena(player) || com.danrod.dcuniverse.ability.active.GiroCalor.girando(player)) return false;
         // O criativo não gasta energia; a kryptonita (esgotado) ainda bloqueia.
         boolean criativo = player.isCreative();
         if (!player.isCreative() && e.esgotado() || !criativo && e.energia() < h.custo()) {

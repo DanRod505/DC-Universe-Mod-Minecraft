@@ -43,10 +43,15 @@ public final class EstadoCliente {
     public static final java.util.Queue<Rede.Impacto> IMPACTOS = new java.util.concurrent.ConcurrentLinkedQueue<>();
     public static final java.util.Queue<Rede.ManobraVista> MANOBRAS = new java.util.concurrent.ConcurrentLinkedQueue<>();
     /** Um raio giratório em andamento e quando chegou (relógio do cliente, em ms). */
-    public record GiroAtivo(Rede.Giro giro, long inicio) {
-        /** Fração já girada (0 a 1; acima de 1 = acabou). */
+    public record GiroAtivo(Rede.Giro giro, long inicio, double chaoY, double baseY) {
+        /** Ticks (com fração) desde o começo do giro de verdade: negativo no preparo. */
+        public float tempo(long agora) {
+            return (agora - inicio) / 50f - giro.preparo();
+        }
+
+        /** Fração já girada (0 a 1; abaixo de 0 = preparando, acima de 1 = acabou). */
         public float progresso(long agora) {
-            return (agora - inicio) / (giro.ticks() * 50f);
+            return tempo(agora) / giro.ticks();
         }
     }
 
