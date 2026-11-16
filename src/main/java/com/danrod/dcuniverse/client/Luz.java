@@ -44,6 +44,24 @@ public final class Luz {
         .withCull(false)
         .build(), RenderPipelines.ENTITY_TRANSLUCENT);
 
+    /** Marca no chão (geada, terra queimada): a mesma superfície, mas sem o sombreado por direção da luz, que a escurecia. */
+    private static final RenderPipeline PIPELINE_DECALQUE = Iris.comoVanilla(RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
+        .withLocation(Identifier.fromNamespaceAndPath("dcuniverse", "pipeline/decalque"))
+        .withShaderDefine("ALPHA_CUTOUT", 0.1F)
+        .withShaderDefine("NO_CARDINAL_LIGHTING")
+        .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
+        .withColorTargetState(new ColorTargetState(com.mojang.blaze3d.pipeline.BlendFunction.TRANSLUCENT))
+        .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
+        .withCull(false)
+        .build(), RenderPipelines.ENTITY_TRANSLUCENT);
+
+    private static final java.util.Map<Identifier, RenderType> DECALQUES = new java.util.HashMap<>();
+
+    public static RenderType decalque(Identifier textura) {
+        return DECALQUES.computeIfAbsent(textura, t -> RenderType.create("dcuniverse_decalque",
+            RenderSetup.builder(PIPELINE_DECALQUE).withTexture("Sampler0", t).useLightmap().useOverlay().sortOnUpload().createRenderSetup()));
+    }
+
     private static final java.util.Map<Identifier, RenderType> TEXTURAS = new java.util.HashMap<>();
 
     public static RenderType translucido(Identifier textura) {

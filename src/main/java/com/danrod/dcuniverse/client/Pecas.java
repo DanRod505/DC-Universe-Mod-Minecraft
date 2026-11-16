@@ -318,8 +318,32 @@ public final class Pecas {
                 vert(buf, pose, a, n, -meia, u0, vBarra, dir, luz, over);
             }
         });
+        // Neve grudada na capa depois do Sopro Congelante (some aos poucos).
+        float neve = Minecraft.getInstance().level == null ? 0 : SoproVisual.neve(s.id, Minecraft.getInstance().level.getGameTime());
+        if (neve > 0 && g < 0.5f) {
+            int cor = ((int) (neve * 255) << 24) | 0xFFFFFF;
+            col.submitCustomGeometry(ps, Luz.translucido(NEVE), (pose, buf) -> {
+                for (int i = 0; i < FAIXAS; i++) {
+                    float v0 = i / (float) FAIXAS, v1 = (i + 1) / (float) FAIXAS;
+                    for (int j = 0; j < COLUNAS; j++) {
+                        float u0 = (1 - j / (float) COLUNAS) * 40 / 128f, u1 = (1 - (j + 1) / (float) COLUNAS) * 40 / 128f;
+                        Vector3f[] q = {pt[i][j], pt[i][j + 1], pt[i + 1][j + 1], pt[i + 1][j]};
+                        Vector3f[] n = {norm[i], norm[i], norm[i + 1], norm[i + 1]};
+                        float[][] uv = {{u0, v0}, {u1, v0}, {u1, v1}, {u0, v1}};
+                        for (int k = 0; k < 4; k++) {
+                            Vector3f pq = q[k], nn = n[k];
+                            float off = meia + 0.06f;
+                            buf.addVertex(pose, (pq.x + nn.x * off) / 16f, (pq.y + nn.y * off) / 16f, (pq.z + nn.z * off) / 16f).setColor(cor)
+                                .setUv(uv[k][0], uv[k][1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(luz).setNormal(pose, nn.x, nn.y, nn.z);
+                        }
+                    }
+                }
+            });
+        }
         ps.popPose();
     }
+
+    private static final Identifier NEVE = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "textures/efeito/capa_neve.png");
 
     /**
      * Ponto da capa aberta como asa (pixels do modelo, no espaço do corpo): c de -0,5 a 0,5 na largura, t de 0 (gola)

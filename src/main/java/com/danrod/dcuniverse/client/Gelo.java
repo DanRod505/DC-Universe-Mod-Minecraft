@@ -65,9 +65,41 @@ final class Gelo {
                 float alto = h * forma;
                 BlockPos bp = ent.blockPosition();
                 int luz = LightCoordsUtil.pack(mc.level.getBrightness(LightLayer.BLOCK, bp), mc.level.getBrightness(LightLayer.SKY, bp));
-                col.submitCustomGeometry(ps, Luz.translucido(TEXTURA), (pose, buf) ->
-                    caixa(pose.pose(), buf, (float) p.x, (float) p.y - 0.05f, (float) p.z, w, alto, luz));
+                col.submitCustomGeometry(ps, Luz.translucido(TEXTURA), (pose, buf) -> {
+                    caixa(pose.pose(), buf, (float) p.x, (float) p.y - 0.05f, (float) p.z, w, alto, luz);
+                    cristais(pose.pose(), buf, (float) p.x, (float) p.y - 0.05f, (float) p.z, w, forma, id, luz);
+                });
             });
+        }
+    }
+
+    /**
+     * Cristais pontiagudos de gelo brotando em volta da base do bloco (como nas referências do Dalton): pirâmides finas
+     * inclinadas para fora, sempre as mesmas para o mesmo mob, crescendo junto com o bloco.
+     */
+    private static void cristais(Matrix4f m, VertexConsumer buf, float cx, float y0, float cz, float w, float forma, int semente, int luz) {
+        java.util.Random r = new java.util.Random(semente * 31L + 7);
+        int n = 7 + r.nextInt(4);
+        for (int i = 0; i < n; i++) {
+            double a = Math.PI * 2 * (i + r.nextFloat() * 0.6) / n;
+            float base = 0.07f + r.nextFloat() * 0.08f;
+            float alt = (0.35f + r.nextFloat() * 0.6f) * forma;
+            // na borda da caixa (o quadrado), um pouco para fora
+            float ca = (float) Math.cos(a), sa = (float) Math.sin(a);
+            float esc = w / Math.max(Math.abs(ca), Math.abs(sa));
+            float bx = cx + ca * (esc + 0.04f), bz = cz + sa * (esc + 0.04f);
+            float tx = bx + ca * alt * 0.45f, tz = bz + sa * alt * 0.45f, ty = y0 + alt;
+            float[][] b = {{bx - base, bz - base}, {bx + base, bz - base}, {bx + base, bz + base}, {bx - base, bz + base}};
+            for (int f = 0; f < 4; f++) {
+                float[] p0 = b[f], p1 = b[(f + 1) % 4];
+                float nx = (p0[1] - p1[1]), nz = (p1[0] - p0[0]);
+                float l = (float) Math.hypot(nx, nz);
+                nx /= l; nz /= l;
+                v(m, buf, p0[0], y0, p0[1], 0, 1, nx, 0.3f, nz, luz);
+                v(m, buf, p1[0], y0, p1[1], 0.3f, 1, nx, 0.3f, nz, luz);
+                v(m, buf, tx, ty, tz, 0.15f, 0, nx, 0.3f, nz, luz);
+                v(m, buf, tx, ty, tz, 0.15f, 0, nx, 0.3f, nz, luz);
+            }
         }
     }
 

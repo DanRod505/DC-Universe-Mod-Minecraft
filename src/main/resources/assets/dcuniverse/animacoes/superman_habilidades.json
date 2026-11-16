@@ -406,7 +406,12 @@
           "zoom": 0.06
         },
         {
+          "t": 0.52,
+          "fx": "sopro_nevoa"
+        },
+        {
           "t": 0.6,
+          "fx": "sopro_nevoa",
           "tremor": 1.6,
           "tremor_ticks": 4,
           "zoom": -0.06,

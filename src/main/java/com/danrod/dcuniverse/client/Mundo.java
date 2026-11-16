@@ -279,6 +279,7 @@ public final class Mundo {
         Efeitos.feixePrimeiraPessoa(ps, col, cam, pt);
         GiroVisual.desenhar(ps, col, cam, pt);
         VisaoVisual.desenhar(ps, col, cam, pt);
+        SoproVisual.desenhar(ps, col, cam, pt);
         Gelo.desenhar(ps, col, cam, pt);
         Bolha.desenhar(ps, col, cam, pt);
     }

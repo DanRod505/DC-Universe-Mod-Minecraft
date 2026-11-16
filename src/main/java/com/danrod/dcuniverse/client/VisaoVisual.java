@@ -202,13 +202,13 @@ public final class VisaoVisual {
         if (!MARCAS.isEmpty()) {
             List<Marca> copia = List.copyOf(MARCAS);
             // Terra queimada (textura com transparência por pixel, iluminada pelo mundo)...
-            col.submitCustomGeometry(ps, Luz.translucido(QUEIMADO), (pose, buf) -> {
+            col.submitCustomGeometry(ps, Luz.decalque(QUEIMADO), (pose, buf) -> {
                 int i = 0;
                 for (Marca m : copia) {
                     float some = Mth.clamp((VIDA - (agora - m.aquecida)) / 80f, 0, 1);
                     BlockPos bp = BlockPos.containing(m.p.add(Vec3.atLowerCornerOf(m.face.getUnitVec3i()).scale(0.3)));
                     int luz = LightCoordsUtil.pack(level.getBrightness(LightLayer.BLOCK, bp), level.getBrightness(LightLayer.SKY, bp));
-                    decalque(pose.pose(), buf, m, cam, 0.006f + (i++ % 12) * 0.0009f, some, luz);
+                    decalque(pose, buf, m, cam, 0.006f + (i++ % 12) * 0.0009f, some, luz);
                 }
             });
             // ...e as brasas acesas por cima (luz aditiva, tremulando, do branco quente ao vermelho apagando).
@@ -256,7 +256,7 @@ public final class VisaoVisual {
     }
 
     /** O quadrado da marca deitado na face do bloco, girado, com uma das 4 variantes do atlas. */
-    private static void decalque(Matrix4fc m4, VertexConsumer buf, Marca m, Vec3 cam, float acima, float alfa, int luz) {
+    private static void decalque(PoseStack.Pose pose, VertexConsumer buf, Marca m, Vec3 cam, float acima, float alfa, int luz) {
         Vec3 n = Vec3.atLowerCornerOf(m.face.getUnitVec3i());
         Vec3[] eixos = eixos(n, m.giro);
         Vec3 c = m.p.add(n.scale(acima)).subtract(cam);
@@ -266,8 +266,8 @@ public final class VisaoVisual {
         int argb = ((int) (alfa * 255) << 24) | 0xFFFFFF;
         for (int i = 0; i < 4; i++) {
             Vec3 p = c.add(eixos[0].scale(cantos[i][0])).add(eixos[1].scale(cantos[i][1]));
-            buf.addVertex(m4, (float) p.x, (float) p.y, (float) p.z).setColor(argb).setUv(cantos[i][2], cantos[i][3])
-                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(luz).setNormal((float) n.x, (float) n.y, (float) n.z);
+            buf.addVertex(pose, (float) p.x, (float) p.y, (float) p.z).setColor(argb).setUv(cantos[i][2], cantos[i][3])
+                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(luz).setNormal(pose, (float) n.x, (float) n.y, (float) n.z);
         }
     }
 

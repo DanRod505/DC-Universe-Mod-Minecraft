@@ -381,7 +381,8 @@ habs["superman.sopro.inicio"] = {
         {"t": 0.0, "som": "dcuniverse:habilidade.inspira", "vol": 1.2},
         {"t": 0.08, "fx": "inspira"},
         {"t": 0.28, "fx": "inspira", "zoom": 0.06},
-        {"t": 0.6, "tremor": 1.6, "tremor_ticks": 4, "zoom": -0.06, "flash": "#BFE8FF", "clarao": 0.15},
+        {"t": 0.52, "fx": "sopro_nevoa"},
+        {"t": 0.6, "fx": "sopro_nevoa", "tremor": 1.6, "tremor_ticks": 4, "zoom": -0.06, "flash": "#BFE8FF", "clarao": 0.15},
     ],
     "bones": {
         "root": {"position": kf([(0, NEUTRO), (0.45, [0, 0.4, 1.2]), (0.6, [0, 0.8, -1]), (0.72, [0, 0.8, -1])], suave=(0.45, 0.72)),

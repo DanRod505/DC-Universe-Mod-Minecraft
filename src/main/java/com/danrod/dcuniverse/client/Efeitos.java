@@ -50,6 +50,7 @@ public final class Efeitos {
         EstadoCliente.TRANSFORMOU.clear();
         GiroVisual.tick(level);
         VisaoVisual.tick(level);
+        SoproVisual.tick(level);
         if (mc.player != null && Planador.amortecendo(mc.player)) rastro(level, mc.player);
     }
 
@@ -86,6 +87,7 @@ public final class Efeitos {
         Vec3 boca = pl.getEyePosition().add(0, -0.22, 0).add(dir.scale(primeiraPessoa ? 0.9 : 0.35));
         double abre = Math.tan(Math.toRadians(a.angulo())) * 0.5;
         double vel = 0.35 + a.alcance() * 0.05;
+        SoproVisual.sopro(level, pl, a);
         for (int i = 0; i < 7; i++) {
             Vec3 v = dir.add((rnd.nextDouble() - 0.5) * abre * 2, (rnd.nextDouble() - 0.5) * abre * 2, (rnd.nextDouble() - 0.5) * abre * 2)
                 .normalize().scale(vel * (0.7 + rnd.nextDouble() * 0.5));

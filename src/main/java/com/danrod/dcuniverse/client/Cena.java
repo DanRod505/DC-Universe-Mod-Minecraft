@@ -119,6 +119,7 @@ public final class Cena {
             case "giro_carga" -> GiroVisual.carga(level, e);
             case "giro_impacto" -> GiroVisual.impacto(level, e);
             case "visao_carga" -> VisaoVisual.carga(level, e);
+            case "sopro_nevoa" -> SoproVisual.nevoa(level, e);
             default -> {}
         }
     }

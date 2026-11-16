@@ -113,6 +113,14 @@ A batida abre uma **cratera de verdade** (pedido do Dalton, habilidades.7): rasa
 
 A destruição segue os cuidados da cratera: só chão natural (terra, grama, areia, cascalho, pedra comum e afins), nunca minérios, baús, blocos com conteúdo ou perto de estruturas e locais da campanha, nunca mais de 3 blocos abaixo dos pés, respeitando áreas protegidas. A opção `visaoDestroi` desliga.
 
+**Sopro Congelante (habilidades.9, das referências do Dalton).** Mantém tudo que já fazia (mobs presos no gelo, água virando gelo, lava virando obsidiana, fogo apagado) e ganhou a cena:
+
+1. **Preparo:** ele puxa o ar e solta uma névoa azul com flocos pela boca.
+2. **Sopro:** um cone de ar gelado azul-claro (mais largo e forte com o dano) cheio de flocos. Os mobs ficam presos em blocos de gelo translúcidos com cristais pontiagudos na base, e a lava que vira obsidiana solta vapor.
+3. **Fim:** o chão por onde o sopro passou fica com geada (some devagar), a água congelada dura mais e a capa fica com neve, que vai caindo e sumindo.
+
+A geada e a neve são só visuais; as mudanças no mundo continuam as mesmas de antes (gelo que derrete sozinho, obsidiana só onde havia lava).
+
 É das mais fortes: 3 pontos, 60 de energia, recarga de 12 s, alcance 12 → 16 → 20 blocos.
 
 ### Habilidades que vêm liberadas
