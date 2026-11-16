@@ -2,7 +2,7 @@
 
 Gerado por `tools/plano.py` a partir de `docs/plano/dados/roteiro.json`. As etapas de personagens, locais e pacotes são montadas pelo gerador.
 
-**64 versões e 226 etapas.** Cada etapa termina numa build de teste testada em servidor com 2 jogadores.
+**64 versões e 229 etapas.** Cada etapa termina numa build de teste testada em servidor com 2 jogadores.
 
 ## Fase 0: Nova base
 
@@ -18,11 +18,16 @@ Mudar para NeoForge sem perder nada, montar o modpack e resolver a gravação.
 
 Os sistemas que todo personagem, local e chefe vão usar.
 
-### v0.7: Animação (sistema)
+### v0.7: Animação e Habilidades (sistema)
 
-1. Animador do jogador com Blockbench e sincronização no multiplayer
-2. Rostos expressivos e interações animadas com o mundo
-3. Ferramenta de coreografias (habilidade como roteiro)
+Etapas 2 a 4 entram em 16/11/2026: o sistema de habilidades é o próximo passo depois do protótipo de combate. As habilidades e melhorias de cada herói quem define é o Dalton.
+
+1. Protótipo jogável: animador do jogador (formato Blockbench, multiplayer) com o combo do Superman, habilidades em atalhos diretos e impacto nos golpes
+2. Sistema de habilidades: árvore em dados, melhorias, pontos por nível, slots livres e só recarga (energia e suprema saem do protótipo), salvo por jogador e por herói e sincronizado no multiplayer
+3. Tela da árvore de habilidades: ramos, melhorias, custos e prévia
+4. Tela de build: slots, presets por herói e HUD dos slots
+5. Rostos expressivos e interações animadas com o mundo
+6. Ferramenta de coreografias (habilidade como roteiro)
 
 ### v0.8: Combate (sistema)
 
@@ -34,13 +39,13 @@ Os sistemas que todo personagem, local e chefe vão usar.
 ### v0.9: Câmera e Cinema (sistema)
 
 1. Câmera de aventura
-2. Câmera cinematográfica: supremas e diálogos
+2. Câmera cinematográfica: habilidades grandes e diálogos
 3. Efeitos visuais próprios
 
 ### v0.10: Herói e RPG (sistema)
 
-1. Escolha e troca de personagem, identidade secreta e modo sandbox
-2. Níveis, atributos e árvore
+1. Heróis desbloqueados pelos itens deles, troca de personagem, identidade secreta e modo sandbox
+2. Fontes de experiência, atributos e Nível da Liga
 3. Trajes, equipamento, materiais e bancada
 
 ### v0.11: Mundo Vivo (sistema)
@@ -57,7 +62,7 @@ Superman e Smallville refeitos do jeito novo. Se a demo ficar incrível, o padr�
 
 1. Base de animações do arquétipo Titã Voador
 2. Skin, rosto expressivo e animações próprias
-3. Kit completo, suprema cinematográfica e trajes
+3. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.13: Smallville (local) · **demo jogável**
 
@@ -74,7 +79,7 @@ Os 24 personagens, as cidades, os reinos, as masmorras e a campanha completa at�
 
 1. Base de animações do arquétipo Artes Marciais
 2. Skin, rosto expressivo e animações próprias
-3. Kit completo, suprema cinematográfica e trajes
+3. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.15: Gotham (local)
 
@@ -85,7 +90,7 @@ Os 24 personagens, as cidades, os reinos, as masmorras e a campanha completa at�
 
 1. Base de animações do arquétipo Caótico
 2. Skin, rosto expressivo e animações próprias
-3. Kit completo, suprema cinematográfica e trajes
+3. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 4. Chefe com fases: Coringa
 
 ### v0.17: Asilo Arkham (local)
@@ -97,25 +102,25 @@ Os 24 personagens, as cidades, os reinos, as masmorras e a campanha completa at�
 ### v0.18: Arlequina (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.19: Mulher-Gato (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.20: Bane (personagem)
 
 1. Base de animações do arquétipo Brutamontes
 2. Skin, rosto expressivo e animações próprias
-3. Kit completo, suprema cinematográfica e trajes
+3. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 4. Chefe com fases: Bane
 5. Capítulo: A Queda do Morcego
 
 ### v0.21: Asa Noturna (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.22: Bases da Liga e da Legião (local)
 
@@ -131,7 +136,7 @@ Os 24 personagens, as cidades, os reinos, as masmorras e a campanha completa at�
 
 1. Base de animações do arquétipo Atirador
 2. Skin, rosto expressivo e animações próprias
-3. Kit completo, suprema cinematográfica e trajes
+3. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 4. Chefe com fases: Lex Luthor
 
 ### v0.25: Torre LexCorp (local)
@@ -143,17 +148,17 @@ Os 24 personagens, as cidades, os reinos, as masmorras e a campanha completa at�
 ### v0.26: Supergirl (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.27: Superboy (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.28: General Zod (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 3. Chefe com fases: General Zod
 4. Zona Fantasma
 5. Capítulo: Ajoelhe-se diante de Zod
@@ -162,7 +167,7 @@ Os 24 personagens, as cidades, os reinos, as masmorras e a campanha completa at�
 
 1. Base de animações do arquétipo Velocista
 2. Skin, rosto expressivo e animações próprias
-3. Kit completo, suprema cinematográfica e trajes
+3. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.30: Central City (local)
 
@@ -172,14 +177,14 @@ Os 24 personagens, as cidades, os reinos, as masmorras e a campanha completa at�
 ### v0.31: Capitão Frio (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 3. Chefe com fases: Capitão Frio e os Vilões
 4. Capítulo: Os Vilões
 
 ### v0.32: Flash Reverso (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 3. Chefe com fases: Flash Reverso
 4. Capítulo: Ponto de Ignição
 
@@ -187,7 +192,7 @@ Os 24 personagens, as cidades, os reinos, as masmorras e a campanha completa at�
 
 1. Base de animações do arquétipo Construtos
 2. Skin, rosto expressivo e animações próprias
-3. Kit completo, suprema cinematográfica e trajes
+3. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.34: Oa (local)
 
@@ -197,7 +202,7 @@ Os 24 personagens, as cidades, os reinos, as masmorras e a campanha completa at�
 ### v0.35: Sinestro (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 3. Chefe com fases: Sinestro
 4. Capítulo: A Guerra dos Anéis
 
@@ -207,7 +212,7 @@ Retoma o trabalho pausado da antiga v0.5 (laço, reflexo, escudo e Jato Invisív
 
 1. Base de animações do arquétipo Guerreiro de Armas
 2. Skin, rosto expressivo e animações próprias
-3. Kit completo, suprema cinematográfica e trajes
+3. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.37: Themyscira (local)
 
@@ -219,7 +224,7 @@ Retoma o trabalho pausado da antiga v0.5 (laço, reflexo, escudo e Jato Invisív
 ### v0.38: Aquaman (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 3. Nado e combate debaixo d'água
 
 ### v0.39: Atlântida (local)
@@ -232,7 +237,7 @@ Retoma o trabalho pausado da antiga v0.5 (laço, reflexo, escudo e Jato Invisív
 ### v0.40: Arqueiro Verde (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.41: Star City (local)
 
@@ -242,23 +247,23 @@ Retoma o trabalho pausado da antiga v0.5 (laço, reflexo, escudo e Jato Invisív
 ### v0.42: Exterminador (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.43: Hera Venenosa (personagem)
 
 1. Base de animações do arquétipo Manipulador
 2. Skin, rosto expressivo e animações próprias
-3. Kit completo, suprema cinematográfica e trajes
+3. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.44: Ciborgue (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 
 ### v0.45: Shazam (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 3. Rocha da Eternidade
 
 ### v0.46: Kahndaq (local)
@@ -269,7 +274,7 @@ Retoma o trabalho pausado da antiga v0.5 (laço, reflexo, escudo e Jato Invisív
 ### v0.47: Adão Negro (personagem)
 
 1. Skin, rosto expressivo e animações próprias
-2. Kit completo, suprema cinematográfica e trajes
+2. Árvore de habilidades definida pelo Dalton, com melhorias, e trajes
 3. Chefe com fases: Adão Negro
 4. Capítulo: O Campeão Esquecido
 

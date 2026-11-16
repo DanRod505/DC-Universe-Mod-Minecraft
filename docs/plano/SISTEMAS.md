@@ -24,7 +24,7 @@ Gerado por `tools/plano.py` a partir de `docs/plano/dados/sistemas.json`.
 | Sistema | O que faz | Versão |
 |---|---|---|
 | Combate | Combo no botão esquerdo, golpe pesado segurando, golpes aéreos e investida, sensação de impacto (pausa, tremor, partículas e som), cancelar golpes em habilidades e golpes em dupla no multiplayer. | v0.8 |
-| Atalhos e novo HUD | 4 habilidades em atalhos diretos, configuráveis, e a suprema numa combinação. O radial fica só para montar o loadout. O HUD mostra vida, recurso, as 4 recargas e a barra da mecânica única. | v0.8 |
+| Atalhos e novo HUD | Os slots da build ficam em atalhos diretos e configuráveis. O HUD mostra vida, os slots com as recargas e o reforço ativo. Sem suprema e sem energia. | v0.8 |
 | Defesa e mira | Esquiva com invencibilidade, aparar no tempo certo com contra-ataque, avisos visuais de ataque inimigo e mira travada que a câmera segue. | v0.8 |
 | Inimigos com IA de combate | Capangas que cercam, esperam a vez, avisam o ataque, bloqueiam e fogem; 7 papéis de inimigo e facções por cidade. Modelos e animações com GeckoLib. | v0.8 |
 | Chefes com fases | Arena, fases com cena de transição, ataques assinatura avisados, pontos fracos e música própria. | v0.11 |
@@ -34,15 +34,15 @@ Gerado por `tools/plano.py` a partir de `docs/plano/dados/sistemas.json`.
 | Sistema | O que faz | Versão |
 |---|---|---|
 | Câmera de aventura | Terceira pessoa por cima do ombro, com distância que se ajusta (mais longe voando rápido, perto no combate), sem atravessar paredes e integrada à mira travada. A primeira pessoa continua. | v0.9 |
-| Câmera cinematográfica | Cenas das supremas, das missões e dos diálogos: enquadramentos, cortes, câmera lenta e barras de cinema. No multiplayer, só quem dispara vê a câmera mudar. | v0.9 |
+| Câmera cinematográfica | Cenas das habilidades grandes, das missões e dos diálogos: enquadramentos, cortes, câmera lenta e barras de cinema. No multiplayer, só quem dispara vê a câmera mudar. | v0.9 |
 | Efeitos visuais | Pós-processamento próprio que funciona com e sem shader: brilho em raios e anéis, cor por local (Gotham fria, Smallville quente), desfoque no boost e distorção nas ondas de choque. | v0.9 |
 
 ## Herói e RPG
 
 | Sistema | O que faz | Versão |
 |---|---|---|
-| Escolha e troca de personagem | No começo você escolhe qualquer um dos 24. A troca é livre nas bases e no menu, com uma espera curta, e no criativo é livre e sem espera. Destransformado, você está na identidade secreta (Clark, Bruce, Diana...). | v0.10 |
-| Níveis e árvore | Nível de 1 a 30 por personagem, 6 atributos, árvore com 3 ramos e o Nível da Liga da conta. | v0.10 |
+| Escolha e troca de personagem | Os heróis são desbloqueados pelos itens deles, e algumas áreas, chefes e missões pedem um herói específico. A troca é livre nas bases e no menu, com uma espera curta, e no criativo é livre e sem espera. Destransformado, você está na identidade secreta (Clark, Bruce, Diana...). | v0.10 |
+| Experiência e atributos | Todas as fontes de experiência (missões, atividades, desafios, chefes), atributos e o Nível da Liga da conta. O nível alimenta os pontos da árvore de habilidades. | v0.10 |
 | Trajes e equipamento | Traje, Emblema, Acessório e Artefato, com raridade, e melhorias com materiais na bancada das bases. | v0.10 |
 
 ## Mundo
@@ -51,7 +51,15 @@ Gerado por `tools/plano.py` a partir de `docs/plano/dados/sistemas.json`.
 |---|---|---|
 | Missões, diálogos e cenas | Campanha em capítulos que se adapta ao personagem escolhido, diálogos com enquadramento e escolhas, Diário de Missões e missões de vilão no Salão da Legião. | v0.11 |
 | Cidades vivas | Crimes e resgates acontecendo, civis que reagem ao herói (fogem, aplaudem, tiram foto, chamam ajuda), desafios de travessia e colecionáveis. | v0.11 |
-| Masmorras | Áreas fechadas com sequência de salas, quebra-cabeças, mini-chefes e chefe, com volta rápida para refazer em dificuldade maior. | v0.11 |
+| Masmorras | Áreas fechadas com sequência de salas, quebra-cabeças (alguns pedem um herói específico), mini-chefes e chefe, com volta rápida para refazer em dificuldade maior. | v0.11 |
 | Travessia | Voo, planar, supercorrida, nado rápido, gancho e tirolesa, parkour (escalar, pular de parede e se pendurar) e veículos, todos com animação própria e trilha sonora dinâmica. | v0.11 |
 | Música e som dinâmicos | Trilha de cada personagem que reage à velocidade (já existe no voo e no planar), à luta e às fases dos chefes, mais sons de impacto por material. | v0.11 |
+
+## Habilidades
+
+| Sistema | O que faz | Versão |
+|---|---|---|
+| Sistema de habilidades | Árvore aberta por herói, definida em dados: cada variação é uma habilidade (ativa, ligar e desligar, passiva ou reforço) com as próprias melhorias (números, efeitos no mundo, transformações). Pontos só por nível, compras para sempre, só recarga (sem energia nem suprema). Salvo por jogador e por herói, conferido pelo servidor e sincronizado no multiplayer. Funciona no criativo. | v0.7 |
+| Tela da árvore | Os ramos do herói, cada habilidade com as melhorias, custos, o que já foi comprado e os pontos livres, com números completos e prévia animada. | v0.7 |
+| Build e presets | Slots livres (1 no começo, mais com o nível) para qualquer habilidade comprada, em qualquer ordem, e presets de build por herói para trocar a hora que quiser. | v0.7 |
 
