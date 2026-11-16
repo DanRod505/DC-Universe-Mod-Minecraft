@@ -24,7 +24,7 @@ Gerado por `tools/plano.py` a partir de `docs/plano/dados/sistemas.json`.
 | Sistema | O que faz | Versão |
 |---|---|---|
 | Combate | Combo no botão esquerdo, golpe pesado segurando, golpes aéreos e investida, sensação de impacto (pausa, tremor, partículas e som), cancelar golpes em habilidades e golpes em dupla no multiplayer. | v0.8 |
-| Atalhos e novo HUD | Os slots da build ficam em atalhos diretos e configuráveis. O HUD mostra vida, os slots com as recargas e o reforço ativo. Sem suprema e sem energia. | v0.8 |
+| Atalhos e novo HUD | Os 6 slots da build ficam nos atalhos Z, X, C, V, B e R, configuráveis, e uma tecla abre a tela da árvore e da build. O HUD mostra vida, os slots com as recargas e o reforço ativo. Sem suprema e sem energia. | v0.8 |
 | Defesa e mira | Esquiva com invencibilidade, aparar no tempo certo com contra-ataque, avisos visuais de ataque inimigo e mira travada que a câmera segue. | v0.8 |
 | Inimigos com IA de combate | Capangas que cercam, esperam a vez, avisam o ataque, bloqueiam e fogem; 7 papéis de inimigo e facções por cidade. Modelos e animações com GeckoLib. | v0.8 |
 | Chefes com fases | Arena, fases com cena de transição, ataques assinatura avisados, pontos fracos e música própria. | v0.11 |
@@ -61,5 +61,5 @@ Gerado por `tools/plano.py` a partir de `docs/plano/dados/sistemas.json`.
 |---|---|---|
 | Sistema de habilidades | Árvore aberta por herói, definida em dados: cada variação é uma habilidade (ativa, ligar e desligar, passiva ou reforço) com as próprias melhorias (números, efeitos no mundo, transformações). Pontos só por nível, compras para sempre, só recarga (sem energia nem suprema). Salvo por jogador e por herói, conferido pelo servidor e sincronizado no multiplayer. Funciona no criativo. | v0.7 |
 | Tela da árvore | Os ramos do herói, cada habilidade com as melhorias, custos, o que já foi comprado e os pontos livres, com números completos e prévia animada. | v0.7 |
-| Build e presets | Slots livres (1 no começo, mais com o nível) para qualquer habilidade comprada, em qualquer ordem, e presets de build por herói para trocar a hora que quiser. | v0.7 |
+| Build e presets | Até 6 slots livres (Z X C V B R; 1 no começo, mais com o nível) para qualquer habilidade comprada, em qualquer ordem, e presets de build por herói para trocar a hora que quiser. | v0.7 |
 

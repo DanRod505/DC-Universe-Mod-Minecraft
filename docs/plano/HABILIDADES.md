@@ -65,11 +65,12 @@ Cada habilidade tem as **próprias** melhorias, pensadas para ela. Elas são de 
 
 ## 5. Slots e build
 
-- Você começa com **1 slot**, e mais slots abrem com o nível.
+- Você começa com **1 slot**, e mais slots abrem com o nível, até **6 slots** (decisão do Dalton em 16/11/2026).
 - **Os slots são livres.** Qualquer habilidade em qualquer slot, na ordem que você quiser, voo incluído. Não há slot de tipo (combate, mobilidade, utilidade), nem limite de quantas habilidades do mesmo ramo, nem trava para habilidades de recarga longa. Montar uma build só de habilidades fortes e ficar sem nada pronto por um tempo é uma escolha do jogador.
 - **Presets de build por herói:** salvar e trocar builds prontas (ex.: uma de combate e uma de exploração).
 - Trocar as habilidades dos slots ou o preset é livre, a hora que você quiser.
-- Os slots ficam nos atalhos diretos. Sem a suprema, o R fica livre.
+- Os 6 slots ficam nos atalhos diretos **Z, X, C, V, B e R** (o R ficou livre sem a suprema).
+- Uma tecla própria abre a tela da árvore e da build (a tecla ainda vai ser escolhida).
 
 ## 6. As telas
 
@@ -89,7 +90,7 @@ Cada habilidade tem as **próprias** melhorias, pensadas para ela. Elas são de 
 - **Combate da v0.7 (PR #17, protótipo do Superman):**
   - A suprema (o mergulho de meteoro) sai como suprema. Se o Dalton quiser, ela pode voltar como uma habilidade comum da árvore.
   - A energia sai. Tudo passa a usar só recarga.
-  - Os atalhos Z X C V B passam a ser os slots da build, e o R deixa de ser a suprema.
+  - Os atalhos Z X C V B e R passam a ser os 6 slots da build, e o R deixa de ser a suprema.
 - **Modo combate e modo mundo:** as duas versões de atalhos por modo (redesenho de 07/11) já tinham saído na decisão de 08/11 (um kit só, mouse normal). Agora existe um só conjunto de slots, montado pelo jogador.
 - **Kits fixos de 4 habilidades por personagem:** saem. As ideias de habilidade do plano antigo ficam no elenco só como referência, marcadas como ideias antigas, até o Dalton definir as habilidades de cada um.
 - **Atributo Energia:** sai, junto com a energia.
@@ -100,6 +101,8 @@ Cada habilidade tem as **próprias** melhorias, pensadas para ela. Elas são de 
 Estes pontos são de balanceamento ou de detalhe e ficam para a implementação:
 
 - O nível máximo, quantos pontos cada nível dá e a curva de experiência.
-- Quantos slots no máximo e em que níveis eles abrem.
+- Em que níveis os slots 2 a 6 abrem.
+- A tecla que abre a tela da árvore e da build.
+- Se o jogador começa com uma habilidade padrão ou escolhe a primeira entre algumas iniciais.
 - Se o combo do botão esquerdo é uma habilidade da árvore (decisão de 08/11) ou fica sempre disponível.
 - A duração e a recarga de cada reforço.
