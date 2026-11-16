@@ -1769,11 +1769,11 @@ public final class Testes {
         // O dono voa: o Krypto sai do chão e vai junto.
         p.snapTo(pos.getX() + 0.5, pos.getY() + 4, pos.getZ() + 0.5, 0f, 0f);
         p.getAbilities().flying = true;
-        h.runAfterDelay(10, () -> {
+        esperar(h, 40, () -> k.voando() && k.getY() > pos.getY() + 0.5, () -> {
             h.assertTrue(k.voando() && k.isNoGravity(), "Krypto voa quando o dono voa");
             h.assertTrue(k.getY() > pos.getY() + 0.5, "Krypto subiu do chão (" + k.getY() + ")");
             p.getAbilities().flying = false;
-            h.runAfterDelay(3, () -> {
+            esperar(h, 20, () -> !k.voando(), () -> {
                 h.assertTrue(!k.voando(), "Krypto pousa quando o dono para de voar");
                 k.discard();
                 k2.discard();
@@ -1781,6 +1781,13 @@ public final class Testes {
                 h.succeed();
             });
         });
+    }
+
+    /** Espera a condição valer (checando a cada tick, até {@code max} ticks) e então roda {@code depois}.
+     *  Evita teste instável quando o servidor de CI atrasa ticks. */
+    private static void esperar(GameTestHelper h, int max, java.util.function.BooleanSupplier cond, Runnable depois) {
+        if (max <= 0 || cond.getAsBoolean()) { depois.run(); return; }
+        h.runAfterDelay(1, () -> esperar(h, max - 1, cond, depois));
     }
 
     private static boolean achar(net.minecraft.server.level.ServerLevel level, net.minecraft.world.level.levelgen.structure.BoundingBox c,
