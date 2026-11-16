@@ -60,6 +60,6 @@ Gerado por `tools/plano.py` a partir de `docs/plano/dados/sistemas.json`.
 | Sistema | O que faz | Versão |
 |---|---|---|
 | Sistema de habilidades | Árvore aberta por herói, definida em dados: cada variação é uma habilidade (ativa, ligar e desligar, passiva ou reforço) com as próprias melhorias (números, efeitos no mundo, transformações). Pontos só por nível, compras para sempre, só recarga (sem energia nem suprema). Salvo por jogador e por herói, conferido pelo servidor e sincronizado no multiplayer. Funciona no criativo. | v0.7 |
-| Tela da árvore | Os ramos do herói, cada habilidade com as melhorias, custos, o que já foi comprado e os pontos livres, com números completos e prévia animada. Abre na tecla K, com dica discreta no HUD; na primeira vez com um herói o jogador escolhe 1 entre as habilidades iniciais dele. | v0.7 |
+| Tela da árvore | Uma árvore de verdade (emblema no tronco, galhos para as habilidades e as melhorias penduradas nelas), cada habilidade com as melhorias, custos, o que já foi comprado e os pontos livres, com números completos e prévia animada. Abre na tecla K, com dica discreta no HUD; na primeira vez com um herói o jogador escolhe 1 entre as habilidades iniciais dele. | v0.7 |
 | Build e presets | Até 6 slots livres (Z X C V B R; abrem nos níveis 1, 3, 5, 10, 20 e 30) para qualquer habilidade comprada, em qualquer ordem, e presets de build por herói para trocar a hora que quiser. | v0.7 |
 

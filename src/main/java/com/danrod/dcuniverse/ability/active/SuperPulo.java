@@ -14,7 +14,9 @@ import net.minecraft.world.phys.Vec3;
 public final class SuperPulo implements TipoHabilidade {
     @Override
     public boolean usar(ServerPlayer player, Personagem p, Personagem.Habilidade h) {
-        if (!player.onGround() || player.isPassenger() || player.isSpectator() || player.getAbilities().flying) return false;
+        // No chão (o servidor nem sempre tem o onGround em dia com o jogador parado: confere o bloco embaixo também).
+        boolean chao = player.onGround() || !player.level().noCollision(player, player.getBoundingBox().move(0, -0.3, 0));
+        if (!chao || player.isPassenger() || player.isSpectator() || player.getAbilities().flying) return false;
         double v = SuperSalto.velocidadeParaAltura(h.params().d("height", 10));
         Vec3 olhar = player.getLookAngle();
         Vec3 frente = new Vec3(olhar.x, 0, olhar.z);

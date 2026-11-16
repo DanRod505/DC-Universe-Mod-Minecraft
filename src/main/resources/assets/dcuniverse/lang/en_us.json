@@ -1035,7 +1035,7 @@
   "dcuniverse.arvore.habilidades": "Abilities",
   "dcuniverse.arvore.build": "Build: drag into the slots",
   "dcuniverse.arvore.pontos": "Points: %s",
-  "dcuniverse.arvore.criativo": "Points: ∞ (creative)",
+  "dcuniverse.arvore.criativo": "Points: ∞",
   "dcuniverse.arvore.comprar": "Buy (%s pts)",
   "dcuniverse.arvore.comprada": "Owned. Drag it into a slot.",
   "dcuniverse.arvore.no_slot": "Equipped in slot %s",
@@ -1083,6 +1083,6 @@
   "dcuniverse.arvore.exige": "Needs first: %s",
   "dcuniverse.arvore.pode_criativo": "Creative: buy anything",
   "dcuniverse.arvore.clique_comprar": "Click the node to buy",
-  "dcuniverse.arvore.desfazer": "Undo purchase (creative)",
+  "dcuniverse.arvore.desfazer": "Undo purchase",
   "dcuniverse.arvore.rajada": "tap: %s s"
 }

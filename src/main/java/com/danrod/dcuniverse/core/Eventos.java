@@ -76,7 +76,11 @@ public final class Eventos {
             Rede.npcCatalogo(p);
         }));
         NeoForge.EVENT_BUS.addListener(PlayerTickEvent.Post.class, e -> {
-            if (e.getEntity() instanceof ServerPlayer sp) tick(sp);
+            if (e.getEntity() instanceof ServerPlayer sp) {
+                tick(sp);
+                // A árvore muda com o modo de jogo (criativo: 6 slots e pontos infinitos); só envia se mudou.
+                if (sp.tickCount % 10 == 0) com.danrod.dcuniverse.ability.Arvore.sincronizar(sp);
+            }
         });
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.HIGHEST, false, LivingDeathEvent.class, Eventos.cancela((Predicate<LivingDeathEvent>) e -> {
             // Decisão 3: destransforma antes do drop; a armadura original cai normalmente, o traje nunca.

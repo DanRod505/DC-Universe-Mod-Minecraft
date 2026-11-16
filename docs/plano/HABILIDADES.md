@@ -57,7 +57,7 @@ Cada habilidade tem as **próprias** melhorias, pensadas para ela. Elas são de 
 
 ## 4. Pontos e nível
 
-- A progressão vem **só do nível**. Cada nível dá pontos de habilidade.
+- A progressão vem **só do nível**. Cada nível dá pontos de habilidade, mais pontos quanto mais alto o nível (decisão do Dalton em 16/11/2026): **1 ponto por nível do 1 ao 9, 2 do 10 ao 19, 3 do 20 ao 29 e 4 do 30 em diante**.
 - Uma habilidade custa de 1 a 3 pontos, e cada melhoria tem o próprio custo.
 - Comprou, é para sempre. Não precisa "resetar" a árvore, porque nada fica preso numa escolha.
 - **O custo total da árvore passa dos pontos de uma campanha.** Assim as escolhas importam, e sobra o que comprar depois.
@@ -75,12 +75,17 @@ Cada habilidade tem as **próprias** melhorias, pensadas para ela. Elas são de 
 ### Habilidade inicial
 
 - Na primeira vez com um herói, depois de escolher o herói (tela de início que já existe), o jogador **escolhe 1 entre as habilidades iniciais** dele. Ela vai para o slot 1 e é de graça; as outras se compram na árvore.
-- Iniciais do Superman (definidas pelo Dalton): **Visão de Calor** (raio contínuo), **Voo** (completo, o voo atual) e **Sopro Congelante**.
+- Iniciais do Superman (definidas pelo Dalton): **Visão de Calor**, **Super Pulo** e **Sopro Congelante**. O Voo saiu das iniciais em 16/11/2026 e virou compra na árvore.
+
+### Primeiras melhorias do Superman (Dalton, 16/11/2026)
+
+- **Visão de Calor:** um toque dispara o raio por 3 segundos, sem segurar a tecla, com 5 segundos de recarga. Melhorias: duração de 5 s e depois de 10 s (a de 10 exige a de 5), pôr fogo, acender fornalha e a comida dos mobs mortos por ela já cair assada.
+- **Super Pulo:** pula 10 blocos de altura; melhorias para 20 e depois 30 blocos.
 - A troca de herói ganha uma tela própria mais adiante.
 
 ## 6. As telas
 
-- **Árvore de habilidades:** os ramos do herói, cada habilidade com as suas melhorias, custo, o que já foi comprado e os pontos disponíveis. Mostra os números completos, o que cada melhoria muda, e uma prévia animada da habilidade.
+- **Árvore de habilidades:** com cara de árvore de verdade (pedido do Dalton): o emblema do herói no tronco, um galho para cada habilidade e as melhorias penduradas nela, com galhos que ficam dourados quando comprados. Os ramos do herói, cada habilidade com as suas melhorias, custo, o que já foi comprado e os pontos disponíveis. Mostra os números completos, o que cada melhoria muda, e uma prévia animada da habilidade.
 - **Build:** os slots, as habilidades compradas para arrastar para eles e os presets.
 - **HUD:** vida, os slots com as recargas e o reforço ativo com o tempo que falta.
 - **Guia:** cada habilidade com os números, as melhorias e um pouco de lore (regra antiga que continua).
@@ -88,7 +93,7 @@ Cada habilidade tem as **próprias** melhorias, pensadas para ela. Elas são de 
 ## 7. Regras de sempre
 
 - **Multiplayer:** o servidor confere cada compra e cada uso. A árvore, os pontos, os slots e os presets ficam salvos por jogador e por herói, e são sincronizados com o cliente.
-- **Criativo:** as habilidades precisam funcionar no criativo. Proposta: no criativo tudo fica liberado e sem recarga, como a regra antiga de não gastar energia.
+- **Criativo:** as habilidades precisam funcionar no criativo. No criativo os 6 slots já vêm abertos e os **pontos são infinitos**, mas nada vem comprado: o jogador compra cada habilidade e melhoria que quiser testar e pode desfazer a compra (decisão do Dalton em 16/11/2026).
 - **Verificadores:** o verificador do mod confere que toda habilidade e melhoria tem texto no Guia, tradução e custo, e que nenhuma melhoria aponta para uma habilidade que não existe.
 
 ## 8. O que muda no que já existe
@@ -106,7 +111,7 @@ Cada habilidade tem as **próprias** melhorias, pensadas para ela. Elas são de 
 
 Estes pontos são de balanceamento ou de detalhe e ficam para a implementação:
 
-- O nível máximo, quantos pontos cada nível dá e a curva de experiência. Provisório na primeira build: nível máximo 30, 1 ponto por nível, XP de abate igual à vida máxima do inimigo.
-- O custo de cada habilidade (provisório na primeira build: 1 ou 2 pontos).
+- O nível máximo e a curva de experiência. Provisório: nível máximo 50, XP de abate igual à vida máxima do inimigo.
+- O custo de cada habilidade e melhoria (provisório: 1 ou 2 pontos).
 - Se o combo do botão esquerdo é uma habilidade da árvore (decisão de 08/11) ou fica sempre disponível.
 - A duração e a recarga de cada reforço.

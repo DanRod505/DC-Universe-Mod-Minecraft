@@ -1035,7 +1035,7 @@
   "dcuniverse.arvore.habilidades": "Habilidades",
   "dcuniverse.arvore.build": "Build: arraste para os slots",
   "dcuniverse.arvore.pontos": "Pontos: %s",
-  "dcuniverse.arvore.criativo": "Pontos: ∞ (criativo)",
+  "dcuniverse.arvore.criativo": "Pontos: ∞",
   "dcuniverse.arvore.comprar": "Comprar (%s pts)",
   "dcuniverse.arvore.comprada": "Comprada. Arraste para um slot.",
   "dcuniverse.arvore.no_slot": "Equipada no slot %s",
@@ -1083,6 +1083,6 @@
   "dcuniverse.arvore.exige": "Antes precisa de: %s",
   "dcuniverse.arvore.pode_criativo": "Criativo: compre o que quiser",
   "dcuniverse.arvore.clique_comprar": "Clique no nó para comprar",
-  "dcuniverse.arvore.desfazer": "Desfazer compra (criativo)",
+  "dcuniverse.arvore.desfazer": "Desfazer compra",
   "dcuniverse.arvore.rajada": "toque: %s s"
 }

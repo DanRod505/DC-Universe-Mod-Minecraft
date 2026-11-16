@@ -60,6 +60,7 @@ public final class ArvoreScreen extends Screen {
     private int linhas = 1;
     private int colW, rowH, tam, tamM;
     private double pan;
+    private boolean centrou;
     private boolean panando;
 
     public ArvoreScreen() {
@@ -76,7 +77,7 @@ public final class ArvoreScreen extends Screen {
         slot = 26;
         sy = y1 - slot - 16;
         int largura = x1 - x0;
-        dw = Math.max(130, Math.min(200, largura * 2 / 5));
+        dw = Math.max(120, Math.min(170, largura * 3 / 10));
         dx = x1 - dw - 6;
         gx = x0 + 8;
         gy = corpoY + 14;
@@ -183,6 +184,12 @@ public final class ArvoreScreen extends Screen {
         rowH = Mth.clamp((gh - 4) / linhas, 26, 44);
         tam = Math.min(colW, rowH) - 6;
         tamM = Math.max(18, tam - 6);
+        // Abre centrada no tronco (o emblema do herói), com as primeiras habilidades em volta.
+        if (!centrou) {
+            float meio = colRaiz();
+            pan = meio * colW + colW / 2f - gw / 2f;
+            centrou = true;
+        }
         pan = Mth.clamp(pan, 0, maxPan());
     }
 
@@ -241,11 +248,7 @@ public final class ArvoreScreen extends Screen {
         boolean dentroArea = dentro(mx, my, gx, gy, gw, gh);
         g.enableScissor(gx - 1, gy - 1, gx + gw + 1, gy + gh - 1);
         // O tronco: o emblema do herói, centrado sobre as habilidades.
-        float meio = 0;
-        int nh = 0;
-        for (No n : nos) if (n.linha() == 1) { meio += n.col(); nh++; }
-        meio = nh == 0 ? 0 : meio / nh;
-        int rx = noX(meio), ry = noY(0);
+        int rx = noX(colRaiz()), ry = noY(0);
         // Galhos primeiro (embaixo dos nós).
         for (No n : nos) {
             int px, py, pt;
@@ -279,6 +282,20 @@ public final class ArvoreScreen extends Screen {
             if (pan > 0) g.text(font, "<", gx + 1, gy + gh / 2 - 4, pulso(OURO, t), true);
             if (pan < maxPan()) g.text(font, ">", gx + gw - 6, gy + gh / 2 - 4, pulso(OURO, t), true);
         }
+    }
+
+    /** O tronco fica em cima das habilidades iniciais (o começo de todo herói); sem elas, no meio. */
+    private float colRaiz() {
+        float soma = 0;
+        int n = 0;
+        for (No x : nos) {
+            if (x.linha() == 1 && x.it().inicial()) {
+                soma += x.col();
+                n++;
+            }
+        }
+        if (n == 0) for (No x : nos) if (x.linha() == 1) { soma += x.col(); n++; }
+        return n == 0 ? 0 : soma / n;
     }
 
     private No no(String id) {
@@ -397,7 +414,10 @@ public final class ArvoreScreen extends Screen {
             icone(g, it.id(), px + 6, py + 6, 24, tem ? 0xFFFFFFFF : 0xFF8A8A8A);
             pequeno(g, font, resumo(it), tx, py + 19, SUAVE);
         }
-        g.text(font, nome(it).copy().withStyle(ChatFormatting.BOLD), tx, py + 7, tem ? OURO : TEXTO, true);
+        Component titulo = nome(it).copy().withStyle(ChatFormatting.BOLD);
+        // Nome comprido (algumas melhorias): menor, para caber no painel.
+        if (font.width(titulo) > px + dw - 4 - tx) pequeno(g, font, titulo, tx, py + 8, tem ? OURO : TEXTO);
+        else g.text(font, titulo, tx, py + 7, tem ? OURO : TEXTO, true);
         // Estado e ação.
         Component estado;
         int corEstado;
