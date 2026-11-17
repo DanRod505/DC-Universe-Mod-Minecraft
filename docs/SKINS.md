@@ -80,7 +80,7 @@
 
 **Corpo:** masculino, 1,91 m (escala 1,03), musculoso, modelo humano, braços largo · peças: capa, brilho
 
-**Traje de Krypton (base):** Malha azul-royal com textura de escamas finas (padrão kryptoniano em relevo de 1 pixel), S vermelho e amarelo em relevo no peito com borda escura, cinto amarelo fino, botas vermelhas até o meio da canela com costura em V e capa vermelha longa com o S amarelo nas costas. Cabelo preto com o cacho na testa. Olhos ganham brilho vermelho (camada emissiva) ao usar visão de calor.
+**Traje de Krypton (base):** Inspirado nas fotos de traje que o Dalton mandou (16/11/2026): malha azul funda com trama texturizada e costuras em relevo marcando os painéis (peito, costelas, ombros, braços e joelhos), gola alta, S vermelho e amarelo em relevo no peito com borda escura, cinto dourado largo com fivela, sunga vermelha, botas vermelhas até o joelho e capa vermelha longa caindo pelos ombros, com o S amarelo grande nas costas. Cabelo preto com o cacho na testa. Olhos ganham brilho vermelho (camada emissiva) ao usar visão de calor.
 
 - **Clássico com Sunga** (Liberada desde o início): Azul mais claro, sunga vermelha por fora, cinto amarelo largo e capa mais curta; S com fundo amarelo maior.
 - **Clark Kent** (Liberada desde o início): Terno cinza com gravata frouxa, óculos de armação grossa e a camisa aberta mostrando o S. Modo identidade secreta: NPCs não reconhecem; usar habilidade troca para o traje.
@@ -91,7 +91,7 @@
 
 **Corpo:** masculino, 1,88 m (escala 1,02), musculoso, modelo humano, braços largo · peças: capa, orelhas_bat, cinto_3d, laminas, planador, brilho
 
-**Traje Tático de Gotham (base):** Armadura cinza-grafite em placas sobre malha preta, morcego preto grande no peito em relevo, cinto de utilidades amarelo-escuro com 6 bolsos em 3D, luvas com três lâminas nos antebraços e capuz com orelhas curtas. Capa preta de tecido pesado que vira asa de planador (animação de abertura). Lentes brancas na máscara quando o visor de detetive está ligado.
+**Traje Tático de Gotham (base):** Traje cinza texturizado em painéis (peito, abdômen, coxas e joelheiras), morcego preto grande de ombro a ombro no peito, capuz preto com orelhas e olhos brancos, manoplas pretas com três lâminas, cinto de utilidades de bronze com 6 bolsos em 3D, sunga e coturnos pretos. Capa preta de tecido pesado que vira asa de planador (animação de abertura). Lentes acesas na máscara quando o visor de detetive está ligado.
 
 - **Clássico Cinza e Azul** (Liberada desde o início): Malha cinza clara, capa e capuz azuis, oval amarelo em volta do morcego e sunga azul.
 - **Bruce Wayne** (Liberada desde o início): Smoking preto com gravata-borboleta e cabelo penteado para trás. Modo identidade secreta.
@@ -244,7 +244,7 @@
 
 **Corpo:** feminino, 1,65 m (escala 0,89), atletico, modelo humano, braços fino · peças: capa, cabelo_longo, saia
 
-**Traje de Kara (base):** Top azul de manga longa com o S no peito, saia vermelha curta pregueada, cinto dourado, botas vermelhas e capa vermelha. Cabelo loiro longo e liso com franja.
+**Traje de Kara (base):** Traje azul texturizado de manga longa com costuras e o S no peito, cinto dourado largo em V, saia vermelha curta pregueada, botas vermelhas até a coxa com a boca em V debruada de dourado, e capa vermelha comprida. Cabelo loiro longo e ondulado.
 
 - **Kara Danvers** (Liberada desde o início): Suéter, saia e óculos. Modo identidade secreta.
 - **Mulher de Aço** (3× Cristal de Memória no Guarda-Roupa): Traje inteiro azul com textura kryptoniana e calças, sem saia.
@@ -528,7 +528,7 @@
 
 **Corpo:** masculino, 1,75 m (escala 0,95), atletico, modelo humano, braços largo
 
-**Superboy (base):** Camiseta preta com o S vermelho, jaqueta de couro, calça jeans escura e coturnos. Cabelo preto curto. Brilho vermelho nos olhos.
+**Superboy (base):** Camiseta preta justa com o S vermelho grande, cinto com fivela prateada, calça cargo azul-marinho escura com bolsos laterais e coturnos marrom-escuros. Cabelo preto curto. Brilho vermelho nos olhos.
 
 - **Anos 90** (Liberada desde o início): Jaqueta de couro com ombreiras, óculos escuros, brinco e corte undercut.
 - **Traje de Krypton** (3× Cristal de Memória no Guarda-Roupa): Malha azul com S e sem capa.

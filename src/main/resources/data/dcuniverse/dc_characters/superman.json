@@ -44,9 +44,36 @@
     "guard": { "anim": "superman.defesa", "parry_anim": "superman.aparo", "parry": 0.3, "reduction": 0.75,
       "parry_stun": 1.5, "parry_knockback": 1.4, "arc": 200 }
   },
+  "skill_tree": {
+    "stats": {
+      "energy": [ 100, 200, 300, 400 ],
+      "health": [ 10, 15, 20, 30 ],
+      "regen": [ 2, 3, 4, 5 ],
+      "armor": [ 10, 14, 18, 22 ],
+      "flight_speed": [ 56, 64, 72 ],
+      "boost_drain": [ 8, 6, 4 ]
+    },
+    "starters": [ "visao_de_calor", "super_pulo", "sopro_congelante" ],
+    "abilities": [
+      { "id": "visao_de_calor", "cost": 1, "range": [ 24, 32, 40 ] },
+      { "id": "super_pulo", "cost": 1,
+        "upgrades": [
+          { "id": "altura_20", "cost": 1, "icon": "minecraft:rabbit_foot", "params": { "height": 20 } },
+          { "id": "altura_30", "cost": 2, "requires": "altura_20", "icon": "minecraft:rabbit_foot", "params": { "height": 30 } }
+        ] },
+      { "id": "sopro_congelante", "cost": 1 },
+      { "id": "investida_de_aco", "cost": 2 },
+      { "id": "palmas_sonicas", "cost": 2 },
+      { "id": "soco_sonico", "cost": 2 },
+      { "id": "visao_raio_x", "cost": 1 },
+      { "id": "pisao_sismico", "cost": 2 },
+      { "id": "giro_de_calor", "cost": 3, "range": [ 12, 16, 20 ] }
+    ]
+  },
   "abilities": [
     { "id": "visao_de_calor", "type": "projectile_beam", "set": "combat", "mode": "hold", "cost": 12, "cooldown": 2,
       "range": 24, "damage_mult": 0.4, "color": "#FF2A1A", "sets_fire": true, "melts": true,
+      "lights_furnace": true, "cooks_drops": true, "knockback": 0.35, "digs": true, "dig_speed": 1.0,
       "anim": "superman.visao.inicio", "windup": 0.35, "loop_anim": "superman.visao" },
     { "id": "sopro_congelante", "type": "area_cone", "set": "combat", "mode": "hold", "cost": 10, "cooldown": 3,
       "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze",
@@ -59,16 +86,19 @@
       "anim": "superman.palmas", "windup": 0.62 },
     { "id": "soco_sonico", "type": "projectile", "set": "combat", "cost": 40, "cooldown": 8, "visual": "sonic",
       "speed": 1.6, "range": 28, "damage_mult": 2.0, "knockback": 1.6, "impact_radius": 4 },
-    { "id": "calor_focado", "type": "projectile_beam", "set": "world", "mode": "hold", "cost": 5, "cooldown": 0.5,
-      "range": 28, "damage_mult": 0.15, "color": "#FF5A2A", "sets_fire": true, "melts": true },
-    { "id": "sopro_gelido", "type": "area_cone", "set": "world", "mode": "hold", "cost": 4, "cooldown": 1,
-      "range": 11, "angle": 22, "damage_mult": 0.05, "effect": "freeze" },
     { "id": "visao_raio_x", "type": "vision", "set": "world", "mode": "xray", "cost": 20, "cooldown": 12,
       "duration": 12, "range": 28, "color": "#8FD8FF" },
     { "id": "pisao_sismico", "type": "area_blast", "set": "world", "cost": 30, "cooldown": 6,
       "radius": 7, "damage_mult": 0.75, "knockback": 1.2, "launch": 0.7, "stun": 1.5, "spread_ticks": 10 },
     { "id": "fortaleza_da_solidao", "type": "structure", "supreme": true, "cost_pct": 70, "cooldown": 150,
       "range": 24, "radius": 6, "duration": 120, "regen_level": 2, "energy_per_second": 8,
-      "meteor": true, "impact_damage_mult": 1.5, "anim": "superman.suprema", "windup": 2.4 }
+      "meteor": true, "impact_damage_mult": 1.5, "anim": "superman.suprema", "windup": 2.4 },
+    { "id": "giro_de_calor", "type": "spinning_beam", "set": "combat", "cost": 60, "cooldown": 12,
+      "charge": 1.0, "duration": 2.5, "turns": 6, "height": 3, "range": 12, "pitch_min": 14, "pitch_max": 42,
+      "damage_mult": 0.35, "hit_interval": 0.5, "knockback": 0.7, "launch": 0.35,
+      "blast_damage_mult": 1.2, "blast_knockback": 2.2, "blast_launch": 0.8, "glow": 3, "color": "#FF2A1A",
+      "crater_radius": 4.5, "crater_depth": 2.5,
+      "sets_fire": true, "melts": true, "cooks_drops": true, "lights_furnace": true, "anim": "superman.giro" },
+    { "id": "super_pulo", "type": "leap", "cost": 10, "cooldown": 1.5, "height": 10, "unlocks_passive": "super_jump" }
   ]
 }

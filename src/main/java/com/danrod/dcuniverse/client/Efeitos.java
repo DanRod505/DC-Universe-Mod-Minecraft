@@ -48,6 +48,9 @@ public final class Efeitos {
             if (level.getEntity(id) instanceof Player pl) transformacao(level, pl, a.cor());
         });
         EstadoCliente.TRANSFORMOU.clear();
+        GiroVisual.tick(level);
+        VisaoVisual.tick(level);
+        SoproVisual.tick(level);
         if (mc.player != null && Planador.amortecendo(mc.player)) rastro(level, mc.player);
     }
 
@@ -67,8 +70,9 @@ public final class Efeitos {
             Vec3 p = olhos.add(dir.scale(t)).add(lado.scale((rnd.nextDouble() - 0.5) * 0.3));
             level.addParticle(fora, p.x, p.y - 0.1, p.z, 0, 0.01, 0);
         }
+        VisaoVisual.feixe(level, pl, a);
         if (rnd.nextFloat() < 0.5f) level.addParticle(nucleo, fim.x, fim.y, fim.z, 0, 0, 0);
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < Math.round(3 * a.escala()); i++) {
             level.addParticle(ParticleTypes.SMALL_FLAME, fim.x, fim.y, fim.z,
                 (rnd.nextDouble() - 0.5) * 0.12, rnd.nextDouble() * 0.1, (rnd.nextDouble() - 0.5) * 0.12);
         }
@@ -83,6 +87,7 @@ public final class Efeitos {
         Vec3 boca = pl.getEyePosition().add(0, -0.22, 0).add(dir.scale(primeiraPessoa ? 0.9 : 0.35));
         double abre = Math.tan(Math.toRadians(a.angulo())) * 0.5;
         double vel = 0.35 + a.alcance() * 0.05;
+        SoproVisual.sopro(level, pl, a);
         for (int i = 0; i < 7; i++) {
             Vec3 v = dir.add((rnd.nextDouble() - 0.5) * abre * 2, (rnd.nextDouble() - 0.5) * abre * 2, (rnd.nextDouble() - 0.5) * abre * 2)
                 .normalize().scale(vel * (0.7 + rnd.nextDouble() * 0.5));
@@ -128,6 +133,7 @@ public final class Efeitos {
 
     /** Feixe de luz (mistura aditiva, brilha no escuro) saindo dos olhos de quem é visto em terceira pessoa. */
     public static void registrarFeixe() {
+        GiroVisual.registrar();
         NeoForge.EVENT_BUS.addListener(RenderLivingEvent.Post.class, e -> {
             if (!(e.getRenderState() instanceof AvatarRenderState st)) return;
             Rede.Aparencia a = EstadoCliente.APARENCIAS.get(st.id);
@@ -141,16 +147,24 @@ public final class Efeitos {
             lado = lado.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : lado.normalize();
             Vec3 base = new Vec3(0, st.eyeHeight, 0).add(dir.scale(0.27));
             int cor = a.efeitoCor();
-            int claro = misturar(cor, 0xFFF4D0, 0.75f);
+            float k = a.escala();
             for (int s = -1; s <= 1; s += 2) {
                 Vec3 de = base.add(lado.scale(0.125 * s));
-                e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> {
-                    feixe(pose.pose(), buf, de, fim, 0.16f, cor, 0.18f);
-                    feixe(pose.pose(), buf, de, fim, 0.07f, cor, 0.55f);
-                    feixe(pose.pose(), buf, de, fim, 0.03f, claro, 0.95f);
-                });
+                Luz.depoisDaAgua(e.getPoseStack(), e.getSubmitNodeCollector(), Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 1.7f, cor, k));
             }
         });
+    }
+
+    /**
+     * As três camadas do feixe (halo, corpo e núcleo quase branco). k = escala das melhorias de dano: mais grosso,
+     * mais forte e com o núcleo mais branco. base = largura de base (1 = terceira pessoa).
+     */
+    static void camadas(Matrix4fc m, VertexConsumer buf, Vec3 de, Vec3 fim, float base, int cor, float k) {
+        float forte = Math.min(1f, 0.75f + 0.25f * k);
+        int claro = misturar(cor, 0xFFF4D0, Math.min(0.95f, 0.65f + 0.1f * k));
+        feixe(m, buf, de, fim, 0.16f * base * k, cor, Math.min(0.45f, 0.18f * k));
+        feixe(m, buf, de, fim, 0.07f * base * k, cor, 0.55f * forte);
+        feixe(m, buf, de, fim, 0.03f * base * (0.6f + 0.4f * k), claro, 0.95f);
     }
 
     /**
@@ -170,20 +184,16 @@ public final class Efeitos {
         lado = lado.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : lado.normalize();
         Vec3 baixo = dir.cross(lado).normalize();
         int cor = a.efeitoCor();
-        int claro = misturar(cor, 0xFFF4D0, 0.75f);
+        float k = a.escala();
         float tremor = 0.9f + 0.1f * Mth.sin((mc.level.getGameTime() + pt) * 1.7f);
         for (int s = -1; s <= 1; s += 2) {
             Vec3 de = olhos.subtract(cam).add(dir.scale(0.4)).add(lado.scale(0.09 * s)).add(baixo.scale(0.13));
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
-                feixe(pose.pose(), buf, de, fim, 0.09f, cor, 0.22f * tremor);
-                feixe(pose.pose(), buf, de, fim, 0.04f, cor, 0.6f * tremor);
-                feixe(pose.pose(), buf, de, fim, 0.016f, claro, 0.95f);
-            });
+            Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> camadas(pose.pose(), buf, de, fim, 0.8f * tremor, cor, k));
         }
     }
 
     /** Dois planos cruzados ao longo do segmento, visíveis dos dois lados. */
-    private static void feixe(Matrix4fc m, VertexConsumer buf, Vec3 de, Vec3 ate, float largura, int cor, float alfa) {
+    static void feixe(Matrix4fc m, VertexConsumer buf, Vec3 de, Vec3 ate, float largura, int cor, float alfa) {
         Vec3 d = ate.subtract(de).normalize();
         Vec3 n1 = d.cross(new Vec3(0, 1, 0));
         n1 = (n1.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : n1.normalize()).scale(largura / 2);

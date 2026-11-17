@@ -69,7 +69,7 @@ public final class GelRenderer extends EntityRenderer<GelEntidade, GelRenderer.E
         float frac = armado ? Mth.clamp(s.armado / (float) GelEntidade.PAVIO, 0, 1) : 0;
         float pisca = armado ? (((int) (s.idade * (1 + frac * 2))) % 2 == 0 ? 1 : 0.25f) : 0.55f + 0.45f * Mth.sin(s.idade * 0.18f + fase);
         int cor = armado ? 0xFF3A2A : 0x4FC8FF;
-        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             halo(m, buf, 0.016f, (armado ? 0.38f + frac * 0.5f : 0.34f) * esc, cor, (armado ? 0.55f : 0.22f) * pisca);
             halo(m, buf, 0.05f, 0.07f, cor, 0.9f * pisca);

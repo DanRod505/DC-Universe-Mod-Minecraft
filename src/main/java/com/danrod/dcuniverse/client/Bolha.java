@@ -97,7 +97,7 @@ public final class Bolha {
             boolean dentro = cam.distanceTo(pos) < r;
             float forca = some * nasce;
             Vec3 olho = cam.subtract(pos);
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> esfera(pose.pose(), buf, c, r, olho, tempo, forca, golpe, a.deOnde, dentro));
+            Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> esfera(pose.pose(), buf, c, r, olho, tempo, forca, golpe, a.deOnde, dentro));
         }
     }
 

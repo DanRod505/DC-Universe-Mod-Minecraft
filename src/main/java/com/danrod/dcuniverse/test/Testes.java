@@ -2,6 +2,7 @@ package com.danrod.dcuniverse.test;
 
 import com.danrod.dcuniverse.DCUniverse;
 import com.danrod.dcuniverse.ability.DemoHud;
+import com.danrod.dcuniverse.ability.Arvore;
 import com.danrod.dcuniverse.ability.Habilidades;
 import com.danrod.dcuniverse.ability.Passivas;
 import com.danrod.dcuniverse.ability.QuedaAmortecida;
@@ -91,14 +92,239 @@ public final class Testes {
         FUNCOES.register("kryptonian_ship", () -> Testes::nave);
         FUNCOES.register("telekinesis", () -> Testes::telecinese);
         FUNCOES.register("floating_island", () -> Testes::ilha);
+        FUNCOES.register("rock_combo", () -> Testes::furiaDeRochas);
+        FUNCOES.register("platform_leap", () -> Testes::escaladaSismica);
         FUNCOES.register("batch_v03", () -> Testes::loteV03);
         FUNCOES.register("guided_start", () -> Testes::inicioGuiado);
+        FUNCOES.register("skill_tree", () -> Testes::arvore);
     }
 
     private Testes() {}
 
+    /**
+     * Árvore de habilidades (Plano 2, estilo Justice League Heroes): as iniciais já liberadas nos slots, os 6 slots
+     * abertos, pontos por nível, melhorias padrão (energia, vida, recuperação, voo, dano e custo), energia gasta com
+     * atraso na recuperação, voo nativo, criativo com pontos infinitos e o pacote ida e volta.
+     */
+    static void arvore(GameTestHelper h) {
+        try {
+            arvore0(h);
+        } catch (RuntimeException ex) {
+            DCUniverse.LOGGER.error("skill_tree", ex);
+            throw ex;
+        }
+    }
+
+    private static void arvore0(GameTestHelper h) {
+        ServerPlayer p = jogadorArvore(h, GameType.SURVIVAL);
+        Transformacao.transformar(p, SUPERMAN, true);
+        Personagem sup = EstadoJogador.de(p).personagem();
+        h.assertTrue(sup.arvore() != null, "Superman usa a árvore nova");
+        List<String> iniciais = List.of("visao_de_calor", "super_pulo", "sopro_congelante");
+        h.assertValueEqual(sup.arvore().iniciais(), iniciais, "as 3 iniciais");
+        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, sup)), iniciais, "as iniciais já vêm nos slots");
+        for (String id : iniciais) h.assertTrue(Arvore.tem(p, sup, id), "já vem com " + id);
+        // Voo nativo: voa sem nada num slot.
+        TiposPassiva.TIPOS.get("flight").tick(p, sup.passiva("flight").params());
+        h.assertTrue(p.getAbilities().mayfly, "o voo é nativo");
+        h.assertTrue(com.danrod.dcuniverse.ability.Passivas.params(p, "super_jump") != null, "Super Pulo no slot libera o salto carregado");
+        h.assertValueEqual(Arvore.alturaSalto(p, sup), 10f, "Super Pulo começa em 10 blocos");
+        h.assertValueEqual(Arvore.pontos(p, sup), 0, "as iniciais são de graça");
+        h.assertFalse(Arvore.comprar(p, "palmas_sonicas"), "sem pontos não compra");
+        // Pontos por nível (Dalton): 1 nos níveis 1-9, 2 nos 10-19, 3 nos 20-29, 4 do 30 em diante.
+        int[][] pts = {{1, 0}, {2, 1}, {9, 8}, {10, 10}, {19, 28}, {20, 31}, {29, 58}, {30, 62}, {31, 66}};
+        for (int[] x : pts) h.assertValueEqual(Arvore.pontosAteNivel(x[0]), x[1], "pontos até o nível " + x[0]);
+        for (int n = 1; n <= Arvore.NIVEL_MAX; n++) h.assertValueEqual(Arvore.nivelDaXp(Arvore.xpDoNivel(n)), n, "xp do nível " + n);
+        Arvore.definirXp(p, sup, Arvore.xpDoNivel(3));
+        h.assertValueEqual(Arvore.pontos(p, sup), 2, "1 ponto por nível no começo");
+        // Melhorias: a exigida antes da seguinte.
+        h.assertFalse(Arvore.comprar(p, "super_pulo.altura_30"), "altura 30 exige a 20 antes");
+        h.assertTrue(Arvore.comprar(p, "super_pulo.altura_20"), "compra a melhoria do Super Pulo");
+        h.assertValueEqual(Arvore.alturaSalto(p, sup), 20f, "melhoria sobe a altura para 20");
+        h.assertFalse(Arvore.comprar(p, "heroi.energia_2"), "energia II exige a I");
+        float max0 = Arvore.energiaMax(p, sup);
+        h.assertValueEqual(max0, 100f, "Superman com 100 de energia na árvore");
+        h.assertTrue(Arvore.comprar(p, "heroi.energia_1"), "compra energia I");
+        h.assertValueEqual(Arvore.energiaMax(p, sup), 200f, "energia I: 100 -> 200 (Dalton)");
+        h.assertValueEqual(Arvore.pontos(p, sup), 0, "gastou os 2 pontos");
+        // Visão de calor completa: segurar, com fogo, fornalha e comida assada desde o começo.
+        Personagem.Habilidade vis = Arvore.habilidade(p, sup, "visao_de_calor");
+        h.assertValueEqual(Arvore.rajada(vis), 0f, "segura para usar");
+        h.assertTrue(vis.params().b("sets_fire", false) && vis.params().b("lights_furnace", false) && vis.params().b("cooks_drops", false),
+            "já vem com fogo, fornalha e comida assada");
+        // Vida em corações e armadura do Superman na árvore (Dalton: 10 corações).
+        h.assertValueEqual(p.getMaxHealth(), 20f, "Superman começa com 10 corações");
+        h.assertValueEqual(Arvore.armadura(p, sup), 10f, "armadura de base");
+        // Energia: gasta ao usar e recupera sempre, aos poucos.
+        EstadoJogador e = EstadoJogador.de(p);
+        e.setEnergia(100f);
+        Habilidades.usar(p, 0, true);
+        com.danrod.dcuniverse.ability.Coreografia.adiantar(p);
+        Habilidades.tick(p, sup);
+        h.assertValueEqual(e.canalizando(), "visao_de_calor", "segurando, canaliza");
+        h.assertTrue(e.energia() < 100f, "a visão de calor gasta energia");
+        h.assertTrue(Arvore.regen(p, sup) == 2f && com.danrod.dcuniverse.energy.Energia.recargaAgora(p, sup) >= 2f, "recupera 2 por segundo, sem esperar");
+        Habilidades.usar(p, 0, false);
+        h.assertValueEqual(e.canalizando(), "", "soltar a tecla para");
+        // Build livre: o que não tem fica de fora, melhoria não vai para slot; qualquer um dos 6 slots vale.
+        Arvore.definirSlots(p, List.of("palmas_sonicas", "super_pulo.altura_20", "", "", "", "super_pulo"));
+        h.assertValueEqual(Arvore.slots(p, sup), List.of("", "", "", "", "", "super_pulo"), "não equipa o que não tem nem melhoria");
+        h.assertValueEqual(ids(Arvore.equipadas(p, sup)), List.of("super_pulo"), "o slot 6 já vem aberto");
+        // Fica guardado ao destransformar e transformar de novo.
+        Transformacao.destransformar(p);
+        Transformacao.transformar(p, SUPERMAN, true);
+        h.assertValueEqual(Arvore.compradas(p, sup), List.of("super_pulo.altura_20", "heroi.energia_1"), "compras guardadas");
+        h.assertValueEqual(Arvore.nivel(p, sup), 3, "nível guardado");
+        h.assertTrue(Math.abs(e.energia() - 200f * com.danrod.dcuniverse.core.Config.ENERGIA_INICIAL.get()) < 0.01f, "começa com a energia da árvore (" + e.energia() + ")");
+        // Criativo: pontos infinitos, compra de verdade o que quiser (e desfaz para testar), sem gastar energia.
+        ServerPlayer c = jogadorArvore(h, GameType.CREATIVE);
+        Transformacao.transformar(c, SUPERMAN, true);
+        h.assertFalse(Arvore.tem(c, sup, "pisao_sismico"), "criativo não vem com tudo comprado");
+        float vida0 = c.getMaxHealth();
+        float dano0 = Arvore.danoCoracoes(sup, Arvore.habilidade(c, sup, "visao_de_calor"));
+        h.assertValueEqual(dano0, 5f, "visão de calor: 5 corações/s de base");
+        for (String id : List.of("pisao_sismico", "visao_de_calor.dano_1", "visao_de_calor.dano_2", "visao_de_calor.custo_1", "visao_de_calor.alcance_1", "giro_de_calor",
+            "heroi.vida_1", "heroi.voo_velocidade_1", "heroi.impulso_1", "heroi.recuperacao_1", "heroi.armadura_1")) h.assertTrue(Arvore.comprar(c, id), "criativo compra " + id);
+        h.assertValueEqual(Arvore.pontos(c, sup), Arvore.PONTOS_CRIATIVO, "pontos infinitos no criativo");
+        Personagem.Habilidade visC = Arvore.habilidade(c, sup, "visao_de_calor");
+        h.assertTrue(Math.abs(Arvore.danoCoracoes(sup, visC) - 10f) < 1e-3, "dano II: 5 -> 10 corações/s");
+        h.assertTrue(Math.abs(visC.custo() - 9.5f) < 1e-4, "eficiência I: 12 -> 9,5 de energia/s");
+        h.assertValueEqual(visC.params().f("range", 0f), 32f, "alcance I: 24 -> 32 blocos");
+        h.assertTrue(Math.abs(visC.params().f("beam_scale", 0f) - 1.9f) < 1e-4, "dano II deixa o raio mais grosso e brilhante");
+        h.assertValueEqual(Arvore.habilidade(c, sup, "visao_raio_x").params().f("beam_scale", 1f), 1f, "sem melhoria de dano, raio normal");
+        // Giro de calor: os raios giram e acertam todo mundo em volta, uma vez por volta.
+        var centro = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 2.5));
+        c.snapTo(centro.x, centro.y, centro.z, 0, 0);
+        var cerco = new java.util.ArrayList<net.minecraft.world.entity.LivingEntity>();
+        for (int[] d : new int[][] {{2, 5}, {5, 2}, {0, 2}, {2, 0}}) {
+            var z = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(d[0], 2, d[1]));
+            z.setNoAi(true);
+            z.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(1000);
+            z.setHealth(1000);
+            cerco.add(z);
+        }
+        // Cratera da batida: tira só chão natural; baú, tijolo e minério ficam.
+        for (int x = 0; x <= 8; x++) for (int z = 0; z <= 8; z++) for (int y = 0; y <= 1; y++)
+            h.setBlock(new net.minecraft.core.BlockPos(x, y, z), y == 1 ? net.minecraft.world.level.block.Blocks.GRASS_BLOCK : net.minecraft.world.level.block.Blocks.DIRT);
+        h.setBlock(new net.minecraft.core.BlockPos(4, 0, 4), net.minecraft.world.level.block.Blocks.IRON_ORE);
+        h.setBlock(new net.minecraft.core.BlockPos(5, 1, 4), net.minecraft.world.level.block.Blocks.STONE_BRICKS);
+        h.setBlock(new net.minecraft.core.BlockPos(3, 1, 4), net.minecraft.world.level.block.Blocks.CHEST);
+        int tirados = com.danrod.dcuniverse.ability.active.GiroCalor.cratera(h.getLevel(), c, h.absolutePos(new net.minecraft.core.BlockPos(4, 2, 4)), 3.5f, 2.5f);
+        h.assertTrue(tirados > 10, "a batida abre uma cratera (" + tirados + " blocos)");
+        h.assertFalse(h.getBlockState(new net.minecraft.core.BlockPos(4, 1, 4)).is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK), "o meio da cratera afunda (grama também)");
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.IRON_ORE, new net.minecraft.core.BlockPos(4, 0, 4));
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.STONE_BRICKS, new net.minecraft.core.BlockPos(5, 1, 4));
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.CHEST, new net.minecraft.core.BlockPos(3, 1, 4));
+        // Visão de Calor cava: desfaz terra, mas nunca minério nem tijolo (as mesmas regras da cratera).
+        h.setBlock(new net.minecraft.core.BlockPos(8, 1, 8), net.minecraft.world.level.block.Blocks.DIRT);
+        h.setBlock(new net.minecraft.core.BlockPos(8, 1, 0), net.minecraft.world.level.block.Blocks.IRON_ORE);
+        h.setBlock(new net.minecraft.core.BlockPos(0, 1, 8), net.minecraft.world.level.block.Blocks.STONE_BRICKS);
+        var pe = h.absolutePos(new net.minecraft.core.BlockPos(4, 2, 4));
+        double vx = c.getX(), vy = c.getY(), vz = c.getZ();
+        float vyaw = c.getYRot(), vpitch = c.getXRot();
+        c.snapTo(pe.getX() + 0.5, pe.getY(), pe.getZ() + 0.5, 0f, 0f);
+        var lv = h.getLevel();
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Raio.queimar(lv, c, h.absolutePos(new net.minecraft.core.BlockPos(8, 1, 8))), "o raio desfaz a terra");
+        h.assertBlockNotPresent(net.minecraft.world.level.block.Blocks.DIRT, new net.minecraft.core.BlockPos(8, 1, 8));
+        h.assertFalse(com.danrod.dcuniverse.ability.active.Raio.queimar(lv, c, h.absolutePos(new net.minecraft.core.BlockPos(8, 1, 0))), "minério fica");
+        h.assertFalse(com.danrod.dcuniverse.ability.active.Raio.queimar(lv, c, h.absolutePos(new net.minecraft.core.BlockPos(0, 1, 8))), "tijolo fica");
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.IRON_ORE, new net.minecraft.core.BlockPos(8, 1, 0));
+        h.assertBlockPresent(net.minecraft.world.level.block.Blocks.STONE_BRICKS, new net.minecraft.core.BlockPos(0, 1, 8));
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Raio.ticksParaQuebrar(net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), 1f)
+            < com.danrod.dcuniverse.ability.active.Raio.ticksParaQuebrar(net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 1f), "pedra demora mais que terra");
+        c.snapTo(vx, vy, vz, vyaw, vpitch);
+        Personagem.Habilidade giro0 = Arvore.habilidade(c, sup, "giro_de_calor");
+        h.assertValueEqual(giro0.params().f("range", 0f), 12f, "giro de calor: 12 blocos de base");
+        // No teste o alcance cai para 4 blocos, para não acertar os testes vizinhos.
+        var curto = giro0.params().json().deepCopy();
+        curto.addProperty("range", 4f);
+        Personagem.Habilidade giro = new Personagem.Habilidade(giro0.id(), giro0.tipo(), giro0.modo(), giro0.custo(), giro0.recargaSeg(),
+            giro0.suprema(), new com.danrod.dcuniverse.character.Params(curto));
+        h.assertTrue(TiposHabilidade.TIPOS.get("spinning_beam").usar(c, sup, giro), "o giro começa");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.GiroCalor.girando(c), "está girando");
+        h.assertTrue(Habilidades.executar(c, sup, Arvore.habilidade(c, sup, "visao_raio_x")) == false, "girando, as outras habilidades esperam");
+        for (int t = 0; t < 15; t++) com.danrod.dcuniverse.ability.active.GiroCalor.tick();
+        h.assertValueEqual(cerco.get(0).getHealth(), 1000f, "no preparo (subindo, olhos acendendo) ainda não fere");
+        for (int t = 0; t < 80; t++) com.danrod.dcuniverse.ability.active.GiroCalor.tick();
+        h.assertFalse(com.danrod.dcuniverse.ability.active.GiroCalor.girando(c), "o giro acaba sozinho depois da batida no chão");
+        for (var z : cerco) {
+            h.assertTrue(z.getHealth() < 1000f && z.isOnFire(), "o giro acertou e incendiou todos em volta (" + z.getHealth() + ")");
+            h.assertTrue(z.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING), "quem foi atingido fica com o contorno aceso");
+            h.assertTrue(z.getDeltaMovement().horizontalDistanceSqr() > 0.01, "e é arremessado para longe");
+            z.discard();
+        }
+        h.assertValueEqual(vida0, 20f, "10 corações");
+        h.assertValueEqual(c.getMaxHealth(), 30f, "vida I: 10 -> 15 corações");
+        h.assertValueEqual(Arvore.armadura(c, sup), 14f, "armadura I: 10 -> 14");
+        h.assertValueEqual(c.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR), 14.0, "armadura aplicada");
+        h.assertValueEqual(Arvore.velocidadeVoo(c, sup), 64f, "velocidade de voo I: 56 -> 64 blocos/s");
+        h.assertValueEqual(Arvore.drenoVoo(c, sup, sup.passiva("flight").params(), true), 6f, "impulso I: 8 -> 6 de energia/s");
+        h.assertValueEqual(Arvore.drenoVoo(c, sup, sup.passiva("flight").params(), false), 0f, "o cruzeiro não gasta");
+        h.assertValueEqual(Arvore.regen(c, sup), 3f, "recuperação I: 2 -> 3 por segundo");
+        EstadoJogador ec = EstadoJogador.de(c);
+        ec.setEnergia(50f);
+        Habilidades.usar(c, 0, true);
+        com.danrod.dcuniverse.ability.Coreografia.adiantar(c);
+        Habilidades.tick(c, sup);
+        Habilidades.usar(c, 0, false);
+        h.assertValueEqual(ec.energia(), 50f, "criativo não gasta energia");
+        h.assertTrue(Arvore.desfazer(c, "visao_de_calor.dano_1"), "criativo desfaz");
+        h.assertFalse(Arvore.tem(c, sup, "visao_de_calor.dano_2"), "desfazer leva junto o que dependia dela");
+        h.assertTrue(Arvore.desfazer(c, "heroi.vida_1"), "desfaz a vida");
+        h.assertTrue(Math.abs(c.getMaxHealth() - vida0) < 0.01f, "a vida volta");
+        h.assertFalse(Arvore.desfazer(c, "visao_de_calor"), "as iniciais não saem");
+        h.assertFalse(Arvore.desfazer(p, "super_pulo.altura_20"), "fora do criativo não desfaz");
+        h.assertFalse(Arvore.tem(p, sup, "pisao_sismico"), "o outro jogador não ganhou nada");
+        // Pacote ida e volta.
+        Rede.ArvoreSync m = Arvore.montar(p);
+        FriendlyByteBuf buf = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
+        Rede.ArvoreSync.encode(m, buf);
+        h.assertValueEqual(Rede.ArvoreSync.decode(buf), m, "ArvoreSync ida e volta");
+        h.assertValueEqual(m.itens().stream().filter(x -> !x.melhoria()).count(), 9L, "9 habilidades na árvore do Superman (o voo é nativo, sem as duplicadas)");
+        h.assertValueEqual(m.itens().stream().filter(x -> x.melhoria() && x.pai().isEmpty()).count(), 16L, "16 melhorias do herói");
+        h.assertValueEqual(m.itens().stream().filter(Rede.ArvoreItem::melhoria).count(), 54L, "54 melhorias no total");
+        h.assertTrue(m.compradas().containsAll(iniciais), "o cliente vê as iniciais como suas");
+        Rede.ArvoreItem en2 = m.item("heroi.energia_2");
+        h.assertTrue(en2.valor() == 200f && en2.depois() == 300f, "energia II mostra 200 -> 300");
+        h.assertTrue(m.podeComprar("palmas_sonicas") == Arvore.podeComprar(p, sup, "palmas_sonicas"), "cliente e servidor concordam");
+        h.assertTrue(m.podeComprar("heroi.vida_1") == Arvore.podeComprar(p, sup, "heroi.vida_1"), "cliente e servidor concordam na melhoria do herói");
+        // Comida assada: o que morre marcado pelo raio solta a comida pronta.
+        var vaca = h.spawn(net.minecraft.world.entity.EntityTypes.COW, new net.minecraft.core.BlockPos(1, 2, 1));
+        com.danrod.dcuniverse.ability.Assar.marcar(vaca);
+        var drops = new java.util.ArrayList<net.minecraft.world.entity.item.ItemEntity>();
+        drops.add(new net.minecraft.world.entity.item.ItemEntity(h.getLevel(), vaca.getX(), vaca.getY(), vaca.getZ(), new ItemStack(Items.BEEF, 2)));
+        drops.add(new net.minecraft.world.entity.item.ItemEntity(h.getLevel(), vaca.getX(), vaca.getY(), vaca.getZ(), new ItemStack(Items.LEATHER)));
+        com.danrod.dcuniverse.ability.Assar.assar(vaca, drops);
+        h.assertTrue(drops.get(0).getItem().is(Items.COOKED_BEEF) && drops.get(0).getItem().getCount() == 2, "carne cai assada");
+        h.assertTrue(drops.get(1).getItem().is(Items.LEATHER), "couro continua couro");
+        // Os outros heróis também usam a árvore, com as próprias iniciais e sem suprema.
+        java.util.Map<Identifier, List<String>> outros = java.util.Map.of(BATMAN, List.of("gancho", "batarangue", "modo_detetive"),
+            SUPERGIRL, List.of("visao_de_calor", "sopro_congelante", "investida_aerea"),
+            SUPERBOY, List.of("telecinese_tatil", "pisao_sismico", "furia_de_rochas"));
+        for (var o : outros.entrySet()) {
+            Transformacao.transformar(p, o.getKey(), true);
+            Personagem x = EstadoJogador.de(p).personagem();
+            h.assertTrue(x.arvore() != null, o.getKey() + " usa a árvore");
+            h.assertValueEqual(x.arvore().iniciais(), o.getValue(), o.getKey() + ": iniciais");
+            h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, x)), o.getValue(), o.getKey() + ": iniciais nos slots");
+            h.assertTrue(x.suprema() == null, o.getKey() + " sem suprema");
+            h.assertTrue(x.combo() != null, o.getKey() + " com o combo");
+            h.assertValueEqual(x.arvore().lista().size(), x.habilidades().size(), o.getKey() + ": todo o catálogo na árvore");
+            h.assertTrue(Arvore.montar(p) != Rede.ArvoreSync.VAZIO, o.getKey() + ": pacote da árvore");
+        }
+        h.succeed();
+    }
+
+    /** Jogador de teste no kit antigo (energia e suprema), que os testes de antes da árvore nova conferem. */
     private static ServerPlayer jogador(GameTestHelper h) {
-        return (ServerPlayer) h.makeMockServerPlayer(GameType.SURVIVAL);
+        ServerPlayer p = (ServerPlayer) h.makeMockServerPlayer(GameType.SURVIVAL);
+        EstadoJogador.de(p).setKitAntigo(true);
+        return p;
+    }
+
+    /** Jogador de teste com a árvore de habilidades nova (Plano 2). */
+    private static ServerPlayer jogadorArvore(GameTestHelper h, GameType modo) {
+        return (ServerPlayer) h.makeMockServerPlayer(modo);
     }
 
     /** Transforma guardando a armadura, aplica a ficha e destransforma devolvendo tudo. */
@@ -461,9 +687,9 @@ public final class Testes {
         zumbi.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE, 2000, 0, false, false));
         // Modo mundo: o clique é o do Minecraft, o combo não sai.
         com.danrod.dcuniverse.combate.Combo.golpe(p, 0);
-        int calor = sup.habilidades().indexOf(sup.habilidade("calor_focado"));
+        int raioX = sup.habilidades().indexOf(sup.habilidade("visao_raio_x"));
         int visao = sup.habilidades().indexOf(sup.habilidade("visao_de_calor"));
-        h.assertValueEqual(com.danrod.dcuniverse.combate.Combo.conjunto(sup.habilidade("calor_focado")), com.danrod.dcuniverse.combate.Combo.MUNDO, "a visão focada é do mundo");
+        h.assertValueEqual(com.danrod.dcuniverse.combate.Combo.conjunto(sup.habilidade("visao_raio_x")), com.danrod.dcuniverse.combate.Combo.MUNDO, "o raio X é do mundo");
         h.runAfterDelay(3, () -> {
             h.assertValueEqual(zumbi.getHealth(), 1000f, "o clique fora do modo combate não golpeou");
             // Os poderes de olhos para o lado (longe do zumbi).
@@ -471,15 +697,16 @@ public final class Testes {
             Habilidades.usar(p, visao, true);
             h.assertFalse(com.danrod.dcuniverse.ability.Coreografia.emCena(p) || !e.canalizando().isEmpty(), "fora do combate a visão de combate não sai");
             Habilidades.usar(p, visao, false);
-            Habilidades.usar(p, calor, true);
-            h.assertValueEqual(e.canalizando(), "calor_focado", "a visão focada sai na hora no modo mundo");
-            // Entrar no combate para o poder do mundo.
+            long agora = p.level().getGameTime();
+            Habilidades.usar(p, raioX, true);
+            Habilidades.usar(p, raioX, false);
+            h.assertTrue(e.prontaEm("visao_raio_x") > agora, "o raio X sai no modo mundo");
+            // No combate o poder do mundo não sai.
             com.danrod.dcuniverse.combate.Combo.modo(p, true);
-            h.assertValueEqual(e.canalizando(), "", "trocar de modo para o poder do outro conjunto");
-            Habilidades.usar(p, calor, false);
-            Habilidades.usar(p, calor, true);
-            h.assertValueEqual(e.canalizando(), "", "no combate a visão focada não sai");
-            Habilidades.usar(p, calor, false);
+            e.setProntaEm("visao_raio_x", 0L);
+            Habilidades.usar(p, raioX, true);
+            Habilidades.usar(p, raioX, false);
+            h.assertValueEqual(e.prontaEm("visao_raio_x"), 0L, "no combate o raio X não sai");
             p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
             // Defesa: no começo da guarda, aparo.
             var fonte = p.level().damageSources().mobAttack(zumbi);
@@ -601,6 +828,7 @@ public final class Testes {
         h.assertFalse(p.getAbilities().mayfly, "normal não voa");
         // No criativo vale o voo do mod; ao destransformar volta o voo do criativo.
         ServerPlayer c = (ServerPlayer) h.makeMockServerPlayer(GameType.CREATIVE);
+        EstadoJogador.de(c).setKitAntigo(true);
         c.setPos(alto.x, alto.y, alto.z);
         Transformacao.transformar(c, SUPERMAN, true);
         h.assertValueEqual(c.getAbilities().getFlyingSpeed(), 0f, "criativo usa o voo do mod");
@@ -856,48 +1084,28 @@ public final class Testes {
      * mantém a habilidade escolhida; a escolha sobrevive à destransformação; só o que está no cinto é fabricado.
      */
     static void cinto(GameTestHelper h) {
-        ServerPlayer p = jogador(h);
+        // Na árvore, os gadgets saem do cinto: se liberam com pontos e vão nos 6 slots (o Batcomputador não monta mais).
+        ServerPlayer p = jogadorArvore(h, GameType.CREATIVE);
         h.assertTrue(Transformacao.transformar(p, BATMAN, true), "transformar no Batman");
         EstadoJogador e = EstadoJogador.de(p);
         Personagem bat = e.personagem();
-        var pos = h.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1));
         h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.gadgets(bat).size(), 9, "9 gadgets no arsenal");
-        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), List.of("gancho", "modo_detetive", "batarangue",
-            "batarangue_explosivo", "batarangue_eletrico", "bomba_fumaca", "gel_explosivo", "batwing"), "cinto padrão");
+        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), List.of("gancho", "batarangue", "modo_detetive"), "as iniciais");
+        h.assertFalse(Arvore.definirSlots(p, List.of("gancho", "lancador_rede", "", "", "", "")) && com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "lancador_rede"),
+            "não equipa o que não liberou");
+        h.assertTrue(Arvore.comprar(p, "lancador_rede"), "libera a rede");
+        h.assertTrue(com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "lancador_rede"), "a rede vai para o slot livre");
+        h.assertTrue(Arvore.definirSlots(p, List.of("gancho", "lancador_rede", "modo_detetive", "", "", "")), "monta a build");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "batarangue"), "o batarangue saiu da build");
+        h.assertTrue(Guia.concluida(p, "cinto"), "tarefa de montar a build");
         h.assertValueEqual(Rede.montar(p).habilidades().stream().map(Rede.HabInfo::id).toList(),
-            ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), "o HUD recebe só o que está equipado");
-        // Escolhe a fumaça e troca o espaço 1: a escolha continua na fumaça.
-        Habilidades.selecionar(p, 5);
-        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 0, "lancador_rede");
-        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(0), "lancador_rede", "rede no espaço 1");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "batarangue"), "batarangue foi para o Batcomputador");
-        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(p, bat);
-        h.assertValueEqual(habs.get(e.selecionada()).id(), "bomba_fumaca", "continua escolhida a fumaça");
-        h.assertTrue(Guia.concluida(p, "cinto"), "tarefa do cinto");
-        // Pôr a rede no espaço 2 troca os dois de lugar; "" esvazia; o que não é gadget não entra.
-        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "lancador_rede");
-        var slots = com.danrod.dcuniverse.character.Cinto.slots(p, bat);
-        h.assertValueEqual(slots.subList(0, 2), List.of("batarangue_explosivo", "lancador_rede"), "trocaram de lugar");
-        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "");
-        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat).size(), 7, "espaço vazio sai do menu");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 1, "batwing"), "a suprema não vai no cinto");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 1, "gancho"), "o gancho é fixo");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 9, "disruptor"), "espaço que não existe");
-        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "disruptor");
-        // Sobrevive à destransformação.
-        Transformacao.destransformar(p);
-        Transformacao.transformar(p, BATMAN, true);
-        bat = EstadoJogador.de(p).personagem();
-        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(1), "disruptor", "cinto guardado");
-        // Só o que está no cinto é fabricado.
-        e = EstadoJogador.de(p);
+            List.of("gancho", "lancador_rede", "modo_detetive"), "o HUD recebe só a build");
+        // Só o que está na build é fabricado.
         e.setCargas("batarangue", 0);
-        e.setCargas("disruptor", 0);
+        e.setCargas("lancador_rede", 0);
         com.danrod.dcuniverse.ability.Cargas.tick(p, bat);
-        h.assertValueEqual(e.proximaCarga("batarangue"), 0L, "fora do cinto não fabrica");
-        h.assertTrue(e.proximaCarga("disruptor") > 0, "no cinto fabrica");
-        com.danrod.dcuniverse.character.Cinto.resetar(p);
-        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(0), "batarangue", "resetar volta ao padrão");
+        h.assertValueEqual(e.proximaCarga("batarangue"), 0L, "fora da build não fabrica");
+        h.assertTrue(e.proximaCarga("lancador_rede") > 0, "na build fabrica");
         h.succeed();
     }
 
@@ -1009,10 +1217,10 @@ public final class Testes {
         EstadoJogador e = EstadoJogador.de(p);
         Personagem bat = e.personagem();
         e.setEnergia(bat.energia().max());
-        Personagem.Habilidade sup = bat.suprema();
-        h.assertValueEqual(sup.id(), "batwing", "a suprema é o Batwing");
+        Personagem.Habilidade sup = bat.habilidade("batwing");
+        h.assertFalse(sup.suprema(), "o Batwing é uma habilidade comum da árvore");
         h.assertTrue(Habilidades.executar(p, bat, sup), "invoca o Batwing");
-        h.assertValueEqual(e.energia(), bat.energia().max() * 0.25f, "custa 75% da energia");
+        h.assertValueEqual(e.energia(), bat.energia().max() - sup.custo(), "custa a energia dele");
         var bw = (com.danrod.dcuniverse.content.BatwingEntidade) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
         h.assertTrue(bw != null && bw.isAlive(), "Batwing no mundo");
         // (Embarcar teleporta o jogador, o que o jogador de teste não suporta: testado no jogo.)
@@ -1024,7 +1232,7 @@ public final class Testes {
     }
 
     /**
-     * Garagem: o veículo escolhido no Batcomputador é o que a suprema chama; chamar de novo o mesmo não gasta nada;
+     * Veículos de chão e de água (habilidades da árvore): chamar de novo o mesmo não gasta nada;
      * o Batbarco precisa de água funda e, quando vem, o veículo antigo vai embora.
      */
     static void garagem(GameTestHelper h) {
@@ -1034,12 +1242,7 @@ public final class Testes {
         Transformacao.transformar(p, BATMAN, true);
         EstadoJogador e = EstadoJogador.de(p);
         Personagem bat = e.personagem();
-        h.assertTrue(com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "batmoto"), "escolhe a Batmoto");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "gancho"), "o gancho não é veículo");
-        Personagem.Habilidade sup = com.danrod.dcuniverse.character.Cinto.suprema(p, bat);
-        h.assertValueEqual(sup.id(), "batmoto", "a suprema agora é a Batmoto");
-        var equipadas = com.danrod.dcuniverse.character.Cinto.equipadas(p, bat);
-        h.assertValueEqual(equipadas.get(equipadas.size() - 1).id(), "batmoto", "no menu radial vai a Batmoto");
+        Personagem.Habilidade sup = bat.habilidade("batmoto");
         e.setEnergia(bat.energia().max());
         h.assertTrue(Habilidades.executar(p, bat, sup), "chama a Batmoto");
         var moto = com.danrod.dcuniverse.ability.active.Veiculo.de(p);
@@ -1049,8 +1252,7 @@ public final class Testes {
         Habilidades.executar(p, bat, sup);
         h.assertValueEqual(e.energia(), depois, "chamar de novo a mesma não custa");
         // Batbarco sem água: não vem, e a Batmoto fica.
-        com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "batbarco");
-        Personagem.Habilidade barco = com.danrod.dcuniverse.character.Cinto.suprema(p, bat);
+        Personagem.Habilidade barco = bat.habilidade("batbarco");
         e.setProntaEm(barco.id(), 0);
         e.setEnergia(bat.energia().max());
         h.assertFalse(Habilidades.executar(p, bat, barco), "sem água o Batbarco não vem");
@@ -1068,7 +1270,6 @@ public final class Testes {
         h.assertValueEqual(((com.danrod.dcuniverse.content.VeiculoDono) b).estado(), com.danrod.dcuniverse.content.VeiculoDono.INDO, "o Batbarco vai embora");
         moto.discard();
         b.discard();
-        com.danrod.dcuniverse.character.Cinto.resetar(p);
         com.danrod.dcuniverse.ability.active.Veiculo.limpar();
         h.succeed();
     }
@@ -1572,11 +1773,11 @@ public final class Testes {
         // O dono voa: o Krypto sai do chão e vai junto.
         p.snapTo(pos.getX() + 0.5, pos.getY() + 4, pos.getZ() + 0.5, 0f, 0f);
         p.getAbilities().flying = true;
-        h.runAfterDelay(10, () -> {
+        esperar(h, 40, () -> k.voando() && k.getY() > pos.getY() + 0.5, () -> {
             h.assertTrue(k.voando() && k.isNoGravity(), "Krypto voa quando o dono voa");
             h.assertTrue(k.getY() > pos.getY() + 0.5, "Krypto subiu do chão (" + k.getY() + ")");
             p.getAbilities().flying = false;
-            h.runAfterDelay(3, () -> {
+            esperar(h, 20, () -> !k.voando(), () -> {
                 h.assertTrue(!k.voando(), "Krypto pousa quando o dono para de voar");
                 k.discard();
                 k2.discard();
@@ -1584,6 +1785,13 @@ public final class Testes {
                 h.succeed();
             });
         });
+    }
+
+    /** Espera a condição valer (checando a cada tick, até {@code max} ticks) e então roda {@code depois}.
+     *  Evita teste instável quando o servidor de CI atrasa ticks. */
+    private static void esperar(GameTestHelper h, int max, java.util.function.BooleanSupplier cond, Runnable depois) {
+        if (max <= 0 || cond.getAsBoolean()) { depois.run(); return; }
+        h.runAfterDelay(1, () -> esperar(h, max - 1, cond, depois));
     }
 
     private static boolean achar(net.minecraft.server.level.ServerLevel level, net.minecraft.world.level.levelgen.structure.BoundingBox c,
@@ -1642,10 +1850,9 @@ public final class Testes {
             EstadoJogador e = EstadoJogador.de(p);
             Personagem kara = e.personagem();
             e.setEnergia(kara.energia().max());
-            Personagem.Habilidade sup = kara.suprema();
-            h.assertValueEqual(sup.id(), "nave_kryptoniana", "a suprema é a nave");
+            Personagem.Habilidade sup = kara.habilidade("nave_kryptoniana");
             h.assertTrue(Habilidades.executar(p, kara, sup), "chama a nave");
-            h.assertValueEqual(e.energia(), kara.energia().max() * 0.3f, "custa 70% da energia");
+            h.assertValueEqual(e.energia(), kara.energia().max() - sup.custo(), "custa a energia dela");
             var nave = (com.danrod.dcuniverse.content.NaveKryptoniana) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
             h.assertTrue(nave != null && nave.isAlive(), "nave no mundo");
             h.assertValueEqual(nave.orbes(), 3, "três orbes prontos");
@@ -1699,9 +1906,75 @@ public final class Testes {
         h.assertTrue(Habilidades.executar(p, conner, esc), "liga o escudo");
         h.assertValueEqual((double) com.danrod.dcuniverse.ability.active.EscudoTk.reducao(p), 0.75, "o escudo corta 75% do dano");
         h.runAfterDelay(60, () -> {
-            long voando = level.getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(80)).size();
+            long voando = level.getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(80),
+                b -> b.estilo() == com.danrod.dcuniverse.content.BlocoTelecinetico.COMUM).size();
             h.assertValueEqual(voando, 0L, "os blocos arremessados assentaram");
             com.danrod.dcuniverse.ability.active.EscudoTk.limpar();
+            Transformacao.destransformar(p);
+            h.succeed();
+        });
+    }
+
+    /** Chão de terra para as habilidades do Superboy que arrancam o piso, e um zumbi parado em (x, 2, z). */
+    private static net.minecraft.world.entity.Mob chaoEZumbi(GameTestHelper h, int ate, int x, int z) {
+        var level = h.getLevel();
+        for (int dx = -3; dx <= 7; dx++) {
+            for (int dz = -2; dz <= ate; dz++) {
+                level.setBlockAndUpdate(h.absolutePos(new net.minecraft.core.BlockPos(dx, 1, dz)), net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState());
+            }
+        }
+        var z0 = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(x, 2, z));
+        z0.setNoAi(true);
+        return z0;
+    }
+
+    /** Fúria de Rochas: ergue três blocos do chão, golpeia um a um e as rochas acertam o inimigo à frente. */
+    static void furiaDeRochas(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var zumbi = chaoEZumbi(h, 12, 2, 9);
+        float vida = zumbi.getHealth();
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 2.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        h.assertTrue(Transformacao.transformar(p, SUPERBOY, true), "transformar no Superboy");
+        Personagem conner = EstadoJogador.de(p).personagem();
+        Personagem.Habilidade fr = conner.habilidade("furia_de_rochas");
+        h.assertTrue(fr != null && fr.params().s("anim", null) != null, "Fúria de Rochas no kit, com coreografia");
+        h.assertTrue(com.danrod.dcuniverse.ability.TiposHabilidade.TIPOS.get(fr.tipo()).usar(p, conner, fr), "soco no chão");
+        var rochas = h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(8));
+        h.assertValueEqual(rochas.size(), 3, "três rochas erguidas");
+        h.assertTrue(rochas.stream().allMatch(b -> b.fase() == com.danrod.dcuniverse.content.BlocoTelecinetico.PAIRANDO), "pairando à espera do golpe");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Rochas.ativa(p), "combo em andamento");
+        h.runAfterDelay(70, () -> {
+            h.assertFalse(com.danrod.dcuniverse.ability.active.Rochas.ativa(p), "os três golpes saíram");
+            h.assertTrue(zumbi.getHealth() < vida || !zumbi.isAlive(), "as rochas acertaram o zumbi (" + zumbi.getHealth() + "/" + vida + ")");
+            Transformacao.destransformar(p);
+            h.succeed();
+        });
+    }
+
+    /** Escalada Sísmica: três plataformas de 3x3 sobem do chão e a batida final fere em área no fim do mergulho. */
+    static void escaladaSismica(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var zumbi = chaoEZumbi(h, 20, 2, 16);
+        float vida = zumbi.getHealth();
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 0.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        h.assertTrue(Transformacao.transformar(p, SUPERBOY, true), "transformar no Superboy");
+        Personagem conner = EstadoJogador.de(p).personagem();
+        Personagem.Habilidade es = conner.habilidade("escalada_sismica");
+        h.assertTrue(es != null && es.params().s("anim", null) != null, "Escalada Sísmica no kit, com coreografia");
+        h.assertTrue(com.danrod.dcuniverse.ability.TiposHabilidade.TIPOS.get(es.tipo()).usar(p, conner, es), "pisão");
+        var tiles = h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(16));
+        h.assertValueEqual(tiles.size(), 27, "três plataformas de 3x3");
+        h.assertTrue(tiles.stream().allMatch(b -> b.estilo() == com.danrod.dcuniverse.content.BlocoTelecinetico.PLATAFORMA), "estilo plataforma");
+        h.assertFalse(com.danrod.dcuniverse.ability.TiposHabilidade.TIPOS.get(es.tipo()).usar(p, conner, es), "não repete no meio do percurso");
+        // O jogador de teste não anda (o percurso é do cliente): a batida cai no destino, junto do zumbi.
+        int batida = com.danrod.dcuniverse.ability.active.Escalada.tempos(es.params()).batida();
+        h.runAfterDelay(batida + 14, () -> {
+            h.assertFalse(com.danrod.dcuniverse.ability.active.Escalada.ativa(p), "terminou");
+            h.assertTrue(zumbi.getHealth() < vida || !zumbi.isAlive(), "a batida feriu o zumbi (" + zumbi.getHealth() + "/" + vida + ")");
+            h.assertTrue(tiles.stream().noneMatch(b -> b.isAlive() && b.fase() == com.danrod.dcuniverse.content.BlocoTelecinetico.PAIRANDO),
+                "as plataformas foram soltas");
             Transformacao.destransformar(p);
             h.succeed();
         });
@@ -1727,8 +2000,7 @@ public final class Testes {
         EstadoJogador e = EstadoJogador.de(p);
         Personagem conner = e.personagem();
         e.setEnergia(conner.energia().max());
-        Personagem.Habilidade sup = conner.suprema();
-        h.assertValueEqual(sup.id(), "ilha_telecinetica", "a suprema é a ilha");
+        Personagem.Habilidade sup = conner.habilidade("ilha_telecinetica");
         var mira = com.danrod.dcuniverse.ability.Alvos.mirarBloco(p, 24, net.minecraft.world.level.ClipContext.Fluid.NONE);
         h.assertTrue(Habilidades.executar(p, conner, sup), "arranca a ilha (mira " + mira.getType() + " " + mira.getBlockPos() + ", pé " + p.blockPosition()
             + ", altura " + level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getBlockX(), p.getBlockZ()) + ")");

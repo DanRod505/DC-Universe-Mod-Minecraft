@@ -8,7 +8,7 @@ import math
 import random
 
 from pixel import clarear, escurecer, hexa, mistura
-from skin_superman import marcar, relevo, tom
+from skin_superman import linha, marcar, relevo, tom
 
 MALHA = hexa("#17181D")
 MALHA_ESCURA = hexa("#0C0D10")
@@ -16,23 +16,29 @@ GRAFITE = hexa("#4F5664")
 GRAFITE_CLARO = hexa("#79818F")
 GRAFITE_ESCURO = hexa("#2B3038")
 JUNTA = hexa("#08090B")
-OURO = hexa("#B08A2C")
-OURO_CLARO = hexa("#DDB451")
-OURO_ESCURO = hexa("#5E4512")
+OURO = hexa("#8E7A3C")
+OURO_CLARO = hexa("#C2A85E")
+OURO_ESCURO = hexa("#4A3D1B")
+BRONZE, BRONZE_CLARO = OURO, OURO_CLARO
+CINZA = hexa("#70757D")
+CINZA_ESCURO = hexa("#3E4249")
+PRETO = hexa("#18191E")
 CAPUZ = hexa("#18191F")
 CAPUZ_BRILHO = hexa("#3A3E4C")
 PELE = hexa("#E3AE88")
 BARBA = hexa("#B98C70")
-LENTE = hexa("#1A1E26")
+LENTE = hexa("#E9EDF2")
 
 # Morcego do peito (14 x 7): asas com três pontas embaixo e orelhas curtas.
 MORCEGO = [
-    "R...R..R...R",
-    "RR..RRRR..RR",
-    "RRRRRRRRRRRR",
-    "RRRRRRRRRRRR",
-    ".RR.RRRR.RR.",
-    "..R..RR..R..",
+    "B....B..B....B",
+    "BB...BBBB...BB",
+    "BBBB.BBBB.BBBB",
+    "BBBBBBBBBBBBBB",
+    "BBBBBBBBBBBBBB",
+    ".BBBBBBBBBBBB.",
+    "..BB.BBBB.BB..",
+    "...B..BB..B...",
 ]
 
 
@@ -179,10 +185,9 @@ def cabeca(t, Pincel, rnd):
         for i, j in forma:
             x = ox + (4 - i if esp else i)
             f.p(x, j, hexa("#050507"))
-        for i in (1, 2, 3):
+        for i, j in forma[1:4] + forma[5:]:
             x = ox + (4 - i if esp else i)
-            f.p(x, 7, LENTE)
-        f.p(ox + (2 if esp else 2), 7, clarear(LENTE, 0.35))
+            f.p(x, j, LENTE if j == 7 else escurecer(LENTE, 0.12))
         for i in range(5):
             x = ox + (4 - i if esp else i)
             f.p(x, 9, tom(CAPUZ, 0.06))
@@ -212,83 +217,106 @@ def lentes(glow, Pincel):
             f.p(x, 9, hexa("#BFD8FF", 60))
 
 
-# ---------------------------------------------------------------- tronco
+# ---------------------------------------------------------------- traje cinza
+
+def sulco(p, pontos, forca=0.42):
+    """Junta entre dois painéis do traje: o vão escuro e a aresta de baixo/direita pegando luz."""
+    for x, y in pontos:
+        if 0 <= x < p.w and 0 <= y < p.h:
+            p.p(x, y, mistura(p.get(x, y), JUNTA, forca))
+    for x, y in pontos:
+        for q in ((x, y + 1), (x + 1, y)):
+            if q not in pontos and 0 <= q[0] < p.w and 0 <= q[1] < p.h:
+                p.p(q[0], q[1], clarear(p.get(*q), 0.07))
+                break
+
+
+def preto(p, x, y, s=0.0, rnd=None, base=None):
+    """Couro/borracha preto fosco do traje (morcego, sunga, luvas, botas) com leve brilho azulado."""
+    c = base or PRETO
+    r = rnd.uniform(-0.015, 0.015) if rnd else 0
+    p.p(x, y, tom(c, s + r))
+
+
+def cinza(p, rnd, bumps=(), luz=0.10, sombra=0.16):
+    """Traje cinza texturizado: o relevo dos músculos com a trama de losangos miúdos."""
+    relevo(p, CINZA, list(bumps), k=0.6, luz_topo=luz, sombra_base=sombra, borda=0.12, rnd=rnd)
+
 
 def tronco(t, Pincel, rnd):
-    for face in ("frente", "tras", "dir", "esq"):
-        malha(Pincel(t, "corpo", face), rnd)
-    malha(Pincel(t, "corpo", "cima"), rnd, luz=0.14, sombra=0)
-    malha(Pincel(t, "corpo", "baixo"), rnd, base=MALHA_ESCURA, luz=0, sombra=0)
     c = Pincel(t, "corpo", "frente")
-    # peitoral: uma placa grande do ombro ao fim do esterno, com a borda de baixo em arco (mais alta nas axilas)
-    def peito(i, j):
-        u = abs(i - 6.5) / 6.5
-        return j <= 10 - round(2 * u ** 2.5) and not (j == 0 and i in (0, 13))
-    placa(c, 1, 1, 14, 11, rnd, forma=peito, cor=tom(GRAFITE, 0.10), chanfro=0.4, gradiente=0.4)
-    # volume dos peitorais: luz em cima dos dois lados, sombra embaixo
-    marcar(c, [(x, 2) for x in (2, 3, 4, 11, 12, 13)], 0.12)
-    marcar(c, [(x, 10) for x in (5, 6, 9, 10)] + [(3, 9), (4, 9), (11, 9), (12, 9)], -0.18)
-    # morcego em relevo no peito: preto fosco com o chanfro aceso em cima
+    cinza(c, rnd, [(4.5, 6, 3.6, 3.2, 1.0), (11.5, 6, 3.6, 3.2, 1.0),
+                   (5.5, 13.5, 1.6, 1.0, 0.55), (10.5, 13.5, 1.6, 1.0, 0.55),
+                   (5.5, 15.5, 1.6, 1.0, 0.5), (10.5, 15.5, 1.6, 1.0, 0.5)])
+    for face in ("tras", "dir", "esq"):
+        cinza(Pincel(t, "corpo", face), rnd, [(4.5, 5, 3.5, 4, 0.8), (11.5, 5, 3.5, 4, 0.8)] if face == "tras" else [])
+    cinza(Pincel(t, "corpo", "cima"), rnd, luz=0.16, sombra=0)
+    Pincel(t, "corpo", "baixo").ret(0, 0, 16, 8, tom(PRETO, -0.2))
+    # gola: o capuz desce até o peito (pescoço preto e o recorte em V raso)
+    for x in range(16):
+        prof = 1 if 6 <= x <= 9 else 0
+        for y in range(prof + 1):
+            preto(c, x, y, 0.06 - 0.04 * y, rnd, CAPUZ)
+    # painéis: linha sob os peitorais, a divisão do esterno, os gomos do abdômen e os oblíquos
+    sulco(c, linha(0, 10, 3, 11) | linha(3, 11, 7, 11) | linha(15, 10, 12, 11) | linha(12, 11, 8, 11))
+    sulco(c, {(7, y) for y in range(11, 18)} | {(8, y) for y in range(11, 18)}, 0.30)
+    sulco(c, linha(3, 14, 6, 14) | linha(9, 14, 12, 14) | linha(3, 16, 6, 16) | linha(9, 16, 12, 16), 0.30)
+    sulco(c, linha(2, 12, 3, 17) | linha(13, 12, 12, 17))
+    sulco(c, linha(0, 3, 2, 1) | linha(15, 3, 13, 1))        # cava do ombro
+    # morcego grande no peito, de ombro a ombro, preto fosco em relevo com a sombra na placa
     m = mascara(MORCEGO)
-    x0, y0 = 2, 3  # 12 de largura: sobra placa cinza em volta para o morcego aparecer
+    x0, y0 = 1, 3
     for i, j in m:
         cima = (i, j - 1) not in m
         baixo = (i, j + 1) not in m
-        cor = tom(MALHA_ESCURA, 0.18 if cima else -0.2 if baixo else 0.02)
-        c.p(x0 + i, y0 + j, cor)
-    for i, j in m:  # sombra projetada na placa
-        q = (i + 1, j + 1)
-        if q not in m:
-            c.p(x0 + q[0], y0 + q[1], escurecer(c.get(x0 + q[0], y0 + q[1]), 0.35))
+        preto(c, x0 + i, y0 + j, 0.16 if cima else -0.10 if baixo else -0.04, rnd)
+    for i, j in m:  # contorno fino de luz em volta do morcego, que destaca a silhueta na placa cinza
+        for q in ((i, j - 1), (i - 1, j), (i + 1, j)):
+            if q not in m and 0 <= x0 + q[0] < 16:
+                c.p(x0 + q[0], y0 + q[1], clarear(c.get(x0 + q[0], y0 + q[1]), 0.10))
     jaq = Pincel(t, "jaqueta", "frente")
     for i, j in m:
-        cima = (i, j - 1) not in m
-        esq = (i - 1, j) not in m
-        cor = tom(MALHA_ESCURA, 0.10 if cima else 0.05 if esq else -0.04)
-        jaq.p(x0 + i, y0 + j, cor)
-    # abdômen: seis placas escuras em gomos, separadas pela linha alba e pelas juntas
-    for k, y in enumerate((12, 14, 16)):
-        placa(c, 2, y, 5, 2, rnd, cor=tom(GRAFITE_ESCURO, -0.05 * k), junta=False, chanfro=0.2, gradiente=0.2)
-        placa(c, 9, y, 5, 2, rnd, cor=tom(GRAFITE_ESCURO, -0.05 * k), junta=False, chanfro=0.2, gradiente=0.2)
-    marcar(c, [(7, y) for y in range(12, 18)] + [(8, y) for y in range(12, 18)], -0.25)
-    # oblíquos na malha dos lados do abdômen
-    marcar(c, [(1, 13), (1, 14), (2, 15), (2, 16), (14, 13), (14, 14), (13, 15), (13, 16)], -0.18)
-    marcar(c, [(0, 12), (15, 12), (1, 12), (14, 12)], 0.10)
-    # costas: placa das escápulas em duas partes, a coluna segmentada e os dorsais na malha
+        if (i, j - 1) not in m or (i, j + 1) not in m or (i - 1, j) not in m or (i + 1, j) not in m:
+            preto(jaq, x0 + i, y0 + j, 0.12 if (i, j - 1) not in m else -0.05, rnd)
+    # costas: escápulas, coluna e dorsais (a capa cobre quase tudo)
     tr = Pincel(t, "corpo", "tras")
-    placa(tr, 1, 1, 7, 9, rnd, forma=redondo(7, 9, 2))
-    placa(tr, 8, 1, 7, 9, rnd, forma=redondo(7, 9, 2))
-    for y in range(11, 18, 2):
-        placa(tr, 6, y, 4, 2, rnd, cor=GRAFITE_ESCURO)
-    marcar(tr, [(2, 11), (2, 12), (3, 13), (3, 14), (4, 15), (13, 11), (13, 12), (12, 13), (12, 14), (11, 15)], -0.20)
-    marcar(tr, [(1, 11), (14, 11)], 0.10)
-    # laterais: placa das costelas (dorsal) e o recorte da axila
+    for x in range(16):
+        preto(tr, x, 0, 0.0, rnd, CAPUZ)
+    sulco(tr, linha(1, 10, 6, 8) | linha(14, 10, 9, 8) | {(7, y) for y in range(2, 17)})
+    sulco(tr, linha(2, 12, 5, 17) | linha(13, 12, 10, 17), 0.30)
     for lado in ("dir", "esq"):
-        s = Pincel(t, "corpo", lado)
-        placa(s, 1, 2, 6, 7, rnd, forma=redondo(6, 7, 2), cor=tom(GRAFITE, -0.06))
-        for y in (11, 13, 15):
-            marcar(s, [(x, y) for x in range(1, 7)], -0.15)
-    # cinto de utilidades: faixa amarelo-escura em todo o tronco (os bolsos são a peça 3D)
-    for face in ("frente", "tras", "dir", "esq"):
-        for camada in ("corpo",):
+        sulco(Pincel(t, "corpo", lado), {(4, y) for y in range(1, 17)}, 0.35)
+    # cinto de utilidades: placas de bronze com o vão entre elas (os bolsos e a fivela são peças 3D)
+    for camada in ("corpo", "jaqueta"):
+        for face in ("frente", "tras", "dir", "esq"):
             p = Pincel(t, camada, face)
             for x in range(p.w):
-                p.p(x, 17, escurecer(p.get(x, 17), 0.40))
-                p.p(x, 18, tom(OURO, 0.22))
-                p.p(x, 19, tom(OURO, 0.05 + rnd.uniform(-0.03, 0.03)))
-                p.p(x, 20, tom(OURO, -0.10 + rnd.uniform(-0.03, 0.03)))
-                p.p(x, 21, tom(OURO, -0.42))
-                p.p(x, 22, escurecer(p.get(x, 22), 0.35))
-            for x in range(1, p.w, 4):  # costura da fita
-                p.p(x, 19, tom(OURO, -0.18))
-    # fivela: placa com o morcego pequeno
-    c.ret(6, 18, 4, 4, tom(OURO, 0.10))
-    for x in range(6, 10):
-        c.p(x, 18, tom(OURO, 0.45)); c.p(x, 21, tom(OURO, -0.45))
-    c.p(6, 19, tom(OURO, 0.3)); c.p(9, 19, tom(OURO, -0.3)); c.p(6, 20, tom(OURO, 0.3)); c.p(9, 20, tom(OURO, -0.3))
-    c.bitmap(6, 19, ["B..B", ".BB."], {"B": OURO_ESCURO})
-    # quadril: malha escura com a costura em V
-    marcar(c, [(4, 22), (5, 23), (11, 22), (10, 23)], -0.25)
+                vao = (x % 4 == 3) and face != "frente"
+                for y, s0 in ((17, 0.30), (18, 0.14), (19, 0.02), (20, -0.10), (21, -0.38)):
+                    cor = tom(BRONZE, s0 + rnd.uniform(-0.03, 0.03))
+                    if vao and 18 <= y <= 20:
+                        cor = tom(BRONZE, -0.42)
+                    p.p(x, y, cor)
+            if camada == "corpo":
+                for x in range(p.w):
+                    p.p(x, 16, escurecer(p.get(x, 16), 0.30))
+        fr = Pincel(t, camada, "frente")
+        for x in (2, 5, 10, 13):
+            for y in range(18, 21):
+                fr.p(x, y, tom(BRONZE, -0.40))
+        # fivela retangular
+        fr.ret(6, 17, 4, 5, tom(BRONZE, 0.12))
+        for x in range(6, 10):
+            fr.p(x, 17, tom(BRONZE_CLARO, 0.25)); fr.p(x, 21, tom(BRONZE, -0.45))
+        for y in range(17, 22):
+            fr.p(6, y, tom(BRONZE_CLARO, 0.1)); fr.p(9, y, tom(BRONZE, -0.35))
+        fr.p(7, 19, tom(BRONZE, -0.25)); fr.p(8, 19, tom(BRONZE, -0.25))
+    # sunga preta
+    for face in ("frente", "tras", "dir", "esq"):
+        p = Pincel(t, "corpo", face)
+        for y in (22, 23):
+            for x in range(p.w):
+                preto(p, x, y, 0.08 if y == 22 else -0.04, rnd)
 
 
 # ---------------------------------------------------------------- braços
@@ -298,56 +326,56 @@ def bracos(t, Pincel, rnd):
         externo = "dir" if parte == "braco_d" else "esq"
         interno = "esq" if parte == "braco_d" else "dir"
         for face in ("frente", "tras", "dir", "esq"):
-            p = Pincel(t, parte, face)
-            malha(p, rnd)
-            # ombreira arredondada (deltoide) em todas as faces de fora
-            if face != interno:
-                placa(p, 0, 0, 8, 6, rnd, forma=lambda i, j: j < 5 or 1 <= i <= 6)
-                marcar(p, [(x, 1) for x in range(2, 6)], 0.10)
-            # bíceps / tríceps na malha
+            bumps = [(3.5, 2.5, 3.5, 2.6, 0.9)]
             if face == "frente":
-                marcar(p, [(2, 8), (3, 7), (4, 7), (5, 8)], 0.12)
-                marcar(p, [(1, 10), (2, 11), (5, 11), (6, 10)], -0.20)
+                bumps.append((3.5, 8.5, 2.2, 2.2, 0.7))
             elif face == "tras":
-                marcar(p, [(2, 8), (3, 9), (4, 9), (5, 8)], -0.18)
-            # luva-manopla do cotovelo à mão: placas segmentadas pretas e grafite escuro
-            for y in range(12, 20):
+                bumps.append((3.5, 8, 2.4, 2.6, 0.6))
+            cinza(Pincel(t, parte, face), rnd, bumps)
+        cinza(Pincel(t, parte, "cima"), rnd, luz=0.14, sombra=0)
+        # placa do deltoide e a junta do cotovelo
+        for face in ("frente", "tras", externo):
+            p = Pincel(t, parte, face)
+            sulco(p, linha(0, 5, 2, 6) | linha(3, 6, 4, 6) | linha(5, 6, 7, 5))
+            sulco(p, {(x, 11) for x in range(8)}, 0.25)
+        sulco(Pincel(t, parte, externo), {(4, y) for y in range(6, 11)}, 0.28)
+        sulco(Pincel(t, parte, interno), {(3, y) for y in range(0, 12)}, 0.25)
+        # manopla preta do meio do antebraço à mão: boca larga com a borda dobrada, gomos e as lâminas
+        for face in ("frente", "tras", "dir", "esq"):
+            p = Pincel(t, parte, face)
+            for y in range(13, 24):
                 for x in range(8):
-                    s = 0.06 - 0.10 * (y - 12) / 8 + rnd.uniform(-0.02, 0.02)
+                    s = 0.12 - 0.12 * (y - 13) / 10
                     if x in (0, 7):
                         s -= 0.10
-                    p.p(x, y, tom(MALHA_ESCURA, s))
-            p2 = Pincel(t, parte, face)
-            for y in (12, 15, 18):
-                for x in range(8):
-                    p2.p(x, y, tom(MALHA_ESCURA, 0.14 if y == 12 else 0.07))
-                    p2.p(x, y + 1, tom(MALHA_ESCURA, -0.08))
-            if face == externo:
-                placa(p, 1, 13, 6, 6, rnd, cor=GRAFITE_ESCURO, forma=redondo(6, 6, 1))
-            # mão: luva preta com os nós dos dedos
-            for y in range(20, 24):
-                for x in range(8):
-                    s = 0.05 - 0.03 * (y - 20) + rnd.uniform(-0.02, 0.02)
-                    p.p(x, y, tom(MALHA_ESCURA, s))
+                    if face == "tras" and x in (3, 4):
+                        s += 0.06
+                    preto(p, x, y, s, rnd)
+            for x in range(8):
+                preto(p, x, 13, 0.30, rnd)
+                preto(p, x, 14, -0.18, rnd)
+            if face in ("frente", "tras", externo):
+                for x in range(1, 7):
+                    preto(p, x, 17, 0.12, rnd)
+                    preto(p, x, 18, -0.10, rnd)
+        # mão: dedos e nós dos dedos
         f = Pincel(t, parte, "frente")
         for x in (1, 3, 5):
-            f.p(x, 23, tom(MALHA_ESCURA, -0.3)); f.p(x + 1, 22, tom(MALHA_ESCURA, 0.12))
+            preto(f, x, 23, -0.30); preto(f, x + 1, 22, 0.10)
         d = Pincel(t, parte, "tras")
-        for x in (0, 2, 4, 6):  # placas dos nós dos dedos
-            d.p(x, 21, tom(GRAFITE_ESCURO, 0.2)); d.p(x + 1, 21, tom(GRAFITE_ESCURO, 0.0))
-            d.p(x, 22, tom(GRAFITE_ESCURO, -0.2)); d.p(x + 1, 22, tom(GRAFITE_ESCURO, -0.3))
-        cima = Pincel(t, parte, "cima")
-        placa(cima, 0, 0, 8, 8, rnd, forma=redondo(8, 8, 2))
-        baixo = Pincel(t, parte, "baixo")
-        for y in range(8):
+        for x in (0, 2, 4, 6):
+            preto(d, x, 21, 0.24); preto(d, x + 1, 21, 0.10)
+            preto(d, x, 22, -0.18); preto(d, x + 1, 22, -0.25)
+        pol = Pincel(t, parte, interno)
+        for y in range(20, 23):
+            for x in range(2, 6):
+                preto(pol, x, y, 0.06 if y == 20 else -0.05)
+        Pincel(t, parte, "baixo").ret(0, 0, 8, 8, tom(PRETO, -0.2))
+        # manga: a borda da manopla saltada na segunda camada
+        for face in ("frente", "tras", "dir", "esq"):
+            mg = Pincel(t, "manga_" + parte[-1], face)
             for x in range(8):
-                baixo.p(x, y, tom(MALHA_ESCURA, -0.1))
-        # manga (segunda camada): borda da ombreira e a borda da manopla em relevo
-        for face in ("frente", "tras", externo):
-            m = Pincel(t, "manga_" + parte[-1], face)
-            for x in range(8):
-                m.p(x, 5, tom(GRAFITE, -0.30))
-                m.p(x, 12, tom(MALHA_ESCURA, 0.25))
+                preto(mg, x, 13, 0.32, rnd)
 
 
 # ---------------------------------------------------------------- pernas
@@ -356,43 +384,62 @@ def pernas(t, Pincel, rnd):
     for parte in ("perna_d", "perna_e"):
         externo = "dir" if parte == "perna_d" else "esq"
         for face in ("frente", "tras", "dir", "esq"):
+            bumps = [(3.5, 5, 3.4, 4, 0.9)]
+            if face == "frente":
+                bumps.append((3.5, 10.5, 1.8, 1.4, 0.7))
+            elif face == "tras":
+                bumps.append((3.5, 13, 2.6, 2.2, 0.8))
+            cinza(Pincel(t, parte, face), rnd, bumps)
+        cinza(Pincel(t, parte, "cima"), rnd, luz=0, sombra=0)
+        for face in ("frente", "tras", "dir", "esq"):
             p = Pincel(t, parte, face)
-            malha(p, rnd)
-            if face != "tras":
-                # coxa: placa do quadríceps e a do joelho
-                placa(p, 1, 1, 6, 8, rnd, forma=redondo(6, 8, 1))
-                if face == "frente":
-                    marcar(p, [(4, 3), (4, 4), (4, 5), (5, 6), (5, 7)], -0.16)
-                    marcar(p, [(2, 2), (2, 3), (2, 4)], 0.10)
-                placa(p, 1, 10, 6, 3, rnd, forma=redondo(6, 3, 1), cor=tom(GRAFITE, 0.05) if face == "frente" else GRAFITE)
-            else:
-                marcar(p, [(x, 9) for x in range(1, 7)], -0.18)  # dobra do joelho
-                marcar(p, [(2, 12), (3, 13), (4, 13), (5, 12)], 0.10)  # panturrilha
-            # bota: cano alto preto com placa da canela e solado grosso
-            for y in range(14, 24):
+            # sunga: o recorte sobe para o lado de fora da perna
+            for x in range(8):
+                if face == externo:
+                    fundo = 2
+                elif face in ("frente", "tras"):
+                    u = x / 7 if parte == "perna_d" else 1 - x / 7
+                    fundo = 2 + round(3 * (1 - u))
+                else:
+                    fundo = 5
+                for y in range(fundo):
+                    preto(p, x, y, 0.04 - 0.03 * y, rnd)
+                p.p(x, fundo, mistura(p.get(x, fundo), JUNTA, 0.45))
+            # bota de cano médio: borda dobrada, cadarço na frente, fivela do lado e solado grosso
+            for y in range(15, 24):
                 for x in range(8):
-                    s = 0.10 - 0.18 * (y - 14) / 9 + rnd.uniform(-0.02, 0.02)
+                    s = 0.10 - 0.16 * (y - 15) / 8
                     if x in (0, 7):
                         s -= 0.10
-                    p.p(x, y, tom(MALHA_ESCURA, s))
+                    preto(p, x, y, s, rnd)
             for x in range(8):
-                p.p(x, 14, tom(MALHA_ESCURA, 0.25))
-                p.p(x, 22, tom(GRAFITE_ESCURO, -0.2))
+                preto(p, x, 15, 0.30, rnd)
+                preto(p, x, 16, -0.20, rnd)
+                preto(p, x, 22, -0.30)
                 p.p(x, 23, hexa("#060607"))
-            if face == "frente":
-                placa(p, 2, 15, 4, 5, rnd, cor=GRAFITE_ESCURO, forma=redondo(4, 5, 1))
-            if face == externo:
-                for y in (17, 19):  # fivelas da bota
-                    for x in range(2, 6):
-                        p.p(x, y, tom(GRAFITE_ESCURO, 0.15))
+        f = Pincel(t, parte, "frente")
+        # painéis da coxa e a joelheira
+        sulco(f, linha(1, 3, 3, 8) | linha(6, 3, 4, 8), 0.28)
+        sulco(f, {(x, 9) for x in range(2, 6)} | {(x, 12) for x in range(2, 6)} | {(1, 10), (1, 11), (6, 10), (6, 11)}, 0.35)
+        for x in range(2, 6):
+            f.p(x, 10, clarear(f.get(x, 10), 0.10))
+        sulco(f, linha(2, 13, 3, 14) | linha(5, 13, 4, 14), 0.22)
+        for y in range(17, 22, 2):                  # cadarço
+            preto(f, 3, y, 0.30); preto(f, 4, y, 0.30)
+            preto(f, 3, y + 1, -0.15); preto(f, 4, y + 1, -0.15)
+        sulco(Pincel(t, parte, externo), {(4, y) for y in range(5, 15)}, 0.30)
+        o = Pincel(t, parte, externo)
+        for x in range(2, 6):
+            o.p(x, 18, tom(CINZA_ESCURO, 0.1))
+        tr = Pincel(t, parte, "tras")
+        sulco(tr, {(x, 9) for x in range(1, 7)}, 0.30)
+        for y in range(16, 22):
+            preto(tr, 3, y, -0.12); preto(tr, 4, y, 0.05)
         Pincel(t, parte, "baixo").ret(0, 0, 8, 8, hexa("#060607"))
-        cima = Pincel(t, parte, "cima")
-        malha(cima, rnd, luz=0, sombra=0)
-        # calça (segunda camada): borda do cano da bota em relevo
         for face in ("frente", "tras", "dir", "esq"):
             calca = Pincel(t, "calca_" + parte[-1], face)
             for x in range(8):
-                calca.p(x, 14, tom(MALHA_ESCURA, 0.18))
+                preto(calca, x, 15, 0.28, rnd)
 
 
 # ---------------------------------------------------------------- capa
@@ -481,7 +528,7 @@ def pecas_textura(pc, rnd):
     # orelha do capuz: couro preto com o brilho na aresta da frente
     area(0, 16, 8, 8, lambda x, y: tom(CAPUZ, 0.25 if x == 1 else 0.10 if x == 2 else -0.05 * y / 7 + rnd.uniform(-0.02, 0.02)))
     # lâmina da manopla: metal grafite com o fio claro
-    area(8, 16, 8, 8, lambda x, y: tom(GRAFITE, 0.45 if y == 0 else 0.25 if y == 1 else -0.08 * y + rnd.uniform(-0.02, 0.02)))
+    area(8, 16, 8, 8, lambda x, y: tom(PRETO, 0.45 if y == 0 else 0.25 if y == 1 else -0.08 * y + rnd.uniform(-0.02, 0.02)))
 
 
 def batman(t, capa, glow, pecas, Pincel):

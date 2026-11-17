@@ -16,6 +16,21 @@ import net.minecraft.sounds.SoundSource;
 public final class SuperSalto {
     private SuperSalto() {}
 
+    /** Velocidade vertical inicial (blocos/tick) para o jogador subir altura blocos (gravidade 0,08 e arrasto 0,98). */
+    public static double velocidadeParaAltura(double altura) {
+        double lo = 0, hi = 6;
+        for (int i = 0; i < 40; i++) {
+            double v = (lo + hi) / 2, y = 0, vy = v;
+            while (vy > 0) {
+                y += vy;
+                vy = (vy - 0.08) * 0.98;
+            }
+            if (y < altura) lo = v;
+            else hi = v;
+        }
+        return hi;
+    }
+
     public static void saltar(ServerPlayer player, float forca) {
         Params prm = Passivas.params(player, "super_jump");
         if (prm == null || !(player.level() instanceof ServerLevel level) || player.isSpectator()) return;

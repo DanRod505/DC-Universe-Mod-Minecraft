@@ -90,6 +90,7 @@ details[open] summary { margin-bottom: 6px; }
 <nav id="abas" aria-label="Seções do plano"></nav>
 <main>
   <section id="visao" class="prosa"><!--VISAO--></section>
+  <section id="habilidades" class="prosa"><!--HABILIDADES--></section>
   <section id="elenco"></section>
   <section id="pacotes"></section>
   <section id="mundo"></section>
@@ -101,7 +102,7 @@ details[open] summary { margin-bottom: 6px; }
 </div>
 <script>
 const D = /*DADOS*/null;
-const ABAS = [["visao", "Visão"], ["elenco", "Elenco"], ["pacotes", "Pacotes"], ["mundo", "Mundo"], ["campanha", "Campanha"], ["sistemas", "Sistemas"], ["rpg", "RPG"], ["roteiro", "Roteiro"]];
+const ABAS = [["visao", "Visão"], ["habilidades", "Habilidades"], ["elenco", "Elenco"], ["pacotes", "Pacotes"], ["mundo", "Mundo"], ["campanha", "Campanha"], ["sistemas", "Sistemas"], ["rpg", "RPG"], ["roteiro", "Roteiro"]];
 const CATS = {heroi: "Herói", vilao: "Vilão", anti: "Anti-herói"};
 const TIPOS = {cidade: "Cidades", reino: "Reinos", base: "Bases", masmorra: "Masmorras"};
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
@@ -126,29 +127,26 @@ document.getElementById("counts").innerHTML = [
 // Elenco
 const filtro = {lado: "todos", arq: ""};
 function cartao(c) {
-  const habs = c.habilidades.map(h => `<div class="hab"><span class="papel">${esc(h.papel)}</span><b>${esc(h.nome)}</b><span>${esc(h.desc)}</span><span class="cor">${esc(h.coreografia)}</span>${h.mundo ? `<span class="cor">No mundo: ${esc(h.mundo)}</span>` : ""}</div>`).join("");
-  const arv = Object.entries(c.arvore).map(([r, i]) => `<li><b>${esc(r)}:</b> ${i.map(esc).join(", ")}</li>`).join("");
+  const i = c.ideias;
+  const arv = i ? Object.entries(i.arvore).map(([r, x]) => `<li><b>${esc(r)}:</b> ${x.map(esc).join(", ")}</li>`).join("") : "";
   return `<article class="card ${c.cat}">
     <div class="tags"><span class="pill">${CATS[c.cat]}</span><span class="tag">${esc(arq[c.arquetipo].nome)}</span><span class="tag">${esc(locais[c.origem].nome)}</span><span class="tag">estreia v${estreia[c.id] || "?"}</span></div>
     <h3>${esc(c.nome)}</h3><div class="sub">${esc(c.civil)}</div>
     <p style="margin:0">${esc(c.lore)}</p>
-    <div><b>Suprema: ${esc(c.suprema.nome)}.</b> ${esc(c.suprema.cena)}</div>
-    <details><summary>Kit completo</summary>
-      <div><b>Combo.</b> ${esc(c.combo)}</div>${habs}
-      <div class="hab"><span class="papel">defesa</span><span>${esc(c.defesa)}</span></div>
-      <div class="hab"><span class="papel">mecânica única</span><span>${esc(c.unica)}</span></div>
-      <div class="hab"><span class="papel">recurso</span><span>${esc(c.recurso)}</span></div>
-      <div class="hab"><span class="papel">travessia</span><span>${c.travessia.map(esc).join(" · ")}</span></div>
-      <div class="hab"><span class="papel">árvore</span><ul class="lista">${arv}</ul></div>
-      <div class="hab"><span class="papel">trajes</span><span>${c.trajes.map(esc).join(" · ")}</span></div>
-    </details></article>`;
+    <div><b>Habilidades e melhorias:</b> ${esc(D.hab_a_definir)}</div>
+    <div class="sub"><b>Trajes:</b> ${c.trajes.map(esc).join(" · ")}</div>
+    ${i ? `<details><summary>Ideias antigas (só referência)</summary>
+      <div class="hab"><span class="papel">habilidades</span><span>${i.habilidades.map(esc).join(" · ")}</span></div>
+      <div class="hab"><span class="papel">travessia</span><span>${i.travessia.map(esc).join(" · ")}</span></div>
+      <div class="hab"><span class="papel">árvore antiga</span><ul class="lista">${arv}</ul></div>
+    </details>` : ""}</article>`;
 }
 function desenharElenco() {
   const lista = D.elenco.filter(c => (filtro.lado === "todos" || (filtro.lado === "heroi" ? c.cat === "heroi" : c.cat !== "heroi")) && (!filtro.arq || c.arquetipo === filtro.arq));
   document.getElementById("grade-elenco").innerHTML = lista.map(cartao).join("") || "<p>Nenhum personagem com esse filtro.</p>";
 }
 document.getElementById("elenco").innerHTML = `<h2>Jogo base: ${D.elenco.length} personagens</h2>
-  <p class="meta">Metade heróis, metade vilões e anti-heróis. Todos seguem o mesmo molde: combo, 4 habilidades coreografadas (mobilidade, controle, dano, utilidade), defesa, mecânica única, suprema cinematográfica, árvore com 3 ramos e 3 trajes.</p>
+  <p class="meta">Metade heróis, metade vilões e anti-heróis. Cada um tem uma árvore de habilidades aberta, com melhorias próprias em cada habilidade (veja a aba Habilidades), e 3 trajes. As habilidades de cada personagem são definidas pelo Dalton.</p>
   <div class="filtros" role="group" aria-label="Filtrar elenco">
     <button class="chip" data-lado="todos" aria-pressed="true">Todos</button>
     <button class="chip" data-lado="heroi" aria-pressed="false">Heróis</button>

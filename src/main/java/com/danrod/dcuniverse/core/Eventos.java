@@ -76,7 +76,11 @@ public final class Eventos {
             Rede.npcCatalogo(p);
         }));
         NeoForge.EVENT_BUS.addListener(PlayerTickEvent.Post.class, e -> {
-            if (e.getEntity() instanceof ServerPlayer sp) tick(sp);
+            if (e.getEntity() instanceof ServerPlayer sp) {
+                tick(sp);
+                // A árvore muda com o modo de jogo (criativo: 6 slots e pontos infinitos); só envia se mudou.
+                if (sp.tickCount % 10 == 0) com.danrod.dcuniverse.ability.Arvore.sincronizar(sp);
+            }
         });
         NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.HIGHEST, false, LivingDeathEvent.class, Eventos.cancela((Predicate<LivingDeathEvent>) e -> {
             // Decisão 3: destransforma antes do drop; a armadura original cai normalmente, o traje nunca.
@@ -86,9 +90,15 @@ public final class Eventos {
         NeoForge.EVENT_BUS.addListener(LivingDeathEvent.class, e -> {
             if (e.getSource().getEntity() instanceof ServerPlayer sp && !(e.getEntity() instanceof net.minecraft.world.entity.player.Player)) {
                 com.danrod.dcuniverse.missao.Diario.abateu(sp, e.getEntity());
-                if (e.getEntity() instanceof net.minecraft.world.entity.monster.Enemy) com.danrod.dcuniverse.npc.Afinidade.protegeu(sp, e.getEntity());
+                if (e.getEntity() instanceof net.minecraft.world.entity.monster.Enemy) {
+                    com.danrod.dcuniverse.npc.Afinidade.protegeu(sp, e.getEntity());
+                    com.danrod.dcuniverse.ability.Arvore.abateu(sp, e.getEntity());
+                }
             }
         });
+        // Visão de calor com a melhoria "comida assada": o que ela mata solta a comida pronta.
+        NeoForge.EVENT_BUS.addListener(net.neoforged.neoforge.event.entity.living.LivingDropsEvent.class,
+            e -> com.danrod.dcuniverse.ability.Assar.assar(e.getEntity(), e.getDrops()));
         NeoForge.EVENT_BUS.addListener(PlayerEvent.ItemCraftedEvent.class, e -> {
             if (e.getEntity() instanceof ServerPlayer sp) com.danrod.dcuniverse.missao.Diario.fabricou(sp, e.getCrafting());
         });
@@ -116,6 +126,7 @@ public final class Eventos {
                 com.danrod.dcuniverse.combate.Combo.esquecer(sp);
                 com.danrod.dcuniverse.combate.Defesa.esquecer(sp);
                 com.danrod.dcuniverse.ability.Coreografia.esquecer(sp);
+                com.danrod.dcuniverse.ability.Arvore.esquecer(sp);
             }
         });
         NeoForge.EVENT_BUS.addListener(PlayerEvent.StartTracking.class, e -> {
@@ -135,6 +146,9 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.Coreografia.tick();
             Onda.tick();
             com.danrod.dcuniverse.ability.active.Palmas.tick();
+            com.danrod.dcuniverse.ability.active.GiroCalor.tick();
+            com.danrod.dcuniverse.ability.active.Rochas.tick();
+            com.danrod.dcuniverse.ability.active.Escalada.tick();
             com.danrod.dcuniverse.combate.Combo.tick(e.getServer());
             com.danrod.dcuniverse.combate.Defesa.tick();
             com.danrod.dcuniverse.ability.Congelamento.tick();
@@ -157,6 +171,9 @@ public final class Eventos {
             Onda.limpar();
             com.danrod.dcuniverse.ability.Coreografia.limpar();
             com.danrod.dcuniverse.ability.active.Palmas.limpar();
+            com.danrod.dcuniverse.ability.active.GiroCalor.limpar();
+            com.danrod.dcuniverse.ability.active.Rochas.limpar();
+            com.danrod.dcuniverse.ability.active.Escalada.limpar();
             com.danrod.dcuniverse.combate.Defesa.limpar();
             com.danrod.dcuniverse.ability.Congelamento.limpar();
             Fortaleza.limpar();

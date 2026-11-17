@@ -32,7 +32,7 @@ neoForge {
         }
         client {
             client()
-            programArguments.addAll '--username', 'Dev'
+            programArguments.addAll '--username', providers.gradleProperty('dcuNome').getOrElse('Dev')
             // ./gradlew runClient -PdcuEntrar: entra direto no servidor local (testes com Xvfb).
             if (providers.gradleProperty('dcuEntrar').isPresent()) programArguments.addAll '--quickPlayMultiplayer', 'localhost:25565'
         }

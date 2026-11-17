@@ -133,7 +133,7 @@ public final class Rastros {
             Matrix4fc m = pose.pose();
             camada(m, buf, rel, lado, larg, 1f, cor, brilho, 0.55f);
         });
-        e.getSubmitNodeCollector().submitCustomGeometry(e.getPoseStack(), Luz.tipo(), (pose, buf) -> {
+        Luz.depoisDaAgua(e.getPoseStack(), e.getSubmitNodeCollector(), Luz.tipo(), (pose, buf) -> {
             Matrix4fc m = pose.pose();
             camada(m, buf, rel, lado, larg, 0.8f, cor2, brilho, 0.6f);
             camada(m, buf, rel, lado, larg, 0.2f, 0xFFFFFF, brilho, 0.45f);

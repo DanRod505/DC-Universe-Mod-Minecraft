@@ -182,6 +182,62 @@ def verificar_personagens(raiz, recursos, erros):
             for i in IDIOMAS:
                 if f"habilidade.dcuniverse.{h.get('id')}" not in lang[i]:
                     erros.append(f"{nome}: falta habilidade.dcuniverse.{h.get('id')} em {i}.json")
+        # Árvore de habilidades (Plano 2): habilidades do personagem, custo 1-3, iniciais dentro da árvore, e as
+        # passivas presas a uma habilidade ("unlocks_passive") existem no personagem.
+        arv = c.get("skill_tree")
+        if arv:
+            ids_hab = {h.get("id") for h in c.get("abilities", [])}
+            na_arvore = [x.get("id") for x in arv.get("abilities", [])]
+            for x in arv.get("abilities", []):
+                if x.get("id") not in ids_hab:
+                    erros.append(f"{nome}: árvore com {x.get('id')}, que não é uma habilidade do personagem")
+                if not 1 <= x.get("cost", 0) <= 3:
+                    erros.append(f"{nome}: árvore: {x.get('id')} custa {x.get('cost')}, deve ser 1-3")
+                # Melhorias: custo 1-3, a exigida vem antes, nome e descrição nos dois idiomas, ícone de item válido.
+                vistas = set()
+                for u in x.get("upgrades", []):
+                    mid = f"{x.get('id')}.{u.get('id')}"
+                    if not 1 <= u.get("cost", 0) <= 3:
+                        erros.append(f"{nome}: melhoria {mid} custa {u.get('cost')}, deve ser 1-3")
+                    if u.get("requires") and u["requires"] not in vistas:
+                        erros.append(f"{nome}: melhoria {mid} exige {u['requires']}, que não vem antes")
+                    if mid in vistas:
+                        erros.append(f"{nome}: melhoria {mid} repetida")
+                    vistas.add(u.get("id"))
+                    if not u.get("icon", "").startswith("minecraft:"):
+                        erros.append(f"{nome}: melhoria {mid} sem ícone (um item minecraft:...)")
+                    for i in IDIOMAS:
+                        for k in (f"melhoria.dcuniverse.{mid}", f"melhoria.dcuniverse.{mid}.desc"):
+                            if k not in lang[i]:
+                                erros.append(f"{nome}: falta {k} em {i}.json")
+            if len(set(na_arvore)) != len(na_arvore):
+                erros.append(f"{nome}: árvore com habilidade repetida")
+            # Melhorias padrão (energia, vida, dano, custo...), geradas em ability/Arvore.java: nome e descrição nos dois idiomas.
+            fonte = (raiz / "src/main/java/com/danrod/dcuniverse/ability/Arvore.java").read_text(encoding="utf-8")
+            for t in re.findall(r'new Status\("(\w+)"', fonte) + ["dano", "custo", "alcance"]:
+                for i in IDIOMAS:
+                    for k in (f"dcuniverse.melhoria.{t}", f"dcuniverse.melhoria.{t}.desc", f"dcuniverse.melhoria.{t}.valor"):
+                        if k not in lang[i]:
+                            erros.append(f"{nome}: falta {k} em {i}.json")
+            # Status do herói por nível (base + um valor por melhoria): listas não vazias de números positivos.
+            for k, v in arv.get("stats", {}).items():
+                if k not in ("energy", "health", "regen", "armor", "flight_speed", "boost_drain"):
+                    erros.append(f"{nome}: skill_tree.stats.{k} desconhecido")
+                elif not isinstance(v, list) or not v or any(not isinstance(x, (int, float)) or x < 0 for x in v):
+                    erros.append(f"{nome}: skill_tree.stats.{k} deve ser uma lista de números (base e um por nível)")
+            for x in arv.get("abilities", []):
+                for k in ("damage", "energy"):
+                    if k in x and (not isinstance(x[k], list) or not x[k]):
+                        erros.append(f"{nome}: árvore: {x.get('id')}.{k} deve ser uma lista (base e um por nível)")
+            if not arv.get("starters"):
+                erros.append(f"{nome}: árvore sem habilidades iniciais")
+            for x in arv.get("starters", []):
+                if x not in na_arvore:
+                    erros.append(f"{nome}: inicial {x} fora da árvore")
+            tipos_passiva = {p.get("type") for p in c.get("passives", [])}
+            for h in c.get("abilities", []):
+                if h.get("unlocks_passive") and h["unlocks_passive"] not in tipos_passiva:
+                    erros.append(f"{nome}: {h.get('id')} libera a passiva {h['unlocks_passive']}, que o personagem não tem")
         for p in c.get("passives", []):
             if p.get("type") not in passivas:
                 erros.append(f"{nome}: tipo de passiva inexistente {p.get('type')}")

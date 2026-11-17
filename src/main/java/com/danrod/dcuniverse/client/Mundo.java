@@ -277,6 +277,9 @@ public final class Mundo {
         RaioX.desenhar(ps, col, cam, pt);
         Detetive.desenhar(ps, col, cam, pt);
         Efeitos.feixePrimeiraPessoa(ps, col, cam, pt);
+        GiroVisual.desenhar(ps, col, cam, pt);
+        VisaoVisual.desenhar(ps, col, cam, pt);
+        SoproVisual.desenhar(ps, col, cam, pt);
         Gelo.desenhar(ps, col, cam, pt);
         Bolha.desenhar(ps, col, cam, pt);
     }
@@ -289,7 +292,7 @@ public final class Mundo {
         float some = u < 1 ? 1 : Mth.clamp(1 - (u - 1) * 2, 0, 1);
         double r = e.a() * frente(u);
         Vec3 c = new Vec3(e.x(), e.y() + 0.06, e.z()).subtract(cam);
-        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             faixa(m, buf, c, r - 1.6, r, 0xFFE2B0, 0f, 0.9f * some);
             faixa(m, buf, c, r, r + 0.5, 0xFFFFFF, 0.95f * some, 0f);
@@ -326,7 +329,7 @@ public final class Mundo {
         if (forca <= 0) return;
         double alto = Math.max(4, e.cor()) * 1.05;
         Vec3 de = new Vec3(e.x(), e.y() + 1, e.z()).subtract(cam), ate = de.add(0, alto - 1, 0);
-        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             coluna(m, buf, de, ate, 0.9f, 0xFFE7A0, 0.10f * forca);
             coluna(m, buf, de, ate, 0.45f, 0xFFF1C8, 0.22f * forca);
@@ -391,7 +394,7 @@ public final class Mundo {
             double j = (i == 0 || i == n) ? 0 : 0.35;
             p[i] = base.add(rnd.nextGaussian() * j, rnd.nextGaussian() * j, rnd.nextGaussian() * j);
         }
-        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             for (int i = 0; i < n; i++) {
                 fita(m, buf, p[i], p[i + 1], 0.32f, 0x3A7BFF, 0.35f * alfa);
@@ -408,7 +411,7 @@ public final class Mundo {
         double u0 = Mth.clamp(t / 2.0, 0, 1), u1 = Mth.clamp(u0 + 6 / d, 0, 1);
         if (u0 >= 1) return;
         Vec3 a = de.lerp(ate, u0), b = de.lerp(ate, u1);
-        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             fita(m, buf, a, b, 0.18f, 0xFFB030, 0.45f);
             fita(m, buf, a, b, 0.06f, 0xFFF4C0, 1f);
@@ -440,7 +443,7 @@ public final class Mundo {
      */
     private static void sonico(PoseStack ps, SubmitNodeCollector col, Vec3 cam, Rede.Efeito e, float t) {
         Vec3 c = new Vec3(e.x(), e.y(), e.z()).subtract(cam);
-        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             for (int onda = 0; onda < 2; onda++) {
                 float u = (t - onda * 4) / SONICO_TICKS;
@@ -488,7 +491,7 @@ public final class Mundo {
      */
     private static void palmas(PoseStack ps, SubmitNodeCollector col, Vec3 cam, Rede.Efeito e, float t) {
         Vec3 c = new Vec3(e.x(), e.y(), e.z()).subtract(cam);
-        col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> {
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> {
             Matrix4f m = pose.pose();
             for (int onda = 0; onda < 2; onda++) {
                 float u = (t - onda * 3) / PALMAS_TICKS;

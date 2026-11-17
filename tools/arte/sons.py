@@ -12,6 +12,8 @@ Gera em src/main/resources/assets/dcuniverse/sounds/habilidade/ (mono, para o so
 - salto.ogg             impulso do super-salto: pancada e o ar passando
 - ricochete.ogg         projétil batendo no aço e ricocheteando
 Combate (v0.7):
+- giro_carga.ogg        Giro de Calor carregando: ronco de energia subindo de tom
+- giro.ogg              Giro de Calor: o raio passando em volta cada vez mais rápido e a batida no chão no fim
 - golpe_ar.ogg          o punho cortando o ar (toca em todo golpe, acertando ou não)
 - golpe_leve.ogg        soco direto acertando: estalo seco e a pancada curta no corpo
 - golpe_medio.ogg       gancho acertando: pancada mais funda, o tapa da pele e um sopro de ar
@@ -1420,6 +1422,54 @@ def trava_solta():
     return finalizar(normalizar(eco(x, 0.4, 0.2, 6000)[: int(seg * SR)], 0.45), 0.15)
 
 
+def giro_carga():
+    # O Giro de Calor carregando: ele sobe do chão, o ar ronca em volta e um zumbido de energia vai subindo de tom.
+    seg = 1.1
+    n = int(round(seg * SR))
+    t = t_(seg)
+    zumbido = varredura(55, 220, seg, 1.6) * env(n, 0.9, 0.3)
+    serra = filtro(np.sign(np.sin(2 * np.pi * np.cumsum(110 + 220 * (t / seg) ** 1.6) / SR)), "lowpass", 1800) * env(n, 0.95, 0.2)
+    vento = filtro(ruido(seg), "bandpass", (300, 2600)) * env(n, 0.8, 0.3) * (0.6 + 0.4 * np.sin(2 * np.pi * (2 + 6 * t / seg) * t))
+    chiado = filtro(ruido(seg), "highpass", 4000) * env(n, 1.0, 0.1)
+    x = misturar((0, zumbido * 0.9), (0, serra * 0.25), (0, vento * 0.6), (0, chiado * 0.3))
+    return finalizar(normalizar(x[:n], 0.85), 0.04)
+
+
+def giro():
+    # O Giro de Calor: o raio passa zunindo em volta cada vez mais rápido (cada passagem é um "vuum" com efeito
+    # Doppler), o fogo ruge por baixo e no fim ele bate no chão: estrondo, estalo e pedras caindo.
+    seg = 4.2
+    n = int(round(seg * SR))
+    t = t_(seg)
+    giro_fim = 2.5
+    # Fase das voltas: acelera no começo, como o jogo (6 voltas em 2,5 s).
+    u = np.clip(t / giro_fim, 0, 1)
+    a = 0.3
+    e = np.where(u < a, u * u / (2 * a), u - a / 2) / (1 - a / 2)
+    fase = 6 * e
+    perto = 0.5 + 0.5 * np.cos(2 * np.pi * fase)          # 1 quando o raio passa pela frente de quem ouve
+    passagens = perto ** 6
+    base = 140 + 90 * np.gradient(fase) * SR / 6          # sobe de tom com a velocidade
+    doppler = base * (1 + 0.25 * np.sin(2 * np.pi * fase))
+    fz = 2 * np.pi * np.cumsum(doppler) / SR
+    zumbido = sum(np.sin(k * fz) / k for k in range(1, 12)) * (0.35 + 0.65 * passagens)
+    zumbido = filtro(zumbido, "lowpass", 2600) * (u < 1)
+    vuum = filtro(ruido(seg), "bandpass", (500, 4000)) * passagens * (u < 1)
+    fogo = filtro(ruido(seg), "bandpass", (120, 1600)) * np.clip(t / 0.4, 0, 1) * np.exp(-np.maximum(t - giro_fim, 0) / 0.5)
+    estalos = np.zeros(n)
+    for _ in range(70):
+        i = RNG.integers(0, int(giro_fim * SR))
+        estalos[i:i + 500] += filtro(ruido(500 / SR), "highpass", 2500)[: len(estalos[i:i + 500])] * np.exp(-np.arange(500) / 80)[: len(estalos[i:i + 500])] * RNG.uniform(0.2, 0.8)
+    # A batida no chão no fim.
+    pancada_t = giro_fim + 0.15
+    estalo = filtro(ruido(0.05), "highpass", 1200) * env(int(round(0.05 * SR)), 0.0005, 0.01)
+    boom = varredura(90, 28, 1.3, 0.4) * env(int(round(1.3 * SR)), 0.002, 0.4)
+    pedras = cascalho(1.2, 70, 0.8, banda=(300, 5000), dur=(0.004, 0.05), ganho=(0.05, 0.35))
+    x = misturar((0, zumbido * 0.7), (0, vuum * 0.9), (0, fogo * 0.45), (0, estalos * 0.35),
+                 (pancada_t, estalo * 1.5), (pancada_t, boom * 1.6), (pancada_t + 0.03, pedras * 0.7))
+    return finalizar(normalizar(eco(x, 1.2, 0.18, 5000)[:n], 0.95), 0.3)
+
+
 SONS = {
     "visao_calor": visao_calor, "sopro": sopro, "soco_sonico": soco_sonico, "pisao": pisao, "raio_x": raio_x,
     "fortaleza_cresce": fortaleza_cresce, "fortaleza_quebra": fortaleza_quebra, "salto_carga": salto_carga,
@@ -1446,7 +1496,7 @@ SONS = {
     "golpe_ar": golpe_ar, "golpe_leve": golpe_leve, "golpe_medio": golpe_medio, "golpe_pesado": golpe_pesado,
     "modo_combate_liga": modo_combate_liga, "modo_combate_desliga": modo_combate_desliga, "carga": carga,
     "golpe_onda": golpe_onda, "palmas": palmas, "defesa": defesa, "aparo": aparo, "trava": trava, "trava_solta": trava_solta, "olhos_acendem": olhos_acendem, "inspira": inspira,
-    "decola": decola, "meteoro": meteoro,
+    "decola": decola, "meteoro": meteoro, "giro_carga": giro_carga, "giro": giro,
 }
 
 

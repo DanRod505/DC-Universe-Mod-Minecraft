@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Pacotes do mod. O servidor decide tudo; o cliente só pede (Selecionar, Usar, Destransformar) e desenha (Sync, Aparencia, Catalogo, GuiaSync). */
 public final class Rede {
-    private static final int VERSAO = 17;
+    private static final int VERSAO = 23;
     public static final Canal CANAL = new Canal(VERSAO);
 
     /**
@@ -114,7 +114,7 @@ public final class Rede {
      * (ability/passive/Planar: 0 fechada, 1 aberta, 2 mergulho, 3 freio).
      */
     public record Aparencia(int entidade, String personagem, int cor, String efeito, int efeitoCor, float alcance, float angulo, boolean voando,
-                            int rastro, int rastro2, int rastro3, int planar) {
+                            int rastro, int rastro2, int rastro3, int planar, float escala) {
         public static void encode(Aparencia m, FriendlyByteBuf b) {
             b.writeVarInt(m.entidade);
             b.writeUtf(m.personagem);
@@ -128,11 +128,12 @@ public final class Rede {
             b.writeInt(m.rastro2);
             b.writeInt(m.rastro3);
             b.writeVarInt(m.planar);
+            b.writeFloat(m.escala);
         }
 
         public static Aparencia decode(FriendlyByteBuf b) {
             return new Aparencia(b.readVarInt(), b.readUtf(), b.readInt(), b.readUtf(), b.readInt(), b.readFloat(), b.readFloat(), b.readBoolean(),
-                b.readInt(), b.readInt(), b.readInt(), b.readVarInt());
+                b.readInt(), b.readInt(), b.readInt(), b.readVarInt(), b.readFloat());
         }
     }
 
@@ -161,6 +162,108 @@ public final class Rede {
             return new GuiaSync(List.copyOf(b.readList(FriendlyByteBuf::readUtf)), List.copyOf(b.readList(FriendlyByteBuf::readUtf)), b.readUtf());
         }
     }
+
+    /** Uma habilidade da árvore como a tela precisa: custo em pontos, recarga, se é segurada e se é uma das iniciais. */
+    /**
+     * Um nó da árvore: habilidade (pai "") ou melhoria (id "habilidade.melhoria", com o pai, a melhoria exigida antes e
+     * o item do ícone). rajada = segundos do disparo por toque (0 = segura ou instantânea).
+     */
+    /**
+     * Um nó da árvore. Habilidade: custo em pontos, recarga, segurar, se já vem liberada (inicial), valor = gasto de
+     * energia (por segundo se segura), tipo = efeitos extras ("fogo,gelo") e depois = dano em corações (por segundo
+     * se segura). Melhoria (id "pai.melhoria", pai "" = do herói): a exigida antes, o item do ícone, o tipo padrão
+     * ("" = própria da habilidade, com texto no lang), valor = o número antes dela e depois = o número com ela.
+     */
+    public record ArvoreItem(String id, int custo, float recarga, boolean hold, boolean inicial, float rajada, String pai, String requer, String icone,
+                             float valor, String tipo, float depois) {
+        public boolean melhoria() {
+            return id.contains(".");
+        }
+
+        /** Nível da melhoria padrão (I, II, III), pelo fim do id. */
+        public int nivel() {
+            int i = id.lastIndexOf('_');
+            try {
+                return i < 0 ? 1 : Integer.parseInt(id.substring(i + 1));
+            } catch (NumberFormatException e) {
+                return 1;
+            }
+        }
+    }
+
+    /**
+     * Árvore de habilidades do herói atual (ability/Arvore): nível, xp (com o começo e o fim do nível), pontos livres,
+     * slots abertos, se está no criativo, o que ele tem (iniciais e compradas), os 6 slots ("" = vazio) e a árvore
+     * toda. heroi "" = o herói atual não usa o sistema novo.
+     */
+    public record ArvoreSync(String heroi, int nivel, int xp, int xpNivel, int xpProximo, int pontos, int slotsAbertos,
+                             boolean criativo, List<String> compradas, List<String> slots, List<ArvoreItem> itens, float salto) {
+        public static final ArvoreSync VAZIO = new ArvoreSync("", 0, 0, 0, 0, 0, 0, false, List.of(), List.of(), List.of(), 0f);
+
+        public ArvoreItem item(String id) {
+            for (ArvoreItem i : itens) if (i.id().equals(id)) return i;
+            return null;
+        }
+
+        public boolean tem(String id) {
+            return item(id) != null && compradas.contains(id);
+        }
+
+        /** Pode comprar agora (a mesma regra do servidor em Arvore.podeComprar). */
+        public boolean podeComprar(String id) {
+            ArvoreItem i = item(id);
+            if (i == null || tem(id) || pontos < i.custo()) return false;
+            return !i.melhoria() || (i.pai().isEmpty() || tem(i.pai())) && (i.requer().isEmpty() || tem(i.requer()));
+        }
+
+        public static void encode(ArvoreSync m, FriendlyByteBuf b) {
+            b.writeUtf(m.heroi);
+            b.writeVarInt(m.nivel);
+            b.writeVarInt(m.xp);
+            b.writeVarInt(m.xpNivel);
+            b.writeVarInt(m.xpProximo);
+            b.writeVarInt(m.pontos + 1000);
+            b.writeVarInt(m.slotsAbertos);
+            b.writeBoolean(m.criativo);
+            b.writeCollection(m.compradas, FriendlyByteBuf::writeUtf);
+            b.writeCollection(m.slots, FriendlyByteBuf::writeUtf);
+            b.writeVarInt(m.itens.size());
+            for (ArvoreItem i : m.itens) {
+                b.writeUtf(i.id());
+                b.writeVarInt(i.custo());
+                b.writeFloat(i.recarga());
+                b.writeBoolean(i.hold());
+                b.writeBoolean(i.inicial());
+                b.writeFloat(i.rajada());
+                b.writeUtf(i.pai());
+                b.writeUtf(i.requer());
+                b.writeUtf(i.icone());
+                b.writeFloat(i.valor());
+                b.writeUtf(i.tipo());
+                b.writeFloat(i.depois());
+            }
+            b.writeFloat(m.salto);
+        }
+
+        public static ArvoreSync decode(FriendlyByteBuf b) {
+            String h = b.readUtf();
+            int nivel = b.readVarInt(), xp = b.readVarInt(), xn = b.readVarInt(), xprox = b.readVarInt(), pts = b.readVarInt() - 1000, abertos = b.readVarInt();
+            boolean cri = b.readBoolean();
+            List<String> comp = List.copyOf(b.readList(FriendlyByteBuf::readUtf));
+            List<String> slots = List.copyOf(b.readList(FriendlyByteBuf::readUtf));
+            int n = b.readVarInt();
+            List<ArvoreItem> itens = new ArrayList<>(n);
+            for (int i = 0; i < n; i++) itens.add(new ArvoreItem(b.readUtf(), b.readVarInt(), b.readFloat(), b.readBoolean(), b.readBoolean(),
+                b.readFloat(), b.readUtf(), b.readUtf(), b.readUtf(), b.readFloat(), b.readUtf(), b.readFloat()));
+            return new ArvoreSync(h, nivel, xp, xn, xprox, pts, abertos, cri, comp, slots, List.copyOf(itens), b.readFloat());
+        }
+    }
+
+    /** Comprar uma habilidade ou melhoria da árvore com pontos (desfazer = tirar a compra, só no criativo). */
+    public record ArvoreComprar(String id, boolean desfazer) {}
+
+    /** Os 6 slots montados na tela da árvore ("" = vazio). */
+    public record ArvoreSlots(List<String> slots) {}
 
     /** Escolha no menu radial (índice na lista de habilidades). */
     public record Selecionar(int indice) {}
@@ -208,6 +311,50 @@ public final class Rede {
 
     /** O cliente abriu, fechou ou mudou a capa do planar (ability/passive/Planar.FECHADA...FREIO). */
     public record Planar(int estado) {}
+
+    /**
+     * Raio de calor giratório (ability/active/GiroCalor): quem vê desenha os dois feixes girando em volta do herói.
+     * ticks de duração, quantas voltas, alcance, cor, yaw de onde começa e a escala do feixe (melhorias de dano).
+     */
+    /**
+     * Giro de Calor (ability/active/GiroCalor): preparo e giro em ticks, voltas, alcance, cor, direção inicial, escala
+     * do raio (melhoria de dano), altura que ele sobe e a inclinação do raio (graus abaixo do horizonte, mín. e máx.).
+     */
+    public record Giro(int entidade, int preparo, int ticks, float voltas, float alcance, int cor, float yaw0, float escala,
+                       float altura, float pitchMin, float pitchMax) {
+        public static void encode(Giro m, FriendlyByteBuf b) {
+            b.writeVarInt(m.entidade).writeVarInt(m.preparo).writeVarInt(m.ticks);
+            b.writeFloat(m.voltas).writeFloat(m.alcance);
+            b.writeInt(m.cor);
+            b.writeFloat(m.yaw0).writeFloat(m.escala);
+            b.writeFloat(m.altura).writeFloat(m.pitchMin).writeFloat(m.pitchMax);
+        }
+
+        public static Giro decode(FriendlyByteBuf b) {
+            return new Giro(b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readFloat(), b.readFloat(), b.readInt(), b.readFloat(),
+                b.readFloat(), b.readFloat(), b.readFloat(), b.readFloat());
+        }
+    }
+
+    /**
+     * Escalada Sísmica do Superboy (ability/active/Escalada): o percurso dos três saltos e do mergulho (pontos = topo
+     * das três plataformas e o chão da batida) e os tempos em ticks contados do pisão. O cliente do dono faz o
+     * movimento (client/EscaladaVisual).
+     */
+    public record Escalada(int entidade, net.minecraft.world.phys.Vec3[] pontos, int sobe, int salto, int pausa, int mergulho) {
+        public static void encode(Escalada m, FriendlyByteBuf b) {
+            b.writeVarInt(m.entidade);
+            for (net.minecraft.world.phys.Vec3 v : m.pontos) b.writeDouble(v.x).writeDouble(v.y).writeDouble(v.z);
+            b.writeVarInt(m.sobe).writeVarInt(m.salto).writeVarInt(m.pausa).writeVarInt(m.mergulho);
+        }
+
+        public static Escalada decode(FriendlyByteBuf b) {
+            int id = b.readVarInt();
+            net.minecraft.world.phys.Vec3[] p = new net.minecraft.world.phys.Vec3[4];
+            for (int i = 0; i < 4; i++) p[i] = new net.minecraft.world.phys.Vec3(b.readDouble(), b.readDouble(), b.readDouble());
+            return new Escalada(id, p, b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readVarInt());
+        }
+    }
 
     /** Outro jogador fez uma manobra: quem vê anima a pose dele. */
     public record ManobraVista(int entidade, int tipo) {}
@@ -561,6 +708,28 @@ public final class Rede {
                     if (q == p || q.distanceToSqr(p) < 160 * 160) aparenciaPara(p, q);
             }))
             .add();
+        CANAL.messageBuilder(ArvoreSync.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(ArvoreSync::encode).decoder(ArvoreSync::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.arvore(m))
+            .add();
+        CANAL.messageBuilder(ArvoreComprar.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> {
+                b.writeUtf(m.id());
+                b.writeBoolean(m.desfazer());
+            }).decoder(b -> new ArvoreComprar(b.readUtf(96), b.readBoolean()))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> {
+                if (m.desfazer()) com.danrod.dcuniverse.ability.Arvore.desfazer(p, m.id());
+                else com.danrod.dcuniverse.ability.Arvore.comprar(p, m.id());
+            }))
+            .add();
+        CANAL.messageBuilder(ArvoreSlots.class)
+            .direction(PacketFlow.SERVERBOUND)
+            .encoder((m, b) -> b.writeCollection(m.slots(), FriendlyByteBuf::writeUtf))
+            .decoder(b -> new ArvoreSlots(List.copyOf(b.<String, java.util.ArrayList<String>>readCollection(n -> new ArrayList<String>(Math.min(n, 8)), x -> x.readUtf(64)))))
+            .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.ability.Arvore.definirSlots(p, m.slots())))
+            .add();
         CANAL.messageBuilder(Sync.class)
             .direction(PacketFlow.CLIENTBOUND)
             .encoder(Sync::encode).decoder(Sync::decode)
@@ -664,6 +833,16 @@ public final class Rede {
             .direction(PacketFlow.SERVERBOUND)
             .encoder((m, b) -> b.writeVarInt(m.estado())).decoder(b -> new Planar(b.readVarInt()))
             .consumerMainThread((m, ctx) -> comJogador(ctx, p -> com.danrod.dcuniverse.ability.passive.Planar.definir(p, m.estado())))
+            .add();
+        CANAL.messageBuilder(Giro.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(Giro::encode).decoder(Giro::decode)
+            .consumerMainThread((m, ctx) -> EstadoCliente.GIROS.put(m.entidade(), new EstadoCliente.GiroAtivo(m, System.currentTimeMillis(), Double.NaN, Double.NaN)))
+            .add();
+        CANAL.messageBuilder(Escalada.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(Escalada::encode).decoder(Escalada::decode)
+            .consumerMainThread((m, ctx) -> com.danrod.dcuniverse.client.EscaladaVisual.receber(m))
             .add();
         CANAL.messageBuilder(ManobraVista.class)
             .direction(PacketFlow.CLIENTBOUND)
@@ -872,22 +1051,23 @@ public final class Rede {
     public static Aparencia montarAparencia(ServerPlayer player) {
         EstadoJogador e = EstadoJogador.de(player);
         Personagem p = e.personagem();
-        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0, e.planar());
-        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : p.habilidade(e.canalizando());
+        if (p == null) return new Aparencia(player.getId(), "", 0, "", 0, 0, 0, false, 0, 0, 0, e.planar(), 1f);
+        Personagem.Habilidade h = e.canalizando().isEmpty() ? null : com.danrod.dcuniverse.ability.Arvore.habilidade(player, p, e.canalizando());
         boolean voando = Voo.voando(player);
         Personagem.Tipo voo = p.passiva("flight");
         int rastro = voo == null ? 0 : voo.params().color("trail_color", p.cor());
         int rastro2 = voo == null ? 0 : voo.params().color("trail_color2", rastro);
         int rastro3 = voo == null ? 0 : voo.params().color("trail_color3", clarear(rastro));
         int planar = e.planar();
-        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), e.detetive() ? "detective_vision" : "", 0, 0, 0, voando, rastro, rastro2, rastro3, planar);
+        if (h == null) return new Aparencia(player.getId(), p.id().toString(), p.cor(), e.detetive() ? "detective_vision" : "", 0, 0, 0, voando, rastro, rastro2, rastro3, planar, 1f);
         return new Aparencia(player.getId(), p.id().toString(), p.cor(), h.tipo(), h.params().color("color", 0xFFFFFF),
-            h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2, rastro3, planar);
+            h.params().f("range", 8), h.params().f("angle", 30), voando, rastro, rastro2, rastro3, planar, h.params().f("beam_scale", 1f));
     }
 
     /** Envia o estado completo ao próprio jogador. */
     public static void sincronizar(ServerPlayer player) {
         if (player.connection == null) return;
+        com.danrod.dcuniverse.ability.Arvore.sincronizar(player);
         CANAL.send(montar(player), Canal.jogador(player));
     }
 
@@ -905,10 +1085,12 @@ public final class Rede {
         for (Personagem.Habilidade h : com.danrod.dcuniverse.character.Cinto.equipadas(player, p)) {
             int restante = (int) Math.max(0, e.prontaEm(h.id()) - agora);
             int max = com.danrod.dcuniverse.ability.Cargas.max(h);
-            habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD, h.suprema(), player.isCreative() ? 0 : h.custo(), restante,
+            boolean semCusto = player.isCreative();
+            habs.add(new HabInfo(h.id(), h.modo() == Personagem.Modo.HOLD && com.danrod.dcuniverse.ability.Arvore.rajada(h) <= 0, h.suprema(), semCusto ? 0 : h.custo(), restante,
                 Math.round(h.recargaSeg() * 20), max == 0 ? -1 : player.isCreative() ? max : com.danrod.dcuniverse.ability.Cargas.atuais(player, h), max,
                 max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.faltam(player, h),
-                max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.ticksPorCarga(player, p, h), com.danrod.dcuniverse.combate.Combo.conjunto(h)));
+                max == 0 ? 0 : com.danrod.dcuniverse.ability.Cargas.ticksPorCarga(player, p, h),
+                com.danrod.dcuniverse.ability.Arvore.ativa(player, p) ? com.danrod.dcuniverse.combate.Combo.AMBOS : com.danrod.dcuniverse.combate.Combo.conjunto(h)));
         }
         int selecionada = e.selecionada();
         if (DemoHud.ativa(player)) {
@@ -916,9 +1098,10 @@ public final class Rede {
         }
         Personagem.Tipo planar = p.passiva("glide");
         boolean solar = p.energia().recargas().stream().anyMatch(r -> r.tipo().equals("sunlight"));
-        return new Sync(p.id().toString(), e.energia(), p.energia().max(), e.esgotado(), selecionada,
+        return new Sync(p.id().toString(), e.energia(), com.danrod.dcuniverse.ability.Arvore.energiaMax(player, p), e.esgotado(), selecionada,
             e.canalizando(), List.copyOf(habs), planar == null ? 0f : planar.params().f("speed", 10f), e.amortecendo(),
-            Recargas.porSegundo(player, p), solar, solar && Recargas.sobOSol(player), Voo.velocidade(p),
+            com.danrod.dcuniverse.energy.Energia.recargaAgora(player, p), solar, solar && Recargas.sobOSol(player),
+            com.danrod.dcuniverse.ability.Arvore.passivaLiberada(player, p, "flight") ? com.danrod.dcuniverse.ability.Arvore.velocidadeVoo(player, p) : 0f,
             p.passiva("flight") == null ? 0f : p.passiva("flight").params().f("dash_cost", 15f),
             Recargas.tecnologica(p), Recargas.tecnologica(p) && Recargas.naEstacao(player, p));
     }

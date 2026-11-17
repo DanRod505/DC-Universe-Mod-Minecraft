@@ -169,6 +169,11 @@ public final class Voador {
             meteoro(p);
             return;
         }
+        if (GiroVisual.mover(p)) return;
+        if (EscaladaVisual.mover(p)) {
+            vel = null;
+            return;
+        }
         if (!voando(p)) {
             vel = null;
             armado = true;
@@ -195,7 +200,9 @@ public final class Voador {
         Vec3 dir = p.getLookAngle().scale(frente).add(esquerda.scale(lado)).add(0, vertical, 0);
         Vec3 alvo = Vec3.ZERO;
         if (dir.lengthSqr() > 1e-6) {
-            boolean correndo = mc.options.keySprint.isDown() || p.isSprinting();
+            // Herói da árvore sem energia: o cruzeiro continua, o impulso não.
+            boolean semImpulso = EstadoCliente.temArvore() && !p.isCreative() && EstadoCliente.atual.energia() < 1f;
+            boolean correndo = (mc.options.keySprint.isDown() || p.isSprinting()) && !semImpulso;
             double v = frente > 0 ? (correndo ? max : max * CRUZEIRO) : max * CRUZEIRO * 0.6;
             alvo = dir.normalize().scale(v);
         }
@@ -611,7 +618,7 @@ public final class Voador {
     /** Pose de voo: deitado na direção do olhar, inclinado nas curvas e com o punho à frente em alta velocidade. */
     private static void pose(AvatarRenderState s) {
         Pose ps = POSES.get(s.id);
-        if (ps == null) return;
+        if (ps == null || EstadoCliente.GIROS.containsKey(s.id)) return;
         s.walkAnimationSpeed = 0;
         float giro = 0;
         if (ps.manobra == Voo.GIRO_ESQUERDA || ps.manobra == Voo.GIRO_DIREITA) {

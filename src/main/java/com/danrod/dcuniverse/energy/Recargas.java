@@ -65,7 +65,7 @@ public final class Recargas {
 
     /** Recarga total agora, em energia por segundo (regen da ficha + fontes ativas). */
     public static float porSegundo(Player player, com.danrod.dcuniverse.character.Personagem p) {
-        float total = p.energia().regen();
+        float total = com.danrod.dcuniverse.ability.Arvore.regen(player, p);
         for (var r : p.energia().recargas()) total += TIPOS.get(r.tipo()).porSegundo(player, r.params());
         return total;
     }

@@ -899,10 +899,16 @@ public final class GuiaScreen extends Screen {
         texto(out, Component.translatable(chave + ".exp").withStyle(ChatFormatting.ITALIC), SUAVE, 6);
         out.add(secao(topicos, "dcuniverse.guia.secao.ficha"));
         Personagem.Ficha f = p.ficha();
-        out.add(atributo("vida", f.vida(), FichaEscala.VIDA, fmt(f.vida())));
-        out.add(atributo("armadura", f.armadura(), FichaEscala.ARMADURA, fmt(f.armadura())));
+        // Herói da árvore: os status de base da árvore, sem as melhorias.
+        var arv = p.arvore();
+        double vida = arv == null || Float.isNaN(arv.valor("vida", 0)) ? f.vida() : arv.valor("vida", 0);
+        double armadura = arv == null || Float.isNaN(arv.valor("armadura", 0)) ? f.armadura() : arv.valor("armadura", 0);
+        out.add(atributo("vida", vida, FichaEscala.VIDA, fmt(vida)));
+        out.add(atributo("armadura", armadura, FichaEscala.ARMADURA, fmt(armadura)));
         out.add(atributo("dano", f.dano(), FichaEscala.DANO, fmt(f.dano())));
-        out.add(atributo("energia", p.energia().max(), FichaEscala.ENERGIA, fmt(p.energia().max())));
+        float emax = arv == null || Float.isNaN(arv.valor("energia", 0)) ? p.energia().max() : arv.valor("energia", 0);
+        float eregen = arv == null || Float.isNaN(arv.valor("recuperacao", 0)) ? p.energia().regen() : arv.valor("recuperacao", 0);
+        out.add(atributo("energia", emax, FichaEscala.ENERGIA, fmt(emax)));
         out.add(atributo("velocidade", f.terra(), FichaEscala.VELOCIDADE, fmt(f.terra())));
         Personagem.Tipo voo = p.passiva("flight");
         if (voo != null) out.add(atributo("voo", voo.params().d("speed", 12), FichaEscala.VOO, fmt(voo.params().d("speed", 12))));
@@ -911,7 +917,7 @@ public final class GuiaScreen extends Screen {
         texto(out, Component.translatable("dcuniverse.guia.ficha.unidades"), SUAVE, 0);
         out.add(espaco(4));
         out.add(secao(topicos, "dcuniverse.guia.secao.energia"));
-        out.add(item(Component.translatable("dcuniverse.guia.recarga.base", fmt(p.energia().regen()))));
+        out.add(item(Component.translatable("dcuniverse.guia.recarga.base", fmt(eregen))));
         for (Personagem.Tipo r : p.energia().recargas()) {
             out.add(item(Component.translatable("dcuniverse.guia.recarga." + r.tipo(), fmt(r.params().d("per_second", 0)))));
         }

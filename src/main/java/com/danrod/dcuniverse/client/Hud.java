@@ -104,8 +104,15 @@ public final class Hud {
         int cor = cor(mc);
         if (s.recarga() < 0) kryptonita(g, tempo);
         medalhao(g, mc, s, cor);
-        barra(g, mc.font, s, cor, pt, tempo);
-        espacos(g, mc.font, s, tempo);
+        if (EstadoCliente.temArvore()) {
+            // Árvore nova: a barra de energia comum, o nível com a experiência embaixo dela e os slots da build.
+            barra(g, mc.font, s, cor, pt, tempo);
+            nivel(g, mc.font, EstadoCliente.arvore, cor, tempo);
+            espacosArvore(g, mc.font, s, EstadoCliente.arvore, cor, tempo);
+        } else {
+            barra(g, mc.font, s, cor, pt, tempo);
+            espacos(g, mc.font, s, tempo);
+        }
         aviso(g, mc.font, pt);
     }
 
@@ -237,6 +244,89 @@ public final class Hud {
         g.text(font, taxa, tx, ty, s.recarga() < 0 ? verde : s.sol() ? 0xFFFFD84A : 0xFFB8C0D0, true);
         if (s.solar()) g.blit(RenderPipelines.GUI_TEXTURED, TEX, tx - 13, ty - 2, s.sol() ? 120 : 132, 32, 11, 11, TW, TH);
         else if (s.tecnologica()) g.blit(RenderPipelines.GUI_TEXTURED, TEX, tx - 13, ty - 2, s.estacao() ? 176 : 188, 32, 11, 11, TW, TH);
+    }
+
+    /**
+     * Nível do herói na linha do nome (à direita) e a experiência num filete dourado logo abaixo da barra de energia,
+     * com um brilho que corre pela parte ganha.
+     */
+    private static void nivel(GuiGraphicsExtractor g, Font font, Rede.ArvoreSync a, int cor, float tempo) {
+        int faixa = Math.max(1, a.xpProximo() - a.xpNivel());
+        boolean max = a.nivel() >= com.danrod.dcuniverse.ability.Arvore.NIVEL_MAX;
+        float k = max ? 1f : Mth.clamp((a.xp() - a.xpNivel()) / (float) faixa, 0f, 1f);
+        Component nivel = Component.translatable("dcuniverse.hud.nivel", a.nivel()).withStyle(ChatFormatting.BOLD);
+        g.text(font, nivel, BX + 124 - font.width(nivel), Y0 + 2, 0xFFFFE08A, true);
+        int fx = BX + 3, fy = BY + 12, fw = MIOLO_W;
+        g.fill(fx, fy, fx + fw, fy + 2, 0xC00E1220);
+        int w = Math.round(fw * k);
+        if (w > 0) g.fillGradient(fx, fy, fx + w, fy + 2, 0xFFFFE6A0, 0xFFC89A30);
+        if (w > 2) {
+            int bx = fx + Math.round(((tempo * 1.5f) % (w + 20)) - 10);
+            for (int i = -3; i <= 3; i++) {
+                int x = bx + i;
+                if (x >= fx && x < fx + w) g.fill(x, fy, x + 1, fy + 2, ((0xC0 - Math.abs(i) * 0x30) << 24) | 0xFFFFFF);
+            }
+        }
+    }
+
+    /**
+     * Os slots abertos da build, cada um com a tecla embaixo (vazios ficam apagados). Embaixo, a dica discreta da tecla da
+     * árvore, que acende quando há pontos para gastar ou a habilidade inicial para escolher.
+     */
+    private static void espacosArvore(GuiGraphicsExtractor g, Font font, Rede.Sync s, Rede.ArvoreSync a, int cor, float tempo) {
+        List<Rede.HabInfo> habs = s.habilidades();
+        int x = X0, y = ESPACOS_Y;
+        int sel = habs.isEmpty() ? -1 : Math.min(s.selecionada(), habs.size() - 1);
+        for (int slot = 0; slot < a.slotsAbertos() && slot < com.danrod.dcuniverse.ability.Arvore.SLOTS; slot++) {
+            int i = Atalhos.indice(slot);
+            Rede.HabInfo h = i >= 0 ? habs.get(i) : null;
+            if (h == null) {
+                g.blit(RenderPipelines.GUI_TEXTURED, TEX, x, y, 0, 32, 22, 22, TW, TH, 0x70FFFFFF);
+            } else {
+                g.blit(RenderPipelines.GUI_TEXTURED, TEX, x, y, i == sel ? 22 : 0, 32, 22, 22, TW, TH);
+                int ix = x + 3, iy = y + 3;
+                boolean pronta = pronta(s, h);
+                int rest = restante(h);
+                int tinta = pronta ? 0xFFFFFFFF : rest > 0 ? 0xFF707070 : 0xFFB06060;
+                Identifier icone = Identifier.fromNamespaceAndPath(DCUniverse.MODID, "textures/gui/ability/" + h.id() + ".png");
+                g.blit(RenderPipelines.GUI_TEXTURED, icone, ix, iy, 0, 0, 16, 16, 32, 32, 32, 32, tinta);
+                if (rest > 0 && h.recargaTotal() > 0) {
+                    int alt = Mth.ceil(16f * Math.min(1f, rest / (float) h.recargaTotal()));
+                    g.fill(ix, iy + 16 - alt, ix + 16, iy + 16, 0x90000000);
+                    String seg = Integer.toString((rest + 19) / 20);
+                    g.text(font, seg, ix + 8 - font.width(seg) / 2 + 1, iy + 4, 0xFFFFFFFF, true);
+                }
+                // Ligada agora (o voo no ar, o raio segurado): um filete na cor do herói embaixo.
+                boolean ligada = h.id().equals(s.canalizando());
+                if (ligada) g.fill(ix, iy + 17, ix + 16, iy + 18, 0xFF000000 | clarear(cor, 0.35f));
+            }
+            String tecla = Atalhos.tecla(slot).getTranslatedKeyMessage().getString();
+            if (tecla.length() > 3) tecla = tecla.substring(0, 3);
+            pequeno(g, font, Component.literal(tecla), x + 11 - Math.round(font.width(tecla) * 0.75f / 2), y + 23, h == null ? 0x80C8D0E0 : 0xFFC8D0E0);
+            x += 24;
+        }
+        if (sel >= 0 && Atalhos.atalhoDe(sel) >= 0) g.text(font, nome(habs.get(sel)), x + 2, y + 7, 0xFFE8ECF4, true);
+        // Dica da árvore: discreta sempre; com algo a fazer, pulsa dourada.
+        boolean chama = a.pontos() > 0 && !a.criativo();
+        Component tecla = Teclas.ARVORE.getTranslatedKeyMessage();
+        Component dica = a.pontos() > 0 && !a.criativo() ? Component.translatable("dcuniverse.hud.arvore.pontos", tecla, a.pontos())
+            : Component.translatable("dcuniverse.hud.arvore", tecla);
+        int dy = y + 33;
+        int corDica = 0xA0B8C0D0;
+        if (chama) {
+            int b = Math.round(160 + 95 * (0.5f + 0.5f * Mth.sin(tempo * 0.18f)));
+            corDica = (b << 24) | 0xFFD84A;
+            g.fill(X0, dy - 2, X0 + 2, dy + 7, (b << 24) | 0xFFD84A);
+        }
+        pequeno(g, font, dica, X0 + (chama ? 4 : 1), dy, corDica);
+    }
+
+    private static void pequeno(GuiGraphicsExtractor g, Font font, Component c, int x, int y, int cor) {
+        g.pose().pushMatrix();
+        g.pose().translate(x, y);
+        g.pose().scale(0.75f, 0.75f);
+        g.text(font, c, 0, 0, cor, true);
+        g.pose().popMatrix();
     }
 
     /** Kryptonita por perto (a recarga fica negativa): bordas da tela num verde doente que pulsa devagar. */

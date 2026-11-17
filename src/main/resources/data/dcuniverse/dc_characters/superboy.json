@@ -5,33 +5,47 @@
   "color": "#E3262E",
   "scale": 0.95,
   "stats": { "vida": 30, "armadura": 18, "dano": 8, "terra": 6.2 },
-  "energy": {
-    "max": 250,
-    "regen": 1.4,
-    "recharge": [
-      { "type": "sunlight", "per_second": 2.6 },
-      { "type": "kryptonite", "per_second": -12.0, "ore_radius": 6, "block_radius": 10 }
-    ]
-  },
-  "suit": [ "chest", "legs", "feet" ],
+  "energy": { "max": 250, "regen": 1.4, "recharge": [{ "type": "sunlight", "per_second": 2.6 }, { "type": "kryptonite", "per_second": -12.0, "ore_radius": 6, "block_radius": 10 }] },
+  "suit": ["chest", "legs", "feet"],
   "passives": [
-    { "type": "flight", "speed": 46, "drain": 0.6, "boost_drain": 3, "dash_cost": 15,
-      "trail_color": "#E3262E", "trail_color2": "#3A7BFF", "trail_color3": "#D0D8E8" },
+    { "type": "flight", "speed": 46, "drain": 0.6, "boost_drain": 3, "dash_cost": 15, "trail_color": "#E3262E", "trail_color2": "#3A7BFF", "trail_color3": "#D0D8E8" },
     { "type": "fall_immunity" },
     { "type": "fire_immunity" },
     { "type": "super_strength", "speed": 10, "max_hardness": 30 },
     { "type": "projectile_resistance", "max_damage": 8 },
     { "type": "super_jump", "power": 2.2, "charge": 1.0 }
   ],
+  "combo": {
+    "lunge": 6,
+    "stance": "superman.postura",
+    "hits": [
+      { "anim": "superman.jab", "impact": 0.08, "recover": 0.16, "window": 0.6, "damage_mult": 0.2, "reach": 3.4, "arc": 80, "knockback": 0.3, "fx": "light" },
+      { "anim": "superman.direto", "impact": 0.1, "recover": 0.21, "window": 0.65, "damage_mult": 0.28, "reach": 3.4, "arc": 80, "knockback": 0.45, "fx": "light" },
+      { "anim": "superman.chute", "impact": 0.27, "recover": 0.4, "window": 0.75, "damage_mult": 0.35, "reach": 3.6, "arc": 140, "knockback": 0.9, "fx": "medium" },
+      { "anim": "superman.gancho", "impact": 0.15, "recover": 0.3, "window": 0.75, "damage_mult": 0.35, "reach": 3.4, "arc": 80, "knockback": 0.3, "launch": 0.7, "fx": "medium" },
+      { "anim": "superman.martelo", "impact": 0.42, "recover": 0.75, "window": 0.6, "damage_mult": 0.8, "reach": 3.8, "arc": 120, "knockback": 2.0, "launch": 0.5, "radius": 3.0, "stun": 1.2, "fx": "shockwave" }
+    ],
+    "heavy": { "charge_anim": "superman.carga", "charge": 1.0, "min_power": 0.35, "anim": "superman.soco_carregado", "impact": 0.08, "recover": 0.45, "window": 0.4, "damage_mult": 1.4, "reach": 4.0, "arc": 70, "knockback": 3.4, "launch": 0.3, "fx": "heavy" },
+    "guard": { "anim": "superman.defesa", "parry_anim": "superman.aparo", "parry": 0.3, "reduction": 0.75, "parry_stun": 1.5, "parry_knockback": 1.4, "arc": 200 }
+  },
+  "skill_tree": {
+    "stats": { "energy": [90, 160, 230, 300], "health": [10, 15, 20, 28], "regen": [2, 2.8, 3.6, 4.4], "armor": [10, 14, 18, 22], "flight_speed": [46, 52, 58], "boost_drain": [8, 6.5, 5] },
+    "starters": ["telecinese_tatil", "pisao_sismico", "furia_de_rochas"],
+    "abilities": [
+      { "id": "telecinese_tatil", "cost": 1 },
+      { "id": "pisao_sismico", "cost": 1 },
+      { "id": "furia_de_rochas", "cost": 2 },
+      { "id": "escudo_telecinetico", "cost": 2 },
+      { "id": "escalada_sismica", "cost": 3 },
+      { "id": "ilha_telecinetica", "cost": 3 }
+    ]
+  },
   "abilities": [
-    { "id": "telecinese_tatil", "type": "telekinesis", "cost": 15, "cooldown": 3,
-      "range": 20, "radius": 1, "depth": 2, "max_blocks": 18, "max_hardness": 30,
-      "damage_mult": 0.6, "throw_speed": 2.2, "hold": 30 },
-    { "id": "pisao_sismico", "type": "area_blast", "cost": 28, "cooldown": 6,
-      "radius": 8, "damage_mult": 0.8, "knockback": 1.3, "launch": 0.8, "stun": 1.5, "spread_ticks": 10 },
-    { "id": "escudo_telecinetico", "type": "tk_shield", "cost": 35, "cooldown": 14,
-      "duration": 10, "shield_radius": 2.6, "reduction": 0.75, "push": 0.5 },
-    { "id": "ilha_telecinetica", "type": "floating_island", "supreme": true, "cost_pct": 75, "cooldown": 160,
-      "range": 24, "radius": 5, "depth": 5, "duration": 150, "speed": 8, "max_blocks": 420 }
+    { "id": "telecinese_tatil", "type": "telekinesis", "cost": 15, "cooldown": 3, "range": 20, "radius": 1, "depth": 2, "max_blocks": 18, "max_hardness": 30, "damage_mult": 0.6, "throw_speed": 2.2, "hold": 30 },
+    { "id": "pisao_sismico", "type": "area_blast", "cost": 28, "cooldown": 6, "radius": 8, "damage_mult": 0.8, "knockback": 1.3, "launch": 0.8, "stun": 1.5, "spread_ticks": 10 },
+    { "id": "escudo_telecinetico", "type": "tk_shield", "cost": 35, "cooldown": 14, "duration": 10, "shield_radius": 2.6, "reduction": 0.75, "push": 0.5 },
+    { "id": "furia_de_rochas", "type": "rock_combo", "cost": 30, "cooldown": 6, "anim": "superboy.rochas", "windup": 0.4, "hit1": 0.45, "hit2": 0.85, "hit3": 1.3, "damage_mult": 1.0, "final_damage_mult": 1.6, "knockback": 1.0, "final_knockback": 1.8, "throw_speed": 2.4, "range": 18 },
+    { "id": "escalada_sismica", "type": "platform_leap", "cost": 40, "cooldown": 9, "anim": "superboy.escalada", "windup": 0.45, "rise": 0.7, "jump": 0.5, "pause": 0.2, "dive": 0.6, "spacing": 3.6, "first_height": 2.5, "step": 1.8, "dive_reach": 4, "radius": 6.5, "damage_mult": 2.0, "knockback": 2.2, "launch": 0.9, "stun": 1.5, "spread_ticks": 7 },
+    { "id": "ilha_telecinetica", "type": "floating_island", "cooldown": 30, "range": 24, "radius": 5, "depth": 5, "duration": 150, "speed": 8, "max_blocks": 420, "cost": 80 }
   ]
 }

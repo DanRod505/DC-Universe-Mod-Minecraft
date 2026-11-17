@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Plano 2 (ação, aventura e RPG): valida docs/plano/dados/*.json e gera os .md e a página do plano.
 
-Fonte única: edite os JSON (e docs/plano/VISAO.md, escrito à mão) e rode este script.
+Fonte única: edite os JSON (e docs/plano/VISAO.md e HABILIDADES.md, escritos à mão) e rode este script.
 Gera docs/plano/{ELENCO,MUNDO,SISTEMAS,RPG,ROTEIRO}.md e docs/plano/site/index.html.
 Sai com código 1 se os dados tiverem erro (elenco, pacotes, referências, etapas, roteiro).
 """
@@ -18,11 +18,11 @@ CATALOGO = RAIZ / "docs/dados/personagens.json"
 MODELO = Path(__file__).resolve().parent / "modelo_plano.html"
 
 CATS = {"heroi": "Herói", "vilao": "Vilão", "anti": "Anti-herói"}
-PAPEIS = ["mobilidade", "controle", "dano", "utilidade"]
 TIPOS_LOCAL = {"cidade": "Cidade", "reino": "Reino", "base": "Base", "masmorra": "Masmorra"}
 BASE_TAM = 24
 PACOTE_TAM = 4
 MAX_ETAPAS = 7
+HAB_A_DEFINIR = "a definir pelo Dalton (o balanceamento é feito junto)."
 
 
 def ler(nome):
@@ -67,21 +67,14 @@ def validar(d):
             erros.append(f"{nome}: origem '{c['origem']}' não é um local")
         if c["n"] not in d["catalogo"]:
             erros.append(f"{nome}: n={c['n']} fora do catálogo de 100")
-        papeis = sorted(h["papel"] for h in c["habilidades"])
-        if papeis != sorted(PAPEIS):
-            erros.append(f"{nome}: as 4 habilidades devem ter um papel cada ({', '.join(PAPEIS)}); tem {papeis}")
-        for h in c["habilidades"]:
-            if not h.get("coreografia"):
-                erros.append(f"{nome}: habilidade '{h['nome']}' sem coreografia")
-        if len(c["arvore"]) != 3:
-            erros.append(f"{nome}: a árvore precisa de 3 ramos")
+        # Habilidades e melhorias: quem define é o Dalton (sistema de 16/11/2026, HABILIDADES.md).
+        # Os campos antigos (habilidades, árvore, suprema...) ficam só como ideias de referência.
+        if "suprema" in c or "recurso" in c:
+            erros.append(f"{nome}: suprema e recurso (energia) saíram do jogo; guarde ideias antigas em 'ideias'")
         if len(c["trajes"]) != 3:
             erros.append(f"{nome}: o jogo base tem 3 trajes por personagem")
-        for campo in ("lore", "recurso", "combo", "defesa", "unica"):
-            if not c.get(campo):
-                erros.append(f"{nome}: falta '{campo}'")
-        if not c.get("suprema", {}).get("cena"):
-            erros.append(f"{nome}: suprema sem cena")
+        if not c.get("lore"):
+            erros.append(f"{nome}: falta 'lore'")
     # Catálogo: base + pacotes cobrem os 100, sem repetir.
     base_n = {c["n"] for c in elenco}
     vistos = {}
@@ -179,7 +172,7 @@ def montar_roteiro(d):
                 estreia_arq[c["arquetipo"]] = v["v"]
                 et.append(f"Base de animações do arquétipo {arq[c['arquetipo']]['nome']}")
             et.append("Skin, rosto expressivo e animações próprias")
-            et.append("Kit completo, suprema cinematográfica e trajes")
+            et.append("Árvore de habilidades definida pelo Dalton, com melhorias, e trajes")
             if v.get("sistema_extra"):
                 et.append(v["sistema_extra"])
             if ref in chefes:
@@ -226,6 +219,7 @@ def md_elenco(d, versoes):
     estreia = {v["ref"]: v["v"] for v in versoes if v["tipo"] == "personagem"}
     out = ["# Elenco", "", "Gerado por `tools/plano.py` a partir de `docs/plano/dados/elenco.json`, `arquetipos.json` e `pacotes.json`.", "",
            f"Jogo base: **{len(d['elenco'])} personagens**. Depois: **{len(d['pacotes'])} pacotes de {PACOTE_TAM}**, que completam o catálogo de {len(d['catalogo'])}.", "",
+           "As habilidades de cada personagem e as melhorias delas são definidas pelo Dalton, no sistema descrito em [HABILIDADES.md](HABILIDADES.md).", "",
            "## Arquétipos de luta", "", "| Arquétipo | Estilo | Personagens do jogo base |", "|---|---|---|"]
     for a in d["arquetipos"]:
         quem = ", ".join(c["nome"] for c in d["elenco"] if c["arquetipo"] == a["id"])
@@ -235,14 +229,12 @@ def md_elenco(d, versoes):
         out.append(f"| {c['nome']} | {CATS[c['cat']]} | {arq[c['arquetipo']]['nome']} | {locais[c['origem']]} | v{estreia.get(c['id'], '?')} |")
     for c in d["elenco"]:
         out += ["", f"### {c['nome']} ({c['civil']})", "", f"*{CATS[c['cat']]} · {arq[c['arquetipo']]['nome']} · {locais[c['origem']]} · estreia na v{estreia.get(c['id'], '?')}*", "",
-                c["lore"], "", f"- **Recurso:** {c['recurso']}", f"- **Travessia:** {'; '.join(c['travessia'])}", f"- **Combo:** {c['combo']}", "",
-                "| Habilidade | Papel | O que faz | Coreografia | No mundo |", "|---|---|---|---|---|"]
-        for h in c["habilidades"]:
-            out.append(f"| {h['nome']} | {h['papel']} | {h['desc']} | {h['coreografia']} | {h.get('mundo', '')} |")
-        out += ["", f"- **Defesa:** {c['defesa']}", f"- **Mecânica única:** {c['unica']}",
-                f"- **Suprema, {c['suprema']['nome']}:** {c['suprema']['cena']}",
-                "- **Árvore:** " + " · ".join(f"*{r}*: {', '.join(i)}" for r, i in c["arvore"].items()),
-                f"- **Trajes:** {', '.join(c['trajes'])}"]
+                c["lore"], "", f"- **Habilidades e melhorias:** {HAB_A_DEFINIR}", f"- **Trajes:** {', '.join(c['trajes'])}"]
+        i = c.get("ideias")
+        if i:
+            out.append("- **Ideias antigas (só referência, não são o kit):** " + "; ".join(
+                [f"habilidades: {', '.join(i['habilidades'])}", f"travessia: {', '.join(i['travessia'])}"]
+                + [f"{r}: {', '.join(x)}" for r, x in i["arvore"].items()]))
     out += ["", "## Pacotes de personagens", "", "| Versão | Pacote | Personagens | Extra |", "|---|---|---|---|"]
     vers = {v["ref"]: v["v"] for v in versoes if v["tipo"] == "pacote"}
     for p in d["pacotes"]:
@@ -378,12 +370,14 @@ def gerar_site(d, versoes):
     visao = (PLANO / "VISAO.md").read_text(encoding="utf-8")
     visao = visao.split("\n", 1)[1]  # o título vira o cabeçalho da página
     visao = re.sub(r"Os outros documentos do plano.*?\n\n(- .*\n)+", "", visao, flags=re.S)
+    hab = (PLANO / "HABILIDADES.md").read_text(encoding="utf-8").split("\n", 1)[1]
     dados = {k: d[k] for k in ("arquetipos", "elenco", "pacotes", "mundo", "rpg", "sistemas")}
+    dados["hab_a_definir"] = HAB_A_DEFINIR
     dados["fases"] = d["roteiro"]["fases"]
     dados["versoes"] = versoes
     dados["catalogo"] = {n: {"nome": p["nome"], "cat": p["cat"], "supremo": p["supremo"]["nome"]} for n, p in d["catalogo"].items()}
     js = json.dumps(dados, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    pagina = MODELO.read_text(encoding="utf-8").replace("/*DADOS*/null", js).replace("<!--VISAO-->", md_para_html(visao))
+    pagina = MODELO.read_text(encoding="utf-8").replace("/*DADOS*/null", js).replace("<!--VISAO-->", md_para_html(visao)).replace("<!--HABILIDADES-->", md_para_html(hab))
     (PLANO / "site").mkdir(parents=True, exist_ok=True)
     (PLANO / "site/index.html").write_text(pagina, encoding="utf-8")
 

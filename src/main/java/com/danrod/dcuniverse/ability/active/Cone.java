@@ -59,9 +59,12 @@ public final class Cone implements TipoHabilidade {
                     // Lava parada vira obsidiana; correnteza vira pedregulho (como água em cima de lava).
                     level.setBlockAndUpdate(pos, (st.getFluidState().isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE).defaultBlockState());
                     level.levelEvent(1501, pos, 0);
+                    // Vapor subindo da lava que virou pedra.
+                    level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 6, 0.3, 0.1, 0.3, 0.03);
+                    level.sendParticles(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 4, 0.35, 0.1, 0.35, 0.02);
                 } else if (st.getFluidState().is(Fluids.WATER) && st.is(Blocks.WATER) && level.getBlockState(pos.above()).isAir()) {
                     level.setBlockAndUpdate(pos, Blocks.FROSTED_ICE.defaultBlockState());
-                    level.scheduleTick(pos, Blocks.FROSTED_ICE, 200 + level.getRandom().nextInt(100));
+                    level.scheduleTick(pos, Blocks.FROSTED_ICE, 500 + level.getRandom().nextInt(200));
                 }
             }
         }

@@ -134,7 +134,7 @@ public final class NaveKryptonianaRenderer extends EntityRenderer<NaveKryptonian
         if (s.escudoAtivo && s.escudo > 0) escudo(s, ps, col, t);
         if (s.canhao > 0) {
             float comp = s.canhao;
-            col.submitCustomGeometry(ps, Luz.tipo(), (pose, buf) -> feixe(pose.pose(), buf, comp, t));
+            Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> feixe(pose.pose(), buf, comp, t));
         }
         ps.popPose();
         super.submit(s, ps, col, cam);

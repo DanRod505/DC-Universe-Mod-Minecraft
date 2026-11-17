@@ -10,16 +10,17 @@ Gerado por `tools/plano.py` a partir de `docs/plano/dados/rpg.json`.
 | Poder | Dano e alcance das habilidades. |
 | Defesa | Redução de dano e resistência a cambalear. |
 | Vitalidade | Vida máxima e regeneração. |
-| Energia | Tamanho e recarga do recurso do personagem. |
 | Agilidade | Velocidade de ataque, janela de esquiva e de aparar. |
 
 ## Progressão
 
-- Cada personagem tem nível próprio, de 1 a 30, ganho lutando, completando missões, atividades e desafios.
-- Cada nível dá 1 ponto de habilidade para a árvore do personagem (3 ramos, com melhorias e golpes novos).
+- Cada personagem tem nível próprio (o máximo e a curva ficam para o balanceamento), ganho lutando, completando missões, atividades e desafios.
+- Cada nível dá pontos de habilidade para a árvore do personagem. Habilidades custam de 1 a 3 pontos, cada melhoria tem o próprio custo, e o que foi comprado é para sempre (detalhes em HABILIDADES.md).
+- O custo total da árvore passa dos pontos de uma campanha, para as escolhas importarem.
+- Mais slots de habilidade abrem com o nível: começa com 1 e chega a 6 (teclas Z, X, C, V, B e R).
 - Os atributos sobem com o nível conforme o arquétipo, e o equipamento dá o resto.
 - Nível da Liga (conta): soma dos níveis de todos os personagens. Ele destrava trajes, áreas e a dificuldade Lenda.
-- Nada se perde ao trocar de personagem: cada um guarda o próprio nível, a árvore, os trajes e o equipamento.
+- Nada se perde ao trocar de personagem: cada um guarda o próprio nível, a árvore, as builds, os trajes e o equipamento.
 
 ## Equipamento
 

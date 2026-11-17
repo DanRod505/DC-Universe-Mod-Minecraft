@@ -29,16 +29,42 @@ from skin_npcs import (Anel, Cabelo, LUZ_FACE, Npc, PELES, PRATA, SOLA, botas, b
 
 # ---------------------------------------------------------------- paleta da Supergirl
 
-AZUL_SG = hexa("#2557D2")
-AZUL_SG_ESC = hexa("#10296E")
-VERM_SG = hexa("#D9262F")          # um pouco mais vivo que o do Superman (#C61F2B)
-VERM_SG_ESC = hexa("#741019")
+AZUL_SG = hexa("#2D58B4")          # azul texturizado do traje, um pouco mais sóbrio
+AZUL_SG_ESC = hexa("#122B66")
+VERM_SG = hexa("#C8222E")          # vermelho-carmim da saia, das botas e da capa
+VERM_SG_ESC = hexa("#63101A")
+COSTURA_SG = hexa("#5A7FD0")
 OURO_SG = hexa("#F6C232")
 OURO_SG_CLARO = hexa("#FFEB9A")
 OURO_SG_ESC = hexa("#9A6A12")
 CONTORNO_SG = hexa("#2A070B")
 OLHO_SG = hexa("#3A86E6")
-CABELO_SG = Cabelo("#E6C063", "#FFF2B8", "#A9802F", semente=88)
+CABELO_SG = Cabelo("#E2BC62", "#FFF0B4", "#9C7429", semente=88)
+
+
+def onda(x, y, fase=0.0):
+    """Cabelo ondulado: faixas de luz e sombra que serpenteiam pela mecha (em S, deslocadas por coluna)."""
+    return 0.15 * math.sin((y + 1.8 * math.sin(x * 0.75 + fase)) * 0.95 + x * 0.35)
+
+
+def costura_sg(p, pontos):
+    """Costura em relevo dos painéis do traje azul: fio claro com a sombra logo embaixo."""
+    for x, y in pontos:
+        if 0 <= x < p.w and 0 <= y < p.h:
+            p.mix(x, y, COSTURA_SG, 0.55)
+            if (x, y + 1) not in pontos:
+                p.mix(x, y + 1, AZUL_SG_ESC, 0.45)
+
+
+def reta(x0, y0, x1, y1):
+    n = max(abs(x1 - x0), abs(y1 - y0), 1)
+    return {(round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n)) for i in range(n + 1)}
+
+
+def cinto_v(lx):
+    """Cinto dourado em V na frente: (linha de cima, linha de baixo) na coluna lx."""
+    d = abs(lx - 7.5)
+    return 15 + (1 if d < 2 else 0), 17 + max(0, round(2.2 - 0.6 * d))
 
 # Escudo menor (10 de largura em vez de 12) para o tronco mais estreito.
 ESCUDO_SG = [
@@ -124,7 +150,7 @@ def sg_cabelo(n):
                         c = mistura(c, cab.claro, 0.18)
                     if x in (0, 15) or y >= fim:
                         c = tom(c, -0.06)
-                tr.p(x, y, tom(c, -0.02 - 0.12 * y / 15))
+                tr.p(x, y, tom(c, -0.02 - 0.12 * y / 15 + onda(x, y)))
         cima = n.face(camada, "cima")
         for y in range(4, 8):
             for x in range(16):
@@ -137,12 +163,14 @@ def sg_cabelo(n):
                     s.p(x, y, tom(fio(cab, x + 70, y + 16), -0.10 - 0.06 * y / 9))
     # mechas na frente dos ombros (só na segunda camada, para não cobrir o brasão)
     jf = n.face("jaqueta", "frente")
-    for x, y1 in ((0, 6), (1, 3), (15, 6), (14, 3)):
+    for x, y1 in ((0, 11), (1, 9), (2, 4), (15, 11), (14, 9), (13, 4)):
         for y in range(0, y1):
             c = fio(cab, x + 16, y + 16)
             if x in (1, 14):
                 c = tom(c, -0.08)
-            jf.p(x, y, tom(c, 0.03 - 0.12 * y / 6))
+            if y == y1 - 1:
+                c = tom(c, -0.14)
+            jf.p(x, y, tom(c, 0.03 - 0.12 * y / 11 + onda(x, y, 1.3)))
 
 
 def sg_tronco(n, rnd):
@@ -184,31 +212,36 @@ def sg_tronco(n, rnd):
             hx = altura(BUSTO, px + 0.5, py) - altura(BUSTO, px - 0.5, py)
             hy = altura(BUSTO, px, py + 0.5) - altura(BUSTO, px, py - 0.5)
             p.m(px, py, -0.45 * (0.5 * hx + hy) + 0.04 * altura(BUSTO, px, py))
-    # cinto dourado com fivela e saia vermelha pregueada (rodando o tronco, nas duas camadas)
-    saia = pregas(VERM_SG)
+    # painéis do traje: costuras da cava, das costelas e das laterais (o traje texturizado das referências)
+    costura_sg(c, reta(0, 3, 2, 1) | reta(15, 3, 13, 1) | reta(1, 11, 4, 14) | reta(14, 11, 11, 14))
+    costura_sg(c, reta(4, 14, 6, 15) | reta(11, 14, 9, 15))
+    costura_sg(tr, reta(0, 4, 5, 11) | reta(15, 4, 10, 11))
+    # saia vermelha pregueada embaixo e o cinto dourado largo em V por cima (nas duas camadas)
+    saia = pregas(tom(VERM_SG, -0.06))
     for camada in ("corpo", "jaqueta"):
         A = Anel(n.t, camada)
         for x in range(A.W):
             face, lx, lw = A.qual(x)
             luz = LUZ_FACE[face]
-            A.p(x, 18, tom(OURO_SG, 0.16 + luz)); A.p(x, 19, tom(OURO_SG, -0.18 + luz))
-            if lx % 4 == 2:
-                A.p(x, 18, tom(OURO_SG_CLARO, luz))
-            for y in range(20, 24):
+            c0, c1 = cinto_v(lx) if face == "frente" else (15, 17)
+            for y in range(c1 + 1, 24):
                 s = luz + 0.06 - 0.10 * (y - 20) / 3 - (0.04 if lx in (0, lw - 1) else 0)
                 c = saia(x, y)
-                if camada == "jaqueta" and y == 20:
-                    c = tom(c, 0.08)
+                if y == c1 + 1:
+                    c = tom(c, -0.22)
                 A.p(x, y, tom(c, s))
+            for y in range(c0, c1 + 1):
+                if y == c0:
+                    cor = tom(OURO_SG_CLARO, luz - 0.05)
+                elif y == c1:
+                    cor = tom(OURO_SG_ESC, luz + 0.10)
+                else:
+                    cor = tom(OURO_SG, luz + 0.10 - 0.12 * (y - c0) / max(1, c1 - c0))
+                if face == "frente" and lx in (7, 8) and c0 < y < c1:
+                    cor = tom(OURO_SG_CLARO, 0.0 if lx == 7 else -0.15)   # vinco do V
+                A.p(x, y, cor)
             if camada == "corpo":
-                A.m(x, 17, -0.25)
-    for camada in ("corpo", "jaqueta"):
-        p = n.face(camada, "frente")
-        p.ret(6, 17, 4, 4, OURO_SG_ESC)
-        p.ret(7, 17, 2, 4, OURO_SG)
-        p.p(7, 18, OURO_SG_CLARO); p.p(8, 19, tom(OURO_SG, -0.12))
-        for x, y in ((6, 17), (9, 17), (6, 20), (9, 20)):
-            p.p(x, y, CONTORNO_SG)
+                A.m(x, c0 - 1, -0.25)
     # presilhas da capa nos ombros (costas e topo) e a gola alta do traje
     for camada in ("corpo", "jaqueta"):
         tr = n.face(camada, "tras")
@@ -241,6 +274,8 @@ def sg_bracos(n, rnd, pele):
             for x in range(p.w):
                 p.m(x, 5, -0.12 if x in (0, p.w - 1) else -0.06)
         f.m(2, 9, 0.08); f.m(3, 9, 0.08)  # bíceps fino
+        for face in ("frente", "tras", externo):
+            costura_sg(n.face(parte, face), reta(0, 5, 2, 6) | reta(3, 6, 5, 5))
         for x in range(w):  # dobra do cotovelo
             f.m(x, 11, -0.14 if 1 <= x <= 4 else -0.06)
         tr = n.face(parte, "tras")
@@ -254,11 +289,9 @@ def sg_bracos(n, rnd, pele):
         for x in range(A.W):
             face, lx, lw = A.qual(x)
             luz = LUZ_FACE[face]
-            for y, sv in ((16, 0.04), (17, -0.04), (18, -0.14)):
-                A.p(x, y, tom(AZUL_SG_ESC, sv + 0.22 + luz))
-            A.m(x, 15, -0.12)
-            M.p(x, 16, tom(OURO_SG, 0.10 + luz)); M.p(x, 17, tom(AZUL_SG, 0.02 + luz))
-            M.p(x, 18, tom(AZUL_SG_ESC, 0.10 + luz))
+            # punho justo do traje até o pulso, com a borda pegando luz
+            A.p(x, 18, tom(AZUL_SG, -0.18 + luz))
+            M.p(x, 18, tom(AZUL_SG, 0.04 + luz))
             for y in range(19, 24):
                 c = tom(pele, LUZ_FACE[face] * 0.8 + (ruido(x, y, 6) - 0.5) * 0.03 - (0.06 if y == 19 else 0))
                 if lx in (0, lw - 1):
@@ -284,26 +317,23 @@ def sg_bracos(n, rnd, pele):
             b.p(x, 5, tom(pele, -0.16))
 
 
-def sg_pernas(n, rnd):
-    saia = pregas(VERM_SG)
+def sg_pernas(n, rnd, pele):
+    """Saia pregueada no alto da coxa, a pele da coxa à mostra e as botas vermelhas até a coxa,
+    com a boca em V na frente debruada de dourado."""
+    saia = pregas(tom(VERM_SG, -0.06))
     for lado in ("d", "e"):
         parte = "perna_" + lado
-        for face in ("frente", "tras", "dir", "esq"):
-            relevo(n.face(parte, face), AZUL_SG, [], rnd=rnd)
+        externo = "dir" if lado == "d" else "esq"
+        L = n.anel(parte)
+        C = n.anel("calca_" + lado)
+        # pele da coxa (a peça da saia cobre o alto)
+        pintar(L, lambda x, y: tom(pele, (ruido(x, y, 31) - 0.5) * 0.03), topo=0.04, base=0.06, borda=0.05)
         relevo(n.face(parte, "cima"), VERM_SG_ESC, [], luz_topo=0, sombra_base=0, escamas=False, rnd=rnd)
         f = n.face(parte, "frente")
         mir = (lambda x: x) if lado == "d" else (lambda x: 7 - x)
-        # coxa e joelho na meia azul
-        for y in range(7, 10):
-            f.m(mir(2), y, 0.07)
-        f.m(3, 10, 0.10); f.m(4, 10, 0.10); f.m(2, 11, -0.10); f.m(5, 11, -0.10)
-        tr = n.face(parte, "tras")
-        for x in range(8):
-            tr.m(x, 7, -0.12)
-        L = n.anel(parte)
-        C = n.anel("calca_" + lado)
-        # saia só na camada de baixo (a peça 3D do anel da saia, supergirl_pecas.png, fica por cima):
-        # pregas com a barra irregular e uma sombra na coxa logo abaixo
+        for y in range(5, 12):
+            f.m(mir(2), y, 0.06); f.m(mir(6), y, -0.07)
+        # saia só na camada de baixo, com a sombra que ela faz na coxa
         for x in range(L.W):
             face, lx, lw = L.qual(x)
             luz = LUZ_FACE[face]
@@ -313,16 +343,15 @@ def sg_pernas(n, rnd):
                 if y == fim:
                     c = tom(c, -0.14)
                 L.p(x, y, tom(c, luz + 0.02 - 0.08 * y / 5 - (0.04 if lx in (0, lw - 1) else 0)))
-            L.m(x, fim + 1, -0.26); L.m(x, fim + 2, -0.10)
-        # botas vermelhas até o joelho, com bico do joelho, filete dourado, costura e sola
-        topo = {0: 12, 1: 12, 2: 11, 3: 11, 4: 11, 5: 11, 6: 12, 7: 12}
+            L.m(x, fim + 1, -0.22); L.m(x, fim + 2, -0.08)
+        # botas: a boca fica no meio da coxa e desce em V na frente (o dourado acompanha o V)
         for x in range(L.W):
             face, lx, lw = L.qual(x)
             luz = LUZ_FACE[face]
-            y0 = topo[lx] if face == "frente" else 12
+            y0 = 10 + (min(3, round(3.2 - abs(lx - 3.5))) if face == "frente" else 0)
             for y in range(y0, 24):
                 t = (y - y0) / (23 - y0)
-                s = luz + 0.12 * (1 - t) - 0.10 * t + (ruido(x, y, 9) - 0.5) * 0.04
+                s = luz + 0.10 * (1 - t) - 0.10 * t + (ruido(x, y, 9) - 0.5) * 0.04
                 if lx in (0, lw - 1):
                     s -= 0.10
                 c = tom(VERM_SG, s)
@@ -331,21 +360,27 @@ def sg_pernas(n, rnd):
                 elif y == 22:
                     c = tom(VERM_SG, s - 0.22)
                 L.p(x, y, c)
-            L.p(x, y0, tom(OURO_SG, 0.10 + luz))
-            L.p(x, y0 + 1, tom(VERM_SG, -0.25 + luz))
-            L.m(x, y0 - 1, -0.20)
-            C.p(x, y0, tom(OURO_SG, 0.20 + luz))
-            C.p(x, y0 + 1, tom(OURO_SG_ESC, luz))
-        # brilho do couro na canela, bico e calcanhar
-        for y in range(14, 21):
-            k = 1 - abs(y - 17) / 4
-            f.m(mir(2), y, 0.10 * k)
+            L.p(x, y0, tom(OURO_SG, 0.08 + luz))
+            L.p(x, y0 + 1, tom(OURO_SG_ESC, 0.05 + luz))
+            L.p(x, y0 + 2, tom(VERM_SG, -0.25 + luz))
+            L.m(x, y0 - 1, -0.16)
+            C.p(x, y0, tom(OURO_SG_CLARO, -0.05 + luz))
+            C.p(x, y0 + 1, tom(OURO_SG, -0.05 + luz))
+        # couro brilhante: reflexo no joelho e na canela, sombra atrás do joelho, salto e sola
+        for y in range(12, 21):
+            k = 1 - abs(y - 15) / 6
+            f.m(mir(2), y, 0.14 * k); f.m(mir(3), y, 0.06 * k)
+        for x in range(2, 6):
+            f.m(x, 14, 0.06); f.m(x, 15, -0.08)
         for x in range(2, 6):
             f.m(x, 21, 0.10)
-        o = n.face(parte, "dir" if lado == "d" else "esq")
-        for y in range(14, 22, 2):
-            o.m(4, y, -0.20)
-        tr.m(3, 21, -0.12); tr.m(4, 21, -0.12)
+        tr = n.face(parte, "tras")
+        for x in range(8):
+            tr.m(x, 14, -0.12)
+        tr.m(3, 21, -0.14); tr.m(4, 21, -0.14)
+        o = n.face(parte, externo)
+        for y in range(12, 21):
+            o.m(4, y, -0.08)
         b = n.face(parte, "baixo")
         for y in range(16):
             for x in range(8):
@@ -357,7 +392,7 @@ def sg_capa(capa, rnd):
     for y in range(64):
         t = y / 63
         for x in range(40):
-            dobra = 0.10 * math.sin(x / 40 * math.pi * 5 + 0.9) * (0.3 + 0.7 * t)
+            dobra = 0.15 * math.sin(x / 40 * math.pi * 5 + 0.9) * (0.3 + 0.7 * t) + 0.05 * math.sin(x / 40 * math.pi * 11)
             luz = 0.11 * (1 - t) - 0.14 * t + dobra + rnd.uniform(-0.015, 0.015)
             if x in (0, 39):
                 luz -= 0.10
@@ -401,7 +436,7 @@ def supergirl(n, capa, glow):
     sg_tronco(n, rnd)
     sg_cabelo(n)
     sg_bracos(n, rnd, pele)
-    sg_pernas(n, rnd)
+    sg_pernas(n, rnd, pele)
     sg_capa(capa, rnd)
     # olhos acesos (visão de calor): íris e pupila nas duas linhas do olho feminino
     f = N.Face(glow, "cabeca", "frente")
@@ -422,7 +457,7 @@ CAMISETA = hexa("#2A2A2F")
 VERM_SB = hexa("#D3202A")
 OLHO_SB = hexa("#3D7FD6")
 CABELO_SB = Cabelo("#141419", "#3E4A68", "#08080B", semente=97)
-JEANS_SB = hexa("#2D3E63")
+CARGO_SB = hexa("#1D2130")
 
 # Escudo do Conner: S vermelho sobre preto (a borda vermelha é acrescentada ao desenhar).
 ESCUDO_SB = [
@@ -530,194 +565,161 @@ def sb_cabeca(n):
             fr.m(x, 3, -0.06)
 
 
-def abertura(y):
-    """Colunas abertas da jaqueta na frente (x0, x1): gola, lapelas abertas no peito e mais fechada embaixo."""
-    if y == 0:
-        return 5, 10
-    if y <= 2:
-        return 4, 11
-    if y <= 13:
-        return 2, 13
-    return 3, 12
-
-
 def sb_tronco(n):
-    # camiseta preta de algodão (fosca) com o escudo; painéis da jaqueta nas laterais da frente
-    malha = N.liso(CAMISETA, 0.025, 9)
+    """Camiseta preta justa (o volume do peito e do abdômen aparece no tecido) com o escudo vermelho grande,
+    cinto preto com fivela prateada e o cós da calça cargo."""
+    pele = hexa("#E7B48E")
     T = n.anel("corpo")
-    pintar(T, couro(semente=1))
-    pintar(n.face("corpo", "cima"), couro(semente=2))
-    pintar(n.face("corpo", "baixo"), lambda x, y: tom(JEANS_SB, -0.2))
+    pintar(T, N.liso(CAMISETA, 0.025, 9))
+    pintar(n.face("corpo", "cima"), N.liso(CAMISETA, 0.02, 10))
+    pintar(n.face("corpo", "baixo"), lambda x, y: tom(CARGO_SB, -0.2))
     f = n.face("corpo", "frente")
-    for y in range(0, 22):
-        a0, a1 = abertura(max(y, 3))
-        for x in range(a0, a1 + 1):
-            f.p(x, y, tom(malha(x, y), 0.05 - 0.10 * y / 21))
-    for x in range(6, 10):  # gola careca
-        f.p(x, 0, tom(hexa("#E7B48E"), -0.14))
-    for x in (5, 10):
-        f.p(x, 0, tom(CAMISETA, 0.12))
-    for x in range(6, 10):
-        f.p(x, 1, tom(CAMISETA, 0.10))
-    # escudo do Conner: S vermelho sobre preto, com borda vermelha e chanfro
-    brasao(f, 5, 4, ESCUDO_SB, fundo=hexa("#131317"), letra=VERM_SB, borda=VERM_SB, contorno=hexa("#0C0C0F"))
-    # dobras da malha embaixo do escudo
-    for x, y in ((5, 15), (6, 16), (9, 17), (10, 16), (4, 18), (11, 19)):
-        f.m(x, y, 0.06); f.m(x, y + 1, -0.06)
-    # cinto e jeans
-    calca_jeans = brim(JEANS_SB, 3)
+    corpo = [(4.5, 6.5, 3.8, 2.8, 1.0), (11.5, 6.5, 3.8, 2.8, 1.0),
+             (5.6, 12.5, 1.7, 1.1, 0.45), (10.4, 12.5, 1.7, 1.1, 0.45),
+             (5.6, 14.8, 1.7, 1.1, 0.40), (10.4, 14.8, 1.7, 1.1, 0.40)]
+    relevo(f, CAMISETA, corpo, k=0.75, luz_topo=0.08, sombra_base=0.10, borda=0.10, escamas=False)
+    tr = n.face("corpo", "tras")
+    relevo(tr, CAMISETA, [(4, 5, 3.0, 3.0, 0.5), (12, 5, 3.0, 3.0, 0.5)], k=0.5, luz_topo=0.06,
+           sombra_base=0.10, borda=0.10, escamas=False)
+    for x in range(16):
+        for y in range(24):
+            f.m(x, y, (ruido(x, y, 9) - 0.5) * 0.05)
+            tr.m(x, y, (ruido(x, y, 19) - 0.5) * 0.05)
+    # gola careca com a ribana e o pescoço
+    for x in range(5, 11):
+        f.p(x, 0, tom(pele, -0.16))
+    for x in (4, 11):
+        f.p(x, 0, tom(CAMISETA, 0.16))
+    for x in range(5, 11):
+        f.p(x, 1, tom(CAMISETA, 0.14 if 6 <= x <= 9 else 0.10))
+    f.m(7, 2, -0.06); f.m(8, 2, -0.06)
+    for x in range(4, 12):
+        tr.p(x, 0, tom(CAMISETA, 0.14))
+    # escudo grande do Conner: S vermelho sobre preto, borda vermelha e chanfro
+    brasao(f, 5, 4, ESCUDO_SB, fundo=hexa("#111115"), letra=VERM_SB, borda=VERM_SB, contorno=hexa("#0A0A0D"))
+    brasao(n.face("jaqueta", "frente"), 5, 4, ESCUDO_SB, fundo=hexa("#111115"), letra=VERM_SB, borda=VERM_SB,
+           contorno=hexa("#0A0A0D"), so_relevo=True)
+    # malha esticada: rugas finas puxando do peito para a cintura e para as axilas
+    for x, y in ((2, 13), (3, 14), (13, 13), (12, 14), (1, 17), (14, 17), (4, 18), (11, 18)):
+        f.m(x, y, 0.07); f.m(x, y + 1, -0.08)
+    for lado in ("dir", "esq"):
+        s = n.face("corpo", lado)
+        for y in range(1, 20):
+            s.m(3, y, -0.10); s.m(4, y, 0.04)
+        for x, y in ((1, 6), (2, 7), (5, 8), (6, 7)):
+            s.m(x, y, -0.10)
+    # camiseta para dentro da calça: a barra franzida em cima do cinto
+    for x in range(T.W):
+        if ruido(x, 19, 3) > 0.45:
+            T.m(x, 19, 0.06)
+        T.m(x, 19, -0.04)
+    # cós da calça cargo e o cinto preto de lona com a fivela prateada
+    tecido = N.lona(CARGO_SB)
     for x in range(T.W):
         face, lx, lw = T.qual(x)
         for y in (22, 23):
-            T.p(x, y, tom(calca_jeans(x, y), LUZ_FACE[face] - 0.08))
-    for x in range(3, 13):
-        f.p(x, 20, tom(hexa("#24201E"), 0.06)); f.p(x, 21, tom(hexa("#24201E"), -0.12))
-    f.p(7, 20, tom(PRATA, 0.2)); f.p(8, 20, PRATA); f.p(7, 21, tom(PRATA, -0.2)); f.p(8, 21, tom(PRATA, -0.35))
-    # painéis da jaqueta (camada de baixo): couro com zíper aberto na borda de dentro
-    for y in range(0, 22):
-        a0, a1 = abertura(max(y, 3))
-        for x in list(range(0, a0)) + list(range(a1 + 1, 16)):
-            f.p(x, y, tom(couro(semente=3)(x, y), 0.04 - 0.10 * y / 21))
-        f.p(a0 - 1, y, tom(PRATA, 0.05) if y % 2 == 0 else tom(PRATA, -0.45))
-        f.p(a1 + 1, y, tom(PRATA, 0.0) if y % 2 == 1 else tom(PRATA, -0.45))
-    jaqueta(n)
-
-
-def jaqueta(n):
-    """Jaqueta de couro preta na segunda camada: gola, lapelas abertas, zíper, pespontos, cós e mangas."""
-    J = Anel(n.t, "jaqueta")
-    cour = couro(semente=4)
-    for x in range(J.W):
-        face, lx, lw = J.qual(x)
-        for y in range(0, 22):
-            if face == "frente":
-                a0, a1 = abertura(y)
-                if a0 <= lx <= a1:
-                    continue
-            c = cour(x, y)
-            s = LUZ_FACE[face] + 0.08 * (1 - y / 21) - 0.08 * y / 21
-            if lx in (0, lw - 1) and face != "frente":
-                s -= 0.06
-            J.p(x, y, tom(c, s))
-        # cós de couro canelado na barra
-        for y, s in ((20, 0.06), (21, -0.16)):
-            if face == "frente" and abertura(y)[0] <= lx <= abertura(y)[1]:
-                continue
-            J.p(x, y, tom(COURO, s + LUZ_FACE[face] + (0.05 if x % 2 else -0.03)))
-        if not (face == "frente" and 3 <= lx <= 12):  # sombra acima do cós
-            J.m(x, 19, -0.22)
-    jf = n.face("jaqueta", "frente")
-    # lapelas dobradas: borda de cima clara, dobra escura; gola levantada atrás do pescoço
-    for x, y in ((0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (1, 1), (2, 1), (3, 1), (4, 1)):
-        jf.mix(x, y, COURO_LUZ, 0.30 if y == 0 else 0.15); jf.mix(15 - x, y, COURO_LUZ, 0.24 if y == 0 else 0.12)
-    for x, y in ((4, 1), (3, 2), (1, 3), (1, 4)):  # dobra escura da lapela
-        jf.p(x, y, tom(COURO, -0.30)); jf.p(15 - x, y, tom(COURO, -0.30))
-    for x, y in ((3, 1), (2, 2), (0, 3), (0, 4), (0, 5)):  # crista clara onde a lapela vira
-        jf.mix(x, y, COURO_LUZ, 0.45); jf.mix(15 - x, y, COURO_LUZ, 0.32)
-    # zíper aberto (dentes prateados) na borda de dentro dos painéis
-    for y in range(3, 20):
-        a0, a1 = abertura(y)
-        jf.p(a0 - 1, y, tom(PRATA, 0.10) if y % 2 == 0 else tom(PRATA, -0.40))
-        jf.p(a1 + 1, y, tom(PRATA, 0.0) if y % 2 == 1 else tom(PRATA, -0.45))
-    jf.p(2, 19, tom(PRATA, 0.35)); jf.p(2, 18, tom(PRATA, -0.1))  # cursor do zíper
-    # pesponto e bolso com zíper diagonal no peito (lado esquerdo do personagem)
-    for y in range(5, 20, 2):
-        jf.m(1, y, 0.10); jf.m(14, y, 0.08)
-    for x, y in ((14, 8), (15, 9)):
-        jf.p(x, y, tom(PRATA, 0.1)); jf.m(x, y + 1, -0.3)
-    for x, y in ((0, 14), (1, 15)):
-        jf.p(x, y, tom(PRATA, -0.1)); jf.m(x, y + 1, -0.3)
-    # brilho do couro nos peitorais (luz de cima à esquerda)
-    for y in range(5, 10):
-        jf.mix(0, y, COURO_LUZ, 0.22 * (1 - abs(y - 7) / 3))
-        jf.mix(15, y, COURO_LUZ, 0.12 * (1 - abs(y - 7) / 3))
-    # costas: pala com pesponto, costura do meio e vincos
-    jt = n.face("jaqueta", "tras")
-    for x in range(16):
-        jt.m(x, 0, 0.12)
-        jt.p(x, 6, tom(COURO, -0.30))
-        if x % 2 == 0:
-            jt.mix(x, 7, COURO_LUZ, 0.25)
-    for y in range(7, 19):
-        jt.m(7, y, -0.18); jt.mix(8, y, COURO_LUZ, 0.10)
-    vinco(jt, [(2, 10), (3, 10), (4, 11)], 0.8)
-    vinco(jt, [(11, 12), (12, 12), (13, 11)], 0.7)
-    vinco(jt, [(3, 15), (4, 16), (11, 16), (12, 15)], 0.6)
-    for x in range(1, 15):
-        jt.mix(x, 2, COURO_LUZ, 0.10 * (1 - abs(x - 7.5) / 8))
-    for lado in ("dir", "esq"):
-        s = n.face("jaqueta", lado)
-        for y in range(1, 19):
-            s.m(3, y, -0.20); s.mix(4, y, COURO_LUZ, 0.10)
-        vinco(s, [(1, 12), (2, 12), (5, 13), (6, 13)], 0.5)
-    jc = n.face("jaqueta", "cima")
-    for x in range(16):
-        for y in range(16):
-            if 4 <= y <= 11 and 4 <= x <= 11:
-                continue
-            jc.p(x, y, tom(cour(x + 60, y), 0.10 if y < 4 else 0.02))
-    # gola levantada na nuca
-    for y in range(9, 12):
-        for x in range(2, 14):
-            jc.p(x, y, tom(COURO, 0.14 if y == 9 else -0.04))
+            T.p(x, y, tom(tecido(x, y), LUZ_FACE[face] - 0.04 * (y - 22)))
+    N.cinto(n, hexa("#3B3530"), PRATA, y=20, passadores=tom(CARGO_SB, 0.05))
+    for camada in ("corpo", "jaqueta"):
+        c = n.face(camada, "frente")
+        for x in range(6, 10):
+            for y in (20, 21):
+                c.p(x, y, tom(PRATA, 0.30 if y == 20 else -0.10))
+        c.p(6, 20, tom(PRATA, 0.45)); c.p(9, 21, tom(PRATA, -0.40))
+        c.p(7, 21, tom(PRATA, -0.30)); c.p(8, 20, tom(PRATA, 0.10))
+    f.p(8, 22, tom(CARGO_SB, -0.25)); f.p(8, 23, tom(CARGO_SB, -0.25))
 
 
 def sb_bracos(n):
+    """Braços de fora (bem fortes) com a manga curta e justa da camiseta."""
     pele = hexa("#E7B48E")
     for lado in ("d", "e"):
         parte = "braco_" + lado
         externo, interno = ("dir", "esq") if lado == "d" else ("esq", "dir")
+        N.braco_pele(n, parte, pele)
         A = n.anel(parte)
         M = n.anel("manga_" + lado)
-        N.braco_pele(n, parte, pele)
-        cour = couro(semente=5 if lado == "d" else 6)
-        pintar(A, cour, 0, 20, topo=0.10, base=0.12)
-        pintar(n.face(parte, "cima"), lambda x, y: tom(cour(x, y), 0.06))
-        # costura do ombro e de baixo da manga, cotovelo enrugado, punho com zíper
+        # músculos: deltoide abaixo da manga, bíceps, tríceps e antebraço
+        f = n.face(parte, "frente")
+        for x, y, k in ((2, 8, 0.08), (3, 8, 0.10), (4, 8, 0.10), (5, 8, 0.06), (3, 9, 0.06), (4, 9, 0.05),
+                        (1, 11, -0.10), (2, 12, -0.12), (5, 12, -0.12), (6, 11, -0.10),
+                        (2, 14, 0.06), (3, 14, 0.07), (2, 15, 0.05), (5, 16, -0.07), (5, 17, -0.07)):
+            f.m(x, y, k)
+        tr = n.face(parte, "tras")
+        for x, y, k in ((2, 8, 0.06), (5, 8, 0.06), (3, 9, -0.08), (4, 9, -0.08), (3, 10, -0.10), (4, 10, -0.06)):
+            tr.m(x, y, k)
+        o = n.face(parte, externo)
+        for y in range(7, 11):
+            o.m(3, y, 0.07); o.m(4, y, -0.05)
+        for y in range(13, 18):
+            o.m(2 if externo == "esq" else 5, y, 0.05)
+        # manga curta: até o meio do braço, justa no músculo, com a barra dobrada
         for x in range(A.W):
-            amix(A, x, 0, COURO_LUZ, 0.20)
             face, lx, lw = A.qual(x)
-            if ruido(x, 10) > 0.45:
-                amix(A, x, 10, COURO_LUZ, 0.18); A.m(x, 11, -0.22)
-            if ruido(x, 13) > 0.6:
-                amix(A, x, 13, COURO_LUZ, 0.12); A.m(x, 14, -0.15)
-            for y, s in ((17, 0.10), (18, 0.0), (19, -0.22)):
-                A.p(x, y, tom(COURO, s + LUZ_FACE[face] + (0.04 if x % 2 else -0.02)))
-            A.m(x, 16, -0.25)
-        for y in range(0, 17):
-            A.m(A.ini(interno) + 3, y, -0.22)
-        for y in range(2, 9):  # brilho do couro no ombro e bíceps
-            k = 1 - abs(y - 5) / 4
-            amix(A, A.ini("frente") + 2, y, COURO_LUZ, 0.25 * k)
-            amix(A, A.ini(externo) + 3, y, COURO_LUZ, 0.30 * k)
-        c = A.ini(externo) + 4
-        for y in range(14, 20):
-            A.p(c, y, tom(PRATA, 0.05) if y % 2 == 0 else tom(PRATA, -0.45))
-        # segunda camada: ombro com pesponto, rugas do cotovelo em relevo e o punho
-        for x in range(M.W):
-            face, lx, lw = M.qual(x)
-            luz = LUZ_FACE[face]
-            M.p(x, 0, tom(cour(x, 0), 0.14 + luz))
-            if x % 2 == 0:
-                M.p(x, 1, tom(cour(x, 1), 0.02 + luz))
-            if ruido(x, 10) > 0.6:
-                M.p(x, 10, tom(COURO_LUZ, -0.25 + luz))
-            for y, s in ((17, 0.14), (18, 0.02), (19, -0.18)):
-                M.p(x, y, tom(COURO, s + luz + (0.04 if x % 2 else -0.02)))
-        M.p(c, 17, tom(PRATA, 0.3)); M.p(c, 18, tom(PRATA, -0.2))
+            for y in range(0, 9):
+                s = LUZ_FACE[face] + 0.06 - 0.025 * y + (ruido(x, y, 14) - 0.5) * 0.05
+                if face == interno and y > 5:
+                    continue
+                A.p(x, y, tom(CAMISETA, s))
+            if face != interno:
+                A.p(x, 8, tom(CAMISETA, LUZ_FACE[face] + 0.10))
+                A.m(x, 9, -0.16)
+                M.p(x, 7, tom(CAMISETA, LUZ_FACE[face] + 0.06))
+                M.p(x, 8, tom(CAMISETA, LUZ_FACE[face] - 0.04))
+        for y in range(0, 6):
+            amix(A, A.ini("frente") + 2, y, hexa("#4A4A55"), 0.25 * (1 - abs(y - 2) / 3))
+        cima = n.face(parte, "cima")
+        pintar(cima, N.liso(CAMISETA, 0.02, 11))
+        for x in range(8):
+            cima.m(x, 0, 0.06)
 
 
 def sb_pernas(n):
-    jeans = brim(JEANS_SB, 3)
-    calca(n, jeans, "jeans", costura=hexa("#C08A3C"), cintura=False)
-    for lado in ("d", "e"):  # vincos atrás do joelho e desbotado na coxa
-        f = n.face("perna_" + lado, "frente")
-        for x in range(2, 6):
-            f.m(x, 4, 0.05)
-        tr = n.face("perna_" + lado, "tras")
+    """Calça cargo azul-marinho bem escura: bolsos laterais com aba, joelho reforçado e a barra franzida
+    por cima dos coturnos marrom-escuros."""
+    tecido = N.lona(CARGO_SB)
+    calca(n, tecido, "social", cintura=False)
+    for lado in ("d", "e"):
+        parte = "perna_" + lado
+        externo, interno = ("dir", "esq") if lado == "d" else ("esq", "dir")
+        f = n.face(parte, "frente")
+        o = n.face(parte, externo)
+        tr = n.face(parte, "tras")
+        mir = (lambda x: x) if lado == "d" else (lambda x: 7 - x)
+        # bolso da frente em diagonal
+        for x, y in ((2, 0), (1, 1), (1, 2), (0, 3)):
+            f.m(mir(x), y, -0.22); f.m(mir(x + 1), y, 0.05)
+        # bolso cargo na lateral: aba com sombra, corpo com fole e botão
+        for y in range(7, 14):
+            for x in range(1, 7):
+                s = 0.05 if y == 7 else 0.03 if y < 9 else 0.0 - 0.02 * (y - 9)
+                o.p(x, y, tom(tecido(x + 40, y), s))
+        for x in range(1, 7):
+            o.p(x, 7, tom(CARGO_SB, 0.14)); o.p(x, 9, tom(CARGO_SB, -0.28))
+            o.p(x, 13, tom(CARGO_SB, -0.22))
+        for y in range(7, 14):
+            o.m(0, y, -0.18); o.m(7, y, -0.14); o.m(1, y, 0.05)
+        o.p(3, 8, tom(CARGO_SB, -0.30)); o.p(4, 8, tom(CARGO_SB, -0.20))
+        for y in range(10, 13):
+            o.m(4, y, -0.08)
+        # joelho reforçado com pesponto
+        for x in range(1, 7):
+            f.m(x, 9, -0.12); f.m(x, 13, -0.14)
+        for y in range(10, 13):
+            f.m(1, y, -0.06); f.m(6, y, -0.06)
+            for x in range(2, 6):
+                f.m(x, y, 0.05)
+        # vincos da calça larga: atrás do joelho e embaixo, onde ela franze sobre a bota
         for x in (2, 3, 5):
-            tr.m(x, 12, 0.08); tr.m(x, 13, -0.10)
-    botas(n, hexa("#1E1D21"), 18, "trabalho", cadarco=hexa("#4A4A52"), calca_por_cima=jeans)
+            tr.m(x, 11, 0.08); tr.m(x, 12, -0.12)
+        for x, y in ((1, 15), (2, 14), (5, 15), (6, 14)):
+            f.m(x, y, -0.10); f.m(x, y - 1, 0.06)
+        # bolso de trás
+        for x in range(1, 7):
+            tr.m(x, 1, 0.08); tr.m(x, 2, -0.18)
+        for y in range(2, 6):
+            tr.m(1, y, -0.08); tr.m(6, y, -0.08)
+    botas(n, hexa("#3A2A20"), 17, "trabalho", cadarco=hexa("#1C1612"), calca_por_cima=tecido)
 
 
 def superboy(n):
@@ -882,7 +884,7 @@ def sg_pecas():
                 c = fio(cab, x + 48 + (40 if dentro else 0), y + 16)
                 if 1 <= y <= 4 and ruido(x, 77, cab.semente) > 0.3 and not dentro:
                     c = mistura(c, cab.claro, 0.35 - 0.06 * abs(y - 2))
-                s = k_luz + 0.06 - 0.16 * y / 19
+                s = k_luz + 0.06 - 0.16 * y / 19 + onda(x, y)
                 if x in (0, 15):
                     s -= 0.06
                 if y == corte:
@@ -896,7 +898,7 @@ def sg_pecas():
         for y in range(20):
             if y <= 18:
                 t.p(32 + x, y, tom(fio(cab, x + 90, y + 16), -0.08 - 0.12 * y / 19))
-    saia = pregas(VERM_SG)
+    saia = pregas(tom(VERM_SG, -0.06))
     for x in range(56):
         for y in range(8):
             c = saia(x, y)
@@ -904,13 +906,13 @@ def sg_pecas():
             if y == 0:
                 c = tom(VERM_SG_ESC, 0.10)  # a costura presa no cinto
             elif y == 7:
-                c = tom(OURO_SG, 0.08 if x % 4 < 2 else -0.12)  # barra com filete dourado
+                c = tom(VERM_SG_ESC, 0.12 if x % 4 < 2 else -0.05)  # barra dobrada
             elif y == 6 and x % 4 == 3:
                 s -= 0.08
             t.p(x, 32 + y, tom(c, s))
             dentro = tom(escurecer(VERM_SG, 0.32), (0.04 if x % 4 == 1 else -0.06 if x % 4 == 3 else 0) - 0.08 * y / 7)
             if y == 7:
-                dentro = tom(OURO_SG_ESC, -0.1)
+                dentro = tom(VERM_SG_ESC, -0.1)
             t.p(x, 40 + y, dentro)
     return t
 
@@ -1122,12 +1124,132 @@ def icone_ilha_telecinetica():
     return t
 
 
+def _bloco_iso(t, d, x, y, topo, frente, lado, tam=9):
+    """Bloco em perspectiva (topo em losango, frente e lado); tam é a largura total."""
+    m, h = tam // 2, tam // 4
+    alt = tam - 2
+    d.polygon([(x, y + h), (x + m, y), (x + tam, y + h), (x + m, y + 2 * h)], fill=hexa(topo))
+    d.polygon([(x, y + h), (x + m, y + 2 * h), (x + m, y + 2 * h + alt), (x, y + h + alt)], fill=hexa(frente))
+    d.polygon([(x + m, y + 2 * h), (x + tam, y + h), (x + tam, y + h + alt), (x + m, y + 2 * h + alt)], fill=hexa(lado))
+
+
+def icone_furia_de_rochas():
+    """Punho de Conner (manga preta) acertando em cheio um bloco de terra com grama que se parte em
+    estilhaços, com o estalo do impacto; mais dois blocos pairam atrás na aura azul, esperando a vez."""
+    from hud import brilho, contornar
+    t, d = _icone()
+    brilho(t, 8, 8, 8, hexa("#5FB8FF"), 0.5)
+    brilho(t, 25, 6, 7, hexa("#5FB8FF"), 0.5)
+    brilho(t, 19, 17, 9, hexa("#FFE08A"), 0.8)
+    fundo = t.img.copy()
+    t.img.paste((0, 0, 0, 0), (0, 0, 32, 32))
+    # Os dois que esperam, pequenos e altos.
+    _bloco_iso(t, d, 3, 3, "#6CB040", "#7A5636", "#5A3E26", 8)
+    d.line([(3, 5), (7, 7)], fill=hexa("#4E8A30"))
+    _bloco_iso(t, d, 21, 1, "#9AA0AA", "#7E838E", "#5E626C", 8)
+    t.p(23, 6, hexa("#B4B8C0")); t.p(26, 8, hexa("#5A5E66"))
+    # O bloco golpeado, maior, já rachando.
+    _bloco_iso(t, d, 15, 10, "#7CC04A", "#7A5636", "#5A3E26", 13)
+    d.line([(15, 13), (21, 16)], fill=hexa("#4E8A30"))
+    d.line([(21, 16), (28, 13)], fill=hexa("#3E7024"))
+    for pts in (((21, 17), (20, 20), (22, 22), (21, 26)), ((21, 18), (24, 20), (26, 19)), ((20, 20), (17, 21))):
+        d.line(pts, fill=hexa("#2A1A0E"), width=1)
+    # Punho vindo da esquerda, de baixo: manga de couro preta, punho fechado com os nós dos dedos.
+    d.polygon([(0, 31), (0, 22), (6, 18), (10, 22), (5, 31)], fill=hexa("#1E1E24"))
+    d.line([(1, 23), (6, 19)], fill=hexa("#5B6274"))
+    d.polygon([(6, 18), (12, 14), (17, 17), (15, 22), (10, 23)], fill=hexa("#E7B48E"))
+    d.line([(12, 15), (16, 18)], fill=hexa("#F8D2B0"))
+    for pts in (((11, 16), (14, 18)), ((10, 18), (14, 20)), ((9, 20), (12, 22))):  # dobras dos dedos
+        d.line(pts, fill=hexa("#B07A58"))
+    d.line([(7, 19), (10, 17)], fill=hexa("#C08A66"))  # polegar
+    for x, y in ((15, 17), (15, 19), (14, 21)):
+        t.p(x, y, hexa("#FFE2C8"))  # nós dos dedos
+    contornar(t)
+    base = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    base.alpha_composite(fundo)
+    base.alpha_composite(t.img)
+    t.img.paste(base)
+    # Estalo do golpe: raios brancos e amarelos saindo do ponto de contato.
+    for ang, r in ((-60, 6), (-20, 7), (25, 6), (70, 5), (200, 5)):
+        a = math.radians(ang)
+        x0, y0 = 17 + 2 * math.cos(a), 17 + 2 * math.sin(a)
+        d.line([(x0, y0), (17 + r * math.cos(a), 17 + r * math.sin(a))], fill=hexa("#FFF4C0"), width=1)
+    t.p(17, 17, hexa("#FFFFFF")); t.p(18, 16, hexa("#FFFFFF"))
+    # Estilhaços voando para a direita.
+    for x, y, c in ((29, 20, "#7A5636"), (30, 25, "#5A3E26"), (27, 28, "#7A5636"), (30, 16, "#6CB040")):
+        d.rectangle([x, y, x + 1, y + 1], fill=hexa(c))
+    for x, y in ((14, 4), (29, 4), (2, 13)):
+        t.p(x, y, hexa("#D8F0FF"))
+    return t
+
+
+def icone_escalada_sismica():
+    """Três plataformas de terra em escada, com as arestas acesas em brasa pela telecinese; o arco
+    pontilhado dos saltos de uma em uma e o mergulho final até o chão, que racha num anel de impacto."""
+    from hud import brilho, contornar
+    t, d = _icone()
+    brilho(t, 25, 27, 9, hexa("#FFB060"), 0.9)
+    brilho(t, 26, 14, 7, hexa("#8FD0FF"), 0.75)  # o ar cortado em volta dele no mergulho
+    fundo = t.img.copy()
+    t.img.paste((0, 0, 0, 0), (0, 0, 32, 32))
+    # Chão rachado no ponto da batida (à direita, abaixo do fim do mergulho).
+    d.rectangle([0, 28, 31, 31], fill=hexa("#6B4A2E"))
+    d.rectangle([0, 28, 31, 28], fill=hexa("#5E9C3A"))
+    for pts in (((25, 29), (21, 31)), ((25, 29), (29, 31)), ((25, 29), (17, 30), (13, 31))):
+        d.line(pts, fill=hexa("#1E120A"))
+    # Plataformas: (x, y, largura), subindo da esquerda para a direita.
+    plats = ((1, 21, 8), (8, 14, 8), (15, 7, 8))
+    for x, y, w in plats:
+        d.polygon([(x, y), (x + w, y), (x + w - 1, y + 3), (x + w - 3, y + 5), (x + 2, y + 5), (x + 1, y + 3)],
+                  fill=hexa("#7A5636"))
+        d.polygon([(x + 2, y + 5), (x + w - 3, y + 5), (x + w // 2, y + 7)], fill=hexa("#7E838E"))
+        d.rectangle([x, y - 1, x + w, y], fill=hexa("#6CB040"))
+        d.line([(x + 1, y - 1), (x + w - 2, y - 1)], fill=hexa("#9AD860"))
+        t.p(x + 3, y + 2, hexa("#5A3E26")); t.p(x + w - 2, y + 3, hexa("#5A3E26"))
+    # Superboy mergulhando de punho à frente: camiseta preta, emblema vermelho, calça escura.
+    d.polygon([(25, 13), (28, 11), (30, 14), (27, 17)], fill=hexa("#2A2A34"))     # tronco
+    d.line([(28, 11), (30, 14)], fill=hexa("#5B6274"))                           # luz no ombro
+    for x, y in ((26, 14), (27, 14), (27, 13), (28, 15)):
+        t.p(x, y, hexa("#E3262E"))
+    d.line([(29, 12), (31, 9)], fill=hexa("#1D2130"), width=2)                   # pernas para cima
+    d.ellipse([22, 10, 25, 13], fill=hexa("#E7B48E"))                            # cabeça
+    t.p(23, 10, hexa("#16161C")); t.p(24, 10, hexa("#16161C"))
+    d.line([(26, 16), (24, 19)], fill=hexa("#E7B48E"), width=2)                   # braço esticado
+    d.rectangle([23, 19, 24, 20], fill=hexa("#F8D2B0"))                           # punho
+    contornar(t)
+    base = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    base.alpha_composite(fundo)
+    base.alpha_composite(t.img)
+    t.img.paste(base)
+    # Brasa nas arestas de baixo de cada plataforma.
+    for x, y, w in plats:
+        t.p(x + 1, y + 4, hexa("#FF8A3A")); t.p(x + 2, y + 5, hexa("#FF8A3A"))
+        t.p(x + w - 1, y + 4, hexa("#FF8A3A")); t.p(x + w - 2, y + 5, hexa("#FF8A3A"))
+        t.p(x + w // 2, y + 8, hexa("#FFC070"))
+    # Arcos pontilhados dos saltos.
+    for (ax, ay), (bx, by) in (((5, 19), (12, 12)), ((12, 12), (19, 5))):
+        for k in (1, 3, 5, 7):
+            u = k / 8
+            t.p(round(ax + (bx - ax) * u), round(ay + (by - ay) * u - 9 * u * (1 - u)), hexa("#FFFFFF", 220))
+    # Rastro do mergulho e linhas de velocidade até o chão.
+    for k in range(3):
+        d.line([(23 + k, 22 + k * 2), (23 + k, 23 + k * 2)], fill=hexa("#FFE6A0"))
+    d.line([(29, 18), (30, 22)], fill=hexa("#DDE6F4"))
+    d.line([(20, 17), (20, 21)], fill=hexa("#DDE6F4"))
+    # Anel de impacto.
+    d.arc([17, 24, 32, 32], start=180, end=360, fill=hexa("#FFF4C0"), width=1)
+    d.arc([13, 22, 36, 34], start=195, end=345, fill=hexa("#FFB060"), width=1)
+    t.p(25, 27, hexa("#FFFFFF"))
+    return t
+
 ICONES_SUPERS = {
     "investida_aerea": icone_investida_aerea,
     "nave_kryptoniana": icone_nave_kryptoniana,
     "telecinese_tatil": icone_telecinese_tatil,
     "escudo_telecinetico": icone_escudo_telecinetico,
     "ilha_telecinetica": icone_ilha_telecinetica,
+    "furia_de_rochas": icone_furia_de_rochas,
+    "escalada_sismica": icone_escalada_sismica,
 }
 
 

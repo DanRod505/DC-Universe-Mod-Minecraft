@@ -32,6 +32,7 @@ public final class Passivas {
         if (player.level().isClientSide()) return EstadoCliente.passiva(tipo);
         Personagem p = EstadoJogador.de(player).personagem();
         Personagem.Tipo t = p == null ? null : p.passiva(tipo);
+        if (t != null && player instanceof ServerPlayer sp && !Arvore.passivaLiberada(sp, p, tipo)) return null;
         return t == null ? null : t.params();
     }
 

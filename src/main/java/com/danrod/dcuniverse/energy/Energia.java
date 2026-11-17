@@ -18,23 +18,29 @@ public final class Energia {
 
     /** Chamado a cada tick do servidor para jogadores transformados. */
     public static void tick(Player player, Personagem p) {
-        adicionar(player, p, Recargas.porSegundo(player, p) / 20f);
+        adicionar(player, p, recargaAgora(player, p) / 20f);
         // Kryptonita: além de drenar, deixa fraco (sem superforça nem ricochete, ver Naturais).
         if (player.tickCount % 20 == 0 && player instanceof ServerPlayer sp && sp.connection != null && Recargas.naKryptonita(player, p)) {
             player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, 40, 0, true, false, true));
         }
     }
 
+    /** Quanto a energia sobe por segundo agora: a recuperação do herói, sempre, mais as fontes (sol, kryptonita...). */
+    public static float recargaAgora(Player player, Personagem p) {
+        return Recargas.porSegundo(player, p);
+    }
+
     public static void adicionar(Player player, Personagem p, float qtd) {
         EstadoJogador estado = EstadoJogador.de(player);
-        float max = p.energia().max();
+        float max = com.danrod.dcuniverse.ability.Arvore.energiaMax(player, p);
         float nova = Mth.clamp(estado.energia() + qtd, 0f, max);
         estado.setEnergia(nova);
         if (nova <= 0f && !estado.esgotado()) {
             estado.setEsgotado(true);
             avisar(player, Component.translatable("dcuniverse.msg.energia_esgotada").withStyle(ChatFormatting.RED));
             // Decisão 6: sem energia no ar, o personagem desce planando devagar, sem dano de queda.
-            if (player instanceof ServerPlayer sp) QuedaAmortecida.iniciarSeNoAr(sp);
+            // Na árvore nova o voo é nativo e o cruzeiro não gasta: zerar só corta o impulso e as habilidades.
+            if (player instanceof ServerPlayer sp && !com.danrod.dcuniverse.ability.Arvore.ativa(sp, p)) QuedaAmortecida.iniciarSeNoAr(sp);
         } else if (estado.esgotado() && nova >= max * LIBERA_EM) {
             estado.setEsgotado(false);
             avisar(player, Component.translatable("dcuniverse.msg.energia_liberada").withStyle(ChatFormatting.GOLD));

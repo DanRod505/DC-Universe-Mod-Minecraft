@@ -56,11 +56,12 @@ public final class Transformacao {
         estado.setPersonagem(id);
         estado.setUltimaTransformacao(agora);
         estado.setSelecionada(0);
-        estado.setEnergia((float) (p.energia().max() * Config.ENERGIA_INICIAL.get()));
+        estado.setEnergia((float) (com.danrod.dcuniverse.ability.Arvore.energiaMax(player, p) * Config.ENERGIA_INICIAL.get()));
         Traje.vestir(player, p);
         Atributos.aplicar(player, p, true);
         Passivas.aoTransformar(player, p);
         efeito(player, true);
+        com.danrod.dcuniverse.ability.Arvore.esquecer(player);
         Rede.sincronizar(player);
         Rede.aparencia(player);
         Guia.descobrir(player, id);
@@ -91,6 +92,7 @@ public final class Transformacao {
         com.danrod.dcuniverse.ability.active.Gancho.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.Veiculo.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.Telecinese.aoDestransformar(player);
+        com.danrod.dcuniverse.ability.active.Escalada.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.EscudoTk.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.Ilha.aoDestransformar(player);
         DemoHud.parar(player);

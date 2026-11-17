@@ -73,6 +73,29 @@ public final class Comandos {
                             c.getSource().sendSuccess(() -> Component.literal("Energia: " + e.energia()), false);
                             return 1;
                         }))))
+            .then(Commands.literal("nivel")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .then(Commands.argument("nivel", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, com.danrod.dcuniverse.ability.Arvore.NIVEL_MAX))
+                        .executes(c -> {
+                            // Para testes da árvore de habilidades: põe o herói atual no nível pedido.
+                            ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                            Personagem p = EstadoJogador.de(alvo).personagem();
+                            if (!com.danrod.dcuniverse.ability.Arvore.ativa(alvo, p)) return 0;
+                            int n = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "nivel");
+                            com.danrod.dcuniverse.ability.Arvore.definirXp(alvo, p, com.danrod.dcuniverse.ability.Arvore.xpDoNivel(n));
+                            c.getSource().sendSuccess(() -> Component.literal(alvo.getScoreboardName() + ": nível " + n), false);
+                            return 1;
+                        }))))
+            .then(Commands.literal("xp")
+                .then(Commands.argument("jogador", EntityArgument.player())
+                    .then(Commands.argument("qtd", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0))
+                        .executes(c -> {
+                            ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+                            Personagem p = EstadoJogador.de(alvo).personagem();
+                            if (!com.danrod.dcuniverse.ability.Arvore.ativa(alvo, p)) return 0;
+                            com.danrod.dcuniverse.ability.Arvore.ganharXp(alvo, p, com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "qtd"));
+                            return 1;
+                        }))))
             .then(Commands.literal("ready")
                 .then(Commands.argument("jogador", EntityArgument.player())
                     .executes(c -> {
@@ -105,7 +128,7 @@ public final class Comandos {
                         }
                         String recarga = String.format(java.util.Locale.ROOT, "%+.1f", Recargas.porSegundo(alvo, p));
                         c.getSource().sendSuccess(() -> Component.translatable("dcuniverse.cmd.status", alvo.getDisplayName(),
-                            Component.translatable(p.chaveNome()), Math.round(e.energia()), Math.round(p.energia().max()), recarga,
+                            Component.translatable(p.chaveNome()), Math.round(e.energia()), Math.round(com.danrod.dcuniverse.ability.Arvore.energiaMax(alvo, p)), recarga,
                             Component.translatable(e.esgotado() ? "dcuniverse.cmd.sim" : "dcuniverse.cmd.nao")), false);
                         return 1;
                     })))
