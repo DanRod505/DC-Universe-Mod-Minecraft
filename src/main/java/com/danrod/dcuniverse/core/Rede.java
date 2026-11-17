@@ -336,6 +336,26 @@ public final class Rede {
         }
     }
 
+    /**
+     * Escalada Sísmica do Superboy (ability/active/Escalada): o percurso dos três saltos e do mergulho (pontos = topo
+     * das três plataformas e o chão da batida) e os tempos em ticks contados do pisão. O cliente do dono faz o
+     * movimento (client/EscaladaVisual).
+     */
+    public record Escalada(int entidade, net.minecraft.world.phys.Vec3[] pontos, int sobe, int salto, int pausa, int mergulho) {
+        public static void encode(Escalada m, FriendlyByteBuf b) {
+            b.writeVarInt(m.entidade);
+            for (net.minecraft.world.phys.Vec3 v : m.pontos) b.writeDouble(v.x).writeDouble(v.y).writeDouble(v.z);
+            b.writeVarInt(m.sobe).writeVarInt(m.salto).writeVarInt(m.pausa).writeVarInt(m.mergulho);
+        }
+
+        public static Escalada decode(FriendlyByteBuf b) {
+            int id = b.readVarInt();
+            net.minecraft.world.phys.Vec3[] p = new net.minecraft.world.phys.Vec3[4];
+            for (int i = 0; i < 4; i++) p[i] = new net.minecraft.world.phys.Vec3(b.readDouble(), b.readDouble(), b.readDouble());
+            return new Escalada(id, p, b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readVarInt());
+        }
+    }
+
     /** Outro jogador fez uma manobra: quem vê anima a pose dele. */
     public record ManobraVista(int entidade, int tipo) {}
 
@@ -818,6 +838,11 @@ public final class Rede {
             .direction(PacketFlow.CLIENTBOUND)
             .encoder(Giro::encode).decoder(Giro::decode)
             .consumerMainThread((m, ctx) -> EstadoCliente.GIROS.put(m.entidade(), new EstadoCliente.GiroAtivo(m, System.currentTimeMillis(), Double.NaN, Double.NaN)))
+            .add();
+        CANAL.messageBuilder(Escalada.class)
+            .direction(PacketFlow.CLIENTBOUND)
+            .encoder(Escalada::encode).decoder(Escalada::decode)
+            .consumerMainThread((m, ctx) -> com.danrod.dcuniverse.client.EscaladaVisual.receber(m))
             .add();
         CANAL.messageBuilder(ManobraVista.class)
             .direction(PacketFlow.CLIENTBOUND)

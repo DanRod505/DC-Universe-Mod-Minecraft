@@ -717,7 +717,7 @@ Total: Heróis 45, Ajudantes 10, Anti-heróis 15, Vilões 30.
 
 - **Reaproveita:** sistemas de Superman (Clark Kent)
 - **Naturais (ativam pela ação):** Voo; Superforça; Invulnerabilidade
-- **Poderes e combate (menu radial):** Telecinese tátil: levanta áreas de blocos e arremessa; Pisão sísmico; Escudo telecinético
+- **Poderes e combate (menu radial):** Telecinese tátil: levanta áreas de blocos e arremessa; Pisão sísmico; Escudo telecinético; Fúria de Rochas: ergue três blocos, golpeia cada um e arremessa em inimigos; Escalada Sísmica: ergue três plataformas, salta por elas e mergulha com um super soco em área
 - **Armas, ferramentas e invocações:** Nenhum
 - **Utilidade no survival:** Mover blocos em massa (construção); Mineração em área
 - **Item de transformação:** Jaqueta de Couro de Conner (Herança kryptoniana em estilo de rua.) Receita em [ITENS.md](ITENS.md#itens-de-transformação).

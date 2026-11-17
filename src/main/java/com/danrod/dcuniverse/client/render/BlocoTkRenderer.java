@@ -25,7 +25,7 @@ public final class BlocoTkRenderer extends EntityRenderer<BlocoTelecinetico, Blo
     public static final class Estado extends EntityRenderState {
         final MovingBlockRenderState bloco = new MovingBlockRenderState();
         float rx, ry;
-        int fase;
+        int fase, estilo;
     }
 
     public BlocoTkRenderer(EntityRendererProvider.Context ctx) {
@@ -51,12 +51,16 @@ public final class BlocoTkRenderer extends EntityRenderer<BlocoTelecinetico, Blo
             s.bloco.lightEngine = cl.getLightEngine();
         }
         s.fase = e.fase();
+        s.estilo = e.estilo();
         float t = e.tickCount + pt;
         float vel = s.fase == BlocoTelecinetico.VOANDO ? 6f : s.fase == BlocoTelecinetico.POUSANDO ? 0f : 1f;
         // Pousando, o giro volta a zero para o bloco assentar alinhado.
         s.rx = vel == 0 ? 0 : Mth.wrapDegrees(e.fase + t * e.giroX * vel);
         s.ry = vel == 0 ? 0 : Mth.wrapDegrees(e.fase * 0.5f + t * e.giroY * vel);
-        if (s.fase == BlocoTelecinetico.SEGURO) {
+        if (s.fase == BlocoTelecinetico.PAIRANDO && s.estilo == BlocoTelecinetico.PLATAFORMA) {
+            s.rx = 0;
+            s.ry = 0;
+        } else if (s.fase == BlocoTelecinetico.SEGURO || s.fase == BlocoTelecinetico.PAIRANDO) {
             s.rx = Mth.sin(t * 0.05f + e.fase) * 12 + s.rx * 0.08f;
             s.ry = s.ry * 0.25f;
         }
@@ -75,13 +79,17 @@ public final class BlocoTkRenderer extends EntityRenderer<BlocoTelecinetico, Blo
         ps.popPose();
         float pulso = 0.5f + 0.5f * Mth.sin(s.ageInTicks * 0.25f);
         float alfa = s.fase == BlocoTelecinetico.VOANDO ? 0.16f : 0.1f + 0.06f * pulso;
-        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> aura(pose.pose(), buf, 0.56f, alfa));
+        boolean piso = s.estilo == BlocoTelecinetico.PLATAFORMA;
+        // A plataforma brilha nas arestas como brasa (a força da telecinese segurando a terra); o resto, azul claro.
+        float[] cor = piso ? new float[] {1f, 0.5f, 0.28f} : new float[] {0.55f, 0.82f, 1f};
+        float a2 = piso ? 0.2f + 0.08f * pulso : alfa;
+        Luz.depoisDaAgua(ps, col, Luz.tipo(), (pose, buf) -> aura(pose.pose(), buf, piso ? 0.52f : 0.56f, a2, cor));
         ps.popPose();
         super.submit(s, ps, col, cam);
     }
 
     /** Cubo de luz em volta do bloco, mais forte nas arestas que no meio das faces. */
-    private static void aura(Matrix4f m, VertexConsumer buf, float r, float alfa) {
+    private static void aura(Matrix4f m, VertexConsumer buf, float r, float alfa, float[] cor) {
         float[][] c = {{-r, -r, -r}, {r, -r, -r}, {r, r, -r}, {-r, r, -r}, {-r, -r, r}, {r, -r, r}, {r, r, r}, {-r, r, r}};
         int[][] faces = {{0, 1, 2, 3}, {5, 4, 7, 6}, {4, 0, 3, 7}, {1, 5, 6, 2}, {3, 2, 6, 7}, {4, 5, 1, 0}};
         for (int[] f : faces) {
@@ -94,10 +102,10 @@ public final class BlocoTkRenderer extends EntityRenderer<BlocoTelecinetico, Blo
             // Quatro triângulos (como quads) do canto ao centro: cantos acesos, centro quase apagado.
             for (int k = 0; k < 4; k++) {
                 float[] a = c[f[k]], b = c[f[(k + 1) % 4]];
-                buf.addVertex(m, a[0], a[1], a[2]).setColor(0.55f, 0.82f, 1f, alfa);
-                buf.addVertex(m, b[0], b[1], b[2]).setColor(0.55f, 0.82f, 1f, alfa);
-                buf.addVertex(m, cx, cy, cz).setColor(0.55f, 0.82f, 1f, alfa * 0.15f);
-                buf.addVertex(m, cx, cy, cz).setColor(0.55f, 0.82f, 1f, alfa * 0.15f);
+                buf.addVertex(m, a[0], a[1], a[2]).setColor(cor[0], cor[1], cor[2], alfa);
+                buf.addVertex(m, b[0], b[1], b[2]).setColor(cor[0], cor[1], cor[2], alfa);
+                buf.addVertex(m, cx, cy, cz).setColor(cor[0], cor[1], cor[2], alfa * 0.15f);
+                buf.addVertex(m, cx, cy, cz).setColor(cor[0], cor[1], cor[2], alfa * 0.15f);
             }
         }
     }

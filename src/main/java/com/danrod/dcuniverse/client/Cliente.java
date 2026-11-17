@@ -109,6 +109,7 @@ public final class Cliente {
             SoproVisual.limpar();
             Hud.limpar();
             Voador.limpar();
+            EscaladaVisual.limpar();
             Planador.limpar();
             Mundo.limpar();
             SomCanal.limpar();

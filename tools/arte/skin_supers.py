@@ -1124,12 +1124,132 @@ def icone_ilha_telecinetica():
     return t
 
 
+def _bloco_iso(t, d, x, y, topo, frente, lado, tam=9):
+    """Bloco em perspectiva (topo em losango, frente e lado); tam é a largura total."""
+    m, h = tam // 2, tam // 4
+    alt = tam - 2
+    d.polygon([(x, y + h), (x + m, y), (x + tam, y + h), (x + m, y + 2 * h)], fill=hexa(topo))
+    d.polygon([(x, y + h), (x + m, y + 2 * h), (x + m, y + 2 * h + alt), (x, y + h + alt)], fill=hexa(frente))
+    d.polygon([(x + m, y + 2 * h), (x + tam, y + h), (x + tam, y + h + alt), (x + m, y + 2 * h + alt)], fill=hexa(lado))
+
+
+def icone_furia_de_rochas():
+    """Punho de Conner (manga preta) acertando em cheio um bloco de terra com grama que se parte em
+    estilhaços, com o estalo do impacto; mais dois blocos pairam atrás na aura azul, esperando a vez."""
+    from hud import brilho, contornar
+    t, d = _icone()
+    brilho(t, 8, 8, 8, hexa("#5FB8FF"), 0.5)
+    brilho(t, 25, 6, 7, hexa("#5FB8FF"), 0.5)
+    brilho(t, 19, 17, 9, hexa("#FFE08A"), 0.8)
+    fundo = t.img.copy()
+    t.img.paste((0, 0, 0, 0), (0, 0, 32, 32))
+    # Os dois que esperam, pequenos e altos.
+    _bloco_iso(t, d, 3, 3, "#6CB040", "#7A5636", "#5A3E26", 8)
+    d.line([(3, 5), (7, 7)], fill=hexa("#4E8A30"))
+    _bloco_iso(t, d, 21, 1, "#9AA0AA", "#7E838E", "#5E626C", 8)
+    t.p(23, 6, hexa("#B4B8C0")); t.p(26, 8, hexa("#5A5E66"))
+    # O bloco golpeado, maior, já rachando.
+    _bloco_iso(t, d, 15, 10, "#7CC04A", "#7A5636", "#5A3E26", 13)
+    d.line([(15, 13), (21, 16)], fill=hexa("#4E8A30"))
+    d.line([(21, 16), (28, 13)], fill=hexa("#3E7024"))
+    for pts in (((21, 17), (20, 20), (22, 22), (21, 26)), ((21, 18), (24, 20), (26, 19)), ((20, 20), (17, 21))):
+        d.line(pts, fill=hexa("#2A1A0E"), width=1)
+    # Punho vindo da esquerda, de baixo: manga de couro preta, punho fechado com os nós dos dedos.
+    d.polygon([(0, 31), (0, 22), (6, 18), (10, 22), (5, 31)], fill=hexa("#1E1E24"))
+    d.line([(1, 23), (6, 19)], fill=hexa("#5B6274"))
+    d.polygon([(6, 18), (12, 14), (17, 17), (15, 22), (10, 23)], fill=hexa("#E7B48E"))
+    d.line([(12, 15), (16, 18)], fill=hexa("#F8D2B0"))
+    for pts in (((11, 16), (14, 18)), ((10, 18), (14, 20)), ((9, 20), (12, 22))):  # dobras dos dedos
+        d.line(pts, fill=hexa("#B07A58"))
+    d.line([(7, 19), (10, 17)], fill=hexa("#C08A66"))  # polegar
+    for x, y in ((15, 17), (15, 19), (14, 21)):
+        t.p(x, y, hexa("#FFE2C8"))  # nós dos dedos
+    contornar(t)
+    base = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    base.alpha_composite(fundo)
+    base.alpha_composite(t.img)
+    t.img.paste(base)
+    # Estalo do golpe: raios brancos e amarelos saindo do ponto de contato.
+    for ang, r in ((-60, 6), (-20, 7), (25, 6), (70, 5), (200, 5)):
+        a = math.radians(ang)
+        x0, y0 = 17 + 2 * math.cos(a), 17 + 2 * math.sin(a)
+        d.line([(x0, y0), (17 + r * math.cos(a), 17 + r * math.sin(a))], fill=hexa("#FFF4C0"), width=1)
+    t.p(17, 17, hexa("#FFFFFF")); t.p(18, 16, hexa("#FFFFFF"))
+    # Estilhaços voando para a direita.
+    for x, y, c in ((29, 20, "#7A5636"), (30, 25, "#5A3E26"), (27, 28, "#7A5636"), (30, 16, "#6CB040")):
+        d.rectangle([x, y, x + 1, y + 1], fill=hexa(c))
+    for x, y in ((14, 4), (29, 4), (2, 13)):
+        t.p(x, y, hexa("#D8F0FF"))
+    return t
+
+
+def icone_escalada_sismica():
+    """Três plataformas de terra em escada, com as arestas acesas em brasa pela telecinese; o arco
+    pontilhado dos saltos de uma em uma e o mergulho final até o chão, que racha num anel de impacto."""
+    from hud import brilho, contornar
+    t, d = _icone()
+    brilho(t, 25, 27, 9, hexa("#FFB060"), 0.9)
+    brilho(t, 26, 14, 7, hexa("#8FD0FF"), 0.75)  # o ar cortado em volta dele no mergulho
+    fundo = t.img.copy()
+    t.img.paste((0, 0, 0, 0), (0, 0, 32, 32))
+    # Chão rachado no ponto da batida (à direita, abaixo do fim do mergulho).
+    d.rectangle([0, 28, 31, 31], fill=hexa("#6B4A2E"))
+    d.rectangle([0, 28, 31, 28], fill=hexa("#5E9C3A"))
+    for pts in (((25, 29), (21, 31)), ((25, 29), (29, 31)), ((25, 29), (17, 30), (13, 31))):
+        d.line(pts, fill=hexa("#1E120A"))
+    # Plataformas: (x, y, largura), subindo da esquerda para a direita.
+    plats = ((1, 21, 8), (8, 14, 8), (15, 7, 8))
+    for x, y, w in plats:
+        d.polygon([(x, y), (x + w, y), (x + w - 1, y + 3), (x + w - 3, y + 5), (x + 2, y + 5), (x + 1, y + 3)],
+                  fill=hexa("#7A5636"))
+        d.polygon([(x + 2, y + 5), (x + w - 3, y + 5), (x + w // 2, y + 7)], fill=hexa("#7E838E"))
+        d.rectangle([x, y - 1, x + w, y], fill=hexa("#6CB040"))
+        d.line([(x + 1, y - 1), (x + w - 2, y - 1)], fill=hexa("#9AD860"))
+        t.p(x + 3, y + 2, hexa("#5A3E26")); t.p(x + w - 2, y + 3, hexa("#5A3E26"))
+    # Superboy mergulhando de punho à frente: camiseta preta, emblema vermelho, calça escura.
+    d.polygon([(25, 13), (28, 11), (30, 14), (27, 17)], fill=hexa("#2A2A34"))     # tronco
+    d.line([(28, 11), (30, 14)], fill=hexa("#5B6274"))                           # luz no ombro
+    for x, y in ((26, 14), (27, 14), (27, 13), (28, 15)):
+        t.p(x, y, hexa("#E3262E"))
+    d.line([(29, 12), (31, 9)], fill=hexa("#1D2130"), width=2)                   # pernas para cima
+    d.ellipse([22, 10, 25, 13], fill=hexa("#E7B48E"))                            # cabeça
+    t.p(23, 10, hexa("#16161C")); t.p(24, 10, hexa("#16161C"))
+    d.line([(26, 16), (24, 19)], fill=hexa("#E7B48E"), width=2)                   # braço esticado
+    d.rectangle([23, 19, 24, 20], fill=hexa("#F8D2B0"))                           # punho
+    contornar(t)
+    base = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    base.alpha_composite(fundo)
+    base.alpha_composite(t.img)
+    t.img.paste(base)
+    # Brasa nas arestas de baixo de cada plataforma.
+    for x, y, w in plats:
+        t.p(x + 1, y + 4, hexa("#FF8A3A")); t.p(x + 2, y + 5, hexa("#FF8A3A"))
+        t.p(x + w - 1, y + 4, hexa("#FF8A3A")); t.p(x + w - 2, y + 5, hexa("#FF8A3A"))
+        t.p(x + w // 2, y + 8, hexa("#FFC070"))
+    # Arcos pontilhados dos saltos.
+    for (ax, ay), (bx, by) in (((5, 19), (12, 12)), ((12, 12), (19, 5))):
+        for k in (1, 3, 5, 7):
+            u = k / 8
+            t.p(round(ax + (bx - ax) * u), round(ay + (by - ay) * u - 9 * u * (1 - u)), hexa("#FFFFFF", 220))
+    # Rastro do mergulho e linhas de velocidade até o chão.
+    for k in range(3):
+        d.line([(23 + k, 22 + k * 2), (23 + k, 23 + k * 2)], fill=hexa("#FFE6A0"))
+    d.line([(29, 18), (30, 22)], fill=hexa("#DDE6F4"))
+    d.line([(20, 17), (20, 21)], fill=hexa("#DDE6F4"))
+    # Anel de impacto.
+    d.arc([17, 24, 32, 32], start=180, end=360, fill=hexa("#FFF4C0"), width=1)
+    d.arc([13, 22, 36, 34], start=195, end=345, fill=hexa("#FFB060"), width=1)
+    t.p(25, 27, hexa("#FFFFFF"))
+    return t
+
 ICONES_SUPERS = {
     "investida_aerea": icone_investida_aerea,
     "nave_kryptoniana": icone_nave_kryptoniana,
     "telecinese_tatil": icone_telecinese_tatil,
     "escudo_telecinetico": icone_escudo_telecinetico,
     "ilha_telecinetica": icone_ilha_telecinetica,
+    "furia_de_rochas": icone_furia_de_rochas,
+    "escalada_sismica": icone_escalada_sismica,
 }
 
 

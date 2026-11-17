@@ -92,6 +92,7 @@ public final class Transformacao {
         com.danrod.dcuniverse.ability.active.Gancho.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.Veiculo.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.Telecinese.aoDestransformar(player);
+        com.danrod.dcuniverse.ability.active.Escalada.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.EscudoTk.aoDestransformar(player);
         com.danrod.dcuniverse.ability.active.Ilha.aoDestransformar(player);
         DemoHud.parar(player);

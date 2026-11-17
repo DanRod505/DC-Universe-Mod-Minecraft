@@ -612,6 +612,169 @@ habs["superman.giro"] = {
 }
 
 
+# ================================================================ Superboy (telecinese tátil)
+sb = {}
+
+
+def cena(chaves, poses, suave="tudo"):
+    """Junta poses inteiras no tempo: chaves = [(t, nome_da_pose)], poses = {nome: {osso: {"rotation"/"position": v}}}.
+    Cada osso recebe um quadro em cada tempo (o que a pose não diz fica neutro)."""
+    ossos = {}
+    for t, nome in chaves:
+        for osso, canais in poses[nome].items():
+            for canal in canais:
+                ossos.setdefault(osso, {}).setdefault(canal, [])
+    for osso, canais in ossos.items():
+        for canal in canais:
+            canais[canal] = kf([(t, poses[nome].get(osso, {}).get(canal, NEUTRO)) for t, nome in chaves], suave)
+    return ossos
+
+
+def pose(**ossos):
+    """pose(body=(rot,), root=(rot, pos), ...): rot e pos em listas; atalho para montar as poses do Superboy."""
+    out = {}
+    for osso, v in ossos.items():
+        if osso.endswith("_pos"):
+            out.setdefault(osso[:-4], {})["position"] = v
+        else:
+            out.setdefault(osso, {})["rotation"] = v
+    return out
+
+
+# ---------------------------------------------------------------- Fúria de Rochas
+# Referências do Dalton (17/11/2026): ele se abaixa e soca o chão (três blocos de grama sobem à frente com terra
+# esfarelando), depois acerta cada bloco: soco de direita, chute lateral e um direto com o corpo todo, e cada um
+# voa contra um inimigo. Tempos: punho no chão em 0.4 (o "windup"); golpes em 0.85, 1.25 e 1.7.
+R = {
+    "N": pose(),
+    "arma": pose(root=[10, 0, 0], root_pos=[0, 2, 0], body=[16, -14, 0], head=[-10, 10, 0], right_arm=[-160, 0, 24],
+                 right_forearm=[-40, 0, 0], left_arm=[10, 0, -22], left_forearm=[-30, 0, 0], right_leg=[-24, 0, 8],
+                 right_shin=[40, 0, 0], left_leg=[10, 0, -8], left_shin=[30, 0, 0]),
+    "chao": pose(root=[26, 0, 0], root_pos=[0, 7, -2], body=[30, 10, 0], head=[-34, 0, 0], right_arm=[-58, 0, 6],
+                 right_forearm=[-4, 0, 0], left_arm=[18, 20, -34], left_forearm=[-50, 0, 0], right_leg=[-70, 0, 10],
+                 right_shin=[96, 0, 0], left_leg=[-10, 0, -10], left_shin=[100, 0, 0]),
+    "olha": pose(root_pos=[0, 2, 0], body=[4, 10, 0], head=[-26, 0, 0], right_arm=[-36, -18, 14], right_forearm=[-110, 0, 0],
+                 left_arm=[-48, 22, -10], left_forearm=[-92, 0, 0], right_leg=[14, 0, 7], left_leg=[-16, 0, -5],
+                 right_shin=[22, 0, 0], left_shin=[14, 0, 0]),
+    "soco1_arma": pose(root_pos=[0, 1.6, 1], body=[2, 32, 0], head=[-12, -16, 0], right_arm=[-14, -8, 22], right_forearm=[-125, 0, 0],
+                       left_arm=[-60, 20, -10], left_forearm=[-90, 0, 0], right_leg=[18, 0, 7], left_leg=[-20, 0, -5],
+                       right_shin=[22, 0, 0], left_shin=[18, 0, 0]),
+    "soco1": pose(root_pos=[0, 1.4, -3], root=[6, 0, 0], body=[6, -42, 0], head=[-14, 26, 0], right_arm=[-112, -6, 0],
+                  right_forearm=[-2, 0, 0], left_arm=[-30, 30, -18], left_forearm=[-118, 0, 0], right_leg=[30, 0, 6],
+                  left_leg=[-30, 0, -5], right_shin=[4, 0, 0], left_shin=[30, 0, 0]),
+    "chute_arma": pose(root_pos=[0, 1, 0], body=[-4, -30, 0], head=[-8, 24, 0], right_arm=[-40, 0, 40], right_forearm=[-80, 0, 0],
+                       left_arm=[-50, 0, -40], left_forearm=[-80, 0, 0], right_leg=[-70, -10, 30], right_shin=[100, 0, 0],
+                       left_leg=[6, 0, -6], left_shin=[20, 0, 0]),
+    "chute": pose(root_pos=[0, 0, 0], root=[-8, 0, 0], body=[-16, -36, 0], head=[0, 30, 0], right_arm=[-20, 0, 60],
+                  right_forearm=[-40, 0, 0], left_arm=[-70, 0, -50], left_forearm=[-60, 0, 0], right_leg=[-100, -20, 26],
+                  right_shin=[2, 0, 0], left_leg=[10, 0, -6], left_shin=[14, 0, 0]),
+    "direto_arma": pose(root_pos=[0, 2, 1.5], body=[6, -38, 0], head=[-12, 30, 0], right_arm=[-70, -20, 10], right_forearm=[-100, 0, 0],
+                        left_arm=[-10, 10, -24], left_forearm=[-125, 0, 0], right_leg=[-20, 0, 7], left_leg=[20, 0, -5],
+                        right_shin=[30, 0, 0], left_shin=[10, 0, 0]),
+    "direto": pose(root_pos=[0, 2, -4], root=[10, 0, 0], body=[12, 44, 0], head=[-16, -30, 0], right_arm=[-20, -30, 26],
+                   right_forearm=[-120, 0, 0], left_arm=[-104, 6, 0], left_forearm=[0, 0, 0], right_leg=[34, 0, 6],
+                   left_leg=[-38, 0, -5], right_shin=[6, 0, 0], left_shin=[40, 0, 0]),
+}
+FP_R = {
+    "N": pose(),
+    "arma": pose(fp_right_arm_pos=[2, 4, 4], fp_right_arm=[-50, 0, 0]),
+    "chao": pose(fp_right_arm_pos=[-2, -4, -8], fp_right_arm=[40, 30, -10], fp_left_arm_pos=[0, -10, 4]),
+    "olha": pose(fp_right_arm_pos=[-2.5, 4, 1], fp_right_arm=[0, 22, -6], fp_left_arm_pos=[2.5, 3.4, 0.5], fp_left_arm=[0, -18, 6]),
+    "soco1_arma": pose(fp_right_arm_pos=[1.5, -0.5, 3], fp_right_arm=[0, -6, 0], fp_left_arm_pos=[2.5, 3.4, 0.5]),
+    "soco1": pose(fp_right_arm_pos=[-6.5, 2, -11], fp_right_arm=[0, 62, -12], fp_left_arm_pos=[2.5, 2, 2]),
+    "chute_arma": pose(fp_right_arm_pos=[-4, 2, 2], fp_left_arm_pos=[4, 2, 2]),
+    "chute": pose(fp_right_arm_pos=[-6, 0, 3], fp_left_arm_pos=[6, 0, 3]),
+    "direto_arma": pose(fp_left_arm_pos=[2.5, 0.5, 3], fp_left_arm=[0, 8, 4], fp_right_arm_pos=[-2.5, 3.4, 1]),
+    "direto": pose(fp_left_arm_pos=[5, 2.2, -11], fp_left_arm=[0, -60, 10], fp_right_arm_pos=[-1, 1, 2.5]),
+}
+for k in R:
+    R[k].update(FP_R[k])
+ROCHAS_T = [(0, "N"), (0.2, "arma"), (0.4, "chao"), (0.55, "chao"), (0.72, "olha"), (0.76, "soco1_arma"), (0.85, "soco1"),
+            (0.98, "soco1"), (1.1, "chute_arma"), (1.25, "chute"), (1.38, "chute"), (1.55, "direto_arma"), (1.7, "direto"),
+            (1.85, "direto"), (2.15, "N")]
+sb["superboy.rochas"] = {
+    "animation_length": 2.15, "dcuniverse:entrada": 0.06, "dcuniverse:saida": 0.2, "dcuniverse:pivo_raiz": 12,
+    "dcuniverse:rastros": {"right_arm": [[0.76, 0.9]], "right_leg": [[1.12, 1.3]], "left_arm": [[1.56, 1.74]]},
+    "dcuniverse:eventos": [
+        {"t": 0.0, "fx": "agacha"},
+        {"t": 0.4, "fx": "agacha", "tremor": 4, "tremor_ticks": 8, "zoom": 0.08, "flash": "#FFE2B0", "clarao": 0.15},
+        {"t": 0.85, "tremor": 1.6, "tremor_ticks": 4, "zoom": -0.04},
+        {"t": 1.25, "tremor": 1.8, "tremor_ticks": 4, "zoom": -0.04},
+        {"t": 1.7, "tremor": 3.2, "tremor_ticks": 7, "zoom": -0.1, "flash": "#FFFFFF", "clarao": 0.2},
+    ],
+    "bones": cena(ROCHAS_T, R),
+}
+
+# ---------------------------------------------------------------- Escalada Sísmica
+# Referências do Dalton: o pisão ergue três plataformas de terra em escada (com as bordas acesas); ele salta de uma em
+# uma e termina descendo de punho no chão, num impacto que levanta terra e arremessa os inimigos em volta. Os tempos
+# seguem ability/active/Escalada com os valores do JSON: pisão em 0.45, saltos de 0.5 s com pausa de 0.2 s a partir de
+# 1.15 (o "rise" de 0.7 s), mergulho de 3.25 a 3.85 (a batida).
+E = {
+    "N": pose(),
+    "joelho": pose(root_pos=[0, -1, 0], body=[-6, 0, 0], head=[-4, 0, 0], right_arm=[-30, 0, 40], right_forearm=[-40, 0, 0],
+                   left_arm=[-30, 0, -40], left_forearm=[-40, 0, 0], right_leg=[-86, 0, 6], right_shin=[96, 0, 0],
+                   left_leg=[4, 0, -4], left_shin=[6, 0, 0]),
+    "pisa": pose(root_pos=[0, 3, 0], root=[8, 0, 0], body=[16, 0, 0], head=[-14, 0, 0], right_arm=[10, 0, 34], right_forearm=[-60, 0, 0],
+                 left_arm=[10, 0, -34], left_forearm=[-60, 0, 0], right_leg=[-16, 0, 10], right_shin=[10, 0, 0],
+                 left_leg=[-30, 0, -8], left_shin=[60, 0, 0]),
+    "agacha": pose(root_pos=[0, 4.5, 0], root=[12, 0, 0], body=[18, 0, 0], head=[-24, 0, 0], right_arm=[34, 0, 14], right_forearm=[-30, 0, 0],
+                   left_arm=[34, 0, -14], left_forearm=[-30, 0, 0], right_leg=[-48, 0, 6], right_shin=[86, 0, 0],
+                   left_leg=[-38, 0, -6], left_shin=[76, 0, 0]),
+    "impulso": pose(root_pos=[0, -1, 0], root=[-6, 0, 0], body=[-8, 0, 0], head=[-8, 0, 0], right_arm=[-150, 0, 20], right_forearm=[-10, 0, 0],
+                    left_arm=[-150, 0, -20], left_forearm=[-10, 0, 0], right_leg=[10, 0, 4], right_shin=[10, 0, 0],
+                    left_leg=[16, 0, -4], left_shin=[16, 0, 0]),
+    "ar": pose(root_pos=[0, 1, 0], root=[10, 0, 0], body=[10, 0, 0], head=[-16, 0, 0], right_arm=[-70, 0, 34], right_forearm=[-60, 0, 0],
+               left_arm=[-60, 0, -34], left_forearm=[-60, 0, 0], right_leg=[-72, 0, 6], right_shin=[100, 0, 0],
+               left_leg=[-36, 0, -6], left_shin=[84, 0, 0]),
+    "pouso": pose(root_pos=[0, 5.5, 0], root=[14, 0, 0], body=[20, 0, 0], head=[-26, 0, 0], right_arm=[40, 0, 24], right_forearm=[-36, 0, 0],
+                  left_arm=[40, 0, -24], left_forearm=[-36, 0, 0], right_leg=[-56, 0, 8], right_shin=[96, 0, 0],
+                  left_leg=[-44, 0, -8], left_shin=[86, 0, 0]),
+    "arma_soco": pose(root_pos=[0, -1, 0], root=[-10, 0, 0], body=[-14, 0, 0], head=[-30, 0, 0], right_arm=[-172, -6, 10],
+                      right_forearm=[-30, 0, 0], left_arm=[-40, 10, -50], left_forearm=[-40, 0, 0], right_leg=[-60, 0, 6],
+                      right_shin=[90, 0, 0], left_leg=[-20, 0, -6], left_shin=[60, 0, 0]),
+    "desce": pose(root_pos=[0, 0, 0], root=[24, 0, 0], body=[20, 0, 0], head=[-34, 0, 0], right_arm=[-120, -6, 10],
+                  right_forearm=[0, 0, 0], left_arm=[-20, 10, -60], left_forearm=[-30, 0, 0], right_leg=[-40, 0, 6],
+                  right_shin=[70, 0, 0], left_leg=[-10, 0, -6], left_shin=[50, 0, 0]),
+    "batida": pose(root_pos=[0, 7, 0], root=[16, 0, 0], body=[26, 10, 0], head=[-6, 0, 0], right_arm=[-40, 0, 6],
+                   right_forearm=[-10, 0, 0], left_arm=[-30, 20, -30], left_forearm=[-70, 0, 0], right_leg=[-82, 0, 8],
+                   right_shin=[96, 0, 0], left_leg=[-6, 0, -6], left_shin=[100, 0, 0]),
+}
+FP_E = {
+    "N": pose(), "joelho": pose(), "pisa": pose(fp_right_arm_pos=[2, -3, 2], fp_left_arm_pos=[-2, -3, 2]),
+    "agacha": pose(fp_right_arm_pos=[3, -6, 3], fp_left_arm_pos=[-3, -6, 3]),
+    "impulso": pose(fp_right_arm_pos=[-3, 6, -2], fp_left_arm_pos=[3, 6, -2]),
+    "ar": pose(fp_right_arm_pos=[-1, 1, -2], fp_left_arm_pos=[1, 1, -2]),
+    "pouso": pose(fp_right_arm_pos=[3, -7, 3], fp_left_arm_pos=[-3, -7, 3]),
+    "arma_soco": pose(fp_right_arm_pos=[-2, 9, -3], fp_right_arm=[-70, 20, 0], fp_left_arm_pos=[2, -4, 2]),
+    "desce": pose(fp_right_arm_pos=[-2, 2, -8], fp_right_arm=[20, 20, 0], fp_left_arm_pos=[2, -4, 2]),
+    "batida": pose(fp_right_arm_pos=[-2, -4, -8], fp_right_arm=[40, 30, -10], fp_left_arm_pos=[0, -10, 4]),
+}
+for k in E:
+    E[k].update(FP_E[k])
+esc = [(0, "N"), (0.25, "joelho"), (0.45, "pisa"), (0.75, "agacha"), (1.1, "agacha")]
+ini = 1.15
+for i in range(3):
+    esc += [(ini + 0.06, "impulso"), (ini + 0.25, "ar"), (ini + 0.44, "ar"), (ini + 0.5, "pouso")]
+    if i < 2:
+        esc += [(ini + 0.66, "agacha")]
+    ini += 0.7
+esc += [(3.12, "agacha"), (3.32, "arma_soco"), (3.62, "desce"), (3.84, "desce"), (3.86, "batida"), (4.2, "batida"), (4.6, "N")]
+ev = [{"t": 0.0, "som": "dcuniverse:habilidade.carga", "vol": 0.8},
+      {"t": 0.45, "fx": "agacha", "tremor": 5, "tremor_ticks": 10, "zoom": 0.1, "flash": "#FFC890", "clarao": 0.15}]
+for i in range(3):
+    ev.append({"t": round(1.15 + 0.7 * i, 2), "fx": "agacha", "zoom": -0.05})
+    ev.append({"t": round(1.65 + 0.7 * i, 2), "tremor": 1.2, "tremor_ticks": 4, "zoom": 0.04})
+ev += [{"t": 3.3, "som": "dcuniverse:habilidade.carga", "vol": 1.2, "zoom": -0.12},
+       {"t": 3.85, "fx": "aterrissa", "tremor": 10, "tremor_ticks": 16, "zoom": 0.16, "flash": "#FFFFFF", "clarao": 0.55}]
+sb["superboy.escalada"] = {
+    "animation_length": 4.6, "dcuniverse:entrada": 0.06, "dcuniverse:saida": 0.3, "dcuniverse:pivo_raiz": 12,
+    "dcuniverse:rastros": {"right_arm": [[3.3, 3.86]], "right_leg": [[0.3, 0.46]]},
+    "dcuniverse:eventos": ev,
+    "bones": cena(esc, E),
+}
+
+
 def gravar(nome, sobre, conteudo):
     arq = {"format_version": "1.8.0", "dcuniverse:sobre": sobre, "animations": conteudo}
     texto = json.dumps(arq, indent=2, ensure_ascii=False)
@@ -622,3 +785,4 @@ def gravar(nome, sobre, conteudo):
 
 gravar("superman_combo", "Guarda, combo, golpe carregado, defesa e aparo do Superman (v0.7). Eixos do modelo Java: graus somados/impostos ao osso, posição em pixels. Ver client/anim/Animacao.java e tools/arte/animacoes.py.", anims)
 gravar("superman_habilidades", "Habilidades coreografadas do Superman (v0.7): visão de calor, sopro congelante, investida de aço, palmas sônicas, giro de calor e a suprema. Os eventos são a coreografia (client/Cena). Ver tools/arte/animacoes.py.", habs)
+gravar("superboy_habilidades", "Habilidades coreografadas do Superboy (v0.7): Fúria de Rochas e Escalada Sísmica, com a telecinese tátil. Os eventos são a coreografia (client/Cena). Ver tools/arte/animacoes.py.", sb)

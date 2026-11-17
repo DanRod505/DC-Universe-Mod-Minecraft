@@ -147,6 +147,8 @@ public final class Eventos {
             Onda.tick();
             com.danrod.dcuniverse.ability.active.Palmas.tick();
             com.danrod.dcuniverse.ability.active.GiroCalor.tick();
+            com.danrod.dcuniverse.ability.active.Rochas.tick();
+            com.danrod.dcuniverse.ability.active.Escalada.tick();
             com.danrod.dcuniverse.combate.Combo.tick(e.getServer());
             com.danrod.dcuniverse.combate.Defesa.tick();
             com.danrod.dcuniverse.ability.Congelamento.tick();
@@ -170,6 +172,8 @@ public final class Eventos {
             com.danrod.dcuniverse.ability.Coreografia.limpar();
             com.danrod.dcuniverse.ability.active.Palmas.limpar();
             com.danrod.dcuniverse.ability.active.GiroCalor.limpar();
+            com.danrod.dcuniverse.ability.active.Rochas.limpar();
+            com.danrod.dcuniverse.ability.active.Escalada.limpar();
             com.danrod.dcuniverse.combate.Defesa.limpar();
             com.danrod.dcuniverse.ability.Congelamento.limpar();
             Fortaleza.limpar();

@@ -39,9 +39,12 @@ import java.util.Map;
  * e vira bloco. Se sumir antes (o dono saiu, o mundo fechou), o bloco é devolvido como item: nada se perde.
  */
 public class BlocoTelecinetico extends Entity {
-    public static final int SEGURO = 0, VOANDO = 1, POUSANDO = 2;
+    public static final int SEGURO = 0, VOANDO = 1, POUSANDO = 2, PAIRANDO = 3;
+    /** Estilo de desenho: o bloco comum da telecinese, a rocha das habilidades de combate e o piso das plataformas. */
+    public static final int COMUM = 0, ROCHA = 1, PLATAFORMA = 2;
     private static final EntityDataAccessor<BlockState> BLOCO = SynchedEntityData.defineId(BlocoTelecinetico.class, EntityDataSerializers.BLOCK_STATE);
     private static final EntityDataAccessor<Integer> FASE = SynchedEntityData.defineId(BlocoTelecinetico.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> ESTILO = SynchedEntityData.defineId(BlocoTelecinetico.class, EntityDataSerializers.INT);
 
     private final InterpolationHandler interpolacao = new InterpolationHandler(this, 2);
     private ServerPlayer dono;
@@ -52,8 +55,20 @@ public class BlocoTelecinetico extends Entity {
     private float dano;
     /** Quantas vezes cada alvo já foi atingido por este grupo (compartilhado entre os blocos do mesmo lançamento). */
     private Map<Integer, Integer> golpes;
+    /** Empurrão de quem a rocha acerta (as do combo; o comum é 0,8). */
+    private double empurra = 0.8;
     private int voo;
     private boolean resolvido;
+    /** Pairando: o ponto onde ele fica parado no ar (os pés da entidade = a base do bloco). */
+    private Vec3 ancora;
+    private float suavidade = 0.25f;
+    /**
+     * Efêmero: cópia do chão feita pela telecinese onde o terreno não é natural (construção, estrada, perto de
+     * estrutura). Ao fim ele se desfaz em pó, sem virar bloco nem item: o mundo fica como estava.
+     */
+    private boolean efemero;
+    /** Ao acertar alguém, o bloco se espatifa no alvo e cai ali (as rochas do combo) em vez de seguir voando. */
+    private boolean estilhaca;
 
     /** Giro visual (graus por tick) e a fase de cada bloco, para não girarem todos juntos. */
     public final float giroX, giroY, fase;
@@ -77,10 +92,37 @@ public class BlocoTelecinetico extends Entity {
         return b;
     }
 
+    /**
+     * Bloco solto para as habilidades coreografadas: nasce em de (pés = base do bloco) e já sobe pairando até ancora.
+     * efemero: veja o campo. O bloco real deve ter sido tirado do mundo antes por quem chama.
+     */
+    public static BlocoTelecinetico pairando(ServerLevel level, ServerPlayer dono, Vec3 de, BlockState st, Vec3 ancora,
+                                           boolean efemero, int estilo) {
+        BlocoTelecinetico b = new BlocoTelecinetico(Entidades.BLOCO_TK.get(), level);
+        b.entityData.set(BLOCO, st);
+        b.entityData.set(ESTILO, estilo);
+        b.entityData.set(FASE, PAIRANDO);
+        b.dono = dono;
+        b.efemero = efemero;
+        b.ancora = ancora;
+        b.setPos(de);
+        level.addFreshEntity(b);
+        return b;
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder b) {
         b.define(BLOCO, Blocks.STONE.defaultBlockState());
         b.define(FASE, SEGURO);
+        b.define(ESTILO, COMUM);
+    }
+
+    public int estilo() {
+        return entityData.get(ESTILO);
+    }
+
+    public boolean efemero() {
+        return efemero;
     }
 
     public BlockState bloco() {
@@ -119,12 +161,27 @@ public class BlocoTelecinetico extends Entity {
 
     // ------------------------------------------------------------------ comandos (ability/active/Telecinese)
 
+    public void empurrar(double forca) {
+        empurra = forca;
+    }
+
     public void lancar(Vec3 velocidade, float dano, Map<Integer, Integer> golpes) {
         vel = velocidade;
         this.dano = dano;
         this.golpes = golpes;
         voo = 0;
         entityData.set(FASE, VOANDO);
+    }
+
+    /** Pairando: muda o ponto no ar (suavidade = fração do caminho andada por tick). */
+    public void pairar(Vec3 onde, float suavidade) {
+        ancora = onde;
+        this.suavidade = suavidade;
+        entityData.set(FASE, PAIRANDO);
+    }
+
+    public void estilhacar(boolean sim) {
+        estilhaca = sim;
     }
 
     /** Solta sem força: cai e vira bloco onde parar. */
@@ -144,6 +201,26 @@ public class BlocoTelecinetico extends Entity {
         super.tick();
         if (level().isClientSide()) {
             interpolacao.interpolate();
+            if (fase() == PAIRANDO && random.nextInt(estilo() == PLATAFORMA ? 5 : 2) == 0) {
+                // Terra esfarelando por baixo do que a telecinese segura no ar (mais quando ainda está subindo).
+                boolean subindo = getY() - yo > 0.02;
+                for (int i = 0; i < (subindo ? 3 : 1); i++) {
+                    level().addParticle(new BlockParticleOption(ParticleTypes.FALLING_DUST, bloco()),
+                        getX() + (random.nextDouble() - 0.5) * 0.9, getY() - 0.05, getZ() + (random.nextDouble() - 0.5) * 0.9, 0, 0, 0);
+                }
+                if (subindo) {
+                    level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, bloco()),
+                        getX() + (random.nextDouble() - 0.5) * 0.8, getY() - 0.2, getZ() + (random.nextDouble() - 0.5) * 0.8,
+                        0, -0.1, 0);
+                }
+            }
+            if (fase() == VOANDO && estilo() == ROCHA && getDeltaMovement().lengthSqr() + position().distanceToSqr(xo, yo, zo) > 0.5) {
+                for (int i = 0; i < 2; i++) {
+                    level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, bloco()),
+                        getX() + (random.nextDouble() - 0.5) * 0.7, getY() + random.nextDouble(), getZ() + (random.nextDouble() - 0.5) * 0.7, 0, 0, 0);
+                }
+                if (random.nextInt(3) == 0) level().addParticle(ParticleTypes.POOF, xo, yo + 0.5, zo, 0, 0, 0);
+            }
             if (random.nextInt(fase() == SEGURO ? 6 : 3) == 0) {
                 level().addParticle(new net.minecraft.core.particles.DustParticleOptions(0x8FD0FF, 0.7f),
                     getX() + (random.nextDouble() - 0.5) * 1.2, getY() + random.nextDouble() * 1.1, getZ() + (random.nextDouble() - 0.5) * 1.2, 0, 0, 0);
@@ -155,6 +232,7 @@ public class BlocoTelecinetico extends Entity {
             case SEGURO -> segurar(level);
             case VOANDO -> voar(level);
             case POUSANDO -> descer(level);
+            case PAIRANDO -> pairar(level);
             default -> {}
         }
     }
@@ -176,6 +254,18 @@ public class BlocoTelecinetico extends Entity {
         setPos(p.lerp(alvo, tickCount < 10 ? 0.18 : 0.35));
     }
 
+    /** Vai até a âncora (suave) e fica ali balançando de leve; a plataforma fica firme. */
+    private void pairar(ServerLevel level) {
+        if (ancora == null || dono == null || dono.isRemoved() || tickCount > 20 * 40) {
+            soltar();
+            return;
+        }
+        double bob = estilo() == PLATAFORMA ? 0 : Math.sin((tickCount + fase) * 0.15) * 0.06;
+        Vec3 alvo = ancora.add(0, bob, 0);
+        Vec3 p = position();
+        setPos(p.distanceToSqr(alvo) < 0.0004 ? alvo : p.lerp(alvo, suavidade));
+    }
+
     private void voar(ServerLevel level) {
         voo++;
         vel = vel.add(0, -0.045, 0).scale(0.99);
@@ -189,10 +279,26 @@ public class BlocoTelecinetico extends Entity {
                 golpes.put(e.getId(), n + 1);
                 Alvos.ferir(dono, e, level.damageSources().thrown(this, dono), dano);
                 e.invulnerableTime = 0;
-                Vec3 emp = vel.normalize().scale(0.8);
-                e.setDeltaMovement(e.getDeltaMovement().add(emp.x, 0.3, emp.z));
+                Vec3 emp = vel.normalize().scale(estilhaca ? empurra : 0.8);
+                e.setDeltaMovement(e.getDeltaMovement().add(emp.x, estilhaca ? 0.45 : 0.3, emp.z));
                 e.hurtMarked = true;
                 vel = vel.scale(0.55);
+                if (estilhaca) {
+                    // Espatifa no alvo: estilhaços, um estalo seco e o que sobra do bloco cai ali.
+                    Vec3 c = e.position().add(0, e.getBbHeight() * 0.6, 0);
+                    level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, bloco()), c.x, c.y, c.z, 40, 0.4, 0.4, 0.4, 0.25);
+                    level.sendParticles(ParticleTypes.CRIT, c.x, c.y, c.z, 14, 0.3, 0.3, 0.3, 0.6);
+                    level.sendParticles(ParticleTypes.EXPLOSION, c.x, c.y, c.z, 1, 0, 0, 0, 0);
+                    level.playSound(null, c.x, c.y, c.z, Sons.GOLPE_PESADO.get(), SoundSource.PLAYERS, 1.2f, 0.9f + random.nextFloat() * 0.2f);
+                    level.playSound(null, c.x, c.y, c.z, bloco().getSoundType().getBreakSound(), SoundSource.BLOCKS, 1.4f, 0.7f);
+                    vel = new Vec3(vel.x * 0.12, 0.15, vel.z * 0.12);
+                    dano = 0;
+                    if (efemero) {
+                        devolver(level);
+                        return;
+                    }
+                    break;
+                }
             }
             Alvos.cristais(dono, caixa, level.damageSources().thrown(this, dono));
         }
@@ -222,6 +328,10 @@ public class BlocoTelecinetico extends Entity {
     /** Vira bloco em onde (se couber e pode construir ali); senão cai como item. */
     private void assentar(ServerLevel level, BlockPos onde, boolean forte) {
         if (resolvido) return;
+        if (efemero) {
+            devolver(level);
+            return;
+        }
         resolvido = true;
         BlockState st = bloco();
         boolean pode = dono == null || level.mayInteract(dono, onde) && dono.mayBuild();
@@ -240,6 +350,13 @@ public class BlocoTelecinetico extends Entity {
     private void devolver(ServerLevel level) {
         if (resolvido) return;
         resolvido = true;
+        if (efemero) {
+            // A cópia se desfaz em pó: nada entra nem sai do mundo.
+            level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, bloco()), getX(), getY() + 0.5, getZ(), 24, 0.35, 0.35, 0.35, 0.1);
+            level.sendParticles(ParticleTypes.POOF, getX(), getY() + 0.5, getZ(), 4, 0.3, 0.3, 0.3, 0.02);
+            discard();
+            return;
+        }
         soltarItem(level, bloco(), position());
         discard();
     }
@@ -255,7 +372,7 @@ public class BlocoTelecinetico extends Entity {
     @Override
     public void remove(RemovalReason motivo) {
         // Sumiu sem virar bloco (o dono saiu, o chunk descarregou, o servidor fechou): devolve como item.
-        if (!resolvido && level() instanceof ServerLevel level && motivo != RemovalReason.KILLED) {
+        if (!resolvido && !efemero && level() instanceof ServerLevel level && motivo != RemovalReason.KILLED) {
             resolvido = true;
             soltarItem(level, bloco(), position());
         }

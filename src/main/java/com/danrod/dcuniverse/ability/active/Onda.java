@@ -55,19 +55,25 @@ public final class Onda implements TipoHabilidade {
             return false;
         }
         Params prm = h.params();
-        Vec3 centro = chao.getLocation();
-        double raio = prm.d("radius", 7);
-        int espalha = Math.max(1, prm.i("spread_ticks", 10));
-        BlockState piso = level.getBlockState(chao.getBlockPos());
-        ATIVAS.add(new Ativa(level, player, centro, raio, espalha, Alvos.dano(p, prm.d("damage_mult", 0.75)),
-            prm.d("knockback", 1.2), prm.d("launch", 0.7), Math.round(Math.min(4f, prm.f("stun", 1.5f)) * 20),
+        disparar(level, player, chao.getLocation(), level.getBlockState(chao.getBlockPos()), prm.d("radius", 7),
+            Math.max(1, prm.i("spread_ticks", 10)), Alvos.dano(p, prm.d("damage_mult", 0.75)), prm.d("knockback", 1.2),
+            prm.d("launch", 0.7), prm.f("stun", 1.5f));
+        player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
+        return true;
+    }
+
+    /**
+     * Uma onda de choque pelo chão a partir de centro (também a do Super Soco da Escalada Sísmica): o anel, a poeira
+     * e o som, e quem a frente alcançar leva dano, é empurrado para fora, jogado para cima e fica lento (stun, s).
+     */
+    public static void disparar(ServerLevel level, ServerPlayer dono, Vec3 centro, BlockState piso, double raio, int espalha,
+                                float dano, double empurra, double lanca, float stun) {
+        ATIVAS.add(new Ativa(level, dono, centro, raio, espalha, dano, empurra, lanca, Math.round(Math.min(4f, stun) * 20),
             new HashSet<>(), new int[1]));
         level.playSound(null, centro.x, centro.y, centro.z, Sons.PISAO.get(), SoundSource.PLAYERS, 2.0f, 1.0f);
         level.playSound(null, centro.x, centro.y, centro.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7f, 0.55f);
         Rede.efeito(level, centro.x, centro.y, centro.z, "slam", (float) raio, espalha, Block.getId(piso));
-        player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
-        if (player.mayBuild()) arrancarPlantas(level, player, BlockPos.containing(centro), (int) raio);
-        return true;
+        if (dono.mayBuild()) arrancarPlantas(level, dono, BlockPos.containing(centro), (int) raio);
     }
 
     /** A onda arranca grama alta, flores e mato no raio (cai o item, como se fosse quebrado à mão). */

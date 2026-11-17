@@ -170,6 +170,10 @@ public final class Voador {
             return;
         }
         if (GiroVisual.mover(p)) return;
+        if (EscaladaVisual.mover(p)) {
+            vel = null;
+            return;
+        }
         if (!voando(p)) {
             vel = null;
             armado = true;

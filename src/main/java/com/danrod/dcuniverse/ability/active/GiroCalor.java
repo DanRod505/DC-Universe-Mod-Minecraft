@@ -246,7 +246,7 @@ public final class GiroCalor implements TipoHabilidade {
     }
 
     /** Chão natural que a cratera pode tirar. */
-    static boolean natural(ServerLevel level, BlockPos p) {
+    public static boolean natural(ServerLevel level, BlockPos p) {
         BlockState b = level.getBlockState(p);
         if (b.isAir() || level.getBlockEntity(p) != null) return false;
         return b.is(net.minecraft.tags.BlockTags.DIRT) || b.is(net.minecraft.tags.BlockTags.GRASS_BLOCKS) || b.is(net.minecraft.tags.BlockTags.SAND)
@@ -257,7 +257,7 @@ public final class GiroCalor implements TipoHabilidade {
     }
 
     /** Há alguma estrutura (do jogo ou do mod) a menos de `margem` blocos? Aí a cratera não abre. */
-    static boolean perto(ServerLevel level, BlockPos p, int margem) {
+    public static boolean perto(ServerLevel level, BlockPos p, int margem) {
         var sm = level.structureManager();
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {

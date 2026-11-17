@@ -33,7 +33,9 @@ public final class TiposHabilidade {
         Map.entry("sonic_clap", new com.danrod.dcuniverse.ability.active.Palmas()),
         Map.entry("flight", new com.danrod.dcuniverse.ability.active.VooAtivo()),
         Map.entry("leap", new com.danrod.dcuniverse.ability.active.SuperPulo()),
-        Map.entry("spinning_beam", new com.danrod.dcuniverse.ability.active.GiroCalor())
+        Map.entry("spinning_beam", new com.danrod.dcuniverse.ability.active.GiroCalor()),
+        Map.entry("rock_combo", new com.danrod.dcuniverse.ability.active.Rochas()),
+        Map.entry("platform_leap", new com.danrod.dcuniverse.ability.active.Escalada())
     ));
 
     private TiposHabilidade() {}

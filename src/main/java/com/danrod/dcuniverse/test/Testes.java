@@ -92,6 +92,8 @@ public final class Testes {
         FUNCOES.register("kryptonian_ship", () -> Testes::nave);
         FUNCOES.register("telekinesis", () -> Testes::telecinese);
         FUNCOES.register("floating_island", () -> Testes::ilha);
+        FUNCOES.register("rock_combo", () -> Testes::furiaDeRochas);
+        FUNCOES.register("platform_leap", () -> Testes::escaladaSismica);
         FUNCOES.register("batch_v03", () -> Testes::loteV03);
         FUNCOES.register("guided_start", () -> Testes::inicioGuiado);
         FUNCOES.register("skill_tree", () -> Testes::arvore);
@@ -1921,9 +1923,75 @@ public final class Testes {
         h.assertTrue(Habilidades.executar(p, conner, esc), "liga o escudo");
         h.assertValueEqual((double) com.danrod.dcuniverse.ability.active.EscudoTk.reducao(p), 0.75, "o escudo corta 75% do dano");
         h.runAfterDelay(60, () -> {
-            long voando = level.getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(80)).size();
+            long voando = level.getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(80),
+                b -> b.estilo() == com.danrod.dcuniverse.content.BlocoTelecinetico.COMUM).size();
             h.assertValueEqual(voando, 0L, "os blocos arremessados assentaram");
             com.danrod.dcuniverse.ability.active.EscudoTk.limpar();
+            Transformacao.destransformar(p);
+            h.succeed();
+        });
+    }
+
+    /** Chão de terra para as habilidades do Superboy que arrancam o piso, e um zumbi parado em (x, 2, z). */
+    private static net.minecraft.world.entity.Mob chaoEZumbi(GameTestHelper h, int ate, int x, int z) {
+        var level = h.getLevel();
+        for (int dx = -3; dx <= 7; dx++) {
+            for (int dz = -2; dz <= ate; dz++) {
+                level.setBlockAndUpdate(h.absolutePos(new net.minecraft.core.BlockPos(dx, 1, dz)), net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState());
+            }
+        }
+        var z0 = h.spawn(net.minecraft.world.entity.EntityTypes.ZOMBIE, new net.minecraft.core.BlockPos(x, 2, z));
+        z0.setNoAi(true);
+        return z0;
+    }
+
+    /** Fúria de Rochas: ergue três blocos do chão, golpeia um a um e as rochas acertam o inimigo à frente. */
+    static void furiaDeRochas(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var zumbi = chaoEZumbi(h, 12, 2, 9);
+        float vida = zumbi.getHealth();
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 2.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        h.assertTrue(Transformacao.transformar(p, SUPERBOY, true), "transformar no Superboy");
+        Personagem conner = EstadoJogador.de(p).personagem();
+        Personagem.Habilidade fr = conner.habilidade("furia_de_rochas");
+        h.assertTrue(fr != null && fr.params().s("anim", null) != null, "Fúria de Rochas no kit, com coreografia");
+        h.assertTrue(com.danrod.dcuniverse.ability.TiposHabilidade.TIPOS.get(fr.tipo()).usar(p, conner, fr), "soco no chão");
+        var rochas = h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(8));
+        h.assertValueEqual(rochas.size(), 3, "três rochas erguidas");
+        h.assertTrue(rochas.stream().allMatch(b -> b.fase() == com.danrod.dcuniverse.content.BlocoTelecinetico.PAIRANDO), "pairando à espera do golpe");
+        h.assertTrue(com.danrod.dcuniverse.ability.active.Rochas.ativa(p), "combo em andamento");
+        h.runAfterDelay(70, () -> {
+            h.assertFalse(com.danrod.dcuniverse.ability.active.Rochas.ativa(p), "os três golpes saíram");
+            h.assertTrue(zumbi.getHealth() < vida || !zumbi.isAlive(), "as rochas acertaram o zumbi (" + zumbi.getHealth() + "/" + vida + ")");
+            Transformacao.destransformar(p);
+            h.succeed();
+        });
+    }
+
+    /** Escalada Sísmica: três plataformas de 3x3 sobem do chão e a batida final fere em área no fim do mergulho. */
+    static void escaladaSismica(GameTestHelper h) {
+        ServerPlayer p = jogador(h);
+        var zumbi = chaoEZumbi(h, 20, 2, 16);
+        float vida = zumbi.getHealth();
+        var aqui = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 0.5));
+        p.snapTo(aqui.x, aqui.y, aqui.z, 0, 0);
+        h.assertTrue(Transformacao.transformar(p, SUPERBOY, true), "transformar no Superboy");
+        Personagem conner = EstadoJogador.de(p).personagem();
+        Personagem.Habilidade es = conner.habilidade("escalada_sismica");
+        h.assertTrue(es != null && es.params().s("anim", null) != null, "Escalada Sísmica no kit, com coreografia");
+        h.assertTrue(com.danrod.dcuniverse.ability.TiposHabilidade.TIPOS.get(es.tipo()).usar(p, conner, es), "pisão");
+        var tiles = h.getLevel().getEntitiesOfClass(com.danrod.dcuniverse.content.BlocoTelecinetico.class, p.getBoundingBox().inflate(16));
+        h.assertValueEqual(tiles.size(), 27, "três plataformas de 3x3");
+        h.assertTrue(tiles.stream().allMatch(b -> b.estilo() == com.danrod.dcuniverse.content.BlocoTelecinetico.PLATAFORMA), "estilo plataforma");
+        h.assertFalse(com.danrod.dcuniverse.ability.TiposHabilidade.TIPOS.get(es.tipo()).usar(p, conner, es), "não repete no meio do percurso");
+        // O jogador de teste não anda (o percurso é do cliente): a batida cai no destino, junto do zumbi.
+        int batida = com.danrod.dcuniverse.ability.active.Escalada.tempos(es.params()).batida();
+        h.runAfterDelay(batida + 14, () -> {
+            h.assertFalse(com.danrod.dcuniverse.ability.active.Escalada.ativa(p), "terminou");
+            h.assertTrue(zumbi.getHealth() < vida || !zumbi.isAlive(), "a batida feriu o zumbi (" + zumbi.getHealth() + "/" + vida + ")");
+            h.assertTrue(tiles.stream().noneMatch(b -> b.isAlive() && b.fase() == com.danrod.dcuniverse.content.BlocoTelecinetico.PAIRANDO),
+                "as plataformas foram soltas");
             Transformacao.destransformar(p);
             h.succeed();
         });
