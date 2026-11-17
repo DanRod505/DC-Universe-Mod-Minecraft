@@ -297,10 +297,21 @@ public final class Testes {
         com.danrod.dcuniverse.ability.Assar.assar(vaca, drops);
         h.assertTrue(drops.get(0).getItem().is(Items.COOKED_BEEF) && drops.get(0).getItem().getCount() == 2, "carne cai assada");
         h.assertTrue(drops.get(1).getItem().is(Items.LEATHER), "couro continua couro");
-        // Batman continua no kit antigo.
-        Transformacao.transformar(p, BATMAN, true);
-        h.assertTrue(EstadoJogador.de(p).personagem().arvore() == null, "Batman sem árvore ainda");
-        h.assertValueEqual(Arvore.montar(p), Rede.ArvoreSync.VAZIO, "sem árvore, pacote vazio");
+        // Os outros heróis também usam a árvore, com as próprias iniciais e sem suprema.
+        java.util.Map<Identifier, List<String>> outros = java.util.Map.of(BATMAN, List.of("gancho", "batarangue", "modo_detetive"),
+            SUPERGIRL, List.of("visao_de_calor", "sopro_congelante", "investida_aerea"),
+            SUPERBOY, List.of("telecinese_tatil", "pisao_sismico", "furia_de_rochas"));
+        for (var o : outros.entrySet()) {
+            Transformacao.transformar(p, o.getKey(), true);
+            Personagem x = EstadoJogador.de(p).personagem();
+            h.assertTrue(x.arvore() != null, o.getKey() + " usa a árvore");
+            h.assertValueEqual(x.arvore().iniciais(), o.getValue(), o.getKey() + ": iniciais");
+            h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, x)), o.getValue(), o.getKey() + ": iniciais nos slots");
+            h.assertTrue(x.suprema() == null, o.getKey() + " sem suprema");
+            h.assertTrue(x.combo() != null, o.getKey() + " com o combo");
+            h.assertValueEqual(x.arvore().lista().size(), x.habilidades().size(), o.getKey() + ": todo o catálogo na árvore");
+            h.assertTrue(Arvore.montar(p) != Rede.ArvoreSync.VAZIO, o.getKey() + ": pacote da árvore");
+        }
         h.succeed();
     }
 
@@ -1073,48 +1084,28 @@ public final class Testes {
      * mantém a habilidade escolhida; a escolha sobrevive à destransformação; só o que está no cinto é fabricado.
      */
     static void cinto(GameTestHelper h) {
-        ServerPlayer p = jogador(h);
+        // Na árvore, os gadgets saem do cinto: se liberam com pontos e vão nos 6 slots (o Batcomputador não monta mais).
+        ServerPlayer p = jogadorArvore(h, GameType.CREATIVE);
         h.assertTrue(Transformacao.transformar(p, BATMAN, true), "transformar no Batman");
         EstadoJogador e = EstadoJogador.de(p);
         Personagem bat = e.personagem();
-        var pos = h.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1));
         h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.gadgets(bat).size(), 9, "9 gadgets no arsenal");
-        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), List.of("gancho", "modo_detetive", "batarangue",
-            "batarangue_explosivo", "batarangue_eletrico", "bomba_fumaca", "gel_explosivo", "batwing"), "cinto padrão");
+        h.assertValueEqual(ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), List.of("gancho", "batarangue", "modo_detetive"), "as iniciais");
+        h.assertFalse(Arvore.definirSlots(p, List.of("gancho", "lancador_rede", "", "", "", "")) && com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "lancador_rede"),
+            "não equipa o que não liberou");
+        h.assertTrue(Arvore.comprar(p, "lancador_rede"), "libera a rede");
+        h.assertTrue(com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "lancador_rede"), "a rede vai para o slot livre");
+        h.assertTrue(Arvore.definirSlots(p, List.of("gancho", "lancador_rede", "modo_detetive", "", "", "")), "monta a build");
+        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "batarangue"), "o batarangue saiu da build");
+        h.assertTrue(Guia.concluida(p, "cinto"), "tarefa de montar a build");
         h.assertValueEqual(Rede.montar(p).habilidades().stream().map(Rede.HabInfo::id).toList(),
-            ids(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat)), "o HUD recebe só o que está equipado");
-        // Escolhe a fumaça e troca o espaço 1: a escolha continua na fumaça.
-        Habilidades.selecionar(p, 5);
-        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 0, "lancador_rede");
-        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(0), "lancador_rede", "rede no espaço 1");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipada(p, bat, "batarangue"), "batarangue foi para o Batcomputador");
-        var habs = com.danrod.dcuniverse.character.Cinto.equipadas(p, bat);
-        h.assertValueEqual(habs.get(e.selecionada()).id(), "bomba_fumaca", "continua escolhida a fumaça");
-        h.assertTrue(Guia.concluida(p, "cinto"), "tarefa do cinto");
-        // Pôr a rede no espaço 2 troca os dois de lugar; "" esvazia; o que não é gadget não entra.
-        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "lancador_rede");
-        var slots = com.danrod.dcuniverse.character.Cinto.slots(p, bat);
-        h.assertValueEqual(slots.subList(0, 2), List.of("batarangue_explosivo", "lancador_rede"), "trocaram de lugar");
-        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "");
-        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.equipadas(p, bat).size(), 7, "espaço vazio sai do menu");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 1, "batwing"), "a suprema não vai no cinto");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 1, "gancho"), "o gancho é fixo");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.equipar(p, bat, 9, "disruptor"), "espaço que não existe");
-        com.danrod.dcuniverse.content.Batcomputador.equipar(p, pos, 1, "disruptor");
-        // Sobrevive à destransformação.
-        Transformacao.destransformar(p);
-        Transformacao.transformar(p, BATMAN, true);
-        bat = EstadoJogador.de(p).personagem();
-        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(1), "disruptor", "cinto guardado");
-        // Só o que está no cinto é fabricado.
-        e = EstadoJogador.de(p);
+            List.of("gancho", "lancador_rede", "modo_detetive"), "o HUD recebe só a build");
+        // Só o que está na build é fabricado.
         e.setCargas("batarangue", 0);
-        e.setCargas("disruptor", 0);
+        e.setCargas("lancador_rede", 0);
         com.danrod.dcuniverse.ability.Cargas.tick(p, bat);
-        h.assertValueEqual(e.proximaCarga("batarangue"), 0L, "fora do cinto não fabrica");
-        h.assertTrue(e.proximaCarga("disruptor") > 0, "no cinto fabrica");
-        com.danrod.dcuniverse.character.Cinto.resetar(p);
-        h.assertValueEqual(com.danrod.dcuniverse.character.Cinto.slots(p, bat).get(0), "batarangue", "resetar volta ao padrão");
+        h.assertValueEqual(e.proximaCarga("batarangue"), 0L, "fora da build não fabrica");
+        h.assertTrue(e.proximaCarga("lancador_rede") > 0, "na build fabrica");
         h.succeed();
     }
 
@@ -1226,10 +1217,10 @@ public final class Testes {
         EstadoJogador e = EstadoJogador.de(p);
         Personagem bat = e.personagem();
         e.setEnergia(bat.energia().max());
-        Personagem.Habilidade sup = bat.suprema();
-        h.assertValueEqual(sup.id(), "batwing", "a suprema é o Batwing");
+        Personagem.Habilidade sup = bat.habilidade("batwing");
+        h.assertFalse(sup.suprema(), "o Batwing é uma habilidade comum da árvore");
         h.assertTrue(Habilidades.executar(p, bat, sup), "invoca o Batwing");
-        h.assertValueEqual(e.energia(), bat.energia().max() * 0.25f, "custa 75% da energia");
+        h.assertValueEqual(e.energia(), bat.energia().max() - sup.custo(), "custa a energia dele");
         var bw = (com.danrod.dcuniverse.content.BatwingEntidade) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
         h.assertTrue(bw != null && bw.isAlive(), "Batwing no mundo");
         // (Embarcar teleporta o jogador, o que o jogador de teste não suporta: testado no jogo.)
@@ -1241,7 +1232,7 @@ public final class Testes {
     }
 
     /**
-     * Garagem: o veículo escolhido no Batcomputador é o que a suprema chama; chamar de novo o mesmo não gasta nada;
+     * Veículos de chão e de água (habilidades da árvore): chamar de novo o mesmo não gasta nada;
      * o Batbarco precisa de água funda e, quando vem, o veículo antigo vai embora.
      */
     static void garagem(GameTestHelper h) {
@@ -1251,12 +1242,7 @@ public final class Testes {
         Transformacao.transformar(p, BATMAN, true);
         EstadoJogador e = EstadoJogador.de(p);
         Personagem bat = e.personagem();
-        h.assertTrue(com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "batmoto"), "escolhe a Batmoto");
-        h.assertFalse(com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "gancho"), "o gancho não é veículo");
-        Personagem.Habilidade sup = com.danrod.dcuniverse.character.Cinto.suprema(p, bat);
-        h.assertValueEqual(sup.id(), "batmoto", "a suprema agora é a Batmoto");
-        var equipadas = com.danrod.dcuniverse.character.Cinto.equipadas(p, bat);
-        h.assertValueEqual(equipadas.get(equipadas.size() - 1).id(), "batmoto", "no menu radial vai a Batmoto");
+        Personagem.Habilidade sup = bat.habilidade("batmoto");
         e.setEnergia(bat.energia().max());
         h.assertTrue(Habilidades.executar(p, bat, sup), "chama a Batmoto");
         var moto = com.danrod.dcuniverse.ability.active.Veiculo.de(p);
@@ -1266,8 +1252,7 @@ public final class Testes {
         Habilidades.executar(p, bat, sup);
         h.assertValueEqual(e.energia(), depois, "chamar de novo a mesma não custa");
         // Batbarco sem água: não vem, e a Batmoto fica.
-        com.danrod.dcuniverse.character.Cinto.escolherVeiculo(p, bat, "batbarco");
-        Personagem.Habilidade barco = com.danrod.dcuniverse.character.Cinto.suprema(p, bat);
+        Personagem.Habilidade barco = bat.habilidade("batbarco");
         e.setProntaEm(barco.id(), 0);
         e.setEnergia(bat.energia().max());
         h.assertFalse(Habilidades.executar(p, bat, barco), "sem água o Batbarco não vem");
@@ -1285,7 +1270,6 @@ public final class Testes {
         h.assertValueEqual(((com.danrod.dcuniverse.content.VeiculoDono) b).estado(), com.danrod.dcuniverse.content.VeiculoDono.INDO, "o Batbarco vai embora");
         moto.discard();
         b.discard();
-        com.danrod.dcuniverse.character.Cinto.resetar(p);
         com.danrod.dcuniverse.ability.active.Veiculo.limpar();
         h.succeed();
     }
@@ -1866,10 +1850,9 @@ public final class Testes {
             EstadoJogador e = EstadoJogador.de(p);
             Personagem kara = e.personagem();
             e.setEnergia(kara.energia().max());
-            Personagem.Habilidade sup = kara.suprema();
-            h.assertValueEqual(sup.id(), "nave_kryptoniana", "a suprema é a nave");
+            Personagem.Habilidade sup = kara.habilidade("nave_kryptoniana");
             h.assertTrue(Habilidades.executar(p, kara, sup), "chama a nave");
-            h.assertValueEqual(e.energia(), kara.energia().max() * 0.3f, "custa 70% da energia");
+            h.assertValueEqual(e.energia(), kara.energia().max() - sup.custo(), "custa a energia dela");
             var nave = (com.danrod.dcuniverse.content.NaveKryptoniana) com.danrod.dcuniverse.ability.active.Veiculo.de(p);
             h.assertTrue(nave != null && nave.isAlive(), "nave no mundo");
             h.assertValueEqual(nave.orbes(), 3, "três orbes prontos");
@@ -2017,8 +2000,7 @@ public final class Testes {
         EstadoJogador e = EstadoJogador.de(p);
         Personagem conner = e.personagem();
         e.setEnergia(conner.energia().max());
-        Personagem.Habilidade sup = conner.suprema();
-        h.assertValueEqual(sup.id(), "ilha_telecinetica", "a suprema é a ilha");
+        Personagem.Habilidade sup = conner.habilidade("ilha_telecinetica");
         var mira = com.danrod.dcuniverse.ability.Alvos.mirarBloco(p, 24, net.minecraft.world.level.ClipContext.Fluid.NONE);
         h.assertTrue(Habilidades.executar(p, conner, sup), "arranca a ilha (mira " + mira.getType() + " " + mira.getBlockPos() + ", pé " + p.blockPosition()
             + ", altura " + level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getBlockX(), p.getBlockZ()) + ")");

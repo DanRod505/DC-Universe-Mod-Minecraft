@@ -526,6 +526,7 @@ public final class Arvore {
         d.put("slots", tag(limpo));
         salvar(player, p, d);
         atualizou(player);
+        com.danrod.dcuniverse.guia.Guia.concluir(player, "cinto");
         return true;
     }
 

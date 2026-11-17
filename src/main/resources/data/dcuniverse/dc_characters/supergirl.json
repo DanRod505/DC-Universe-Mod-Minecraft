@@ -5,37 +5,45 @@
   "color": "#4FA3FF",
   "scale": 0.89,
   "stats": { "vida": 34, "armadura": 20, "dano": 10, "terra": 6.6 },
-  "energy": {
-    "max": 280,
-    "regen": 1.6,
-    "recharge": [
-      { "type": "sunlight", "per_second": 3.0 },
-      { "type": "kryptonite", "per_second": -12.0, "ore_radius": 6, "block_radius": 10 }
-    ]
-  },
-  "suit": [ "chest", "legs", "feet" ],
+  "energy": { "max": 280, "regen": 1.6, "recharge": [{ "type": "sunlight", "per_second": 3.0 }, { "type": "kryptonite", "per_second": -12.0, "ore_radius": 6, "block_radius": 10 }] },
+  "suit": ["chest", "legs", "feet"],
   "passives": [
-    { "type": "flight", "speed": 60, "drain": 0.5, "boost_drain": 2.8, "dash_cost": 12,
-      "trail_color": "#4FA8FF", "trail_color2": "#FF3A4E", "trail_color3": "#FFD84A" },
+    { "type": "flight", "speed": 60, "drain": 0.5, "boost_drain": 2.8, "dash_cost": 12, "trail_color": "#4FA8FF", "trail_color2": "#FF3A4E", "trail_color3": "#FFD84A" },
     { "type": "fall_immunity" },
     { "type": "fire_immunity" },
     { "type": "super_strength", "speed": 8, "max_hardness": 30 },
     { "type": "projectile_resistance", "max_damage": 9 },
     { "type": "super_jump", "power": 2.0, "charge": 0.9 }
   ],
+  "combo": {
+    "lunge": 6,
+    "stance": "superman.postura",
+    "hits": [
+      { "anim": "superman.jab", "impact": 0.08, "recover": 0.16, "window": 0.6, "damage_mult": 0.2, "reach": 3.4, "arc": 80, "knockback": 0.3, "fx": "light" },
+      { "anim": "superman.direto", "impact": 0.1, "recover": 0.21, "window": 0.65, "damage_mult": 0.28, "reach": 3.4, "arc": 80, "knockback": 0.45, "fx": "light" },
+      { "anim": "superman.chute", "impact": 0.27, "recover": 0.4, "window": 0.75, "damage_mult": 0.35, "reach": 3.6, "arc": 140, "knockback": 0.9, "fx": "medium" },
+      { "anim": "superman.gancho", "impact": 0.15, "recover": 0.3, "window": 0.75, "damage_mult": 0.35, "reach": 3.4, "arc": 80, "knockback": 0.3, "launch": 0.7, "fx": "medium" },
+      { "anim": "superman.martelo", "impact": 0.42, "recover": 0.75, "window": 0.6, "damage_mult": 0.8, "reach": 3.8, "arc": 120, "knockback": 2.0, "launch": 0.5, "radius": 3.0, "stun": 1.2, "fx": "shockwave" }
+    ],
+    "heavy": { "charge_anim": "superman.carga", "charge": 1.0, "min_power": 0.35, "anim": "superman.soco_carregado", "impact": 0.08, "recover": 0.45, "window": 0.4, "damage_mult": 1.4, "reach": 4.0, "arc": 70, "knockback": 3.4, "launch": 0.3, "fx": "heavy" },
+    "guard": { "anim": "superman.defesa", "parry_anim": "superman.aparo", "parry": 0.3, "reduction": 0.75, "parry_stun": 1.5, "parry_knockback": 1.4, "arc": 200 }
+  },
+  "skill_tree": {
+    "stats": { "energy": [100, 180, 260, 340], "health": [10, 14, 18, 26], "regen": [2.5, 3.5, 4.5, 5.5], "armor": [9, 12, 16, 20], "flight_speed": [60, 68, 76], "boost_drain": [7, 5.5, 4] },
+    "starters": ["visao_de_calor", "sopro_congelante", "investida_aerea"],
+    "abilities": [
+      { "id": "visao_de_calor", "cost": 1, "range": [24, 32, 40] },
+      { "id": "sopro_congelante", "cost": 1 },
+      { "id": "investida_aerea", "cost": 1 },
+      { "id": "visao_raio_x", "cost": 1 },
+      { "id": "nave_kryptoniana", "cost": 3 }
+    ]
+  },
   "abilities": [
-    { "id": "visao_de_calor", "type": "projectile_beam", "mode": "hold", "cost": 12, "cooldown": 2,
-      "range": 24, "damage_mult": 0.4, "color": "#FF3A2A", "sets_fire": true, "melts": true,
-      "anim": "superman.visao.inicio", "windup": 0.35, "loop_anim": "superman.visao" },
-    { "id": "sopro_congelante", "type": "area_cone", "mode": "hold", "cost": 10, "cooldown": 3,
-      "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze",
-      "anim": "superman.sopro.inicio", "windup": 0.6, "loop_anim": "superman.sopro" },
-    { "id": "investida_aerea", "type": "air_dash", "cost": 25, "cooldown": 5,
-      "range": 24, "speed": 3.2, "damage_mult": 1.6, "knockback": 2.0, "hit_radius": 1.6, "breaks_soft": true },
-    { "id": "visao_raio_x", "type": "vision", "mode": "xray", "cost": 20, "cooldown": 12,
-      "duration": 12, "range": 28, "color": "#8FD8FF" },
-    { "id": "nave_kryptoniana", "type": "vehicle", "model": "nave_kryptoniana", "supreme": true, "cost_pct": 70, "cooldown": 150,
-      "duration": 90, "speed": 34, "boost_speed": 72, "beam_damage": 2.5, "beam_range": 48,
-      "orbs": 3, "orb_damage": 8, "orb_radius": 3.5, "orb_reload": 6, "shield_time": 12, "shield_recharge": 18 }
+    { "id": "visao_de_calor", "type": "projectile_beam", "mode": "hold", "cost": 12, "cooldown": 2, "range": 24, "damage_mult": 0.4, "color": "#FF3A2A", "sets_fire": true, "melts": true, "anim": "superman.visao.inicio", "windup": 0.35, "loop_anim": "superman.visao", "lights_furnace": true, "cooks_drops": true, "knockback": 0.35, "digs": true, "dig_speed": 1.0 },
+    { "id": "sopro_congelante", "type": "area_cone", "mode": "hold", "cost": 10, "cooldown": 3, "range": 9, "angle": 30, "damage_mult": 0.2, "effect": "freeze", "anim": "superman.sopro.inicio", "windup": 0.6, "loop_anim": "superman.sopro" },
+    { "id": "investida_aerea", "type": "air_dash", "cost": 25, "cooldown": 5, "range": 24, "speed": 3.2, "damage_mult": 1.6, "knockback": 2.0, "hit_radius": 1.6, "breaks_soft": true },
+    { "id": "visao_raio_x", "type": "vision", "mode": "xray", "cost": 20, "cooldown": 12, "duration": 12, "range": 28, "color": "#8FD8FF" },
+    { "id": "nave_kryptoniana", "type": "vehicle", "model": "nave_kryptoniana", "cooldown": 20, "duration": 90, "speed": 34, "boost_speed": 72, "beam_damage": 2.5, "beam_range": 48, "orbs": 3, "orb_damage": 8, "orb_radius": 3.5, "orb_reload": 6, "shield_time": 12, "shield_recharge": 18, "cost": 90 }
   ]
 }

@@ -123,9 +123,28 @@ A geada e a neve são só visuais; as mudanças no mundo continuam as mesmas de 
 
 É das mais fortes: 3 pontos, 60 de energia, recarga de 12 s, alcance 12 → 16 → 20 blocos.
 
+### Os outros heróis no mesmo sistema (habilidades.12)
+
+Pedido do Dalton em 17/11/2026: Batman, Supergirl e Superboy saíram do kit antigo e usam o sistema do Superman (árvore, energia com recuperação contínua, melhorias padrão com números reais, 6 slots, combo de corpo a corpo com golpe carregado, defesa e aparo, que por enquanto reaproveita as animações do Superman). O catálogo de cada um é **só o que eles já tinham**, nada inventado:
+
+| Herói | Catálogo (pontos) | Status: base → I → II → III (provisórios) |
+|---|---|---|
+| Batman | Gancho 1, Batarangue 1, Modo Detetive 1, Bomba de Fumaça 1, Batarangue Explosivo 2, Elétrico 2, Congelante 2, Sônico 2, Gel Explosivo 2, Lançador de Rede 2, Disruptor 2, Batmoto 2, Batbarco 2, Batmóvel 3, Batwing 3 | energia 100/150/200/250, vida 10/12/15/18, recuperação 1/1,5/2/2,5, armadura 12/15/18/21 |
+| Supergirl | Visão de Calor 1, Sopro Congelante 1, Investida Aérea 1, Visão de Raio X 1, Nave Kryptoniana 3 | energia 100/180/260/340, vida 10/14/18/26, recuperação 2,5/3,5/4,5/5,5, armadura 9/12/16/20, voo 60/68/76, impulso 7/5,5/4 |
+| Superboy | Telecinese Tátil 1, Pisão Sísmico 1, Fúria de Rochas 2, Escudo Telecinético 2, Escalada Sísmica 3, Ilha Telecinética 3 | energia 90/160/230/300, vida 10/15/20/28, recuperação 2/2,8/3,6/4,4, armadura 10/14/18/22, voo 46/52/58, impulso 8/6,5/5 |
+
+- **As antigas supremas viraram habilidades comuns** do catálogo, com custo fixo de energia e recarga curta: Batwing 90, Batmóvel 80, Batmoto 60, Batbarco 70, Nave Kryptoniana 90, Ilha Telecinética 80.
+- **O cinto do Batman saiu:** os gadgets se liberam na árvore e vão nos slots como qualquer habilidade, e a munição só é fabricada para o que está na build. O Batcomputador continua recarregando e fabricando; as abas de cinto e garagem avisam que isso agora é na árvore (K).
+- A Visão de Calor e o Sopro Congelante da Supergirl ficaram iguais aos do Superman (acende fornalha, assa a comida, cava), porque as habilidades vêm completas.
+
 ### Habilidades que vêm liberadas
 
-- Iniciais provisórias do Superman: **Visão de Calor**, **Super Pulo** e **Sopro Congelante** (as três que o Dalton tinha escolhido como opções iniciais). **A definir pelo Dalton:** quais e quantas habilidades cada herói traz de início.
+Provisórias, **a confirmar pelo Dalton**:
+
+- Superman: **Visão de Calor**, **Super Pulo** e **Sopro Congelante** (as três que o Dalton tinha escolhido como opções iniciais).
+- Batman: **Gancho**, **Batarangue** e **Modo Detetive**.
+- Supergirl: **Visão de Calor**, **Sopro Congelante** e **Investida Aérea**.
+- Superboy: **Telecinese Tátil**, **Pisão Sísmico** e **Fúria de Rochas**.
 
 ## 8. As telas
 

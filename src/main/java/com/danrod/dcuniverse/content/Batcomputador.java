@@ -175,7 +175,8 @@ public final class Batcomputador {
 
     private static Rede.BatCinto cinto(ServerPlayer player) {
         Personagem p = donoDoCinto(player);
-        if (p == null) return Rede.BatCinto.VAZIO;
+        // Herói da árvore: os gadgets e os veículos se liberam na árvore (K) e vão nos 6 slots; o cinto não vale.
+        if (p == null || com.danrod.dcuniverse.ability.Arvore.ativa(player, p)) return Rede.BatCinto.VAZIO;
         Personagem.Habilidade sup = Cinto.suprema(player, p);
         return new Rede.BatCinto(p.id().toString(), p.cinto().slots(), Cinto.gadgets(p).stream().map(Personagem.Habilidade::id).toList(),
             Cinto.slots(player, p), Cinto.supremas(p).stream().map(Personagem.Habilidade::id).toList(), sup == null ? "" : sup.id());
